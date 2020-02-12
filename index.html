@@ -1,7 +1,178 @@
-<!DOCTYPE html>
-<html>
-<body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+<!doctype html>
+<html lang="ja">
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-157950862-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-157950862-1');
+  </script>
+
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/build/styles/main.css">
+  <title>How to order | GT Instruments</title>
+</head>
+<body class="how-to-order">
+    <header>
+      <h1>order form</h1>
+    </header>
+    <!--
+    <a href="#" class="btn toggle-menu" title="Menu">Menu</a>
+      <nav>
+        <ul>
+          <li><a href="/guitars/regular"  title="Regular">Guitars</a></li>
+          <li><a href="/guitars/tread-line"  title="TREAD-LINE">Tread-LINE</a></li>
+          <li><a href="/guitars/baritone guitar"  title="Baritone guitar">Baritone guitar</a></li>
+          <li><a href="/guitars/basses"  title="Basses">Basses</a></li>
+        </ul>
+      <a href="/">
+        <h1>GT Instruments</h1>
+      </a>
+    </nav>
+-->
+<fieldset>
+<ul>
+  <h2>Personal information</h2>
+    <li>
+<label>
+  Name<span class="required" aria-required="true">*</span>
+</label>
+<div class="form-item-wrapper">
+  <input class="required" required  type="text" name="name" placeholder="Name" aria-required="true">
+</div>
+</li>
+<li>
+<label>
+  E-mail<span class="required" aria-required="true">*</span>
+</label>
+<div class="form-item-wrapper">
+<input type="email" name="e-mail" placeholder="E-mail" class="required" required  aria-required="true">
+</div>
+</li>
+<p>Use the form below if you have any special requests or if you have any more questions about ordering.</p>
+</ul>
+</fieldset>
+    <fieldset>
+      <ul>
+        <h2>Choose your guitar</h2>
+        <li>
+            <label>
+                Model <span class="required" required aria-required="true">*</span>
+            </label>
+            <select class="required model-selector" required name="model">
+              <option data-price="650000" value="satan">Satan  ( ¥650,000 ) </option>
+              <option data-price="620000" value="devil">Devil  ( ¥620,000 ) </option>
+              <option data-price="350000" value="ergo">Ergo  ( ¥350,000 ) </option>
+              <option data-price="340000" value="bull">Bull  ( ¥340,000 ) </option>
+              <option data-price="300000" value="orochi">Orochi  ( ¥300,000 ) </option>
+              <option data-price="290000" value="nekro">Nekro  ( ¥290,000 ) </option>
+              <option data-price="280000" value="raven">Raven  ( ¥280,000 ) </option>
+              <option data-price="275000" value="jake">Jake  ( ¥275,000 ) </option>
+              <option data-price="270000" value="drake">Drake  ( ¥270,000 ) </option>
+              <option data-price="260000" value="luc">Luc  ( ¥260,000 ) </option>
+              <option data-price="260000" value="s-series">TREAD-LINE S-series  ( ¥260,000 ) </option>
+              <option data-price="260000" value="t-series">TREAD-LINE T-series  ( ¥260,000 ) </option>
+            </select>
+        </li>
+        <li class="left-right-handed">
+          <label>
+            Left or Right handed
+          </label>
+          <div class="checkbox-wrapper">
+            <label for="right" class="Drake"><input type="radio" id="right_handed" name="left-right-handed" value="right">Right</label>
+            <label for="left" class="Drake"><input type="radio" id="left_handed" name="left-right-handed" value="left">Left</label>
+           </div>
+        </li>
+    </ul>
+    </fieldset>
+    <fieldset id="guitar-options">
+    <ul>
+        <h2>Options</h2>
+          <li>
+            <label>
+                Pickups <span class="required" required aria-required="true">*</span>
+            </label>
+            <select class="required backup pickup-selector" name="pickups-backup">
+              <option data-price="230" class="satan devil ergo bull orochi nekro raven jake drak luc s-series t-series " value="BKP Juggernauts">BKP Juggernauts  ( +€230 ) </option>
+              <option data-price="20" class="satan " value="Seymour Duncan APS 2&#039;s-TB11 (HSS)">Seymour Duncan APS 2&#039;s-TB11 (HSS)  ( +€20 ) </option>
+            </select>
+          </li>
+        </ul>
+    </fieldset>
+    <fieldset id="guitar-finish">
+      <ul>
+        <h2>Finish</h2>
+          <li class="finish">
+            <div class="non-raw-finishes">
+              <div class="checkbox-wrapper">
+                <label><b>Chameleon Gloss Finishes</b>
+                </label>
+                <div class="checkbox-wrapper-list">
+                  <label for="worn-purple-red-chameleon"><input data-price="520" type="radio" id="worn-purple-red-chameleon" name="finish" value="Worn Purple/Red Chameleon Gloss">Worn Purple/Red Chameleon Gloss   ( +€520 ) </label>
+                  <label for="blueberry-chameleon-gloss-2"><input data-price="460" type="radio" id="blueberry-chameleon-gloss-2" name="finish" value="Blueberry Chameleon Gloss">Blueberry Chameleon Gloss   ( +€460 ) </label>
+                </div>
+                <label><b>Chameleon Satin Finishes</b>
+                </label>
+                <div class="checkbox-wrapper-list">
+                  <label for="rose-gold-chameleon-satin"><input data-price="250" type="radio" id="rose-gold-chameleon-satin" name="finish" value="Rose Gold Chameleon Satin">Rose Gold Chameleon Satin   ( +€250 ) </label>
+                  <label for="blueberry-chameleon-gloss"><input data-price="250" type="radio" id="blueberry-chameleon-gloss" name="finish" value="Blueberry Chameleon Satin">Blueberry Chameleon Satin   ( +€250 ) </label>
+                </div>
+            </div>
+          </div>
+<div class="raw-finishes" style="display:none;">
+                <div class="checkbox-wrapper">
+<label><b>Raw finishes</b></label>
+<label for="anthracite"><input data-price="0" type="radio" id="anthracite" name="finish" value="anthracite">Anthracite (Grey)</label>
+                    <label for="black"><input data-price="0" type="radio" id="black" name="finish" value="black">Black</label>
+            </div>
+        </li>
+
+        <div class="non-raw-finishes finish-extra-options">
+            <li id="burst-option">
+
+                <label>
+                    Finish extra
+                </label>
+
+                <div class="checkbox-wrapper">
+                    <label for="burst"><input type="checkbox" id="burst" name="burst" value="burst">Burst on finish ( +€150 )</label>
+                </div>
+
+            </li>
+
+            <li id="neck-satin-option">
+
+                <label>
+                    Neck finish
+                </label>
+
+                <div class="checkbox-wrapper">
+                    <label for="satin-neck"><input type="checkbox" id="satin-neck" name="satin-neck" value="satin neck">Satin painted neck "(only necessary on gloss finish)"</label>
+                </div>
+
+            </li>
+        </div>
+
+</ul>
+
+</fieldset>
+
+<div class="total-price"></div>
+<input type="hidden" name="price" class="price" value="0">
+
+<script>
+var total = "data-price"
+document.write(total);
+</script>
+
+
+
+            <div class="btn-group">
+                <button class="btn btn-primary order-product submit" type="submit">Send</button>
+            </div>
+<div class="total-price">Price estimate: document write euro (incl. 21% VAT)</div>
 </body>
 </html>
