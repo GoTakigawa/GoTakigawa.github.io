@@ -21,112 +21,51 @@ body{
   font-family:'Barlow','DIN Condensed',sans-serif;
   min-height:100vh;
 }
-
-/* Layout */
 .app{display:grid;grid-template-columns:360px 1fr;min-height:100vh;}
 @media(max-width:900px){.app{grid-template-columns:1fr;}}
-
-/* Sidebar */
 .sidebar{
   background:var(--bg2);border-right:1px solid var(--border);
   padding:20px 16px;overflow-y:auto;max-height:100vh;position:sticky;top:0;
 }
 @media(max-width:900px){.sidebar{max-height:none;position:static;border-right:none;border-bottom:1px solid var(--border);}}
-
 .logo{font-size:11px;letter-spacing:.2em;color:var(--accent1);text-transform:uppercase;margin-bottom:4px;font-weight:600;}
 .app-title{font-size:20px;font-weight:600;color:var(--text);margin-bottom:20px;line-height:1.2;letter-spacing:.02em;}
-
-/* Section */
 .sec{margin-bottom:16px;}
-.sec-title{
-  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--accent2);margin-bottom:9px;padding-bottom:4px;
-  border-bottom:1px solid var(--border);font-weight:600;
-}
-
-/* Grids */
+.sec-title{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent2);margin-bottom:9px;padding-bottom:4px;border-bottom:1px solid var(--border);font-weight:600;}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;}
-
-/* Field */
 .field{display:flex;flex-direction:column;gap:3px;}
 .field>label{font-size:11px;color:var(--text2);letter-spacing:.03em;font-weight:500;}
 .hint{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.5;}
 .hint span{color:var(--accent3);font-weight:600;}
-
-/* Custom Numeric Input */
-.num-wrap{
-  display:flex;align-items:stretch;
-  background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);
-  overflow:hidden;transition:border-color .15s;
-}
+.num-wrap{display:flex;align-items:stretch;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .15s;}
 .num-wrap:focus-within{border-color:var(--accent1);}
-.num-wrap input{
-  flex:1;min-width:0;
-  background:transparent;border:none;outline:none;
-  color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;font-weight:500;
-  padding:7px 6px 7px 9px;
-  -moz-appearance:textfield;
-}
-.num-wrap input::-webkit-inner-spin-button,
-.num-wrap input::-webkit-outer-spin-button{-webkit-appearance:none;}
+.num-wrap input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;font-weight:500;padding:7px 6px 7px 9px;-moz-appearance:textfield;}
+.num-wrap input::-webkit-inner-spin-button,.num-wrap input::-webkit-outer-spin-button{-webkit-appearance:none;}
 .num-btns{display:flex;flex-direction:column;border-left:1px solid var(--border);}
-.num-btn{
-  flex:1;width:22px;background:transparent;border:none;
-  color:var(--text2);font-size:8px;line-height:1;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  transition:background .1s,color .1s;user-select:none;padding:0;
-}
+.num-btn{flex:1;width:22px;background:transparent;border:none;color:var(--text2);font-size:8px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s,color .1s;user-select:none;padding:0;}
 .num-btn:hover{background:var(--bg4);color:var(--text);}
 .num-btn:active{background:var(--border2);}
 .num-btn+.num-btn{border-top:1px solid var(--border);}
-
-/* Readonly display */
-.ro-wrap{
-  background:var(--bg);border:1px solid var(--border);border-radius:var(--r);
-  padding:7px 9px;font-size:14px;color:var(--text3);
-  font-family:'Barlow',sans-serif;font-weight:500;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-
-/* Buttons */
-button.std{
-  background:var(--bg4);border:1px solid var(--border2);color:var(--text);
-  font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;
-  padding:8px 12px;border-radius:var(--r);cursor:pointer;
-  transition:background .15s,border-color .15s;
-}
+.ro-wrap{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:7px 9px;font-size:14px;color:var(--text3);font-family:'Barlow',sans-serif;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+button.std{background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;padding:8px 12px;border-radius:var(--r);cursor:pointer;transition:background .15s,border-color .15s;}
 button.std:hover{background:var(--bg3);border-color:var(--accent1);}
-button.primary{
-  background:var(--accent1);border:1px solid var(--accent1);color:#1a1a1a;
-  font-family:'Barlow',sans-serif;font-size:14px;font-weight:700;
-  padding:11px 22px;border-radius:var(--r);cursor:pointer;transition:background .15s;
-}
+button.primary{background:var(--accent1);border:1px solid var(--accent1);color:#1a1a1a;font-family:'Barlow',sans-serif;font-size:14px;font-weight:700;padding:11px 22px;border-radius:var(--r);cursor:pointer;transition:background .15s;}
 button.primary:hover{background:#c4b5fd;}
 button.primary:active{transform:scale(.98);}
-
-/* Edge layout */
 .edge-wrap{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .edge-col{display:flex;flex-direction:column;gap:6px;}
 .edge-col-hd{font-size:11px;color:var(--text2);text-align:center;padding-bottom:4px;border-bottom:1px solid var(--border);font-weight:500;}
-
-/* PD row */
 .pd-row{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:end;}
 .pd-ref{font-size:11px;color:var(--text3);margin-top:5px;display:flex;flex-wrap:wrap;gap:0 10px;line-height:1.8;}
-
-/* Main */
 .main{padding:20px;display:flex;flex-direction:column;gap:14px;}
 @media(max-width:600px){.main{padding:12px;}}
-
-/* Metrics */
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 @media(max-width:600px){.metrics{grid-template-columns:1fr 1fr;}}
 .metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px;}
 .metric-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;font-weight:500;}
 .metric-val{font-size:22px;font-weight:600;}
 .metric-unit{font-size:12px;color:var(--text2);margin-left:3px;}
-
-/* Table */
 .tbl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .tbl{width:100%;border-collapse:collapse;font-size:13px;}
 .tbl th,.tbl td{padding:7px 10px;border-bottom:1px solid var(--border);text-align:center;white-space:nowrap;}
@@ -134,15 +73,9 @@ button.primary:active{transform:scale(.98);}
 .tbl td{color:var(--text);font-weight:500;}
 .tbl tr:last-child td,.tbl tr:last-child th{border-bottom:none;}
 .tbl td:first-child,.tbl th:first-child{text-align:left;}
-
-/* Canvas */
 .canvas-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;}
 #fsv{width:100%;display:block;}
-
-/* Legend */
 .legend{font-size:11px;color:var(--text3);display:flex;flex-wrap:wrap;gap:4px 16px;line-height:1.8;font-weight:500;}
-
-/* DXF */
 .dxf-area{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .dxf-fname{font-size:12px;color:var(--text3);}
 #dxf-link{display:none;font-size:12px;color:var(--accent2);text-decoration:underline;cursor:pointer;}
@@ -150,36 +83,18 @@ button.primary:active{transform:scale(.98);}
 </head>
 <body>
 <div class="app">
-
-<!-- ===== SIDEBAR ===== -->
 <aside class="sidebar">
   <div class="logo">GTI / Fretboard Tools</div>
   <div class="app-title">Multiscale<br>Fretboard Generator</div>
-
-  <!-- Scale -->
   <div class="sec">
     <div class="sec-title">Scale Length (inch)</div>
     <div class="g4">
-      <div class="field">
-        <label>Last String</label>
-        <div class="num-wrap"><input type="number" id="sN" value="27.0" step="0.1" min="20" max="40"><div class="num-btns"><button class="num-btn" data-target="sN" data-dir="up">▲</button><button class="num-btn" data-target="sN" data-dir="dn">▼</button></div></div>
-      </div>
-      <div class="field">
-        <label>→ mm</label>
-        <div class="ro-wrap" id="sNmm">—</div>
-      </div>
-      <div class="field">
-        <label>1st String</label>
-        <div class="num-wrap"><input type="number" id="s1" value="25.5" step="0.1" min="20" max="35"><div class="num-btns"><button class="num-btn" data-target="s1" data-dir="up">▲</button><button class="num-btn" data-target="s1" data-dir="dn">▼</button></div></div>
-      </div>
-      <div class="field">
-        <label>→ mm</label>
-        <div class="ro-wrap" id="s1mm">—</div>
-      </div>
+      <div class="field"><label>Last String</label><div class="num-wrap"><input type="number" id="sN" value="27.0" step="0.1" min="20" max="40"><div class="num-btns"><button class="num-btn" data-target="sN" data-dir="up">▲</button><button class="num-btn" data-target="sN" data-dir="dn">▼</button></div></div></div>
+      <div class="field"><label>→ mm</label><div class="ro-wrap" id="sNmm">—</div></div>
+      <div class="field"><label>1st String</label><div class="num-wrap"><input type="number" id="s1" value="25.5" step="0.1" min="20" max="35"><div class="num-btns"><button class="num-btn" data-target="s1" data-dir="up">▲</button><button class="num-btn" data-target="s1" data-dir="dn">▼</button></div></div></div>
+      <div class="field"><label>→ mm</label><div class="ro-wrap" id="s1mm">—</div></div>
     </div>
   </div>
-
-  <!-- String Pitch -->
   <div class="sec">
     <div class="sec-title">String Spacing</div>
     <div class="g2">
@@ -195,48 +110,27 @@ button.primary:active{transform:scale(.98);}
       </div>
     </div>
   </div>
-
-  <!-- Strings / Frets -->
   <div class="sec">
     <div class="sec-title">Strings &amp; Frets</div>
     <div class="g2">
-      <div class="field">
-        <label>No. of Strings</label>
-        <div class="num-wrap"><input type="number" id="ns" value="7" step="1" min="4" max="13"><div class="num-btns"><button class="num-btn" data-target="ns" data-dir="up">▲</button><button class="num-btn" data-target="ns" data-dir="dn">▼</button></div></div>
-      </div>
-      <div class="field">
-        <label>No. of Frets</label>
-        <div class="num-wrap"><input type="number" id="nf" value="24" step="1" min="12" max="37"><div class="num-btns"><button class="num-btn" data-target="nf" data-dir="up">▲</button><button class="num-btn" data-target="nf" data-dir="dn">▼</button></div></div>
-      </div>
+      <div class="field"><label>No. of Strings</label><div class="num-wrap"><input type="number" id="ns" value="7" step="1" min="4" max="13"><div class="num-btns"><button class="num-btn" data-target="ns" data-dir="up">▲</button><button class="num-btn" data-target="ns" data-dir="dn">▼</button></div></div></div>
+      <div class="field"><label>No. of Frets</label><div class="num-wrap"><input type="number" id="nf" value="24" step="1" min="12" max="37"><div class="num-btns"><button class="num-btn" data-target="nf" data-dir="up">▲</button><button class="num-btn" data-target="nf" data-dir="dn">▼</button></div></div></div>
     </div>
   </div>
-
-  <!-- PD -->
   <div class="sec">
     <div class="sec-title">Perpendicular Fret Distance</div>
     <div class="g2" style="margin-bottom:7px;">
-      <div class="field">
-        <label>P.D. Value</label>
-        <div class="num-wrap"><input type="number" id="pd" value="0.37004" step="0.001" min="0" max="1"><div class="num-btns"><button class="num-btn" data-target="pd" data-dir="up">▲</button><button class="num-btn" data-target="pd" data-dir="dn">▼</button></div></div>
-      </div>
-      <div class="field">
-        <label>Equiv. Fret (approx)</label>
-        <div class="ro-wrap" id="pdFret">—</div>
-      </div>
+      <div class="field"><label>P.D. Value</label><div class="num-wrap"><input type="number" id="pd" value="0.37004" step="0.001" min="0" max="1"><div class="num-btns"><button class="num-btn" data-target="pd" data-dir="up">▲</button><button class="num-btn" data-target="pd" data-dir="dn">▼</button></div></div></div>
+      <div class="field"><label>Equiv. Fret (approx)</label><div class="ro-wrap" id="pdFret">—</div></div>
     </div>
     <div class="pd-row">
-      <div class="field">
-        <label>Reference Fret No.</label>
-        <div class="num-wrap"><input type="number" id="pfref" value="8" step="1" min="0" max="36"><div class="num-btns"><button class="num-btn" data-target="pfref" data-dir="up">▲</button><button class="num-btn" data-target="pfref" data-dir="dn">▼</button></div></div>
-      </div>
+      <div class="field"><label>Reference Fret No.</label><div class="num-wrap"><input type="number" id="pfref" value="8" step="1" min="0" max="36"><div class="num-btns"><button class="num-btn" data-target="pfref" data-dir="up">▲</button><button class="num-btn" data-target="pfref" data-dir="dn">▼</button></div></div></div>
       <button class="std" onclick="applyFretPD()" style="align-self:end;">→ Apply</button>
     </div>
     <div class="pd-ref">
       <span>nut = 0.000</span><span>7f ≈ 0.333</span><span>12f = 0.500</span><span>17f ≈ 0.625</span><span>bridge = 1.000</span>
     </div>
   </div>
-
-  <!-- Edge -->
   <div class="sec">
     <div class="sec-title">Edge Overhang (mm)</div>
     <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
@@ -246,81 +140,42 @@ button.primary:active{transform:scale(.98);}
     <div class="edge-wrap">
       <div class="edge-col">
         <div class="edge-col-hd">← End</div>
-        <div class="field">
-          <label>Bass Side</label>
-          <div class="num-wrap"><input type="number" id="eeN" value="5.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="eeN" data-dir="up">▲</button><button class="num-btn" data-target="eeN" data-dir="dn">▼</button></div></div>
-        </div>
-        <div class="field">
-          <label>Treble Side</label>
-          <div class="num-wrap"><input type="number" id="ee1" value="4.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ee1" data-dir="up">▲</button><button class="num-btn" data-target="ee1" data-dir="dn">▼</button></div></div>
-        </div>
+        <div class="field"><label>Bass Side</label><div class="num-wrap"><input type="number" id="eeN" value="5.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="eeN" data-dir="up">▲</button><button class="num-btn" data-target="eeN" data-dir="dn">▼</button></div></div></div>
+        <div class="field"><label>Treble Side</label><div class="num-wrap"><input type="number" id="ee1" value="4.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ee1" data-dir="up">▲</button><button class="num-btn" data-target="ee1" data-dir="dn">▼</button></div></div></div>
       </div>
       <div class="edge-col">
         <div class="edge-col-hd">Nut →</div>
-        <div class="field">
-          <label>Bass Side</label>
-          <div class="num-wrap"><input type="number" id="neN" value="4.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="neN" data-dir="up">▲</button><button class="num-btn" data-target="neN" data-dir="dn">▼</button></div></div>
-        </div>
-        <div class="field">
-          <label>Treble Side</label>
-          <div class="num-wrap"><input type="number" id="ne1" value="3.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ne1" data-dir="up">▲</button><button class="num-btn" data-target="ne1" data-dir="dn">▼</button></div></div>
-        </div>
+        <div class="field"><label>Bass Side</label><div class="num-wrap"><input type="number" id="neN" value="4.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="neN" data-dir="up">▲</button><button class="num-btn" data-target="neN" data-dir="dn">▼</button></div></div></div>
+        <div class="field"><label>Treble Side</label><div class="num-wrap"><input type="number" id="ne1" value="3.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ne1" data-dir="up">▲</button><button class="num-btn" data-target="ne1" data-dir="dn">▼</button></div></div></div>
       </div>
     </div>
     <div style="margin-top:8px;">
-      <div class="field" style="max-width:160px;">
-        <label>Board End (fret no.)</label>
-        <div class="num-wrap"><input type="number" id="fb_end" value="25" step="1" min="1" max="37"><div class="num-btns"><button class="num-btn" data-target="fb_end" data-dir="up">▲</button><button class="num-btn" data-target="fb_end" data-dir="dn">▼</button></div></div>
-      </div>
+      <div class="field" style="max-width:160px;"><label>Board End (fret no.)</label><div class="num-wrap"><input type="number" id="fb_end" value="25" step="1" min="1" max="37"><div class="num-btns"><button class="num-btn" data-target="fb_end" data-dir="up">▲</button><button class="num-btn" data-target="fb_end" data-dir="dn">▼</button></div></div></div>
     </div>
   </div>
-
-  <!-- Nut Overhang -->
   <div class="sec">
     <div class="sec-title">Nut Overhang</div>
     <p style="font-size:11px;color:var(--text3);margin-bottom:7px;font-weight:500;">Edge → Nut thickness → Overhang (toward headstock)</p>
     <div class="g2">
-      <div class="field">
-        <label>Nut Thickness (mm)</label>
-        <div class="num-wrap"><input type="number" id="nut_thick" value="3.0" step="0.5" min="1" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_thick" data-dir="up">▲</button><button class="num-btn" data-target="nut_thick" data-dir="dn">▼</button></div></div>
-      </div>
-      <div class="field">
-        <label>Overhang Length (mm)</label>
-        <div class="num-wrap"><input type="number" id="nut_oh" value="8.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_oh" data-dir="up">▲</button><button class="num-btn" data-target="nut_oh" data-dir="dn">▼</button></div></div>
-      </div>
+      <div class="field"><label>Nut Thickness (mm)</label><div class="num-wrap"><input type="number" id="nut_thick" value="3.0" step="0.5" min="1" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_thick" data-dir="up">▲</button><button class="num-btn" data-target="nut_thick" data-dir="dn">▼</button></div></div></div>
+      <div class="field"><label>Overhang Length (mm)</label><div class="num-wrap"><input type="number" id="nut_oh" value="8.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_oh" data-dir="up">▲</button><button class="num-btn" data-target="nut_oh" data-dir="dn">▼</button></div></div></div>
     </div>
   </div>
-
 </aside>
 
-<!-- ===== MAIN ===== -->
 <main class="main">
   <div class="metrics">
-    <div class="metric">
-      <div class="metric-lbl">Bridge Angle</div>
-      <div><span class="metric-val" id="o-ba">—</span><span class="metric-unit">°</span></div>
-    </div>
-    <div class="metric">
-      <div class="metric-lbl">Nut Angle</div>
-      <div><span class="metric-val" id="o-na">—</span><span class="metric-unit">°</span></div>
-    </div>
-    <div class="metric">
-      <div class="metric-lbl">Scale Difference</div>
-      <div><span class="metric-val" id="o-df">—</span><span class="metric-unit">mm</span></div>
-    </div>
+    <div class="metric"><div class="metric-lbl">Bridge Angle</div><div><span class="metric-val" id="o-ba">—</span><span class="metric-unit">°</span></div></div>
+    <div class="metric"><div class="metric-lbl">Nut Angle</div><div><span class="metric-val" id="o-na">—</span><span class="metric-unit">°</span></div></div>
+    <div class="metric"><div class="metric-lbl">Scale Difference</div><div><span class="metric-val" id="o-df">—</span><span class="metric-unit">mm</span></div></div>
   </div>
-
   <div class="tbl-wrap">
     <table class="tbl" id="saddle-table">
       <thead><tr><th>String</th></tr></thead>
       <tbody><tr><td>Saddle Offset (mm)</td></tr></tbody>
     </table>
   </div>
-
-  <div class="canvas-wrap">
-    <svg id="fsv" xmlns="http://www.w3.org/2000/svg"></svg>
-  </div>
-
+  <div class="canvas-wrap"><svg id="fsv" xmlns="http://www.w3.org/2000/svg"></svg></div>
   <div class="legend">
     <span>Right = Nut &nbsp; Left = Bridge &nbsp; Top = Bass &nbsp; Bottom = Treble</span>
     <span style="color:#a78bfa;">■ Perpendicular fret</span>
@@ -328,7 +183,6 @@ button.primary:active{transform:scale(.98);}
     <span style="color:#f59e0b;">■ Board outline</span>
     <span style="color:#86efac;">■ Nut overhang</span>
   </div>
-
   <div class="dxf-area">
     <button class="primary" onclick="exportDXF()">⬇ Export DXF</button>
     <span class="dxf-fname" id="dxf-filename"></span>
@@ -338,7 +192,6 @@ button.primary:active{transform:scale(.98);}
 </div>
 
 <script>
-// ===== Numeric Stepper =====
 (function(){
   let _timer=null,_interval=null;
   function step(targetId,dir){
@@ -373,13 +226,10 @@ button.primary:active{transform:scale(.98);}
   ['touchend','touchcancel'].forEach(ev=>document.addEventListener(ev,()=>{clearTimeout(_timer);clearInterval(_interval);}));
 })();
 
-// ===== Fretboard Calc =====
 const I2M=25.4,FR=n=>1-Math.pow(2,-n/12);
 const PDT=[0,0.05613,0.10910,0.15910,0.20630,0.25085,0.29289,0.33258,0.37004,0.40540,0.43877,0.47027,0.50000,0.52806,0.55455,0.57955,0.60315,0.62542,0.64645,0.66629,0.68502,0.70270,0.71938,0.73513,0.75000];
-
 function pdToFret(pd){if(pd<=0)return'0.000';if(pd>=1)return'∞';return(-12*Math.log2(1-pd)).toFixed(3);}
 function buildFilename(nStr,s1in,sNin,pd){const f=pdToFret(pd);return`fb${nStr}st${parseFloat(s1in.toFixed(1))}-${parseFloat(sNin.toFixed(1))}pd${f==='∞'?'bridge':f}.dxf`;}
-
 function applyFretPD(){
   const n=+document.getElementById('pfref').value;
   const nc=Math.max(0,Math.min(36,n));
@@ -387,7 +237,6 @@ function applyFretPD(){
   document.getElementById('pd').value=v.toFixed(5);
   document.getElementById('pd').dispatchEvent(new Event('input',{bubbles:true}));
 }
-
 function extendFretLine(p0,pN,d1,dN){
   const dx=pN.x-p0.x,dy=pN.y-p0.y,L=Math.sqrt(dx*dx+dy*dy),ux=dx/L,uy=dy/L;
   return{c1:{x:p0.x-ux*d1,y:p0.y-uy*d1},cN:{x:pN.x+ux*dN,y:pN.y+uy*dN},ux,uy};
@@ -442,8 +291,19 @@ function calcGeometry(){
   const dxN=cornerNutN.x-cornerEndN.x,dyN=cornerNutN.y-cornerEndN.y,LN=Math.sqrt(dxN**2+dyN**2);
   const sNux=dxN/LN,sNuy=dyN/LN;
 
-  const nutHeadSide1={x:cornerNut1.x+s1ux*nutThick,y:cornerNut1.y+s1uy*nutThick};
-  const nutHeadSideN={x:cornerNutN.x+sNux*nutThick,y:cornerNutN.y+sNuy*nutThick};
+  // ナット厚さ：ナット線に対して垂直方向で nutThick になるよう
+  // サイド辺方向の延長量を補正する。
+  // ナット線の法線 = ナット線方向ベクトルを90度回転: (-nutExt.uy, nutExt.ux)
+  // サイド辺方向とナット法線の内積 = cos(角度)
+  // サイド辺方向に nutThick/cos だけ進むと、ナット線垂直方向の距離が nutThick になる
+  const nutNx=-nutExt.uy, nutNy=nutExt.ux;
+  const dot1=Math.abs(s1ux*nutNx+s1uy*nutNy);
+  const dotN=Math.abs(sNux*nutNx+sNuy*nutNy);
+  const nutThickAdj1=dot1>1e-6?nutThick/dot1:nutThick;
+  const nutThickAdjN=dotN>1e-6?nutThick/dotN:nutThick;
+
+  const nutHeadSide1={x:cornerNut1.x+s1ux*nutThickAdj1,y:cornerNut1.y+s1uy*nutThickAdj1};
+  const nutHeadSideN={x:cornerNutN.x+sNux*nutThickAdjN,y:cornerNutN.y+sNuy*nutThickAdjN};
   const oh1={x:nutHeadSide1.x+s1ux*nutOH,y:nutHeadSide1.y+s1uy*nutOH};
   const ohN={x:nutHeadSideN.x+sNux*nutOH,y:nutHeadSideN.y+sNuy*nutOH};
 
@@ -451,8 +311,7 @@ function calcGeometry(){
     const t=fn===0?0:FR(fn);
     const f0=Sp(0,t),fN=Sp(nStr-1,t);
     const dx=fN.x-f0.x,dy=fN.y-f0.y;
-    const far=10;
-    const p1={x:f0.x-dx*far,y:f0.y-dy*far},p2={x:fN.x+dx*far,y:fN.y+dy*far};
+    const p1={x:f0.x-dx*10,y:f0.y-dy*10},p2={x:fN.x+dx*10,y:fN.y+dy*10};
     return{
       ix1:lineIntersect(p1,p2,cornerNut1,cornerEnd1)||f0,
       ixN:lineIntersect(p1,p2,cornerNutN,cornerEndN)||fN
@@ -524,7 +383,6 @@ function run(){
   for(let i=0;i<nStr;i++){th+=`<th>${i+1}</th>`;td+=`<td>${offs[i]}</td>`;}
   tbl.innerHTML=`<thead>${th}</tr></thead><tbody>${td}</tr></tbody>`;
 
-  // Bounding box
   const allPts=[];
   for(let fn=0;fn<=nFret;fn++){const{ix1,ixN}=fretEdgePts(fn);allPts.push(ix1,ixN);}
   for(let i=0;i<nStr;i++) allPts.push(Bp(i));
@@ -545,32 +403,23 @@ function run(){
   const FF="font-family:'Barlow','DIN Condensed',sans-serif";
   let o='';
 
-  // Board outline (amber)
   const cn1=mp(cornerNut1),cnN=mp(cornerNutN),ce1=mp(cornerEnd1),ceN=mp(cornerEndN);
-  [
-    [cn1,ce1],[cnN,ceN],[cn1,cnN],[ce1,ceN]
-  ].forEach(([a,b])=>{
+  [[cn1,ce1],[cnN,ceN],[cn1,cnN],[ce1,ceN]].forEach(([a,b])=>{
     o+=`<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="#f59e0b" stroke-width="1.5"/>`;
   });
 
-  // Nut overhang (green)
   const nh1=mp(nutHeadSide1),nhN=mp(nutHeadSideN),o1p=mp(oh1),oNp=mp(ohN);
-  [
-    [cn1,nh1],[cnN,nhN],[nh1,nhN],[nh1,o1p],[nhN,oNp],[o1p,oNp]
-  ].forEach(([a,b])=>{
+  [[cn1,nh1],[cnN,nhN],[nh1,nhN],[nh1,o1p],[nhN,oNp],[o1p,oNp]].forEach(([a,b])=>{
     o+=`<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="#86efac" stroke-width="1.5"/>`;
   });
 
-  // Strings
   for(let i=0;i<nStr;i++){
     const a=sp(i,0),b=sp(i,1);
     o+=`<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="#374151" stroke-width="0.8"/>`;
   }
 
-  // Centerline
   o+=`<line x1="${mxf(x0).toFixed(1)}" y1="${myf(0).toFixed(1)}" x2="${mxf(x1).toFixed(1)}" y2="${myf(0).toFixed(1)}" stroke="#2d3748" stroke-width="0.6" stroke-dasharray="4,3"/>`;
 
-  // Frets
   const showNums=new Set([0,3,5,7,9,12,15,17,19,21,24,27,29,31,33,36]);
   for(let fn=0;fn<=nFret;fn++){
     const{ix1,ixN}=fretEdgePts(fn);
@@ -586,15 +435,13 @@ function run(){
     }
   }
 
-  // Perpendicular (purple)
   const perpPts=Array.from({length:nStr},(_,i)=>sp(i,pd));
   let pp=`M${perpPts[0].x.toFixed(1)},${perpPts[0].y.toFixed(1)}`;
   for(let j=1;j<nStr;j++) pp+=` L${perpPts[j].x.toFixed(1)},${perpPts[j].y.toFixed(1)}`;
   o+=`<path d="${pp}" stroke="#a78bfa" stroke-width="1.8" fill="none"/>`;
   const ptop=perpPts.reduce((a,b)=>a.y<b.y?a:b);
-  o+=`<text x="${ptop.x.toFixed(1)}" y="${(ptop.y-4).toFixed(1)}" text-anchor="middle" font-size="8" fill="#a78bfa" ${FF}>${pdToFret(pd)}f</text>`;
+  o+=`<text x="${ptop.x.toFixed(1)}" y="${(ptop.y-16).toFixed(1)}" text-anchor="middle" font-size="8" fill="#a78bfa" ${FF}>${pdToFret(pd)}f</text>`;
 
-  // Bridge (cyan)
   const bpts=Array.from({length:nStr},(_,i)=>sp(i,1));
   let bd=`M${bpts[0].x.toFixed(1)},${bpts[0].y.toFixed(1)}`;
   for(let j=1;j<nStr;j++) bd+=` L${bpts[j].x.toFixed(1)},${bpts[j].y.toFixed(1)}`;
@@ -602,7 +449,6 @@ function run(){
   const btop=bpts.reduce((a,b)=>a.y<b.y?a:b);
   o+=`<text x="${btop.x.toFixed(1)}" y="${(btop.y-4).toFixed(1)}" text-anchor="middle" font-size="8" fill="#38bdf8" ${FF}>BRIDGE</text>`;
 
-  // Labels
   const loN=sp(nStr-1,0),hiN=sp(0,0);
   o+=`<text x="${PL+DW+4}" y="${(loN.y+4).toFixed(0)}" font-size="8" fill="#4b5563" ${FF}>Bass</text>`;
   o+=`<text x="${PL+DW+4}" y="${(hiN.y+4).toFixed(0)}" font-size="8" fill="#4b5563" ${FF}>Treble</text>`;
