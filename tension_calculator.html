@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>String Tension Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0a0a;--surface:#111;--surface2:#1a1a1a;--border:#2a2a2a;
+    --accent:#c8ff00;--accent2:#ff6b35;--text:#e8e8e8;--text-dim:#666;--text-mid:#999;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;min-height:100vh;padding:40px 24px;}
+  .header{margin-bottom:40px;}
+  .title{font-family:'Syne',sans-serif;font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-0.03em;line-height:1;}
+  .title span{color:var(--accent);}
+  .subtitle{margin-top:8px;font-size:11px;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;}
+  .layout{display:grid;grid-template-columns:360px 1fr;gap:20px;max-width:1140px;}
+  @media(max-width:800px){.layout{grid-template-columns:1fr;}}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:24px;}
+  .panel-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .field{margin-bottom:13px;}
+  label{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:5px;}
+  input[type="number"],select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:14px;padding:9px 12px;border-radius:2px;outline:none;transition:border-color .15s;appearance:none;}
+  input[type="number"]:focus,select:focus{border-color:var(--accent);}
+
+  /* Spinner */
+  .spinner{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:2px;height:32px;overflow:hidden;transition:border-color .15s;}
+  .spinner:focus-within{border-color:var(--accent);}
+  .spinner-val{flex:1;text-align:center;font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 3px;user-select:none;cursor:default;}
+  .spin-btn{width:24px;height:32px;background:transparent;border:none;color:var(--text-dim);font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .1s,background .1s;flex-shrink:0;-webkit-user-select:none;user-select:none;}
+  .spin-btn:hover{color:var(--accent);background:#1e1e1e;}
+  .spin-btn:active{background:#252525;}
+  .spin-sep{width:1px;background:var(--border);height:18px;flex-shrink:0;}
+
+  /* String rows */
+  .str-header,.string-row{display:grid;gap:6px;align-items:center;margin-bottom:6px;}
+  .str-header{grid-template-columns:22px 1fr 1fr;}
+  .str-header.multi{grid-template-columns:22px 1fr 1fr 86px;}
+  .string-row{grid-template-columns:22px 1fr 1fr;}
+  .string-row.multi{grid-template-columns:22px 1fr 1fr 86px;}
+  .string-num{font-size:11px;color:var(--text-dim);text-align:center;}
+  .col-lbl{font-size:9px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;text-align:center;}
+
+  /* Tuning buttons */
+  .tuning-group{margin-bottom:12px;}
+  .tuning-group-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:5px;}
+  .btn-row{display:flex;flex-wrap:wrap;gap:4px;}
+  .t-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text-mid);font-family:'DM Mono',monospace;font-size:10px;padding:4px 8px;border-radius:2px;cursor:pointer;transition:all .12s;white-space:nowrap;}
+  .t-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .t-btn.active{border-color:var(--accent);color:var(--accent);background:#1a1f00;}
+
+  /* Results */
+  .results-panel{display:flex;flex-direction:column;gap:9px;}
+  .col-header{display:grid;grid-template-columns:22px 82px 1fr 66px 66px;gap:10px;padding:0 13px 7px;}
+  .col-header span{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);}
+  .col-header span:nth-child(4),.col-header span:nth-child(5){text-align:right;}
+  .result-row{display:grid;grid-template-columns:22px 82px 1fr 66px 66px;gap:10px;align-items:center;padding:11px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;transition:border-color .2s;}
+  .result-row:hover{border-color:#333;}
+  .result-num{font-size:10px;color:var(--text-dim);text-align:center;}
+  .result-info .r-gauge{font-size:13px;color:var(--text);}
+  .result-info .r-note{font-size:10px;color:var(--text-dim);margin-top:1px;}
+  .tension-bar-wrap{height:5px;background:#1e1e1e;border-radius:3px;overflow:hidden;}
+  .tension-bar{height:100%;border-radius:3px;transition:width .35s ease,background .35s ease;}
+  .tension-val{font-family:'Syne',sans-serif;font-weight:700;text-align:right;transition:color .3s;}
+  .tension-val.lb{font-size:13px;}
+  .tension-val.kgf{font-size:16px;}
+  .t-unit{font-size:9px;color:var(--text-dim);font-family:'DM Mono',monospace;font-weight:400;}
+
+  .summary{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:18px 22px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .summary-item{text-align:center;}
+  .summary-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--accent);}
+  .summary-label{font-size:9px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;}
+  .warn{font-size:11px;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);padding:9px 13px;border-radius:2px;border-left:2px solid var(--accent2);}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="title">STRING <span>TENSION</span></div>
+  <div class="subtitle">D'Addario XL Nickel — Calibrated Unit Weight Data</div>
+</div>
+
+<div class="layout">
+  <div>
+    <div class="panel">
+      <div class="panel-label">Parameters</div>
+      <div class="field">
+        <label>Scale Mode</label>
+        <select id="scaleMode" onchange="toggleScaleMode()">
+          <option value="single">Single Scale</option>
+          <option value="multi">Multi Scale (per string)</option>
+        </select>
+      </div>
+      <div id="singleScaleWrap" class="field">
+        <label>Scale Length (inch)</label>
+        <input type="number" id="scale" value="25.5" step="0.01" min="20" max="36">
+      </div>
+      <div class="field">
+        <label>Strings</label>
+        <select id="stringCount" onchange="updateStringCount()">
+          <option value="6">6 strings</option>
+          <option value="7">7 strings</option>
+          <option value="4">4 strings (Bass)</option>
+          <option value="5">5 strings (Bass)</option>
+          <option value="6b">6 strings (Bass)</option>
+        </select>
+      </div>
+
+      <div class="panel-label" style="margin-top:4px;">Tuning</div>
+
+      <div class="tuning-group">
+        <div class="tuning-group-label">Transpose All Strings</div>
+        <div class="btn-row">
+          <button class="t-btn" onclick="transposeAll(-1)">−½</button>
+          <button class="t-btn" onclick="transposeAll(-2)">−1st</button>
+          <button class="t-btn" onclick="transposeAll(-3)">−1½</button>
+          <button class="t-btn" onclick="transposeAll(-4)">−2nd</button>
+          <button class="t-btn" onclick="transposeAll(-5)">−2½</button>
+          <button class="t-btn" onclick="transposeAll(+1)">+½</button>
+          <button class="t-btn" onclick="transposeAll(+2)">+1st</button>
+        </div>
+      </div>
+
+      <div class="tuning-group">
+        <div class="tuning-group-label">Drop (lowest string only)</div>
+        <div class="btn-row" id="dropBtns"></div>
+      </div>
+
+      <div class="tuning-group">
+        <div class="tuning-group-label">Presets</div>
+        <div class="btn-row" id="presets"></div>
+      </div>
+
+      <div class="panel-label" style="margin-top:6px;margin-bottom:10px;">Strings</div>
+      <div id="strHeader"></div>
+      <div id="stringRows"></div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px;">
+    <div class="panel">
+      <div class="panel-label">Tension per String</div>
+      <div class="col-header">
+        <span>#</span><span>String</span><span>Bar</span>
+        <span>lbs</span><span>kgf</span>
+      </div>
+      <div class="results-panel" id="results"></div>
+    </div>
+    <div class="summary" id="summary"></div>
+    <div class="warn" id="warnBox" style="display:none;"></div>
+  </div>
+</div>
+
+<script>
+// ── Unit Weight (lb/in) ───────────────────────────────────────────────────────
+const UW = {
+  '0080p':0.000014198,'0085p':0.000016029,'0090p':0.000017970,'0095p':0.000020022,
+  '0100p':0.000022185,'0105p':0.000024459,'0110p':0.000026844,'0115p':0.000029340,
+  '0120p':0.000031947,'0125p':0.000034664,'0130p':0.000037493,'0135p':0.000040432,
+  '0140p':0.000043483,'0150p':0.000049917,'0160p':0.000056794,'0170p':0.000064115,
+  '0180p':0.000071880,'0190p':0.000080088,'0200p':0.000088741,
+  '017w':0.000057019,'018w':0.000063485,'019w':0.000070274,'020w':0.000077386,
+  '021w':0.000084817,'022w':0.000092565,'023w':0.000100630,'024w':0.000109009,
+  '025w':0.000117701,'026w':0.000126704,'027w':0.000136017,'028w':0.000145638,
+  '029w':0.000155566,'030w':0.000165799,'032w':0.000187178,'034w':0.000209766,
+  '036w':0.000233553,'038w':0.000258531,'039w':0.000271464,'040w':0.000284692,
+  '042w':0.000312029,'044w':0.000340536,'046w':0.000370205,'048w':0.000401031,
+  '050w':0.000433007,'052w':0.000466127,'054w':0.000500387,'056w':0.000535782,
+  '058w':0.000572305,'060w':0.000609954,'062w':0.000648721,'064w':0.000688605,
+  '066w':0.000729599,'068w':0.000771701,'070w':0.000814906,'072w':0.000859209,
+  '074w':0.000904609,'080w':0.001047344,'085w':0.001173730,'090w':0.001306828,
+  '095w':0.001446590,'100w':0.001592974,'105w':0.001745938,'110w':0.001905445,
+  '115w':0.002071456,'120w':0.002243939,'125w':0.002422858,'130w':0.002608183,
+  '135w':0.002799883,
+};
+
+// ── Notes (低→高) ─────────────────────────────────────────────────────────────
+const NOTE_LIST = [
+  'C0','C#0','D0','D#0','E0','F0','F#0','G0','G#0','A0','A#0','B0',
+  'C1','C#1','D1','D#1','E1','F1','F#1','G1','G#1','A1','A#1','B1',
+  'C2','C#2','D2','D#2','E2','F2','F#2','G2','G#2','A2','A#2','B2',
+  'C3','C#3','D3','D#3','E3','F3','F#3','G3','G#3','A3','A#3','B3',
+  'C4','C#4','D4','D#4','E4','F4','F#4','G4','G#4','A4','A#4','B4',
+];
+const NOTE_FREQ = {
+  'C0':16.35,'C#0':17.32,'D0':18.35,'D#0':19.45,'E0':20.60,'F0':21.83,'F#0':23.12,'G0':24.50,'G#0':25.96,'A0':27.50,'A#0':29.14,'B0':30.87,
+  'C1':32.70,'C#1':34.65,'D1':36.71,'D#1':38.89,'E1':41.20,'F1':43.65,'F#1':46.25,'G1':49.00,'G#1':51.91,'A1':55.00,'A#1':58.27,'B1':61.74,
+  'C2':65.41,'C#2':69.30,'D2':73.42,'D#2':77.78,'E2':82.41,'F2':87.31,'F#2':92.50,'G2':98.00,'G#2':103.83,'A2':110.00,'A#2':116.54,'B2':123.47,
+  'C3':130.81,'C#3':138.59,'D3':146.83,'D#3':155.56,'E3':164.81,'F3':174.61,'F#3':185.00,'G3':196.00,'G#3':207.65,'A3':220.00,'A#3':233.08,'B3':246.94,
+  'C4':261.63,'C#4':277.18,'D4':293.66,'D#4':311.13,'E4':329.63,'F4':349.23,'F#4':369.99,'G4':392.00,'G#4':415.30,'A4':440.00,'A#4':466.16,'B4':493.88,
+};
+
+const GAUGE_PLAIN = ['0080p','0085p','0090p','0095p','0100p','0105p','0110p','0115p','0120p','0125p','0130p','0135p','0140p','0150p','0160p','0170p','0180p','0190p','0200p'];
+const GAUGE_WOUND = ['017w','018w','019w','020w','021w','022w','023w','024w','025w','026w','027w','028w','029w','030w','032w','034w','036w','038w','039w','040w','042w','044w','046w','048w','050w','052w','054w','056w','058w','060w','062w','064w','066w','068w','070w','072w','074w','080w','085w','090w','095w','100w','105w','110w','115w','120w','125w','130w','135w'];
+const GAUGE_ALL = [...GAUGE_PLAIN, ...GAUGE_WOUND];
+
+const PRESETS = {
+  '6':[
+    {name:'Standard E', notes:['E4','B3','G3','D3','A2','E2'], gauges:['0100p','0130p','0170p','026w','036w','046w']},
+    {name:'Standard Eb',notes:['D#4','A#3','F#3','C#3','G#2','D#2'],gauges:['0100p','0130p','0170p','026w','036w','046w']},
+    {name:'Open G',     notes:['D4','B3','G3','D3','G2','D2'],  gauges:['0100p','0130p','0170p','026w','036w','046w']},
+  ],
+  '7':[{name:'Standard',notes:['E4','B3','G3','D3','A2','E2','B1'],gauges:['0100p','0130p','0170p','026w','036w','046w','062w']}],
+  '4':[{name:'Standard',notes:['G2','D2','A1','E1'],gauges:['042w','032w','045w','065w']}],
+  '5':[{name:'Standard',notes:['G2','D2','A1','E1','B0'],gauges:['042w','032w','045w','065w','085w']}],
+  '6b':[{name:'Standard',notes:['C3','G2','D2','A1','E1','B0'],gauges:['032w','042w','060w','080w','100w','130w']}],
+};
+
+const DROP_TUNINGS = [
+  {name:'Drop D',  lowest:'D2'},
+  {name:'Drop C#', lowest:'C#2'},
+  {name:'Drop C',  lowest:'C2'},
+  {name:'Drop B',  lowest:'B1'},
+  {name:'Drop A#', lowest:'A#1'},
+  {name:'Drop A',  lowest:'A1'},
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let currentMode = '6';
+let activePreset = 0;
+let noteIdx  = [];
+let gaugeIdx = [];
+
+function strCount() { return parseInt(currentMode) || 6; }
+
+function initState(preset) {
+  const n = strCount();
+  noteIdx = []; gaugeIdx = [];
+  for (let i = 0; i < n; i++) {
+    noteIdx.push(NOTE_LIST.indexOf(preset?.notes[i] ?? 'E2'));
+    gaugeIdx.push(GAUGE_ALL.indexOf(preset?.gauges[i] ?? '026w'));
+  }
+}
+
+// ── Spinner ───────────────────────────────────────────────────────────────────
+let _spinTimer = null;
+
+function startSpin(type, i, dir, e) {
+  if(e) e.preventDefault();
+  _doSpin(type, i, dir);
+  _spinTimer = setTimeout(() => {
+    _spinTimer = setInterval(() => _doSpin(type, i, dir), 70);
+  }, 340);
+}
+function stopSpin(e) {
+  if(e) e.preventDefault();
+  clearTimeout(_spinTimer); clearInterval(_spinTimer); _spinTimer = null;
+}
+function _doSpin(type, i, dir) {
+  if (type === 'g') {
+    gaugeIdx[i] = Math.max(0, Math.min(GAUGE_ALL.length-1, gaugeIdx[i]+dir));
+    document.getElementById(`gv_${i}`).textContent = gDisp(GAUGE_ALL[gaugeIdx[i]]);
+  } else {
+    noteIdx[i] = Math.max(0, Math.min(NOTE_LIST.length-1, noteIdx[i]+dir));
+    document.getElementById(`nv_${i}`).textContent = NOTE_LIST[noteIdx[i]];
+  }
+  activePreset = -1; renderPresets(); calculate();
+}
+
+function startScaleSpin(i, delta, e) {
+  if(e) e.preventDefault();
+  _doScale(i, delta);
+  _spinTimer = setTimeout(() => {
+    _spinTimer = setInterval(() => _doScale(i, delta), 70);
+  }, 340);
+}
+function _doScale(i, delta) {
+  const el = document.getElementById(`sc_${i}`);
+  if (!el) return;
+  el.value = Math.max(400, Math.min(1000, (parseFloat(el.value)||648) + delta)).toFixed(2);
+  calculate();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function gDisp(g) {
+  const n = g.replace('p','').replace('w','');
+  return `.${n}${g.endsWith('w')?'w':'p'}`;
+}
+function calcT(gauge, note, scaleIn) {
+  const uw = UW[gauge], f = NOTE_FREQ[note];
+  if (!uw||!f) return null;
+  const lb = uw * Math.pow(2*scaleIn*f, 2) / 386.4;
+  return {lb, kgf: lb/2.20462};
+}
+function tColor(kgf) {
+  if (kgf<5) return '#44aaff';
+  if (kgf<7) return '#c8ff00';
+  if (kgf<9) return '#ffaa00';
+  return '#ff6b35';
+}
+function isMulti() { return document.getElementById('scaleMode').value === 'multi'; }
+
+// ── Render rows ───────────────────────────────────────────────────────────────
+function renderRows() {
+  const n = strCount(), multi = isMulti();
+  const defMm = [662.94,667.51,672.08,676.66,681.23,685.80];
+
+  const hdr = document.getElementById('strHeader');
+  hdr.className = `str-header${multi?' multi':''}`;
+  hdr.innerHTML = `<span></span><span class="col-lbl">Gauge</span><span class="col-lbl">Note</span>${multi?'<span class="col-lbl">Scale mm</span>':''}`;
+
+  const cont = document.getElementById('stringRows');
+  cont.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const mm = defMm[i] ?? 648;
+    const row = document.createElement('div');
+    row.className = `string-row${multi?' multi':''}`;
+    row.innerHTML = `
+      <div class="string-num">${i+1}</div>
+      <div class="spinner">
+        <button class="spin-btn"
+          onmousedown="startSpin('g',${i},-1,event)" onmouseup="stopSpin()" onmouseleave="stopSpin()"
+          ontouchstart="startSpin('g',${i},-1,event)" ontouchend="stopSpin(event)">▼</button>
+        <div class="spin-sep"></div>
+        <div class="spinner-val" id="gv_${i}"></div>
+        <div class="spin-sep"></div>
+        <button class="spin-btn"
+          onmousedown="startSpin('g',${i},+1,event)" onmouseup="stopSpin()" onmouseleave="stopSpin()"
+          ontouchstart="startSpin('g',${i},+1,event)" ontouchend="stopSpin(event)">▲</button>
+      </div>
+      <div class="spinner">
+        <button class="spin-btn"
+          onmousedown="startSpin('n',${i},-1,event)" onmouseup="stopSpin()" onmouseleave="stopSpin()"
+          ontouchstart="startSpin('n',${i},-1,event)" ontouchend="stopSpin(event)">▼</button>
+        <div class="spin-sep"></div>
+        <div class="spinner-val" id="nv_${i}"></div>
+        <div class="spin-sep"></div>
+        <button class="spin-btn"
+          onmousedown="startSpin('n',${i},+1,event)" onmouseup="stopSpin()" onmouseleave="stopSpin()"
+          ontouchstart="startSpin('n',${i},+1,event)" ontouchend="stopSpin(event)">▲</button>
+      </div>
+      ${multi ? `
+      <div class="spinner">
+        <button class="spin-btn"
+          onmousedown="startScaleSpin(${i},-0.5,event)" onmouseup="stopSpin()" onmouseleave="stopSpin()">▼</button>
+        <div class="spin-sep"></div>
+        <input type="number" id="sc_${i}" value="${mm}" step="0.01" min="400" max="1000" oninput="calculate()"
+          style="border:none;background:transparent;font-size:10px;text-align:center;color:var(--text);width:52px;outline:none;padding:0 2px;">
+        <div class="spin-sep"></div>
+        <button class="spin-btn"
+          onmousedown="startScaleSpin(${i},+0.5,event)" onmouseup="stopSpin()" onmouseleave="stopSpin()">▲</button>
+      </div>` : ''}`;
+    cont.appendChild(row);
+  }
+  updateAllVals();
+}
+
+function updateAllVals() {
+  const n = strCount();
+  for (let i = 0; i < n; i++) {
+    const gv = document.getElementById(`gv_${i}`);
+    const nv = document.getElementById(`nv_${i}`);
+    if (gv) gv.textContent = gDisp(GAUGE_ALL[gaugeIdx[i]]);
+    if (nv) nv.textContent = NOTE_LIST[noteIdx[i]];
+  }
+}
+
+// ── Transpose & Drop ──────────────────────────────────────────────────────────
+function transposeAll(semi) {
+  const n = strCount();
+  for (let i = 0; i < n; i++)
+    noteIdx[i] = Math.max(0, Math.min(NOTE_LIST.length-1, noteIdx[i]+semi));
+  updateAllVals(); activePreset=-1; renderPresets(); renderDropBtns(); calculate();
+}
+
+function applyDrop(lowestNote) {
+  const n = strCount();
+  const idx = NOTE_LIST.indexOf(lowestNote);
+  if (idx < 0) return;
+  noteIdx[n-1] = idx;
+  const nv = document.getElementById(`nv_${n-1}`);
+  if (nv) nv.textContent = lowestNote;
+  activePreset=-1; renderPresets(); renderDropBtns(); calculate();
+}
+
+// ── Presets & Drop render ─────────────────────────────────────────────────────
+function renderPresets() {
+  const presets = PRESETS[currentMode] || [];
+  document.getElementById('presets').innerHTML = presets.map((p,i) =>
+    `<button class="t-btn${i===activePreset?' active':''}" onclick="applyPreset(${i})">${p.name}</button>`
+  ).join('');
+}
+
+function renderDropBtns() {
+  const cont = document.getElementById('dropBtns');
+  if (currentMode !== '6' && currentMode !== '7') {
+    cont.innerHTML = '<span style="font-size:10px;color:var(--text-dim)">6/7弦のみ</span>';
+    return;
+  }
+  const lowest = NOTE_LIST[noteIdx[strCount()-1]];
+  cont.innerHTML = DROP_TUNINGS.map(d =>
+    `<button class="t-btn${lowest===d.lowest?' active':''}" onclick="applyDrop('${d.lowest}')">${d.name}</button>`
+  ).join('');
+}
+
+function applyPreset(idx) {
+  activePreset = idx;
+  const p = PRESETS[currentMode][idx];
+  initState(p); updateAllVals();
+  renderPresets(); renderDropBtns(); calculate();
+}
+
+// ── Scale mode ────────────────────────────────────────────────────────────────
+function toggleScaleMode() {
+  document.getElementById('singleScaleWrap').style.display = isMulti() ? 'none' : 'block';
+  renderRows(); calculate();
+}
+
+// ── Calculate & Render ────────────────────────────────────────────────────────
+function calculate() {
+  const multi = isMulti();
+  const singleScale = parseFloat(document.getElementById('scale')?.value) || 25.5;
+  const n = strCount();
+  const results = []; const warns = [];
+
+  for (let i = 0; i < n; i++) {
+    const gauge = GAUGE_ALL[gaugeIdx[i]];
+    const note  = NOTE_LIST[noteIdx[i]];
+    const scaleIn = multi ? (parseFloat(document.getElementById(`sc_${i}`)?.value)||648)/25.4 : singleScale;
+    const tension = calcT(gauge, note, scaleIn);
+    results.push({gauge, note, tension, idx:i+1, scaleIn});
+    if (!tension) warns.push(`String ${i+1}`);
+  }
+
+  // results
+  const maxKgf = Math.max(...results.map(r=>r.tension?.kgf||0));
+  document.getElementById('results').innerHTML = results.map(r => {
+    const t=r.tension, kgf=t?.kgf, lb=t?.lb;
+    const pct = kgf ? Math.min(kgf/(maxKgf*1.15)*100, 100) : 0;
+    const col = kgf ? tColor(kgf) : '#333';
+    const wound = r.gauge?.endsWith('w');
+    const scNote = multi ? ` · ${(r.scaleIn*25.4).toFixed(2)}mm` : '';
+    return `
+      <div class="result-row">
+        <div class="result-num">${r.idx}</div>
+        <div class="result-info">
+          <div class="r-gauge">${gDisp(r.gauge)}</div>
+          <div class="r-note">${r.note} · ${wound?'wound':'plain'}${scNote}</div>
+        </div>
+        <div><div class="tension-bar-wrap"><div class="tension-bar" style="width:${pct}%;background:${col}"></div></div></div>
+        <div class="tension-val lb" style="color:${col}">${lb?lb.toFixed(2):'—'}<span class="t-unit"> lb</span></div>
+        <div class="tension-val kgf" style="color:${col}">${kgf?kgf.toFixed(2):'—'}<span class="t-unit"> kg</span></div>
+      </div>`;
+  }).join('');
+
+  // summary
+  const valid = results.filter(r=>r.tension);
+  const total = valid.reduce((s,r)=>s+r.tension.kgf,0);
+  const avg   = valid.length ? total/valid.length : 0;
+  const mx    = Math.max(...valid.map(r=>r.tension.kgf));
+  const mn    = Math.min(...valid.map(r=>r.tension.kgf));
+  const bal   = avg ? Math.max(0,(1-(mx-mn)/avg)*100) : 0;
+  document.getElementById('summary').innerHTML = `
+    <div class="summary-item"><div class="summary-val">${total.toFixed(1)}</div><div class="summary-label">Total kgf</div></div>
+    <div class="summary-item"><div class="summary-val">${avg.toFixed(2)}</div><div class="summary-label">Avg / String</div></div>
+    <div class="summary-item"><div class="summary-val" style="color:${bal>80?'var(--accent)':bal>60?'#ffaa00':'var(--accent2)'}">${bal.toFixed(0)}%</div><div class="summary-label">Balance</div></div>`;
+
+  // warn
+  const wb = document.getElementById('warnBox');
+  if (warns.length) { wb.style.display='block'; wb.textContent='Unknown: '+warns.join(', '); }
+  else wb.style.display='none';
+
+  renderDropBtns();
+}
+
+// ── String count change ───────────────────────────────────────────────────────
+function updateStringCount() {
+  currentMode = document.getElementById('stringCount').value;
+  activePreset = 0;
+  initState(PRESETS[currentMode]?.[0]);
+  renderRows(); renderPresets(); renderDropBtns(); calculate();
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+(function(){
+  activePreset = 0;
+  initState(PRESETS[currentMode][0]);
+  renderRows(); renderPresets(); renderDropBtns(); calculate();
+  document.getElementById('scale').addEventListener('input', calculate);
+})();
+</script>
+</body>
+</html>
