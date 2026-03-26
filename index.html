@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -33,26 +34,26 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow','DIN Condensed'
 .hint span{color:var(--accent3);font-weight:600;}
 
 /* number input */
-.num-wrap{display:flex;align-items:stretch;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .15s;}
-.num-wrap:focus-within{border-color:var(--accent1);}
-.num-wrap input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;font-weight:500;padding:7px 6px 7px 9px;-moz-appearance:textfield;}
+.num-wrap{display:flex;align-items:stretch;background:var(–bg3);border:1px solid var(–border);border-radius:var(–r);overflow:hidden;transition:border-color .15s;}
+.num-wrap:focus-within{border-color:var(–accent1);}
+.num-wrap input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(–text);font-family:‘Barlow’,sans-serif;font-size:14px;font-weight:500;padding:7px 6px 7px 9px;-moz-appearance:textfield;}
 .num-wrap input::-webkit-inner-spin-button,.num-wrap input::-webkit-outer-spin-button{-webkit-appearance:none;}
-.num-btns{display:flex;flex-direction:column;border-left:1px solid var(--border);}
-.num-btn{flex:1;width:22px;background:transparent;border:none;color:var(--text2);font-size:8px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s,color .1s;user-select:none;padding:0;}
-.num-btn:hover{background:var(--bg4);color:var(--text);}
-.num-btn:active{background:var(--border2);}
-.num-btn+.num-btn{border-top:1px solid var(--border);}
+.num-btns{display:flex;flex-direction:column;border-left:1px solid var(–border);}
+.num-btn{flex:1;width:22px;background:transparent;border:none;color:var(–text2);font-size:8px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s,color .1s;user-select:none;padding:0;}
+.num-btn:hover{background:var(–bg4);color:var(–text);}
+.num-btn:active{background:var(–border2);}
+.num-btn+.num-btn{border-top:1px solid var(–border);}
 
 /* readonly */
-.ro-wrap{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:7px 9px;font-size:14px;color:var(--text3);font-family:'Barlow',sans-serif;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ro-wrap{background:var(–bg);border:1px solid var(–border);border-radius:var(–r);padding:7px 9px;font-size:14px;color:var(–text3);font-family:‘Barlow’,sans-serif;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
 /* seed section */
 .seed-wrap{display:flex;gap:6px;align-items:stretch;}
-.seed-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'Barlow',monospace,sans-serif;font-size:11px;font-weight:500;padding:7px 9px;outline:none;transition:border-color .15s;letter-spacing:.04em;}
-.seed-input:focus{border-color:var(--accent1);}
-.seed-copy{background:var(--bg4);border:1px solid var(--border2);color:var(--text2);font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;padding:0 10px;border-radius:var(--r);cursor:pointer;white-space:nowrap;transition:background .12s,color .12s;}
-.seed-copy:hover{background:var(--bg3);color:var(--text);}
-.seed-apply{background:var(--accent1);border:1px solid var(--accent1);color:#1a1a1a;font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;padding:0 10px;border-radius:var(--r);cursor:pointer;white-space:nowrap;transition:background .12s;}
+.seed-input{flex:1;background:var(–bg3);border:1px solid var(–border);border-radius:var(–r);color:var(–text);font-family:‘Barlow’,monospace,sans-serif;font-size:11px;font-weight:500;padding:7px 9px;outline:none;transition:border-color .15s;letter-spacing:.04em;}
+.seed-input:focus{border-color:var(–accent1);}
+.seed-copy{background:var(–bg4);border:1px solid var(–border2);color:var(–text2);font-family:‘Barlow’,sans-serif;font-size:11px;font-weight:600;padding:0 10px;border-radius:var(–r);cursor:pointer;white-space:nowrap;transition:background .12s,color .12s;}
+.seed-copy:hover{background:var(–bg3);color:var(–text);}
+.seed-apply{background:var(–accent1);border:1px solid var(–accent1);color:#1a1a1a;font-family:‘Barlow’,sans-serif;font-size:11px;font-weight:700;padding:0 10px;border-radius:var(–r);cursor:pointer;white-space:nowrap;transition:background .12s;}
 .seed-apply:hover{background:#c4b5fd;}
 .seed-err{font-size:10px;color:#f87171;margin-top:3px;min-height:14px;}
 
@@ -61,26 +62,26 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow','DIN Condensed'
 .strings-warn{font-size:11px;color:#f87171;font-weight:600;white-space:nowrap;}
 
 /* advanced accordion */
-.adv-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;cursor:pointer;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text2);transition:border-color .15s,color .15s;margin-bottom:0;}
-.adv-toggle:hover{border-color:var(--border2);color:var(--text);}
-.adv-toggle.open{border-color:var(--accent1);color:var(--accent1);border-bottom-left-radius:0;border-bottom-right-radius:0;}
+.adv-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;background:var(–bg3);border:1px solid var(–border);border-radius:var(–r);padding:8px 12px;cursor:pointer;font-family:‘Barlow’,sans-serif;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(–text2);transition:border-color .15s,color .15s;margin-bottom:0;}
+.adv-toggle:hover{border-color:var(–border2);color:var(–text);}
+.adv-toggle.open{border-color:var(–accent1);color:var(–accent1);border-bottom-left-radius:0;border-bottom-right-radius:0;}
 .adv-arrow{font-size:9px;transition:transform .2s;}
 .adv-toggle.open .adv-arrow{transform:rotate(180deg);}
-.adv-body{display:none;background:var(--bg3);border:1px solid var(--accent1);border-top:none;border-bottom-left-radius:var(--r);border-bottom-right-radius:var(--r);padding:12px;}
+.adv-body{display:none;background:var(–bg3);border:1px solid var(–accent1);border-top:none;border-bottom-left-radius:var(–r);border-bottom-right-radius:var(–r);padding:12px;}
 .adv-body.open{display:block;}
 .adv-sec{margin-bottom:12px;}
 .adv-sec:last-child{margin-bottom:0;}
-.adv-sec-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:7px;font-weight:600;}
+.adv-sec-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(–text3);margin-bottom:7px;font-weight:600;}
 .edge-wrap{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .edge-col{display:flex;flex-direction:column;gap:6px;}
-.edge-col-hd{font-size:11px;color:var(--text2);text-align:center;padding-bottom:4px;border-bottom:1px solid var(--border);font-weight:500;}
+.edge-col-hd{font-size:11px;color:var(–text2);text-align:center;padding-bottom:4px;border-bottom:1px solid var(–border);font-weight:500;}
 .pd-row{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:end;}
-.pd-ref{font-size:11px;color:var(--text3);margin-top:5px;display:flex;flex-wrap:wrap;gap:0 10px;line-height:1.8;}
+.pd-ref{font-size:11px;color:var(–text3);margin-top:5px;display:flex;flex-wrap:wrap;gap:0 10px;line-height:1.8;}
 
 /* buttons */
-button.std{background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;padding:8px 12px;border-radius:var(--r);cursor:pointer;transition:background .15s,border-color .15s;}
-button.std:hover{background:var(--bg3);border-color:var(--accent1);}
-button.primary{background:var(--accent1);border:1px solid var(--accent1);color:#1a1a1a;font-family:'Barlow',sans-serif;font-size:14px;font-weight:700;padding:11px 22px;border-radius:var(--r);cursor:pointer;transition:background .15s;}
+button.std{background:var(–bg4);border:1px solid var(–border2);color:var(–text);font-family:‘Barlow’,sans-serif;font-size:13px;font-weight:500;padding:8px 12px;border-radius:var(–r);cursor:pointer;transition:background .15s,border-color .15s;}
+button.std:hover{background:var(–bg3);border-color:var(–accent1);}
+button.primary{background:var(–accent1);border:1px solid var(–accent1);color:#1a1a1a;font-family:‘Barlow’,sans-serif;font-size:14px;font-weight:700;padding:11px 22px;border-radius:var(–r);cursor:pointer;transition:background .15s;}
 button.primary:hover{background:#c4b5fd;}
 button.primary:active{transform:scale(.98);}
 
@@ -89,44 +90,45 @@ button.primary:active{transform:scale(.98);}
 @media(max-width:600px){.main{padding:12px;}}
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 @media(max-width:600px){.metrics{grid-template-columns:1fr 1fr;}}
-.metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px;}
-.metric-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;font-weight:500;}
+.metric{background:var(–bg2);border:1px solid var(–border);border-radius:var(–r2);padding:12px 14px;}
+.metric-lbl{font-size:11px;color:var(–text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;font-weight:500;}
 .metric-val{font-size:22px;font-weight:600;}
-.metric-unit{font-size:12px;color:var(--text2);margin-left:3px;}
-.tbl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.metric-unit{font-size:12px;color:var(–text2);margin-left:3px;}
+.tbl-wrap{background:var(–bg2);border:1px solid var(–border);border-radius:var(–r2);overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .tbl{width:100%;border-collapse:collapse;font-size:13px;}
-.tbl th,.tbl td{padding:7px 10px;border-bottom:1px solid var(--border);text-align:center;white-space:nowrap;}
-.tbl th{color:var(--text2);font-weight:600;background:var(--bg3);}
-.tbl td{color:var(--text);font-weight:500;}
+.tbl th,.tbl td{padding:7px 10px;border-bottom:1px solid var(–border);text-align:center;white-space:nowrap;}
+.tbl th{color:var(–text2);font-weight:600;background:var(–bg3);}
+.tbl td{color:var(–text);font-weight:500;}
 .tbl tr:last-child td,.tbl tr:last-child th{border-bottom:none;}
 .tbl td:first-child,.tbl th:first-child{text-align:left;}
-.canvas-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;}
+.canvas-wrap{background:var(–bg2);border:1px solid var(–border);border-radius:var(–r2);overflow:hidden;}
 #fsv{width:100%;display:block;}
-.legend{font-size:11px;color:var(--text3);display:flex;flex-wrap:wrap;gap:4px 16px;line-height:1.8;font-weight:500;}
+.legend{font-size:11px;color:var(–text3);display:flex;flex-wrap:wrap;gap:4px 16px;line-height:1.8;font-weight:500;}
 .dxf-area{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.dxf-fname{font-size:12px;color:var(--text3);}
-#dxf-link{display:none;font-size:12px;color:var(--accent2);text-decoration:underline;cursor:pointer;}
+.dxf-fname{font-size:12px;color:var(–text3);}
+#dxf-link{display:none;font-size:12px;color:var(–accent2);text-decoration:underline;cursor:pointer;}
 
 /* lefty toggle */
 .toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
-.toggle-label{font-size:11px;color:var(--text2);font-weight:500;letter-spacing:.03em;}
+.toggle-label{font-size:11px;color:var(–text2);font-weight:500;letter-spacing:.03em;}
 .toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0;}
 .toggle-switch input{opacity:0;width:0;height:0;}
-.toggle-slider{position:absolute;inset:0;background:var(--bg4);border:1px solid var(--border2);border-radius:12px;cursor:pointer;transition:background .2s,border-color .2s;}
-.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:var(--text2);border-radius:50%;transition:transform .2s,background .2s;}
-.toggle-switch input:checked+.toggle-slider{background:var(--accent1);border-color:var(--accent1);}
+.toggle-slider{position:absolute;inset:0;background:var(–bg4);border:1px solid var(–border2);border-radius:12px;cursor:pointer;transition:background .2s,border-color .2s;}
+.toggle-slider::before{content:’’;position:absolute;width:16px;height:16px;left:3px;top:3px;background:var(–text2);border-radius:50%;transition:transform .2s,background .2s;}
+.toggle-switch input:checked+.toggle-slider{background:var(–accent1);border-color:var(–accent1);}
 .toggle-switch input:checked+.toggle-slider::before{transform:translateX(20px);background:#1a1a1a;}
 
 /* lefty toggle */
 .toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
-.toggle-label{font-size:11px;color:var(--text2);font-weight:500;letter-spacing:.03em;}
+.toggle-label{font-size:11px;color:var(–text2);font-weight:500;letter-spacing:.03em;}
 .toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0;}
 .toggle-switch input{opacity:0;width:0;height:0;}
-.toggle-slider{position:absolute;inset:0;background:var(--bg4);border:1px solid var(--border2);border-radius:12px;cursor:pointer;transition:background .2s,border-color .2s;}
-.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:var(--text2);border-radius:50%;transition:transform .2s,background .2s;}
-.toggle-switch input:checked+.toggle-slider{background:var(--accent1);border-color:var(--accent1);}
+.toggle-slider{position:absolute;inset:0;background:var(–bg4);border:1px solid var(–border2);border-radius:12px;cursor:pointer;transition:background .2s,border-color .2s;}
+.toggle-slider::before{content:’’;position:absolute;width:16px;height:16px;left:3px;top:3px;background:var(–text2);border-radius:50%;transition:transform .2s,background .2s;}
+.toggle-switch input:checked+.toggle-slider{background:var(–accent1);border-color:var(–accent1);}
 .toggle-switch input:checked+.toggle-slider::before{transform:translateX(20px);background:#1a1a1a;}
 </style>
+
 </head>
 <body>
 <div class="app">
@@ -135,6 +137,7 @@ button.primary:active{transform:scale(.98);}
   <div class="app-title">Multiscale<br>Fretboard Generator</div>
 
   <!-- Seed -->
+
   <div class="sec">
     <div class="sec-title">Seed</div>
     <div class="seed-wrap">
@@ -146,6 +149,7 @@ button.primary:active{transform:scale(.98);}
   </div>
 
   <!-- Scale Length -->
+
   <div class="sec">
     <div class="sec-title">Scale Length (inch)</div>
     <div class="g4">
@@ -169,6 +173,7 @@ button.primary:active{transform:scale(.98);}
   </div>
 
   <!-- Strings & Frets -->
+
   <div class="sec">
     <div class="sec-title">Strings &amp; Frets</div>
     <div class="g2">
@@ -193,6 +198,7 @@ button.primary:active{transform:scale(.98);}
   </div>
 
   <!-- Multiscale PD -->
+
   <div class="sec">
     <div class="sec-title">Multiscale PD</div>
     <div class="g2">
@@ -211,6 +217,7 @@ button.primary:active{transform:scale(.98);}
   </div>
 
   <!-- Advanced accordion -->
+
   <div class="sec">
     <button class="adv-toggle" id="adv-toggle" onclick="toggleAdv()">
       Advanced <span class="adv-arrow">▼</span>
@@ -247,74 +254,77 @@ button.primary:active{transform:scale(.98);}
         </div>
       </div>
 
-      <!-- Board End -->
-      <div class="adv-sec">
-        <div class="adv-sec-title">Board End</div>
-        <div class="field" style="max-width:160px;">
-          <label>Board End (fret no.)</label>
-          <div class="num-wrap">
-            <input type="number" id="fb_end" value="25" step="1" min="1" max="37">
-            <div class="num-btns"><button class="num-btn" data-target="fb_end" data-dir="up">▲</button><button class="num-btn" data-target="fb_end" data-dir="dn">▼</button></div>
-          </div>
-        </div>
-        <div class="hint" style="margin-top:4px;">Min: Frets + 1 = <span id="fb-end-min">—</span></div>
+```
+  <!-- Board End -->
+  <div class="adv-sec">
+    <div class="adv-sec-title">Board End</div>
+    <div class="field" style="max-width:160px;">
+      <label>Board End (fret no.)</label>
+      <div class="num-wrap">
+        <input type="number" id="fb_end" value="25" step="1" min="1" max="37">
+        <div class="num-btns"><button class="num-btn" data-target="fb_end" data-dir="up">▲</button><button class="num-btn" data-target="fb_end" data-dir="dn">▼</button></div>
       </div>
-
-      <!-- String Spacing -->
-      <div class="adv-sec">
-        <div class="adv-sec-title">String Spacing</div>
-        <div class="g2">
-          <div class="field">
-            <label>Bridge Spacing (mm)</label>
-            <div class="num-wrap">
-              <input type="number" id="bpitch" value="10.5" step="0.1" min="5" max="25">
-              <div class="num-btns"><button class="num-btn" data-target="bpitch" data-dir="up">▲</button><button class="num-btn" data-target="bpitch" data-dir="dn">▼</button></div>
-            </div>
-            <div class="hint">Span <span id="bw-calc">—</span> / Total <span id="bw-total">—</span> mm</div>
-          </div>
-          <div class="field">
-            <label>Nut Spacing (mm)</label>
-            <div class="num-wrap">
-              <input type="number" id="npitch" value="7.0" step="0.1" min="4" max="15">
-              <div class="num-btns"><button class="num-btn" data-target="npitch" data-dir="up">▲</button><button class="num-btn" data-target="npitch" data-dir="dn">▼</button></div>
-            </div>
-            <div class="hint">Span <span id="nw-calc">—</span> / Total <span id="nw-total">—</span> mm</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Edge Overhang -->
-      <div class="adv-sec">
-        <div class="adv-sec-title">Edge Overhang (mm)</div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-          <span style="font-size:11px;color:var(--text2);font-weight:500;">← End side</span>
-          <span style="font-size:11px;color:var(--text2);font-weight:500;">Nut side →</span>
-        </div>
-        <div class="edge-wrap">
-          <div class="edge-col">
-            <div class="edge-col-hd">← End</div>
-            <div class="field"><label>Bass Side</label><div class="num-wrap"><input type="number" id="eeN" value="5.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="eeN" data-dir="up">▲</button><button class="num-btn" data-target="eeN" data-dir="dn">▼</button></div></div></div>
-            <div class="field"><label>Treble Side</label><div class="num-wrap"><input type="number" id="ee1" value="4.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ee1" data-dir="up">▲</button><button class="num-btn" data-target="ee1" data-dir="dn">▼</button></div></div></div>
-          </div>
-          <div class="edge-col">
-            <div class="edge-col-hd">Nut →</div>
-            <div class="field"><label>Bass Side</label><div class="num-wrap"><input type="number" id="neN" value="4.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="neN" data-dir="up">▲</button><button class="num-btn" data-target="neN" data-dir="dn">▼</button></div></div></div>
-            <div class="field"><label>Treble Side</label><div class="num-wrap"><input type="number" id="ne1" value="3.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ne1" data-dir="up">▲</button><button class="num-btn" data-target="ne1" data-dir="dn">▼</button></div></div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Nut Overhang -->
-      <div class="adv-sec">
-        <div class="adv-sec-title">Nut Overhang</div>
-        <p style="font-size:11px;color:var(--text3);margin-bottom:7px;font-weight:500;">Edge → Nut thickness → Overhang (toward headstock)</p>
-        <div class="g2">
-          <div class="field"><label>Nut Thickness (mm)</label><div class="num-wrap"><input type="number" id="nut_thick" value="3.0" step="0.5" min="1" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_thick" data-dir="up">▲</button><button class="num-btn" data-target="nut_thick" data-dir="dn">▼</button></div></div></div>
-          <div class="field"><label>Overhang Length (mm)</label><div class="num-wrap"><input type="number" id="nut_oh" value="8.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_oh" data-dir="up">▲</button><button class="num-btn" data-target="nut_oh" data-dir="dn">▼</button></div></div></div>
-        </div>
-      </div>
-
     </div>
+    <div class="hint" style="margin-top:4px;">Min: Frets + 1 = <span id="fb-end-min">—</span></div>
+  </div>
+
+  <!-- String Spacing -->
+  <div class="adv-sec">
+    <div class="adv-sec-title">String Spacing</div>
+    <div class="g2">
+      <div class="field">
+        <label>Bridge Spacing (mm)</label>
+        <div class="num-wrap">
+          <input type="number" id="bpitch" value="10.5" step="0.1" min="5" max="25">
+          <div class="num-btns"><button class="num-btn" data-target="bpitch" data-dir="up">▲</button><button class="num-btn" data-target="bpitch" data-dir="dn">▼</button></div>
+        </div>
+        <div class="hint">Span <span id="bw-calc">—</span> / Total <span id="bw-total">—</span> mm</div>
+      </div>
+      <div class="field">
+        <label>Nut Spacing (mm)</label>
+        <div class="num-wrap">
+          <input type="number" id="npitch" value="7.0" step="0.1" min="4" max="15">
+          <div class="num-btns"><button class="num-btn" data-target="npitch" data-dir="up">▲</button><button class="num-btn" data-target="npitch" data-dir="dn">▼</button></div>
+        </div>
+        <div class="hint">Span <span id="nw-calc">—</span> / Total <span id="nw-total">—</span> mm</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edge Overhang -->
+  <div class="adv-sec">
+    <div class="adv-sec-title">Edge Overhang (mm)</div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+      <span style="font-size:11px;color:var(--text2);font-weight:500;">← End side</span>
+      <span style="font-size:11px;color:var(--text2);font-weight:500;">Nut side →</span>
+    </div>
+    <div class="edge-wrap">
+      <div class="edge-col">
+        <div class="edge-col-hd">← End</div>
+        <div class="field"><label>Bass Side</label><div class="num-wrap"><input type="number" id="eeN" value="5.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="eeN" data-dir="up">▲</button><button class="num-btn" data-target="eeN" data-dir="dn">▼</button></div></div></div>
+        <div class="field"><label>Treble Side</label><div class="num-wrap"><input type="number" id="ee1" value="4.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ee1" data-dir="up">▲</button><button class="num-btn" data-target="ee1" data-dir="dn">▼</button></div></div></div>
+      </div>
+      <div class="edge-col">
+        <div class="edge-col-hd">Nut →</div>
+        <div class="field"><label>Bass Side</label><div class="num-wrap"><input type="number" id="neN" value="4.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="neN" data-dir="up">▲</button><button class="num-btn" data-target="neN" data-dir="dn">▼</button></div></div></div>
+        <div class="field"><label>Treble Side</label><div class="num-wrap"><input type="number" id="ne1" value="3.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ne1" data-dir="up">▲</button><button class="num-btn" data-target="ne1" data-dir="dn">▼</button></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nut Overhang -->
+  <div class="adv-sec">
+    <div class="adv-sec-title">Nut Overhang</div>
+    <p style="font-size:11px;color:var(--text3);margin-bottom:7px;font-weight:500;">Edge → Nut thickness → Overhang (toward headstock)</p>
+    <div class="g2">
+      <div class="field"><label>Nut Thickness (mm)</label><div class="num-wrap"><input type="number" id="nut_thick" value="3.0" step="0.5" min="1" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_thick" data-dir="up">▲</button><button class="num-btn" data-target="nut_thick" data-dir="dn">▼</button></div></div></div>
+      <div class="field"><label>Overhang Length (mm)</label><div class="num-wrap"><input type="number" id="nut_oh" value="8.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_oh" data-dir="up">▲</button><button class="num-btn" data-target="nut_oh" data-dir="dn">▼</button></div></div></div>
+    </div>
+  </div>
+
+</div>
+```
+
   </div>
 
 </aside>
@@ -642,13 +652,11 @@ function exportDXF(){
   var encoded='data:application/dxf;charset=utf-8,'+encodeURIComponent(buildDXF(g,leftyExp));
   var fname=buildFilename(g.nStr,g.s1in,g.sNin,g.pd);
   document.getElementById('dxf-filename').textContent=fname;
-  // create a temporary anchor and click it
-  var a=document.createElement('a');
-  a.href=encoded;
-  a.download=fname;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  var link=document.getElementById('dxf-link');
+  link.href=encoded;
+  link.download=fname;
+  link.style.display='inline';
+  link.click();
 }
 
 function run(){
@@ -701,7 +709,7 @@ function run(){
   document.getElementById('s1mm').textContent=s1.toFixed(2);
   document.getElementById('sNmm').textContent=sN.toFixed(2);
   document.getElementById('dxf-filename').textContent=buildFilename(nStr,s1in,sNin,pd);
-  // dxf-link: handled by exportDXF directly
+  document.getElementById('dxf-link').style.display='none';
 
   // update seed display
   document.getElementById('seed-input').value=encodeSeed();
@@ -853,5 +861,6 @@ document.addEventListener('DOMContentLoaded',function(){
   run();
 });
 </script>
+
 </body>
 </html>
