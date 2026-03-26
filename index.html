@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -216,20 +216,6 @@ button.primary:active{transform:scale(.98);}
       Advanced <span class="adv-arrow">▼</span>
     </button>
     <div class="adv-body" id="adv-body">
-
-      <!-- Lefty -->
-      <div class="adv-sec">
-        <div class="adv-sec-title">Orientation</div>
-        <div class="toggle-row" style="margin-bottom:0;">
-          <span class="toggle-label">Righty</span>
-          <label class="toggle-switch">
-            <input type="checkbox" id="lefty-toggle" onchange="run()">
-            <span class="toggle-slider"></span>
-          </label>
-          <span class="toggle-label">Lefty</span>
-        </div>
-      </div>
-
       <!-- PD fine control -->
       <div class="adv-sec">
         <div class="adv-sec-title">PD Fine Control</div>
@@ -353,10 +339,20 @@ button.primary:active{transform:scale(.98);}
     <span style="color:#f59e0b;">■ Board outline</span>
     <span style="color:#86efac;">■ Nut overhang</span>
   </div>
-  <div class="dxf-area">
-    <button class="primary" onclick="exportDXF()">⬇ Export DXF</button>
-    <span class="dxf-fname" id="dxf-filename"></span>
-    <a id="dxf-link">Click to download</a>
+  <div class="dxf-area" style="flex-direction:column;align-items:flex-start;gap:8px;">
+    <div class="toggle-row" style="margin-bottom:0;">
+      <span class="toggle-label" style="font-size:12px;">Righty</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="lefty-toggle" onchange="run()">
+        <span class="toggle-slider"></span>
+      </label>
+      <span class="toggle-label" style="font-size:12px;">Lefty</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <button class="primary" onclick="exportDXF()">⬇ Export DXF</button>
+      <span class="dxf-fname" id="dxf-filename"></span>
+      <a id="dxf-link">Click to download</a>
+    </div>
   </div>
 </main>
 </div>
@@ -624,13 +620,13 @@ function buildDXF(g,lefty){
   L.push('0\nENDTAB\n0\nENDSEC\n0\nSECTION\n2\nENTITIES');
   var allNx=[],allBx=[];
   for(var ii=0;ii<nStr;ii++){allNx.push(Np(ii).x);allBx.push(Bp(ii).x);}
-  var a0=toDXF(g,Math.min.apply(null,allNx,lefty),0),b0=toDXF(g,Math.max.apply(null,allBx,lefty),0);
+  var allNx=[],allBx=[];
+  for(var ii=0;ii<nStr;ii++){allNx.push(Np(ii).x);allBx.push(Bp(ii).x);}
+  var a0=toDXF(g,Math.min.apply(null,allNx),0,lefty),b0=toDXF(g,Math.max.apply(null,allBx),0,lefty);
   L.push(dxfLine(a0.x,a0.z,b0.x,b0.z,'CENTERLINE'));
-  for(var i=0;i<nStr;i++){var an=toDXF(g,Np(i,lefty).x,Np(i).y),bn=toDXF(g,Bp(i,lefty).x,Bp(i).y);L.push(dxfLine(an.x,an.z,bn.x,bn.z,'STRING'));}
-  var aN=toDXF(g,Np(0,lefty).x,Np(0).y),bN=toDXF(g,Np(nStr-1,lefty).x,Np(nStr-1).y);L.push(dxfLine(aN.x,aN.z,bN.x,bN.z,'NUT'));
-  var aBr=toDXF(g,Bp(0,lefty).x,Bp(0).y),bBr=toDXF(g,Bp(nStr-1,lefty).x,Bp(nStr-1).y);L.push(dxfLine(aBr.x,aBr.z,bBr.x,bBr.z,'BRIDGE'));
-  for(var fn=1;fn<=nFret;fn++){var ep=fretEdgePts(fn);var af=toDXF(g,ep.ix1.x,ep.ix1.y,lefty),bf=toDXF(g,ep.ixN.x,ep.ixN.y,lefty);L.push(dxfLine(af.x,af.z,bf.x,bf.z,'FRET'));}
-  var cn1=toDXF(g,cornerNut1.x,cornerNut1.y,lefty),cnN=toDXF(g,cornerNutN.x,cornerNutN.y,lefty);
+  for(var i=0;i<nStr;i++){var an=toDXF(g,Np(i).x,Np(i).y,lefty),bn=toDXF(g,Bp(i).x,Bp(i).y,lefty);L.push(dxfLine(an.x,an.z,bn.x,bn.z,'STRING'));}
+  var aN=toDXF(g,Np(0).x,Np(0).y,lefty),bN=toDXF(g,Np(nStr-1).x,Np(nStr-1).y,lefty);L.push(dxfLine(aN.x,aN.z,bN.x,bN.z,'NUT'));
+  var aBr=toDXF(g,Bp(0).x,Bp(0).y,lefty),bBr=toDXF(g,Bp(nStr-1).x,Bp(nStr-1).y,lefty);L.push(dxfLine(aBr.x,aBr.z,bBr.x,bBr.z,'BRIDGE'));
   var ce1=toDXF(g,cornerEnd1.x,cornerEnd1.y,lefty),ceN=toDXF(g,cornerEndN.x,cornerEndN.y,lefty);
   L.push(dxfLine(cn1.x,cn1.z,ce1.x,ce1.z,'EDGE'),dxfLine(cnN.x,cnN.z,ceN.x,ceN.z,'EDGE'),dxfLine(cn1.x,cn1.z,cnN.x,cnN.z,'EDGE'),dxfLine(ce1.x,ce1.z,ceN.x,ceN.z,'EDGE'));
   var nh1=toDXF(g,nutHeadSide1.x,nutHeadSide1.y,lefty),nhN=toDXF(g,nutHeadSideN.x,nutHeadSideN.y,lefty);
