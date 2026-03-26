@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -16,17 +16,10 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{font-size:15px;}
-body{
-  background:var(--bg);color:var(--text);
-  font-family:'Barlow','DIN Condensed',sans-serif;
-  min-height:100vh;
-}
+body{background:var(--bg);color:var(--text);font-family:'Barlow','DIN Condensed',sans-serif;min-height:100vh;}
 .app{display:grid;grid-template-columns:360px 1fr;min-height:100vh;}
 @media(max-width:900px){.app{grid-template-columns:1fr;}}
-.sidebar{
-  background:var(--bg2);border-right:1px solid var(--border);
-  padding:20px 16px;overflow-y:auto;max-height:100vh;position:sticky;top:0;
-}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:20px 16px;overflow-y:auto;max-height:100vh;position:sticky;top:0;}
 @media(max-width:900px){.sidebar{max-height:none;position:static;border-right:none;border-bottom:1px solid var(--border);}}
 .logo{font-size:11px;letter-spacing:.2em;color:var(--accent1);text-transform:uppercase;margin-bottom:4px;font-weight:600;}
 .app-title{font-size:20px;font-weight:600;color:var(--text);margin-bottom:20px;line-height:1.2;letter-spacing:.02em;}
@@ -38,6 +31,8 @@ body{
 .field>label{font-size:11px;color:var(--text2);letter-spacing:.03em;font-weight:500;}
 .hint{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.5;}
 .hint span{color:var(--accent3);font-weight:600;}
+
+/* number input */
 .num-wrap{display:flex;align-items:stretch;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .15s;}
 .num-wrap:focus-within{border-color:var(--accent1);}
 .num-wrap input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;font-weight:500;padding:7px 6px 7px 9px;-moz-appearance:textfield;}
@@ -47,17 +42,49 @@ body{
 .num-btn:hover{background:var(--bg4);color:var(--text);}
 .num-btn:active{background:var(--border2);}
 .num-btn+.num-btn{border-top:1px solid var(--border);}
+
+/* readonly */
 .ro-wrap{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:7px 9px;font-size:14px;color:var(--text3);font-family:'Barlow',sans-serif;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-button.std{background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;padding:8px 12px;border-radius:var(--r);cursor:pointer;transition:background .15s,border-color .15s;}
-button.std:hover{background:var(--bg3);border-color:var(--accent1);}
-button.primary{background:var(--accent1);border:1px solid var(--accent1);color:#1a1a1a;font-family:'Barlow',sans-serif;font-size:14px;font-weight:700;padding:11px 22px;border-radius:var(--r);cursor:pointer;transition:background .15s;}
-button.primary:hover{background:#c4b5fd;}
-button.primary:active{transform:scale(.98);}
+
+/* seed section */
+.seed-wrap{display:flex;gap:6px;align-items:stretch;}
+.seed-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'Barlow',monospace,sans-serif;font-size:11px;font-weight:500;padding:7px 9px;outline:none;transition:border-color .15s;letter-spacing:.04em;}
+.seed-input:focus{border-color:var(--accent1);}
+.seed-copy{background:var(--bg4);border:1px solid var(--border2);color:var(--text2);font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;padding:0 10px;border-radius:var(--r);cursor:pointer;white-space:nowrap;transition:background .12s,color .12s;}
+.seed-copy:hover{background:var(--bg3);color:var(--text);}
+.seed-apply{background:var(--accent1);border:1px solid var(--accent1);color:#1a1a1a;font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;padding:0 10px;border-radius:var(--r);cursor:pointer;white-space:nowrap;transition:background .12s;}
+.seed-apply:hover{background:#c4b5fd;}
+.seed-err{font-size:10px;color:#f87171;margin-top:3px;min-height:14px;}
+
+/* strings warning */
+.strings-row{display:flex;align-items:center;gap:8px;}
+.strings-warn{font-size:11px;color:#f87171;font-weight:600;white-space:nowrap;}
+
+/* advanced accordion */
+.adv-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;cursor:pointer;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text2);transition:border-color .15s,color .15s;margin-bottom:0;}
+.adv-toggle:hover{border-color:var(--border2);color:var(--text);}
+.adv-toggle.open{border-color:var(--accent1);color:var(--accent1);border-bottom-left-radius:0;border-bottom-right-radius:0;}
+.adv-arrow{font-size:9px;transition:transform .2s;}
+.adv-toggle.open .adv-arrow{transform:rotate(180deg);}
+.adv-body{display:none;background:var(--bg3);border:1px solid var(--accent1);border-top:none;border-bottom-left-radius:var(--r);border-bottom-right-radius:var(--r);padding:12px;}
+.adv-body.open{display:block;}
+.adv-sec{margin-bottom:12px;}
+.adv-sec:last-child{margin-bottom:0;}
+.adv-sec-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:7px;font-weight:600;}
 .edge-wrap{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .edge-col{display:flex;flex-direction:column;gap:6px;}
 .edge-col-hd{font-size:11px;color:var(--text2);text-align:center;padding-bottom:4px;border-bottom:1px solid var(--border);font-weight:500;}
 .pd-row{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:end;}
 .pd-ref{font-size:11px;color:var(--text3);margin-top:5px;display:flex;flex-wrap:wrap;gap:0 10px;line-height:1.8;}
+
+/* buttons */
+button.std{background:var(--bg4);border:1px solid var(--border2);color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;padding:8px 12px;border-radius:var(--r);cursor:pointer;transition:background .15s,border-color .15s;}
+button.std:hover{background:var(--bg3);border-color:var(--accent1);}
+button.primary{background:var(--accent1);border:1px solid var(--accent1);color:#1a1a1a;font-family:'Barlow',sans-serif;font-size:14px;font-weight:700;padding:11px 22px;border-radius:var(--r);cursor:pointer;transition:background .15s;}
+button.primary:hover{background:#c4b5fd;}
+button.primary:active{transform:scale(.98);}
+
+/* main */
 .main{padding:20px;display:flex;flex-direction:column;gap:14px;}
 @media(max-width:600px){.main{padding:12px;}}
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
@@ -79,6 +106,26 @@ button.primary:active{transform:scale(.98);}
 .dxf-area{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .dxf-fname{font-size:12px;color:var(--text3);}
 #dxf-link{display:none;font-size:12px;color:var(--accent2);text-decoration:underline;cursor:pointer;}
+
+/* lefty toggle */
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.toggle-label{font-size:11px;color:var(--text2);font-weight:500;letter-spacing:.03em;}
+.toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle-switch input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--bg4);border:1px solid var(--border2);border-radius:12px;cursor:pointer;transition:background .2s,border-color .2s;}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:var(--text2);border-radius:50%;transition:transform .2s,background .2s;}
+.toggle-switch input:checked+.toggle-slider{background:var(--accent1);border-color:var(--accent1);}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(20px);background:#1a1a1a;}
+
+/* lefty toggle */
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.toggle-label{font-size:11px;color:var(--text2);font-weight:500;letter-spacing:.03em;}
+.toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle-switch input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--bg4);border:1px solid var(--border2);border-radius:12px;cursor:pointer;transition:background .2s,border-color .2s;}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:var(--text2);border-radius:50%;transition:transform .2s,background .2s;}
+.toggle-switch input:checked+.toggle-slider{background:var(--accent1);border-color:var(--accent1);}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(20px);background:#1a1a1a;}
 </style>
 </head>
 <body>
@@ -86,81 +133,204 @@ button.primary:active{transform:scale(.98);}
 <aside class="sidebar">
   <div class="logo">GTI / Fretboard Tools</div>
   <div class="app-title">Multiscale<br>Fretboard Generator</div>
+
+  <!-- Seed -->
+  <div class="sec">
+    <div class="sec-title">Seed</div>
+    <div class="seed-wrap">
+      <input type="text" class="seed-input" id="seed-input" placeholder="Paste seed here…" spellcheck="false">
+      <button class="seed-copy" onclick="copySeed()">Copy</button>
+      <button class="seed-apply" onclick="applySeed()">Apply</button>
+    </div>
+    <div class="seed-err" id="seed-err"></div>
+  </div>
+
+  <!-- Scale Length -->
   <div class="sec">
     <div class="sec-title">Scale Length (inch)</div>
     <div class="g4">
-      <div class="field"><label>Last String</label><div class="num-wrap"><input type="number" id="sN" value="27.0" step="0.1" min="20" max="40"><div class="num-btns"><button class="num-btn" data-target="sN" data-dir="up">▲</button><button class="num-btn" data-target="sN" data-dir="dn">▼</button></div></div></div>
+      <div class="field">
+        <label>Last String</label>
+        <div class="num-wrap">
+          <input type="number" id="sN" value="27.0" step="0.1" min="20" max="40">
+          <div class="num-btns"><button class="num-btn" data-target="sN" data-dir="up">▲</button><button class="num-btn" data-target="sN" data-dir="dn">▼</button></div>
+        </div>
+      </div>
       <div class="field"><label>→ mm</label><div class="ro-wrap" id="sNmm">—</div></div>
-      <div class="field"><label>1st String</label><div class="num-wrap"><input type="number" id="s1" value="25.5" step="0.1" min="20" max="35"><div class="num-btns"><button class="num-btn" data-target="s1" data-dir="up">▲</button><button class="num-btn" data-target="s1" data-dir="dn">▼</button></div></div></div>
+      <div class="field">
+        <label>1st String</label>
+        <div class="num-wrap">
+          <input type="number" id="s1" value="25.5" step="0.1" min="20" max="35">
+          <div class="num-btns"><button class="num-btn" data-target="s1" data-dir="up">▲</button><button class="num-btn" data-target="s1" data-dir="dn">▼</button></div>
+        </div>
+      </div>
       <div class="field"><label>→ mm</label><div class="ro-wrap" id="s1mm">—</div></div>
     </div>
   </div>
-  <div class="sec">
-    <div class="sec-title">String Spacing</div>
-    <div class="g2">
-      <div class="field">
-        <label>Bridge Spacing (mm)</label>
-        <div class="num-wrap"><input type="number" id="bpitch" value="10.5" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="bpitch" data-dir="up">▲</button><button class="num-btn" data-target="bpitch" data-dir="dn">▼</button></div></div>
-        <div class="hint">String span <span id="bw-calc">—</span> mm / Board width <span id="bw-total">—</span> mm</div>
-      </div>
-      <div class="field">
-        <label>Nut Spacing (mm)</label>
-        <div class="num-wrap"><input type="number" id="npitch" value="7.0" step="0.1" min="4" max="15"><div class="num-btns"><button class="num-btn" data-target="npitch" data-dir="up">▲</button><button class="num-btn" data-target="npitch" data-dir="dn">▼</button></div></div>
-        <div class="hint">String span <span id="nw-calc">—</span> mm / Board width <span id="nw-total">—</span> mm</div>
-      </div>
-    </div>
-  </div>
+
+  <!-- Strings & Frets -->
   <div class="sec">
     <div class="sec-title">Strings &amp; Frets</div>
     <div class="g2">
-      <div class="field"><label>No. of Strings</label><div class="num-wrap"><input type="number" id="ns" value="7" step="1" min="4" max="13"><div class="num-btns"><button class="num-btn" data-target="ns" data-dir="up">▲</button><button class="num-btn" data-target="ns" data-dir="dn">▼</button></div></div></div>
-      <div class="field"><label>No. of Frets</label><div class="num-wrap"><input type="number" id="nf" value="24" step="1" min="12" max="37"><div class="num-btns"><button class="num-btn" data-target="nf" data-dir="up">▲</button><button class="num-btn" data-target="nf" data-dir="dn">▼</button></div></div></div>
-    </div>
-  </div>
-  <div class="sec">
-    <div class="sec-title">Perpendicular Fret Distance</div>
-    <div class="g2" style="margin-bottom:7px;">
-      <div class="field"><label>P.D. Value</label><div class="num-wrap"><input type="number" id="pd" value="0.37004" step="0.001" min="0" max="1"><div class="num-btns"><button class="num-btn" data-target="pd" data-dir="up">▲</button><button class="num-btn" data-target="pd" data-dir="dn">▼</button></div></div></div>
-      <div class="field"><label>Equiv. Fret (approx)</label><div class="ro-wrap" id="pdFret">—</div></div>
-    </div>
-    <div class="pd-row">
-      <div class="field"><label>Reference Fret No.</label><div class="num-wrap"><input type="number" id="pfref" value="8" step="1" min="0" max="36"><div class="num-btns"><button class="num-btn" data-target="pfref" data-dir="up">▲</button><button class="num-btn" data-target="pfref" data-dir="dn">▼</button></div></div></div>
-      <button class="std" onclick="applyFretPD()" style="align-self:end;">→ Apply</button>
-    </div>
-    <div class="pd-ref">
-      <span>nut = 0.000</span><span>7f ≈ 0.333</span><span>12f = 0.500</span><span>17f ≈ 0.625</span><span>bridge = 1.000</span>
-    </div>
-  </div>
-  <div class="sec">
-    <div class="sec-title">Edge Overhang (mm)</div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-      <span style="font-size:11px;color:var(--text2);font-weight:500;">← End side</span>
-      <span style="font-size:11px;color:var(--text2);font-weight:500;">Nut side →</span>
-    </div>
-    <div class="edge-wrap">
-      <div class="edge-col">
-        <div class="edge-col-hd">← End</div>
-        <div class="field"><label>Bass Side</label><div class="num-wrap"><input type="number" id="eeN" value="5.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="eeN" data-dir="up">▲</button><button class="num-btn" data-target="eeN" data-dir="dn">▼</button></div></div></div>
-        <div class="field"><label>Treble Side</label><div class="num-wrap"><input type="number" id="ee1" value="4.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ee1" data-dir="up">▲</button><button class="num-btn" data-target="ee1" data-dir="dn">▼</button></div></div></div>
+      <div class="field">
+        <label>No. of Strings</label>
+        <div class="strings-row">
+          <div class="num-wrap" style="flex:1;">
+            <input type="number" id="ns" value="7" step="1" min="4">
+            <div class="num-btns"><button class="num-btn" data-target="ns" data-dir="up">▲</button><button class="num-btn" data-target="ns" data-dir="dn">▼</button></div>
+          </div>
+          <span class="strings-warn" id="ns-warn" style="display:none;">Too many strings!</span>
+        </div>
       </div>
-      <div class="edge-col">
-        <div class="edge-col-hd">Nut →</div>
-        <div class="field"><label>Bass Side</label><div class="num-wrap"><input type="number" id="neN" value="4.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="neN" data-dir="up">▲</button><button class="num-btn" data-target="neN" data-dir="dn">▼</button></div></div></div>
-        <div class="field"><label>Treble Side</label><div class="num-wrap"><input type="number" id="ne1" value="3.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ne1" data-dir="up">▲</button><button class="num-btn" data-target="ne1" data-dir="dn">▼</button></div></div></div>
+      <div class="field">
+        <label>No. of Frets</label>
+        <div class="num-wrap">
+          <input type="number" id="nf" value="24" step="1" min="12" max="37">
+          <div class="num-btns"><button class="num-btn" data-target="nf" data-dir="up">▲</button><button class="num-btn" data-target="nf" data-dir="dn">▼</button></div>
+        </div>
       </div>
     </div>
-    <div style="margin-top:8px;">
-      <div class="field" style="max-width:160px;"><label>Board End (fret no.)</label><div class="num-wrap"><input type="number" id="fb_end" value="25" step="1" min="1" max="37"><div class="num-btns"><button class="num-btn" data-target="fb_end" data-dir="up">▲</button><button class="num-btn" data-target="fb_end" data-dir="dn">▼</button></div></div></div>
-    </div>
   </div>
+
+  <!-- Multiscale PD -->
   <div class="sec">
-    <div class="sec-title">Nut Overhang</div>
-    <p style="font-size:11px;color:var(--text3);margin-bottom:7px;font-weight:500;">Edge → Nut thickness → Overhang (toward headstock)</p>
+    <div class="sec-title">Multiscale PD</div>
     <div class="g2">
-      <div class="field"><label>Nut Thickness (mm)</label><div class="num-wrap"><input type="number" id="nut_thick" value="3.0" step="0.5" min="1" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_thick" data-dir="up">▲</button><button class="num-btn" data-target="nut_thick" data-dir="dn">▼</button></div></div></div>
-      <div class="field"><label>Overhang Length (mm)</label><div class="num-wrap"><input type="number" id="nut_oh" value="8.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_oh" data-dir="up">▲</button><button class="num-btn" data-target="nut_oh" data-dir="dn">▼</button></div></div></div>
+      <div class="field">
+        <label>Perpendicular Fret</label>
+        <div class="num-wrap">
+          <input type="number" id="pd-fret" value="8.0" step="0.5" min="0" max="24">
+          <div class="num-btns"><button class="num-btn" data-target="pd-fret" data-dir="up">▲</button><button class="num-btn" data-target="pd-fret" data-dir="dn">▼</button></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>P.D. Value</label>
+        <div class="ro-wrap" id="pd-val-disp">—</div>
+      </div>
     </div>
   </div>
+
+  <!-- Advanced accordion -->
+  <div class="sec">
+    <button class="adv-toggle" id="adv-toggle" onclick="toggleAdv()">
+      Advanced <span class="adv-arrow">▼</span>
+    </button>
+    <div class="adv-body" id="adv-body">
+
+      <!-- Lefty -->
+      <div class="adv-sec">
+        <div class="adv-sec-title">Orientation</div>
+        <div class="toggle-row" style="margin-bottom:0;">
+          <span class="toggle-label">Righty</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="lefty-toggle" onchange="run()">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">Lefty</span>
+        </div>
+      </div>
+
+      <!-- PD fine control -->
+      <div class="adv-sec">
+        <div class="adv-sec-title">PD Fine Control</div>
+        <div class="pd-row">
+          <div class="field">
+            <label>P.D. Value (direct)</label>
+            <div class="num-wrap">
+              <input type="number" id="pd" value="0.37004" step="0.001" min="0" max="1">
+              <div class="num-btns"><button class="num-btn" data-target="pd" data-dir="up">▲</button><button class="num-btn" data-target="pd" data-dir="dn">▼</button></div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Equiv. Fret</label>
+            <div class="ro-wrap" id="pdFret">—</div>
+          </div>
+        </div>
+        <div class="pd-row" style="margin-top:6px;">
+          <div class="field">
+            <label>Reference Fret No.</label>
+            <div class="num-wrap">
+              <input type="number" id="pfref" value="8" step="1" min="0" max="36">
+              <div class="num-btns"><button class="num-btn" data-target="pfref" data-dir="up">▲</button><button class="num-btn" data-target="pfref" data-dir="dn">▼</button></div>
+            </div>
+          </div>
+          <button class="std" onclick="applyFretPD()" style="align-self:end;">→ Apply</button>
+        </div>
+        <div class="pd-ref">
+          <span>nut = 0.000</span><span>7f ≈ 0.333</span><span>12f = 0.500</span><span>17f ≈ 0.625</span><span>bridge = 1.000</span>
+        </div>
+      </div>
+
+      <!-- Board End -->
+      <div class="adv-sec">
+        <div class="adv-sec-title">Board End</div>
+        <div class="field" style="max-width:160px;">
+          <label>Board End (fret no.)</label>
+          <div class="num-wrap">
+            <input type="number" id="fb_end" value="25" step="1" min="1" max="37">
+            <div class="num-btns"><button class="num-btn" data-target="fb_end" data-dir="up">▲</button><button class="num-btn" data-target="fb_end" data-dir="dn">▼</button></div>
+          </div>
+        </div>
+        <div class="hint" style="margin-top:4px;">Min: Frets + 1 = <span id="fb-end-min">—</span></div>
+      </div>
+
+      <!-- String Spacing -->
+      <div class="adv-sec">
+        <div class="adv-sec-title">String Spacing</div>
+        <div class="g2">
+          <div class="field">
+            <label>Bridge Spacing (mm)</label>
+            <div class="num-wrap">
+              <input type="number" id="bpitch" value="10.5" step="0.1" min="5" max="25">
+              <div class="num-btns"><button class="num-btn" data-target="bpitch" data-dir="up">▲</button><button class="num-btn" data-target="bpitch" data-dir="dn">▼</button></div>
+            </div>
+            <div class="hint">Span <span id="bw-calc">—</span> / Total <span id="bw-total">—</span> mm</div>
+          </div>
+          <div class="field">
+            <label>Nut Spacing (mm)</label>
+            <div class="num-wrap">
+              <input type="number" id="npitch" value="7.0" step="0.1" min="4" max="15">
+              <div class="num-btns"><button class="num-btn" data-target="npitch" data-dir="up">▲</button><button class="num-btn" data-target="npitch" data-dir="dn">▼</button></div>
+            </div>
+            <div class="hint">Span <span id="nw-calc">—</span> / Total <span id="nw-total">—</span> mm</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edge Overhang -->
+      <div class="adv-sec">
+        <div class="adv-sec-title">Edge Overhang (mm)</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:11px;color:var(--text2);font-weight:500;">← End side</span>
+          <span style="font-size:11px;color:var(--text2);font-weight:500;">Nut side →</span>
+        </div>
+        <div class="edge-wrap">
+          <div class="edge-col">
+            <div class="edge-col-hd">← End</div>
+            <div class="field"><label>Bass Side</label><div class="num-wrap"><input type="number" id="eeN" value="5.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="eeN" data-dir="up">▲</button><button class="num-btn" data-target="eeN" data-dir="dn">▼</button></div></div></div>
+            <div class="field"><label>Treble Side</label><div class="num-wrap"><input type="number" id="ee1" value="4.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ee1" data-dir="up">▲</button><button class="num-btn" data-target="ee1" data-dir="dn">▼</button></div></div></div>
+          </div>
+          <div class="edge-col">
+            <div class="edge-col-hd">Nut →</div>
+            <div class="field"><label>Bass Side</label><div class="num-wrap"><input type="number" id="neN" value="4.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="neN" data-dir="up">▲</button><button class="num-btn" data-target="neN" data-dir="dn">▼</button></div></div></div>
+            <div class="field"><label>Treble Side</label><div class="num-wrap"><input type="number" id="ne1" value="3.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ne1" data-dir="up">▲</button><button class="num-btn" data-target="ne1" data-dir="dn">▼</button></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nut Overhang -->
+      <div class="adv-sec">
+        <div class="adv-sec-title">Nut Overhang</div>
+        <p style="font-size:11px;color:var(--text3);margin-bottom:7px;font-weight:500;">Edge → Nut thickness → Overhang (toward headstock)</p>
+        <div class="g2">
+          <div class="field"><label>Nut Thickness (mm)</label><div class="num-wrap"><input type="number" id="nut_thick" value="3.0" step="0.5" min="1" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_thick" data-dir="up">▲</button><button class="num-btn" data-target="nut_thick" data-dir="dn">▼</button></div></div></div>
+          <div class="field"><label>Overhang Length (mm)</label><div class="num-wrap"><input type="number" id="nut_oh" value="8.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_oh" data-dir="up">▲</button><button class="num-btn" data-target="nut_oh" data-dir="dn">▼</button></div></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </aside>
 
 <main class="main">
@@ -192,272 +362,494 @@ button.primary:active{transform:scale(.98);}
 </div>
 
 <script>
+// ── num-btn long-press ──
 (function(){
-  let _timer=null,_interval=null;
-  function step(targetId,dir){
-    const inp=document.getElementById(targetId);
-    if(!inp)return;
-    const s=parseFloat(inp.step)||1;
-    const mn=inp.min!==''?parseFloat(inp.min):-Infinity;
-    const mx=inp.max!==''?parseFloat(inp.max):Infinity;
-    let v=parseFloat(inp.value)||0;
-    const dec=(s.toString().split('.')[1]||'').length;
+  var _t=null,_iv=null;
+  function step(id,dir){
+    var inp=document.getElementById(id); if(!inp) return;
+    var s=parseFloat(inp.step)||1;
+    var mn=inp.min!==''?parseFloat(inp.min):-Infinity;
+    var mx=inp.max!==''?parseFloat(inp.max):Infinity;
+    var dec=(s.toString().split('.')[1]||'').length;
+    var v=parseFloat(inp.value)||0;
     v=dir==='up'?v+s:v-s;
     v=Math.max(mn,Math.min(mx,parseFloat(v.toFixed(dec))));
     inp.value=v;
     inp.dispatchEvent(new Event('input',{bubbles:true}));
   }
-  function getBtn(e){return e.target.closest('.num-btn');}
-  document.addEventListener('mousedown',e=>{
-    const btn=getBtn(e);if(!btn)return;
-    e.preventDefault();
-    const id=btn.dataset.target,dir=btn.dataset.dir;
+  function gb(e){return e.target.closest('.num-btn');}
+  document.addEventListener('mousedown',function(e){
+    var b=gb(e); if(!b) return; e.preventDefault();
+    var id=b.dataset.target,dir=b.dataset.dir;
     step(id,dir);
-    _timer=setTimeout(()=>{_interval=setInterval(()=>step(id,dir),60);},400);
+    _t=setTimeout(function(){_iv=setInterval(function(){step(id,dir);},60);},400);
   });
-  ['mouseup','mouseleave'].forEach(ev=>document.addEventListener(ev,()=>{clearTimeout(_timer);clearInterval(_interval);}));
-  document.addEventListener('touchstart',e=>{
-    const btn=getBtn(e);if(!btn)return;
-    e.preventDefault();
-    const id=btn.dataset.target,dir=btn.dataset.dir;
+  ['mouseup','mouseleave'].forEach(function(ev){document.addEventListener(ev,function(){clearTimeout(_t);clearInterval(_iv);});});
+  document.addEventListener('touchstart',function(e){
+    var b=gb(e); if(!b) return; e.preventDefault();
+    var id=b.dataset.target,dir=b.dataset.dir;
     step(id,dir);
-    _timer=setTimeout(()=>{_interval=setInterval(()=>step(id,dir),60);},400);
+    _t=setTimeout(function(){_iv=setInterval(function(){step(id,dir);},60);},400);
   },{passive:false});
-  ['touchend','touchcancel'].forEach(ev=>document.addEventListener(ev,()=>{clearTimeout(_timer);clearInterval(_interval);}));
+  ['touchend','touchcancel'].forEach(function(ev){document.addEventListener(ev,function(){clearTimeout(_t);clearInterval(_iv);});});
 })();
 
-const I2M=25.4,FR=n=>1-Math.pow(2,-n/12);
-const PDT=[0,0.05613,0.10910,0.15910,0.20630,0.25085,0.29289,0.33258,0.37004,0.40540,0.43877,0.47027,0.50000,0.52806,0.55455,0.57955,0.60315,0.62542,0.64645,0.66629,0.68502,0.70270,0.71938,0.73513,0.75000];
-function pdToFret(pd){if(pd<=0)return'0.000';if(pd>=1)return'∞';return(-12*Math.log2(1-pd)).toFixed(3);}
-function buildFilename(nStr,s1in,sNin,pd){const f=pdToFret(pd);return`fb${nStr}st${parseFloat(s1in.toFixed(1))}-${parseFloat(sNin.toFixed(1))}pd${f==='∞'?'bridge':f}.dxf`;}
-function applyFretPD(){
-  const n=+document.getElementById('pfref').value;
-  const nc=Math.max(0,Math.min(36,n));
-  const v=(nc<=24)?PDT[Math.round(nc)]:FR(nc);
-  document.getElementById('pd').value=v.toFixed(5);
-  document.getElementById('pd').dispatchEvent(new Event('input',{bubbles:true}));
+// ── constants ──
+var I2M=25.4;
+var FR=function(n){return 1-Math.pow(2,-n/12);};
+
+function pdToFret(pd){
+  if(pd<=0) return '0.000';
+  if(pd>=1) return '∞';
+  return (-12*Math.log2(1-pd)).toFixed(3);
 }
+function fretToPD(n){
+  if(n>=24.999) return 0.75;
+  if(n<=0) return 0;
+  return 1-Math.pow(2,-n/12);
+}
+function buildFilename(nStr,s1in,sNin,pd){
+  var f=pdToFret(pd);
+  return 'fb'+nStr+'st'+parseFloat(s1in.toFixed(1))+'-'+parseFloat(sNin.toFixed(1))+'pd'+(f==='∞'?'bridge':f)+'.dxf';
+}
+
+// ── seed encode/decode ──
+// fields: sN s1 pd-fret ns nf fb_end bpitch npitch ne1 neN ee1 eeN nut_thick nut_oh pd
+// encode: each value multiplied to integer, joined with hyphen, no decimals or dots
+// format: GTI-<sN*10>-<s1*10>-<pdfret*10>-<ns>-<nf>-<fbend>-<bpitch*10>-<npitch*10>-<ne1*10>-<neN*10>-<ee1*10>-<eeN*10>-<nutthick*10>-<nutoh*10>-<pd*100000>
+function encodeSeed(){
+  function g(id){return parseFloat(document.getElementById(id).value)||0;}
+  var parts=[
+    'GTI',
+    Math.round(g('sN')*10),
+    Math.round(g('s1')*10),
+    Math.round(g('pd-fret')*10),
+    Math.round(g('ns')),
+    Math.round(g('nf')),
+    Math.round(g('fb_end')),
+    Math.round(g('bpitch')*10),
+    Math.round(g('npitch')*10),
+    Math.round(g('ne1')*10),
+    Math.round(g('neN')*10),
+    Math.round(g('ee1')*10),
+    Math.round(g('eeN')*10),
+    Math.round(g('nut_thick')*10),
+    Math.round(g('nut_oh')*10),
+    Math.round(g('pd')*100000)
+  ];
+  return parts.join('-');
+}
+
+function decodeSeed(seed){
+  var parts=seed.trim().split('-');
+  if(parts.length!==16||parts[0]!=='GTI') return null;
+  var n=parts.slice(1).map(Number);
+  if(n.some(isNaN)) return null;
+  return{
+    sN:    n[0]/10,
+    s1:    n[1]/10,
+    pdfret:n[2]/10,
+    ns:    n[3],
+    nf:    n[4],
+    fb_end:n[5],
+    bpitch:n[6]/10,
+    npitch:n[7]/10,
+    ne1:   n[8]/10,
+    neN:   n[9]/10,
+    ee1:   n[10]/10,
+    eeN:   n[11]/10,
+    nut_thick:n[12]/10,
+    nut_oh:n[13]/10,
+    pd:    n[14]/100000
+  };
+}
+
+function copySeed(){
+  var seed=encodeSeed();
+  document.getElementById('seed-input').value=seed;
+  navigator.clipboard.writeText(seed).catch(function(){});
+  var btn=document.querySelector('.seed-copy');
+  btn.textContent='Copied!';
+  setTimeout(function(){btn.textContent='Copy';},1200);
+}
+
+function applySeed(){
+  var seed=document.getElementById('seed-input').value.trim();
+  var errEl=document.getElementById('seed-err');
+  var d=decodeSeed(seed);
+  if(!d){errEl.textContent='Invalid seed.'; return;}
+  errEl.textContent='';
+  function s(id,v){var el=document.getElementById(id); if(el){el.value=v;}}
+  s('sN',     d.sN);
+  s('s1',     d.s1);
+  s('pd-fret',d.pdfret);
+  s('ns',     d.ns);
+  s('nf',     d.nf);
+  s('fb_end', d.fb_end);
+  s('bpitch', d.bpitch);
+  s('npitch', d.npitch);
+  s('ne1',    d.ne1);
+  s('neN',    d.neN);
+  s('ee1',    d.ee1);
+  s('eeN',    d.eeN);
+  s('nut_thick',d.nut_thick);
+  s('nut_oh', d.nut_oh);
+  s('pd',     d.pd);
+  // sync fb_end tracking
+  var fbEndInp=document.getElementById('fb_end');
+  fbEndInp._isDefault=false;
+  run();
+}
+
+// ── advanced toggle ──
+function toggleAdv(){
+  document.getElementById('adv-toggle').classList.toggle('open');
+  document.getElementById('adv-body').classList.toggle('open');
+}
+
+// ── applyFretPD (advanced) ──
+function applyFretPD(){
+  var n=parseFloat(document.getElementById('pfref').value)||0;
+  n=Math.max(0,Math.min(36,n));
+  var v=FR(n);
+  _pdSource='direct';
+  document.getElementById('pd').value=v.toFixed(5);
+  run();
+}
+
+// ── geometry helpers ──
 function extendFretLine(p0,pN,d1,dN){
-  const dx=pN.x-p0.x,dy=pN.y-p0.y,L=Math.sqrt(dx*dx+dy*dy),ux=dx/L,uy=dy/L;
-  return{c1:{x:p0.x-ux*d1,y:p0.y-uy*d1},cN:{x:pN.x+ux*dN,y:pN.y+uy*dN},ux,uy};
+  var dx=pN.x-p0.x,dy=pN.y-p0.y,L=Math.sqrt(dx*dx+dy*dy),ux=dx/L,uy=dy/L;
+  return{c1:{x:p0.x-ux*d1,y:p0.y-uy*d1},cN:{x:pN.x+ux*dN,y:pN.y+uy*dN},ux:ux,uy:uy};
 }
 function lineIntersect(p1,p2,p3,p4){
-  const d1x=p2.x-p1.x,d1y=p2.y-p1.y,d2x=p4.x-p3.x,d2y=p4.y-p3.y;
-  const denom=d1x*d2y-d1y*d2x;
-  if(Math.abs(denom)<1e-10)return null;
-  const t=((p3.x-p1.x)*d2y-(p3.y-p1.y)*d2x)/denom;
+  var d1x=p2.x-p1.x,d1y=p2.y-p1.y,d2x=p4.x-p3.x,d2y=p4.y-p3.y;
+  var denom=d1x*d2y-d1y*d2x;
+  if(Math.abs(denom)<1e-10) return null;
+  var t=((p3.x-p1.x)*d2y-(p3.y-p1.y)*d2x)/denom;
   return{x:p1.x+t*d1x,y:p1.y+t*d1y};
 }
 
-let _state=null;
+var _state=null;
+var _pdSource='fret'; // 'fret' or 'direct' — tracks which PD field was last edited
+
 function calcGeometry(){
-  const s1in=+document.getElementById('s1').value||25.5;
-  const sNin=+document.getElementById('sN').value||27.0;
-  const nStr=+document.getElementById('ns').value||7;
-  const nFret=Math.min(+document.getElementById('nf').value||24,37);
-  const bpitch=+document.getElementById('bpitch').value||10.5;
-  const npitch=+document.getElementById('npitch').value||7.0;
-  const ne1=+document.getElementById('ne1').value||3.5;
-  const neN=+document.getElementById('neN').value||4.0;
-  const ee1=+document.getElementById('ee1').value||4.5;
-  const eeN=+document.getElementById('eeN').value||5.0;
-  const fbEnd=Math.min(+document.getElementById('fb_end').value||25,37);
-  const nutThick=+document.getElementById('nut_thick').value||3.0;
-  const nutOH=+document.getElementById('nut_oh').value||8.0;
-  let pd=+document.getElementById('pd').value;
+  var s1in=+document.getElementById('s1').value||25.5;
+  var sNin=+document.getElementById('sN').value||27.0;
+  var nStr=+document.getElementById('ns').value||7;
+  var nFret=Math.min(+document.getElementById('nf').value||24,37);
+  var bpitch=+document.getElementById('bpitch').value||10.5;
+  var npitch=+document.getElementById('npitch').value||7.0;
+  var ne1=+document.getElementById('ne1').value||3.5;
+  var neN=+document.getElementById('neN').value||4.0;
+  var ee1=+document.getElementById('ee1').value||4.5;
+  var eeN=+document.getElementById('eeN').value||5.0;
+  var fbEnd=Math.min(+document.getElementById('fb_end').value||25,37);
+  var nutThick=+document.getElementById('nut_thick').value||3.0;
+  var nutOH=+document.getElementById('nut_oh').value||8.0;
+  var pd=+document.getElementById('pd').value;
   pd=Math.max(0,Math.min(1,isNaN(pd)?0.37004:pd));
 
-  const brgW=bpitch*(nStr-1),nutW=npitch*(nStr-1);
+  var brgW=bpitch*(nStr-1),nutW=npitch*(nStr-1);
   document.getElementById('bw-calc').textContent=brgW.toFixed(1);
   document.getElementById('bw-total').textContent=(brgW+ee1+eeN).toFixed(1);
   document.getElementById('nw-calc').textContent=nutW.toFixed(1);
   document.getElementById('nw-total').textContent=(nutW+ne1+neN).toFixed(1);
 
-  const s1=s1in*I2M,sN=sNin*I2M;
-  const sc=i=>s1+(sN-s1)*i/(nStr-1);
-  const xShift=i=>(s1+sN)/2*pd-sc(i)*pd;
-  const Np=i=>({x:xShift(i),y:-nutW/2+nutW*i/(nStr-1)});
-  const Bp=i=>({x:sc(i)+xShift(i),y:-brgW/2+brgW*i/(nStr-1)});
-  const Sp=(i,t)=>{const n=Np(i),b=Bp(i);return{x:n.x+(b.x-n.x)*t,y:n.y+(b.y-n.y)*t};};
+  var s1=s1in*I2M,sN=sNin*I2M;
+  var sc=function(i){return s1+(sN-s1)*i/(nStr-1);};
+  var xShift=function(i){return (s1+sN)/2*pd-sc(i)*pd;};
+  var Np=function(i){return{x:xShift(i),y:-nutW/2+nutW*i/(nStr-1)};};
+  var Bp=function(i){return{x:sc(i)+xShift(i),y:-brgW/2+brgW*i/(nStr-1)};};
+  var Sp=function(i,t){var n=Np(i),b=Bp(i);return{x:n.x+(b.x-n.x)*t,y:n.y+(b.y-n.y)*t};};
 
-  const nutExt=extendFretLine(Np(0),Np(nStr-1),ne1,neN);
-  const tEnd=FR(fbEnd);
-  const endExt=extendFretLine(Sp(0,tEnd),Sp(nStr-1,tEnd),ee1,eeN);
-  const cornerNut1=nutExt.c1,cornerNutN=nutExt.cN;
-  const cornerEnd1=endExt.c1,cornerEndN=endExt.cN;
+  var nutExt=extendFretLine(Np(0),Np(nStr-1),ne1,neN);
+  var tEnd=FR(fbEnd);
+  var endExt=extendFretLine(Sp(0,tEnd),Sp(nStr-1,tEnd),ee1,eeN);
+  var cornerNut1=nutExt.c1,cornerNutN=nutExt.cN;
+  var cornerEnd1=endExt.c1,cornerEndN=endExt.cN;
 
-  const dx1=cornerNut1.x-cornerEnd1.x,dy1=cornerNut1.y-cornerEnd1.y,L1=Math.sqrt(dx1**2+dy1**2);
-  const s1ux=dx1/L1,s1uy=dy1/L1;
-  const dxN=cornerNutN.x-cornerEndN.x,dyN=cornerNutN.y-cornerEndN.y,LN=Math.sqrt(dxN**2+dyN**2);
-  const sNux=dxN/LN,sNuy=dyN/LN;
+  var dx1=cornerNut1.x-cornerEnd1.x,dy1=cornerNut1.y-cornerEnd1.y,L1=Math.sqrt(dx1*dx1+dy1*dy1);
+  var s1ux=dx1/L1,s1uy=dy1/L1;
+  var dxN=cornerNutN.x-cornerEndN.x,dyN=cornerNutN.y-cornerEndN.y,LN=Math.sqrt(dxN*dxN+dyN*dyN);
+  var sNux=dxN/LN,sNuy=dyN/LN;
 
-  // ナット厚さ：ナット線に対して垂直方向で nutThick になるよう
-  // サイド辺方向の延長量を補正する。
-  // ナット線の法線 = ナット線方向ベクトルを90度回転: (-nutExt.uy, nutExt.ux)
-  // サイド辺方向とナット法線の内積 = cos(角度)
-  // サイド辺方向に nutThick/cos だけ進むと、ナット線垂直方向の距離が nutThick になる
-  const nutNx=-nutExt.uy, nutNy=nutExt.ux;
-  const dot1=Math.abs(s1ux*nutNx+s1uy*nutNy);
-  const dotN=Math.abs(sNux*nutNx+sNuy*nutNy);
-  const nutThickAdj1=dot1>1e-6?nutThick/dot1:nutThick;
-  const nutThickAdjN=dotN>1e-6?nutThick/dotN:nutThick;
+  var nutNx=-nutExt.uy,nutNy=nutExt.ux;
+  var dot1=Math.abs(s1ux*nutNx+s1uy*nutNy);
+  var dotN=Math.abs(sNux*nutNx+sNuy*nutNy);
+  var nutThickAdj1=dot1>1e-6?nutThick/dot1:nutThick;
+  var nutThickAdjN=dotN>1e-6?nutThick/dotN:nutThick;
 
-  const nutHeadSide1={x:cornerNut1.x+s1ux*nutThickAdj1,y:cornerNut1.y+s1uy*nutThickAdj1};
-  const nutHeadSideN={x:cornerNutN.x+sNux*nutThickAdjN,y:cornerNutN.y+sNuy*nutThickAdjN};
-  const oh1={x:nutHeadSide1.x+s1ux*nutOH,y:nutHeadSide1.y+s1uy*nutOH};
-  const ohN={x:nutHeadSideN.x+sNux*nutOH,y:nutHeadSideN.y+sNuy*nutOH};
+  var nutHeadSide1={x:cornerNut1.x+s1ux*nutThickAdj1,y:cornerNut1.y+s1uy*nutThickAdj1};
+  var nutHeadSideN={x:cornerNutN.x+sNux*nutThickAdjN,y:cornerNutN.y+sNuy*nutThickAdjN};
+  var oh1={x:nutHeadSide1.x+s1ux*nutOH,y:nutHeadSide1.y+s1uy*nutOH};
+  var ohN={x:nutHeadSideN.x+sNux*nutOH,y:nutHeadSideN.y+sNuy*nutOH};
 
   function fretEdgePts(fn){
-    const t=fn===0?0:FR(fn);
-    const f0=Sp(0,t),fN=Sp(nStr-1,t);
-    const dx=fN.x-f0.x,dy=fN.y-f0.y;
-    const p1={x:f0.x-dx*10,y:f0.y-dy*10},p2={x:fN.x+dx*10,y:fN.y+dy*10};
+    var t=fn===0?0:FR(fn);
+    var f0=Sp(0,t),fN=Sp(nStr-1,t);
+    var dx=fN.x-f0.x,dy=fN.y-f0.y;
+    var p1={x:f0.x-dx*10,y:f0.y-dy*10},p2={x:fN.x+dx*10,y:fN.y+dy*10};
     return{
       ix1:lineIntersect(p1,p2,cornerNut1,cornerEnd1)||f0,
       ixN:lineIntersect(p1,p2,cornerNutN,cornerEndN)||fN
     };
   }
 
-  return{s1in,sNin,s1,sN,nStr,nFret,nutW,brgW,pd,
-    ne1,neN,ee1,eeN,fbEnd,nutThick,nutOH,
-    Np,Bp,Sp,cornerNut1,cornerNutN,cornerEnd1,cornerEndN,
-    nutHeadSide1,nutHeadSideN,oh1,ohN,fretEdgePts};
+  return{s1in:s1in,sNin:sNin,s1:s1,sN:sN,nStr:nStr,nFret:nFret,nutW:nutW,brgW:brgW,pd:pd,
+    ne1:ne1,neN:neN,ee1:ee1,eeN:eeN,fbEnd:fbEnd,nutThick:nutThick,nutOH:nutOH,
+    Np:Np,Bp:Bp,Sp:Sp,cornerNut1:cornerNut1,cornerNutN:cornerNutN,cornerEnd1:cornerEnd1,cornerEndN:cornerEndN,
+    nutHeadSide1:nutHeadSide1,nutHeadSideN:nutHeadSideN,oh1:oh1,ohN:ohN,fretEdgePts:fretEdgePts};
 }
 
-function toDXF(g,px,py){return{x:-py,z:-(px-g.Bp(0).x)};}
-function dxfLine(x1,z1,x2,z2,l){return`0\nLINE\n8\n${l}\n10\n${x1.toFixed(6)}\n20\n${z1.toFixed(6)}\n30\n0.000000\n11\n${x2.toFixed(6)}\n21\n${z2.toFixed(6)}\n31\n0.000000`;}
+function toDXF(g,px,py,lefty){
+  var x=-py;
+  if(lefty) x=py;  // flip x axis for lefty
+  return{x:x,z:-(px-g.Bp(0).x)};
+}
+function dxfLine(x1,z1,x2,z2,l){
+  return '0\nLINE\n8\n'+l+'\n10\n'+x1.toFixed(6)+'\n20\n'+z1.toFixed(6)+'\n30\n0.000000\n11\n'+x2.toFixed(6)+'\n21\n'+z2.toFixed(6)+'\n31\n0.000000';
+}
 
-function buildDXF(g){
-  const{nStr,nFret,Np,Bp,Sp,cornerNut1,cornerNutN,cornerEnd1,cornerEndN,nutHeadSide1,nutHeadSideN,oh1,ohN,fretEdgePts}=g;
-  const L=[];
+function buildDXF(g,lefty){
+  lefty=!!lefty;
+  var nStr=g.nStr,nFret=g.nFret,Np=g.Np,Bp=g.Bp,Sp=g.Sp;
+  var cornerNut1=g.cornerNut1,cornerNutN=g.cornerNutN,cornerEnd1=g.cornerEnd1,cornerEndN=g.cornerEndN;
+  var nutHeadSide1=g.nutHeadSide1,nutHeadSideN=g.nutHeadSideN,oh1=g.oh1,ohN=g.ohN,fretEdgePts=g.fretEdgePts;
+  var L=[];
   L.push('0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1009\n9\n$INSUNITS\n70\n4\n0\nENDSEC');
   L.push('0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nLAYER\n70\n7');
-  const ld=(n,c)=>`0\nLAYER\n2\n${n}\n70\n0\n62\n${c}\n6\nCONTINUOUS`;
+  var ld=function(n,c){return '0\nLAYER\n2\n'+n+'\n70\n0\n62\n'+c+'\n6\nCONTINUOUS';};
   L.push(ld('STRING',7),ld('NUT',3),ld('BRIDGE',1),ld('FRET',7),ld('CENTERLINE',8),ld('EDGE',2),ld('NUT_OH',3));
   L.push('0\nENDTAB\n0\nENDSEC\n0\nSECTION\n2\nENTITIES');
-  {const a=toDXF(g,Math.min(...Array.from({length:nStr},(_,i)=>Np(i).x)),0),b=toDXF(g,Math.max(...Array.from({length:nStr},(_,i)=>Bp(i).x)),0);L.push(dxfLine(a.x,a.z,b.x,b.z,'CENTERLINE'));}
-  for(let i=0;i<nStr;i++){const a=toDXF(g,Np(i).x,Np(i).y),b=toDXF(g,Bp(i).x,Bp(i).y);L.push(dxfLine(a.x,a.z,b.x,b.z,'STRING'));}
-  {const a=toDXF(g,Np(0).x,Np(0).y),b=toDXF(g,Np(nStr-1).x,Np(nStr-1).y);L.push(dxfLine(a.x,a.z,b.x,b.z,'NUT'));}
-  {const a=toDXF(g,Bp(0).x,Bp(0).y),b=toDXF(g,Bp(nStr-1).x,Bp(nStr-1).y);L.push(dxfLine(a.x,a.z,b.x,b.z,'BRIDGE'));}
-  for(let fn=1;fn<=nFret;fn++){const{ix1,ixN}=fretEdgePts(fn);const a=toDXF(g,ix1.x,ix1.y),b=toDXF(g,ixN.x,ixN.y);L.push(dxfLine(a.x,a.z,b.x,b.z,'FRET'));}
-  const cn1=toDXF(g,cornerNut1.x,cornerNut1.y),cnN=toDXF(g,cornerNutN.x,cornerNutN.y);
-  const ce1=toDXF(g,cornerEnd1.x,cornerEnd1.y),ceN=toDXF(g,cornerEndN.x,cornerEndN.y);
+  var allNx=[],allBx=[];
+  for(var ii=0;ii<nStr;ii++){allNx.push(Np(ii).x);allBx.push(Bp(ii).x);}
+  var a0=toDXF(g,Math.min.apply(null,allNx,lefty),0),b0=toDXF(g,Math.max.apply(null,allBx,lefty),0);
+  L.push(dxfLine(a0.x,a0.z,b0.x,b0.z,'CENTERLINE'));
+  for(var i=0;i<nStr;i++){var an=toDXF(g,Np(i,lefty).x,Np(i).y),bn=toDXF(g,Bp(i,lefty).x,Bp(i).y);L.push(dxfLine(an.x,an.z,bn.x,bn.z,'STRING'));}
+  var aN=toDXF(g,Np(0,lefty).x,Np(0).y),bN=toDXF(g,Np(nStr-1,lefty).x,Np(nStr-1).y);L.push(dxfLine(aN.x,aN.z,bN.x,bN.z,'NUT'));
+  var aBr=toDXF(g,Bp(0,lefty).x,Bp(0).y),bBr=toDXF(g,Bp(nStr-1,lefty).x,Bp(nStr-1).y);L.push(dxfLine(aBr.x,aBr.z,bBr.x,bBr.z,'BRIDGE'));
+  for(var fn=1;fn<=nFret;fn++){var ep=fretEdgePts(fn);var af=toDXF(g,ep.ix1.x,ep.ix1.y,lefty),bf=toDXF(g,ep.ixN.x,ep.ixN.y,lefty);L.push(dxfLine(af.x,af.z,bf.x,bf.z,'FRET'));}
+  var cn1=toDXF(g,cornerNut1.x,cornerNut1.y,lefty),cnN=toDXF(g,cornerNutN.x,cornerNutN.y,lefty);
+  var ce1=toDXF(g,cornerEnd1.x,cornerEnd1.y,lefty),ceN=toDXF(g,cornerEndN.x,cornerEndN.y,lefty);
   L.push(dxfLine(cn1.x,cn1.z,ce1.x,ce1.z,'EDGE'),dxfLine(cnN.x,cnN.z,ceN.x,ceN.z,'EDGE'),dxfLine(cn1.x,cn1.z,cnN.x,cnN.z,'EDGE'),dxfLine(ce1.x,ce1.z,ceN.x,ceN.z,'EDGE'));
-  const nh1=toDXF(g,nutHeadSide1.x,nutHeadSide1.y),nhN=toDXF(g,nutHeadSideN.x,nutHeadSideN.y);
-  const o1=toDXF(g,oh1.x,oh1.y),oN=toDXF(g,ohN.x,ohN.y);
+  var nh1=toDXF(g,nutHeadSide1.x,nutHeadSide1.y,lefty),nhN=toDXF(g,nutHeadSideN.x,nutHeadSideN.y,lefty);
+  var o1=toDXF(g,oh1.x,oh1.y,lefty),oN=toDXF(g,ohN.x,ohN.y,lefty);
   L.push(dxfLine(cn1.x,cn1.z,nh1.x,nh1.z,'NUT_OH'),dxfLine(cnN.x,cnN.z,nhN.x,nhN.z,'NUT_OH'),dxfLine(nh1.x,nh1.z,nhN.x,nhN.z,'NUT_OH'),dxfLine(nh1.x,nh1.z,o1.x,o1.z,'NUT_OH'),dxfLine(nhN.x,nhN.z,oN.x,oN.z,'NUT_OH'),dxfLine(o1.x,o1.z,oN.x,oN.z,'NUT_OH'));
   L.push('0\nENDSEC\n0\nEOF');
   return L.join('\n');
 }
 
 function exportDXF(){
-  const g=_state;if(!g)return;
-  const encoded='data:application/dxf;charset=utf-8,'+encodeURIComponent(buildDXF(g));
-  const link=document.getElementById('dxf-link');
+  var g=_state; if(!g) return;
+  var leftyExp=document.getElementById('lefty-toggle').checked;
+  var encoded='data:application/dxf;charset=utf-8,'+encodeURIComponent(buildDXF(g,leftyExp));
+  var link=document.getElementById('dxf-link');
   link.href=encoded;link.download=buildFilename(g.nStr,g.s1in,g.sNin,g.pd);
   link.style.display='block';link.click();
 }
 
 function run(){
-  const g=calcGeometry();_state=g;
-  const{s1in,sNin,s1,sN,nStr,nFret,pd,Np,Bp,Sp,
-    cornerNut1,cornerNutN,cornerEnd1,cornerEndN,
-    nutHeadSide1,nutHeadSideN,oh1,ohN,fretEdgePts}=g;
+  // ── PD dual-source sync ──
+  var pdFretInp=document.getElementById('pd-fret');
+  var pdInp=document.getElementById('pd');
+  if(_pdSource==='fret'){
+    var pdfv=parseFloat(pdFretInp.value);
+    if(!isNaN(pdfv)){
+      pdfv=Math.max(0,Math.min(24,pdfv));
+      pdInp.value=fretToPD(pdfv).toFixed(5);
+    }
+  } else {
+    var pdv2=parseFloat(pdInp.value);
+    if(!isNaN(pdv2) && pdv2>0 && pdv2<1){
+      var fe=-12*Math.log2(1-pdv2);
+      fe=Math.max(0,Math.min(24,fe));
+      pdFretInp.value=(Math.round(fe*2)/2).toFixed(1);
+    } else if(!isNaN(pdv2) && pdv2<=0){
+      pdFretInp.value='0.0';
+    } else if(!isNaN(pdv2) && pdv2>=1){
+      pdFretInp.value='24.0';
+    }
+  }
+
+  // ── strings warning ──
+  var nsVal=parseInt(document.getElementById('ns').value)||7;
+  var warnEl=document.getElementById('ns-warn');
+  warnEl.style.display=nsVal>13?'inline':'none';
+
+  // ── board end floor = nf+1 ──
+  var nfVal=parseInt(document.getElementById('nf').value)||24;
+  var fbEndInp=document.getElementById('fb_end');
+  var fbMin=nfVal+1;
+  document.getElementById('fb-end-min').textContent=fbMin;
+  var fbVal=parseInt(fbEndInp.value)||fbMin;
+  if(fbVal<fbMin){
+    fbEndInp.value=fbMin;
+  }
+  fbEndInp.min=fbMin;
+
+  var g=calcGeometry(); _state=g;
+  var s1in=g.s1in,sNin=g.sNin,s1=g.s1,sN=g.sN,nStr=g.nStr,nFret=g.nFret,pd=g.pd;
+  var Np=g.Np,Bp=g.Bp,Sp=g.Sp;
+  var cornerNut1=g.cornerNut1,cornerNutN=g.cornerNutN,cornerEnd1=g.cornerEnd1,cornerEndN=g.cornerEndN;
+  var nutHeadSide1=g.nutHeadSide1,nutHeadSideN=g.nutHeadSideN,oh1=g.oh1,ohN=g.ohN,fretEdgePts=g.fretEdgePts;
 
   document.getElementById('pdFret').textContent=pdToFret(pd);
+  document.getElementById('pd-val-disp').textContent=pd.toFixed(5);
   document.getElementById('s1mm').textContent=s1.toFixed(2);
   document.getElementById('sNmm').textContent=sN.toFixed(2);
   document.getElementById('dxf-filename').textContent=buildFilename(nStr,s1in,sNin,pd);
   document.getElementById('dxf-link').style.display='none';
 
-  const nAng=Math.atan2(Np(nStr-1).x-Np(0).x,Np(nStr-1).y-Np(0).y)*180/Math.PI;
-  const bAng=Math.atan2(Bp(nStr-1).x-Bp(0).x,Bp(nStr-1).y-Bp(0).y)*180/Math.PI;
+  // update seed display
+  document.getElementById('seed-input').value=encodeSeed();
+
+  var nAng=Math.atan2(Np(nStr-1).x-Np(0).x,Np(nStr-1).y-Np(0).y)*180/Math.PI;
+  var bAng=Math.atan2(Bp(nStr-1).x-Bp(0).x,Bp(nStr-1).y-Bp(0).y)*180/Math.PI;
   document.getElementById('o-na').textContent=nAng.toFixed(3);
   document.getElementById('o-ba').textContent=bAng.toFixed(3);
   document.getElementById('o-df').textContent=(sN-s1).toFixed(1);
 
-  const b0x=Bp(0).x;
-  const offs=Array.from({length:nStr},(_,i)=>(Bp(i).x-b0x).toFixed(2));
-  const tbl=document.getElementById('saddle-table');
-  let th='<tr><th>String</th>',td='<tr><td>Saddle Offset (mm)</td>';
-  for(let i=0;i<nStr;i++){th+=`<th>${i+1}</th>`;td+=`<td>${offs[i]}</td>`;}
-  tbl.innerHTML=`<thead>${th}</tr></thead><tbody>${td}</tr></tbody>`;
+  var b0x=Bp(0).x;
+  var offs=[];for(var ii=0;ii<nStr;ii++) offs.push((Bp(ii).x-b0x).toFixed(2));
+  var tbl=document.getElementById('saddle-table');
+  var th='<tr><th>String</th>',td='<tr><td>Saddle Offset (mm)</td>';
+  for(var i=0;i<nStr;i++){th+='<th>'+(i+1)+'</th>';td+='<td>'+offs[i]+'</td>';}
+  tbl.innerHTML='<thead>'+th+'</tr></thead><tbody>'+td+'</tr></tbody>';
 
-  const allPts=[];
-  for(let fn=0;fn<=nFret;fn++){const{ix1,ixN}=fretEdgePts(fn);allPts.push(ix1,ixN);}
-  for(let i=0;i<nStr;i++) allPts.push(Bp(i));
+  // ── aspect-correct drawing ──
+  var lefty=document.getElementById('lefty-toggle').checked;
+
+  var allPts=[];
+  for(var fn=0;fn<=nFret;fn++){var ep=fretEdgePts(fn);allPts.push(ep.ix1,ep.ixN);}
+  for(var si=0;si<nStr;si++) allPts.push(Bp(si));
   allPts.push(cornerNut1,cornerNutN,cornerEnd1,cornerEndN,oh1,ohN);
-  const xs=allPts.map(p=>p.x),ys=allPts.map(p=>p.y);
-  const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
-  const rx=x1-x0,ry=y1-y0;
+  var xs=allPts.map(function(p){return p.x;}),ys=allPts.map(function(p){return p.y;});
+  var x0=Math.min.apply(null,xs),x1=Math.max.apply(null,xs);
+  var y0=Math.min.apply(null,ys),y1=Math.max.apply(null,ys);
+  var rx=x1-x0,ry=y1-y0;
 
-  const PL=52,PR=40,PT=30,PB=18,DW=580;
-  const DH=Math.min(260,Math.max(70,Math.round(DW*ry/rx)));
-  const SW=DW+PL+PR,SH=DH+PT+PB;
-  const mxf=x=>PL+DW*(1-(x-x0)/rx),myf=y=>PT+DH*(1-(y-y0)/ry);
-  const sp=(i,t)=>{const p=Sp(i,t);return{x:mxf(p.x),y:myf(p.y)};};
-  const mp=p=>({x:mxf(p.x),y:myf(p.y)});
+  // uniform scale: same px/mm for x and y preserves angles/proportions
+  var canvasWrap=document.querySelector('.canvas-wrap');
+  var availW=canvasWrap?Math.max(200,canvasWrap.clientWidth-2):680;
+  var PL=52,PR=52,PT=22,PB=14;
+  var drawW=availW-PL-PR;
+  var SC=drawW/rx;           // px per mm
+  var drawH=ry*SC;
+  var SW=availW,SH=drawH+PT+PB;
 
-  const svg=document.getElementById('fsv');
-  svg.setAttribute('viewBox',`0 0 ${SW} ${SH}`);
-  const FF="font-family:'Barlow','DIN Condensed',sans-serif";
-  let o='';
+  // map raw geometry coords to SVG px
+  // x axis: nut at right (x=x1 → px=PL), bridge at left (x=x0 → px=PL+drawW)
+  var mxf=function(x){return PL+drawW*(1-(x-x0)/rx);};
+  var myf=function(y){return PT+(y1-y)*SC;};  // y-flipped: bass(large y) → top
+  var sp=function(i,t){var p=Sp(i,t);return{x:mxf(p.x),y:myf(p.y)};};
+  var mp=function(p){return{x:mxf(p.x),y:myf(p.y)};};
 
-  const cn1=mp(cornerNut1),cnN=mp(cornerNutN),ce1=mp(cornerEnd1),ceN=mp(cornerEndN);
-  [[cn1,ce1],[cnN,ceN],[cn1,cnN],[ce1,ceN]].forEach(([a,b])=>{
-    o+=`<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="#f59e0b" stroke-width="1.5"/>`;
+  var svg=document.getElementById('fsv');
+  svg.setAttribute('viewBox','0 0 '+SW.toFixed(0)+' '+SH.toFixed(0));
+  svg.setAttribute('width','100%');
+  var FF="font-family:'Barlow','DIN Condensed',sans-serif";
+  var o='';
+
+  // lefty: flip horizontally
+  if(lefty) o+='<g transform="scale(-1,1) translate(-'+SW.toFixed(0)+',0)">';
+
+  // board outline (amber)
+  var cn1=mp(cornerNut1),cnN=mp(cornerNutN),ce1=mp(cornerEnd1),ceN=mp(cornerEndN);
+  [[cn1,ce1],[cnN,ceN],[cn1,cnN],[ce1,ceN]].forEach(function(pair){
+    o+='<line x1="'+pair[0].x.toFixed(1)+'" y1="'+pair[0].y.toFixed(1)+'" x2="'+pair[1].x.toFixed(1)+'" y2="'+pair[1].y.toFixed(1)+'" stroke="#f59e0b" stroke-width="1.5"/>';
   });
 
-  const nh1=mp(nutHeadSide1),nhN=mp(nutHeadSideN),o1p=mp(oh1),oNp=mp(ohN);
-  [[cn1,nh1],[cnN,nhN],[nh1,nhN],[nh1,o1p],[nhN,oNp],[o1p,oNp]].forEach(([a,b])=>{
-    o+=`<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="#86efac" stroke-width="1.5"/>`;
+  // nut overhang (green)
+  var nh1=mp(nutHeadSide1),nhN=mp(nutHeadSideN),o1p=mp(oh1),oNp=mp(ohN);
+  [[cn1,nh1],[cnN,nhN],[nh1,nhN],[nh1,o1p],[nhN,oNp],[o1p,oNp]].forEach(function(pair){
+    o+='<line x1="'+pair[0].x.toFixed(1)+'" y1="'+pair[0].y.toFixed(1)+'" x2="'+pair[1].x.toFixed(1)+'" y2="'+pair[1].y.toFixed(1)+'" stroke="#86efac" stroke-width="1.5"/>';
   });
 
-  for(let i=0;i<nStr;i++){
-    const a=sp(i,0),b=sp(i,1);
-    o+=`<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="#374151" stroke-width="0.8"/>`;
+  // strings
+  for(var si2=0;si2<nStr;si2++){
+    var sa=sp(si2,0),sb=sp(si2,1);
+    o+='<line x1="'+sa.x.toFixed(1)+'" y1="'+sa.y.toFixed(1)+'" x2="'+sb.x.toFixed(1)+'" y2="'+sb.y.toFixed(1)+'" stroke="#374151" stroke-width="0.8"/>';
   }
 
-  o+=`<line x1="${mxf(x0).toFixed(1)}" y1="${myf(0).toFixed(1)}" x2="${mxf(x1).toFixed(1)}" y2="${myf(0).toFixed(1)}" stroke="#2d3748" stroke-width="0.6" stroke-dasharray="4,3"/>`;
+  // centerline
+  o+='<line x1="'+mxf(x0).toFixed(1)+'" y1="'+myf(0).toFixed(1)+'" x2="'+mxf(x1).toFixed(1)+'" y2="'+myf(0).toFixed(1)+'" stroke="#2d3748" stroke-width="0.6" stroke-dasharray="4,3"/>';
 
-  const showNums=new Set([0,3,5,7,9,12,15,17,19,21,24,27,29,31,33,36]);
-  for(let fn=0;fn<=nFret;fn++){
-    const{ix1,ixN}=fretEdgePts(fn);
-    const a=mp(ix1),b=mp(ixN);
-    const isNut=fn===0;
-    const col=isNut?'#d1d5db':'#374151';
-    const sw=isNut?2:0.8;
-    o+=`<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke="${col}" stroke-width="${sw}"/>`;
-    if(showNums.has(fn)){
-      const top=a.y<b.y?a:b;
-      const fc=isNut?'#9ca3af':'#4b5563';
-      o+=`<text x="${top.x.toFixed(1)}" y="${(top.y-4).toFixed(1)}" text-anchor="middle" font-size="8" fill="${fc}" ${FF}>${fn===0?'NUT':fn}</text>`;
+  // fret lines + numbers
+  var showNums=new Set([0,3,5,7,9,12,15,17,19,21,24,27,29,31,33,36]);
+  for(var fn2=0;fn2<=nFret;fn2++){
+    var ep2=fretEdgePts(fn2);
+    var fa=mp(ep2.ix1),fb=mp(ep2.ixN);
+    var isNut=fn2===0;
+    o+='<line x1="'+fa.x.toFixed(1)+'" y1="'+fa.y.toFixed(1)+'" x2="'+fb.x.toFixed(1)+'" y2="'+fb.y.toFixed(1)+'" stroke="'+(isNut?'#d1d5db':'#374151')+'" stroke-width="'+(isNut?2:0.8)+'"/>';
+    if(showNums.has(fn2)){
+      var top2=fa.y<fb.y?fa:fb;
+      // fret number label: use a nested g to counter lefty flip if needed
+      if(lefty){
+        o+='<g transform="scale(-1,1) translate(-'+SW.toFixed(0)+',0)">';
+        o+='<text x="'+(SW-top2.x).toFixed(1)+'" y="'+(top2.y-4).toFixed(1)+'" text-anchor="middle" font-size="8" fill="'+(isNut?'#9ca3af':'#4b5563')+'" '+FF+'>'+(fn2===0?'NUT':fn2)+'</text>';
+        o+='</g>';
+      } else {
+        o+='<text x="'+top2.x.toFixed(1)+'" y="'+(top2.y-4).toFixed(1)+'" text-anchor="middle" font-size="8" fill="'+(isNut?'#9ca3af':'#4b5563')+'" '+FF+'>'+(fn2===0?'NUT':fn2)+'</text>';
+      }
     }
   }
 
-  const perpPts=Array.from({length:nStr},(_,i)=>sp(i,pd));
-  let pp=`M${perpPts[0].x.toFixed(1)},${perpPts[0].y.toFixed(1)}`;
-  for(let j=1;j<nStr;j++) pp+=` L${perpPts[j].x.toFixed(1)},${perpPts[j].y.toFixed(1)}`;
-  o+=`<path d="${pp}" stroke="#a78bfa" stroke-width="1.8" fill="none"/>`;
-  const ptop=perpPts.reduce((a,b)=>a.y<b.y?a:b);
-  o+=`<text x="${ptop.x.toFixed(1)}" y="${(ptop.y-16).toFixed(1)}" text-anchor="middle" font-size="8" fill="#a78bfa" ${FF}>${pdToFret(pd)}f</text>`;
+  // perpendicular line
+  var perpPts=[];
+  for(var pi=0;pi<nStr;pi++) perpPts.push(sp(pi,pd));
+  var pp='M'+perpPts[0].x.toFixed(1)+','+perpPts[0].y.toFixed(1);
+  for(var pj=1;pj<nStr;pj++) pp+=' L'+perpPts[pj].x.toFixed(1)+','+perpPts[pj].y.toFixed(1);
+  o+='<path d="'+pp+'" stroke="#a78bfa" stroke-width="1.8" fill="none"/>';
+  var ptop=perpPts.reduce(function(a,b){return a.y<b.y?a:b;});
+  if(lefty){
+    o+='<g transform="scale(-1,1) translate(-'+SW.toFixed(0)+',0)">';
+    o+='<text x="'+(SW-ptop.x).toFixed(1)+'" y="'+(ptop.y-5).toFixed(1)+'" text-anchor="middle" font-size="8" fill="#a78bfa" '+FF+'>'+pdToFret(pd)+'f</text>';
+    o+='</g>';
+  } else {
+    o+='<text x="'+ptop.x.toFixed(1)+'" y="'+(ptop.y-5).toFixed(1)+'" text-anchor="middle" font-size="8" fill="#a78bfa" '+FF+'>'+pdToFret(pd)+'f</text>';
+  }
 
-  const bpts=Array.from({length:nStr},(_,i)=>sp(i,1));
-  let bd=`M${bpts[0].x.toFixed(1)},${bpts[0].y.toFixed(1)}`;
-  for(let j=1;j<nStr;j++) bd+=` L${bpts[j].x.toFixed(1)},${bpts[j].y.toFixed(1)}`;
-  o+=`<path d="${bd}" stroke="#38bdf8" stroke-width="2" fill="none"/>`;
-  const btop=bpts.reduce((a,b)=>a.y<b.y?a:b);
-  o+=`<text x="${btop.x.toFixed(1)}" y="${(btop.y-4).toFixed(1)}" text-anchor="middle" font-size="8" fill="#38bdf8" ${FF}>BRIDGE</text>`;
+  // bridge line
+  var bpts=[];
+  for(var bi=0;bi<nStr;bi++) bpts.push(sp(bi,1));
+  var bd='M'+bpts[0].x.toFixed(1)+','+bpts[0].y.toFixed(1);
+  for(var bj=1;bj<nStr;bj++) bd+=' L'+bpts[bj].x.toFixed(1)+','+bpts[bj].y.toFixed(1);
+  o+='<path d="'+bd+'" stroke="#38bdf8" stroke-width="2" fill="none"/>';
 
-  const loN=sp(nStr-1,0),hiN=sp(0,0);
-  o+=`<text x="${PL+DW+4}" y="${(loN.y+4).toFixed(0)}" font-size="8" fill="#4b5563" ${FF}>Bass</text>`;
-  o+=`<text x="${PL+DW+4}" y="${(hiN.y+4).toFixed(0)}" font-size="8" fill="#4b5563" ${FF}>Treble</text>`;
+  if(lefty) o+='</g>';
+
+  // Bass / Treble labels outside flip group (always readable)
+  var loN=sp(nStr-1,0),hiN=sp(0,0);
+  if(lefty){
+    // after flip: bass is at top-right visually
+    o+='<text x="'+PL.toFixed(0)+'" y="'+loN.y.toFixed(0)+'" font-size="8" fill="#4b5563" '+FF+'>Bass</text>';
+    o+='<text x="'+PL.toFixed(0)+'" y="'+hiN.y.toFixed(0)+'" font-size="8" fill="#4b5563" '+FF+'>Treble</text>';
+    // BRIDGE label
+    var btopp=bpts.reduce(function(a,b){return a.y<b.y?a:b;});
+    o+='<text x="'+(SW-btopp.x).toFixed(1)+'" y="'+(btopp.y-4).toFixed(1)+'" text-anchor="middle" font-size="8" fill="#38bdf8" '+FF+'>BRIDGE</text>';
+  } else {
+    o+='<text x="'+(PL+drawW+4).toFixed(0)+'" y="'+loN.y.toFixed(0)+'" font-size="8" fill="#4b5563" '+FF+'>Bass</text>';
+    o+='<text x="'+(PL+drawW+4).toFixed(0)+'" y="'+hiN.y.toFixed(0)+'" font-size="8" fill="#4b5563" '+FF+'>Treble</text>';
+    var btopp2=bpts.reduce(function(a,b){return a.y<b.y?a:b;});
+    o+='<text x="'+btopp2.x.toFixed(1)+'" y="'+(btopp2.y-4).toFixed(1)+'" text-anchor="middle" font-size="8" fill="#38bdf8" '+FF+'>BRIDGE</text>';
+  }
 
   svg.innerHTML=o;
 }
 
-document.querySelectorAll('.num-wrap input[type=number]').forEach(el=>el.addEventListener('input',run));
-run();
+// ── event listeners ──
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.num-wrap input[type=number]').forEach(function(el){
+    el.addEventListener('input',function(){
+      // set source flag before run
+      if(el.id==='pd') _pdSource='direct';
+      else if(el.id==='pd-fret') _pdSource='fret';
+      run();
+    });
+  });
+  run();
+});
 </script>
 </body>
 </html>
