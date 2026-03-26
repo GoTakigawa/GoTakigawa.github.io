@@ -36,7 +36,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow','DIN Condensed'
 /* number input */
 .num-wrap{display:flex;align-items:stretch;background:var(–bg3);border:1px solid var(–border);border-radius:var(–r);overflow:hidden;transition:border-color .15s;}
 .num-wrap:focus-within{border-color:var(–accent1);}
-.num-wrap input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(–text);font-family:‘Barlow’,sans-serif;font-size:14px;font-weight:500;padding:7px 6px 7px 9px;-moz-appearance:textfield;}
+.num-wrap input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(–text);-webkit-text-fill-color:var(–text);font-family:‘Barlow’,sans-serif;font-size:16px;font-weight:500;padding:7px 6px 7px 9px;-moz-appearance:textfield;}
 .num-wrap input::-webkit-inner-spin-button,.num-wrap input::-webkit-outer-spin-button{-webkit-appearance:none;}
 .num-btns{display:flex;flex-direction:column;border-left:1px solid var(–border);}
 .num-btn{flex:1;width:22px;background:transparent;border:none;color:var(–text2);font-size:8px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s,color .1s;user-select:none;padding:0;}
@@ -49,7 +49,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow','DIN Condensed'
 
 /* seed section */
 .seed-wrap{display:flex;gap:6px;align-items:stretch;}
-.seed-input{flex:1;background:var(–bg3);border:1px solid var(–border);border-radius:var(–r);color:var(–text);font-family:‘Barlow’,monospace,sans-serif;font-size:11px;font-weight:500;padding:7px 9px;outline:none;transition:border-color .15s;letter-spacing:.04em;}
+.seed-input{flex:1;background:var(–bg3);border:1px solid var(–border);border-radius:var(–r);color:var(–text);-webkit-text-fill-color:var(–text);font-family:‘Barlow’,monospace,sans-serif;font-size:11px;font-weight:500;padding:7px 9px;outline:none;transition:border-color .15s;letter-spacing:.04em;}
 .seed-input:focus{border-color:var(–accent1);}
 .seed-copy{background:var(–bg4);border:1px solid var(–border2);color:var(–text2);font-family:‘Barlow’,sans-serif;font-size:11px;font-weight:600;padding:0 10px;border-radius:var(–r);cursor:pointer;white-space:nowrap;transition:background .12s,color .12s;}
 .seed-copy:hover{background:var(–bg3);color:var(–text);}
@@ -106,7 +106,7 @@ button.primary:active{transform:scale(.98);}
 .legend{font-size:11px;color:var(–text3);display:flex;flex-wrap:wrap;gap:4px 16px;line-height:1.8;font-weight:500;}
 .dxf-area{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .dxf-fname{font-size:12px;color:var(–text3);}
-#dxf-link{display:none;font-size:12px;color:var(–accent2);text-decoration:underline;cursor:pointer;}
+#dxf-link{display:none;font-size:12px;color:var(–accent2);text-decoration:underline;cursor:pointer;word-break:break-all;margin-top:4px;}
 
 /* lefty toggle */
 .toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
@@ -658,8 +658,11 @@ function exportDXF(){
   var link=document.getElementById('dxf-link');
   link.href=encoded;
   link.download=fname;
-  link.style.display='inline';
-  link.click();
+  link.textContent=fname;
+  link.style.display='block';
+  // iOS: click() is blocked — user taps the link directly
+  var isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(/Mac/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
+  if(!isIOS) link.click();
 }
 
 function run(){
@@ -865,6 +868,6 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 
-<div id="ver">v001-g7k2</div>
+<div id="ver">v002-m4p1</div>
 </body>
 </html>
