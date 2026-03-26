@@ -640,9 +640,15 @@ function exportDXF(){
   var g=_state; if(!g) return;
   var leftyExp=document.getElementById('lefty-toggle').checked;
   var encoded='data:application/dxf;charset=utf-8,'+encodeURIComponent(buildDXF(g,leftyExp));
-  var link=document.getElementById('dxf-link');
-  link.href=encoded;link.download=buildFilename(g.nStr,g.s1in,g.sNin,g.pd);
-  link.style.display='block';link.click();
+  var fname=buildFilename(g.nStr,g.s1in,g.sNin,g.pd);
+  document.getElementById('dxf-filename').textContent=fname;
+  // create a temporary anchor and click it
+  var a=document.createElement('a');
+  a.href=encoded;
+  a.download=fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function run(){
@@ -695,7 +701,7 @@ function run(){
   document.getElementById('s1mm').textContent=s1.toFixed(2);
   document.getElementById('sNmm').textContent=sN.toFixed(2);
   document.getElementById('dxf-filename').textContent=buildFilename(nStr,s1in,sNin,pd);
-  document.getElementById('dxf-link').style.display='none';
+  // dxf-link: handled by exportDXF directly
 
   // update seed display
   document.getElementById('seed-input').value=encodeSeed();
