@@ -140,7 +140,7 @@ button.primary:active{transform:scale(.98);}
 .home-link{position:fixed;bottom:14px;left:16px;font-size:12px;color:var(--text3);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:6px;transition:color .2s;z-index:9999;}
 .home-link:hover{color:var(--accent1);}
   /* tension section */
-  .tension-sec{margin-top:24px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px;overflow-x:auto;}
+  .tension-sec{margin-top:24px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px;overflow-x:auto;min-width:0;}
   .tension-sec-title{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent1);margin-bottom:12px;font-weight:700;display:flex;align-items:center;gap:8px;}
   .tension-table{width:100%;border-collapse:collapse;font-size:14px;min-width:450px;}
   .tension-table th{text-align:left;color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:8px 4px;border-bottom:1px solid var(--border);}
@@ -163,9 +163,9 @@ button.primary:active{transform:scale(.98);}
   .dropped-badge.active{display:inline-block;}
 
   /* tension section improvements */
-  .tension-content{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start;}
+  .tension-content{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start;}
   @media(max-width:1100px){.tension-content{grid-template-columns:1fr;}}
-  .tuning-browser{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;max-height:600px;overflow-y:auto;}
+  .tuning-browser{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;max-height:600px;overflow-y:auto;min-width:260px;}
   .tuning-browser-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
   .tuning-browser-title{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent1);font-weight:700;}
   .tuning-filter-pills{display:flex;gap:4px;}
@@ -197,6 +197,24 @@ button.primary:active{transform:scale(.98);}
   .tension-table .num-wrap{width:100%;min-width:64px;height:28px;}
   .tension-table .num-wrap input{font-size:14px;padding:4px 6px;}
   .tension-table .num-wrap select{background:transparent;border:none;color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;padding:4px 6px;width:100%;outline:none;cursor:pointer;}
+  /* Fix select drop-down background */
+  .tension-table select { background: var(--bg2); color: var(--text); }
+  .tension-table select option { background: var(--bg2); color: var(--text); }
+  
+  /* Tension Chart & Summary Elements */
+  .tension-bar-wrap{height:4px;background:#1e1e1e;border-radius:2px;overflow:hidden;width:100%;margin:0 auto;max-width:40px;}
+  .tension-bar{height:100%;border-radius:2px;transition:width .35s ease,background .35s ease;}
+  .tension-gradient-legend-wrap { display:flex; flex-direction:column; align-items:center; width:100%; margin-bottom:8px; position:relative; }
+  .tension-gradient-legend { 
+    height:3px; width:100%; border-radius:2px; 
+    background: linear-gradient(to right, #94a3b8, #44aaff, #86efac, #86efac, #ffaa00, #ff6b35, #ff0000); 
+    position:relative;
+  }
+  .tension-legend-labels { display:flex; justify-content:space-between; width:100%; font-size:8px; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; font-weight:800; line-height:1; margin-bottom:10px; position:relative; }
+  .tension-legend-proper { color:#86efac; }
+  .tension-legend-marker { position:absolute; transition:left .3s ease, color .3s ease; transform:translateX(-50%); font-size:8px; line-height:1; z-index:2; }
+  .tension-legend-marker-top { top:10px; } /* points down to bar */
+  .tension-legend-marker-bottom { top:22px; } /* points up to bar */
 </style>
 </head>
 <body>
@@ -462,16 +480,49 @@ button.primary:active{transform:scale(.98);}
           </div>
           <div style="width:1px;height:16px;background:var(--border);margin:0 4px;"></div>
           <button class="std btn-drop" id="btn-drop" style="padding:4px 16px;font-size:11px;font-weight:700;min-width:80px;" onclick="toggleDrop()" data-i18n="btn-drop">Drop</button>
+          
+          <div style="width:1px;height:16px;background:var(--border);margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:6px;margin-left:4px;">
+            <select id="target-preset" style="font-size:11px;padding:2px 4px;background:var(--bg2);color:var(--text1);border:1px solid var(--border);border-radius:4px;" onchange="applyTargetPreset(this.value)">
+              <option value="custom">-- Target Preset --</option>
+              <option value="7.5|16.5">Guitar 6-str (10-46, 25.5")</option>
+              <option value="8.0|17.6">Guitar 7-str (10-59, 25.5")</option>
+              <option value="17.5|38.6">Bass 4-str (45-105, 34")</option>
+              <option value="10.0|22.0">Baritone (14-68, 27")</option>
+            </select>
+            <div style="display:flex;align-items:center;gap:4px;margin-left:4px;">
+              <span style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:600;">lb</span>
+              <input type="number" id="target-tension-lb" value="17.6" step="0.1" min="1" max="110" style="width:50px;font-size:11px;padding:3px 4px;background:var(--bg2);color:var(--text1);border:1px solid var(--border);border-radius:4px;text-align:center;" oninput="syncTargetUnits('lb')">
+              <span style="color:var(--border);margin:0 2px;">/</span>
+              <span style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:600;">kg</span>
+              <input type="number" id="target-tension" value="8.0" step="0.1" min="1" max="50" style="width:45px;font-size:11px;padding:3px 4px;background:var(--bg2);color:var(--text1);border:1px solid var(--border);border-radius:4px;text-align:center;" oninput="syncTargetUnits('kg')">
+            </div>
+          </div>
         </div>
 
         <table class="tension-table">
           <thead>
             <tr>
-              <th style="width:40px;">#</th>
-              <th style="width:100px;" data-i18n="lbl-scale">Scale (in)</th>
-              <th style="width:120px;" data-i18n="lbl-note">Note</th>
-              <th style="width:120px;" data-i18n="lbl-gauge">Gauge</th>
-              <th style="width:105px;" data-i18n="lbl-type">Type</th>
+              <th colspan="4" style="border:none;"></th>
+              <th colspan="2" style="border:none; padding-bottom:4px; vertical-align:bottom;">
+                <div class="tension-gradient-legend-wrap">
+                  <div class="tension-legend-labels">
+                    <span>LOOSE</span>
+                    <span class="tension-legend-proper">PROPER</span>
+                    <span>STIFF</span>
+                  </div>
+                  <div id="legend-marker-avg" class="tension-legend-marker tension-legend-marker-top">▼</div>
+                  <div class="tension-gradient-legend"></div>
+                  <div id="legend-marker-bal" class="tension-legend-marker tension-legend-marker-bottom">▲</div>
+                </div>
+              </th>
+            </tr>
+            <tr>
+              <th style="width:30px;">#</th>
+              <th style="width:90px;" data-i18n="lbl-scale">Scale (in)</th>
+              <th style="width:110px;" data-i18n="lbl-note">Note</th>
+              <th style="width:140px;" data-i18n="lbl-gauge">Gauge</th>
+              <th style="width:60px;text-align:center;">Bar</th>
               <th style="text-align:right;" data-i18n="lbl-tension">Tension</th>
             </tr>
           </thead>
@@ -480,12 +531,26 @@ button.primary:active{transform:scale(.98);}
           </tbody>
         </table>
 
-        <div class="tension-total">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span class="tension-total-lbl" data-i18n="lbl-total-tension">Total Tension</span>
-            <span class="tension-total-val" id="total-tension-lb">0.0</span><span class="tension-total-unit">lb</span>
-            <span style="color:var(--border);margin:0 4px;">/</span>
-            <span class="tension-total-val" id="total-tension-kg">0.00</span><span class="tension-total-unit">kg</span>
+        <div class="tension-footer" style="margin-top:12px;">
+          <div class="tension-summary-row" style="display:flex; justify-content:flex-end; align-items:center; gap:24px; padding-bottom:10px; border-bottom:1px solid var(--border);">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="tension-total-lbl" data-i18n="lbl-total-tension">TOTAL TENSION</span>
+              <span class="tension-total-val" id="total-tension-lb">0.0</span><span class="tension-total-unit">lb</span>
+              <span style="color:var(--border); margin:0 4px;">/</span>
+              <span class="tension-total-val" id="total-tension-kg">0.00</span><span class="tension-total-unit" style="margin-right:0;">kg</span>
+            </div>
+          </div>
+          <div class="tension-summary-row" style="display:flex; justify-content:flex-end; align-items:center; gap:32px; padding-top:10px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="tension-total-lbl">AVG / STRING</span>
+              <span class="tension-total-val" id="avg-tension-lb">0.0</span><span class="tension-total-unit">lb</span>
+              <span style="color:var(--border); margin:0 4px;">/</span>
+              <span class="tension-total-val" id="avg-tension-kg">0.00</span><span class="tension-total-unit">kg</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="tension-total-lbl">BALANCE</span>
+              <span class="tension-total-val" id="tension-balance">0</span><span class="tension-total-unit">%</span>
+            </div>
           </div>
         </div>
       </div>
@@ -493,7 +558,7 @@ button.primary:active{transform:scale(.98);}
       <div class="tuning-browser" id="tuning-browser">
         <div class="tuning-browser-hd">
           <span class="tuning-browser-title" data-i18n="lbl-presets">Tuning Presets</span>
-          <div class="tuning-filter-pills" id="tuning-filter-pills"></div>
+          <div class="tuning-filter-pills" id="tuning-inst-pills"></div>
         </div>
         <div id="tuning-browser-body"></div>
       </div>
@@ -537,6 +602,7 @@ button.primary:active{transform:scale(.98);}
 
 // ── constants ──
 var I2M=25.4;
+var K2L=0.45359237; // kg per lb
 var FR=function(n){return 1-Math.pow(2,-n/12);};
 
 function pdToFret(pd){
@@ -837,6 +903,20 @@ var PRESETS={
 function applyPreset(key){
   var seed=PRESETS[key]; if(!seed) return;
   document.getElementById('seed-input').value=seed;
+  
+  // Set instrument context for tension calculator
+  if (key === 'bass') {
+    if (typeof _tuningInst !== 'undefined') _tuningInst = 'bass';
+    if (typeof _tuningFilter !== 'undefined') _tuningFilter = 4;
+    if (typeof _stringSettings !== 'undefined') _stringSettings = [];
+  } else if (key === 'guitar') {
+    if (typeof _tuningInst !== 'undefined') _tuningInst = 'guitar';
+    if (typeof _tuningFilter !== 'undefined') _tuningFilter = 6;
+    if (typeof _stringSettings !== 'undefined') _stringSettings = [];
+  }
+  
+  if (typeof clearStringBuffers === 'function') clearStringBuffers();
+  
   applySeed();
 }
 
@@ -898,8 +978,11 @@ function calcGeometry(){
 
   var brgW=bpitch*(nStr-1),nutW=npitch*(nStr-1);
   var iForY = function(y, t){
-    if(nStr<=1) return 0;
     var pEff = npitch*(1-t) + bpitch*t;
+    if(nStr<=1) {
+      if(pEff === 0) return 0;
+      return y / pEff;
+    }
     var yOff = (-nutW/2)*(1-t) + (-brgW/2)*t;
     return (y - yOff) / pEff;
   };
@@ -919,8 +1002,14 @@ function calcGeometry(){
     return s1+(sN-s1)*(Math.exp(k*t)-1)/(Math.exp(k)-1);
   };
   var xShift=function(i){return (s1+sN)/2*pd-sc(i)*pd;};
-  var Np=function(i){return{x:xShift(i),y:nStr===1?0:-nutW/2+nutW*i/(nStr-1)};};
-  var Bp=function(i){return{x:sc(i)+xShift(i),y:nStr===1?0:-brgW/2+brgW*i/(nStr-1)};};
+  var Np=function(i){
+    var y = (nStr<=1) ? (i * npitch) : (-nutW/2+nutW*i/(nStr-1));
+    return {x:xShift(i), y:y};
+  };
+  var Bp=function(i){
+    var y = (nStr<=1) ? (i * bpitch) : (-brgW/2+brgW*i/(nStr-1));
+    return {x:sc(i)+xShift(i), y:y};
+  };
   var Sp=function(i,t){var n=Np(i),b=Bp(i);return{x:n.x+(b.x-n.x)*t,y:n.y+(b.y-n.y)*t};};
 
   var tEnd=FR(fbEnd);
@@ -1130,7 +1219,7 @@ function run(){
   var nsVal=parseInt(document.getElementById('ns').value)||7;
   var warnEl=document.getElementById('ns-warn');
   if(nsVal===1){warnEl.textContent='Djent!?';warnEl.style.display='inline';}
-  else if(nsVal>13){warnEl.textContent='Too many strings!';warnEl.style.display='inline';}
+  else if(nsVal>=12){warnEl.textContent='Too many strings!';warnEl.style.display='inline';}
   else{warnEl.style.display='none';}
 
   // ── board end floor = nf+1 ──
@@ -1144,7 +1233,16 @@ function run(){
   }
   fbEndInp.min=fbMin;
 
-  var g=calcGeometry(); _state=g;
+  var g=calcGeometry();
+  
+  // Clear buffers if core geometry parameters changed (other than nStr)
+  if (_state) {
+    if (g.s1in !== _state.s1in || g.sNin !== _state.sNin || g.pd !== _state.pd || g.nFret !== _state.nFret) {
+      if (typeof clearStringBuffers === 'function') clearStringBuffers();
+    }
+  }
+  
+  _state=g;
   var s1in=g.s1in,sNin=g.sNin,s1=g.s1,sN=g.sN,nStr=g.nStr,nFret=g.nFret,pd=g.pd;
   var Np=g.Np,Bp=g.Bp,Sp=g.Sp;
   var cornerNut1=g.cornerNut1,cornerNutN=g.cornerNutN,cornerEnd1=g.cornerEnd1,cornerEndN=g.cornerEndN;
@@ -1390,26 +1488,232 @@ const GAUGE_LIST = [
   {g:0.017,p:true,w:true},{g:0.018,p:true,w:true},{g:0.019,p:true,w:true},
   {g:0.020,p:true,w:true},{g:0.021,p:false,w:true},{g:0.022,p:true,w:true},
   {g:0.024,p:true,w:true},{g:0.026,p:false,w:true},{g:0.028,p:false,w:true},
-  {g:0.030,p:false,w:true},{g:0.032,p:false,w:true},{g:0.034,p:false,w:true},
+  {g:0.030,p:false,w:true},{g:0.032,p:false,w:true},{g:0.034,p:false,w:true},{g:0.035,p:false,w:true},
   {g:0.036,p:false,w:true},{g:0.038,p:false,w:true},{g:0.040,p:false,w:true},
   {g:0.042,p:false,w:true},{g:0.044,p:false,w:true},{g:0.045,p:false,w:true},
   {g:0.046,p:false,w:true},{g:0.048,p:false,w:true},{g:0.049,p:false,w:true},
-  {g:0.050,p:false,w:true},{g:0.052,p:false,w:true},{g:0.054,p:false,w:true},
+  {g:0.050,p:false,w:true},{g:0.052,p:false,w:true},{g:0.054,p:false,w:true},{g:0.055,p:false,w:true},
   {g:0.056,p:false,w:true},{g:0.058,p:false,w:true},{g:0.059,p:false,w:true},
-  {g:0.060,p:false,w:true},{g:0.062,p:false,w:true},{g:0.064,p:false,w:true},
+  {g:0.060,p:false,w:true},{g:0.062,p:false,w:true},{g:0.064,p:false,w:true},{g:0.065,p:false,w:true},
   {g:0.066,p:false,w:true},{g:0.068,p:false,w:true},{g:0.070,p:false,w:true},
-  {g:0.072,p:false,w:true},{g:0.074,p:false,w:true},{g:0.080,p:false,w:true},
+  {g:0.072,p:false,w:true},{g:0.074,p:false,w:true},{g:0.075,p:false,w:true},{g:0.080,p:false,w:true},
   {g:0.085,p:false,w:true},{g:0.090,p:false,w:true},{g:0.095,p:false,w:true},
   {g:0.100,p:false,w:true},{g:0.105,p:false,w:true},{g:0.110,p:false,w:true},
-  {g:0.115,p:false,w:true},{g:0.120,p:false,w:true},  {g:0.125,p:false,w:true},{g:0.130,p:false,w:true},{g:0.135,p:false,w:true}
+  {g:0.115,p:false,w:true},{g:0.120,p:false,w:true},{g:0.125,p:false,w:true},{g:0.130,p:false,w:true},{g:0.135,p:false,w:true},
+  {g:0.140,p:false,w:true},{g:0.145,p:false,w:true},{g:0.150,p:false,w:true},{g:0.160,p:false,w:true},{g:0.170,p:false,w:true},{g:0.175,p:false,w:true}
 ];
 
-// ── Tuning Browser (loaded from guitar_tunings.json) ──
+// ============================================================
+// Instrument Tables & Range Rules for String Increment/Decrement
+// ============================================================
+const INSTRUMENT_TABLES = {
+  guitar: {
+    reference: ["E2","A2","D3","G3","B3","E4"],
+    scaleMax: 30.0
+  },
+  bass: {
+    reference: ["E1","A1","D2","G2"],
+    scaleMin: 30.0
+  }
+};
+
+const NOTE_RANGE_RULES = {
+  guitar_6th: { min: "C2", max: "G#2" },
+  bass_4th:   { min: "C1", max: "G#1" }
+};
+
+const GAUGE_TABLES = {
+  guitar_low: {
+    7:  0.064,
+    8:  0.080,
+    9:  0.105,
+    10: 0.130,
+    11: 0.160,
+    12: 0.184
+  },
+  guitar_high: [0.036, 0.026, 0.017, 0.013, 0.010, 0.008],
+  bass_low: {
+    5: 0.130
+  },
+  bass_high: [0.036, 0.026, 0.017, 0.013, 0.010, 0.008],
+  guitar_low_longscale: {
+    7:  0.070,
+    8:  0.090,
+    9:  0.115,
+    10: 0.142,
+    11: 0.175,
+    12: 0.200
+  }
+};
+
+// Buffers for storing deleted strings
+var _deletedStringsHighBuffer = [];
+var _deletedStringsLowBuffer = [];
+
+function clearStringBuffers() {
+  _deletedStringsHighBuffer = [];
+  _deletedStringsLowBuffer = [];
+}
+
+// ============================================================
+// String Increment/Decrement Algorithm Functions
+// ============================================================
+function isNoteInRange(noteStr, rangeRule) {
+  var m = noteToMidi(noteStr);
+  if (m === null) return false;
+  var minM = noteToMidi(rangeRule.min);
+  var maxM = noteToMidi(rangeRule.max);
+  return (m >= minM && m <= maxM);
+}
+
+function matchNotes(settings, reference) {
+  var score = 0;
+  for(var i=0; i<settings.length; i++) {
+    if(reference.includes(settings[i].note)) score++;
+  }
+  return score;
+}
+
+function addOneString(settings, inst, scaleMax) {
+  var n = settings.length;
+  if (n === 0) return [{ note: 'E4', gauge: 0.010, type: 'plain' }];
+  
+  var lowestNote = settings[n - 1].note;
+  var highestNote = settings[0].note;
+  var addDir = ''; 
+  
+  if (inst === 'guitar' && isNoteInRange(lowestNote, NOTE_RANGE_RULES.guitar_6th)) {
+    addDir = (n < 6) ? 'high' : 'low';
+  } else if (inst === 'bass' && isNoteInRange(lowestNote, NOTE_RANGE_RULES.bass_4th)) {
+    addDir = (n === 4) ? 'low' : 'high';
+  } else {
+    var ref = INSTRUMENT_TABLES[inst].reference;
+    var lowestRef = ref[0];
+    var highestRef = ref[ref.length - 1];
+    var mLowest = noteToMidi(lowestNote) || 0;
+    var mHighest = noteToMidi(highestNote) || 0;
+    var mRefLow = noteToMidi(lowestRef) || 0;
+    var mRefHigh = noteToMidi(highestRef) || 0;
+    
+    if (mLowest > mRefLow) addDir = 'low';
+    else if (mHighest < mRefHigh) addDir = 'high';
+    else addDir = (inst === 'guitar') ? 'low' : 'high';
+  }
+  
+  var restored = null;
+  if (addDir === 'high' && _deletedStringsHighBuffer.length > 0) {
+    restored = _deletedStringsHighBuffer.pop();
+  } else if (addDir === 'low' && _deletedStringsLowBuffer.length > 0) {
+    restored = _deletedStringsLowBuffer.pop();
+  }
+  
+  if (restored) {
+    if (addDir === 'high') settings.unshift(restored);
+    else settings.push(restored);
+    return settings;
+  }
+  
+  var newNote = "";
+  var newGauge = 0.010;
+  var newType = 'plain';
+  
+  if (addDir === 'high') {
+    var midi = noteToMidi(highestNote) || 64;
+    newNote = midiToNote(midi + 5);
+    if (inst === 'guitar') {
+      var idx = n - 1;
+      if (idx < 0) idx = 0;
+      if (idx >= GAUGE_TABLES.guitar_high.length) idx = GAUGE_TABLES.guitar_high.length - 1;
+      newGauge = GAUGE_TABLES.guitar_high[idx];
+    } else {
+      var idx = n - 5;
+      if (idx < 0) idx = 0;
+      if (idx >= GAUGE_TABLES.bass_high.length) idx = GAUGE_TABLES.bass_high.length - 1;
+      newGauge = GAUGE_TABLES.bass_high[idx];
+    }
+  } else {
+    var midi = noteToMidi(lowestNote) || 52;
+    newNote = midiToNote(midi - 5);
+    var stringNum = n + 1;
+    if (inst === 'guitar') {
+      var table = (scaleMax >= 28.0) ? GAUGE_TABLES.guitar_low_longscale : GAUGE_TABLES.guitar_low;
+      newGauge = table[stringNum] || (table[12] + (stringNum - 12)*0.02) || 0.100;
+      // Cap at reasonable value to avoid weird errors
+      if (newGauge < 0.010) newGauge = 0.010;
+    } else {
+      newGauge = GAUGE_TABLES.bass_low[stringNum] || 0.130;
+      if (stringNum > 5) newGauge = 0.130 + (stringNum - 5)*0.025;
+    }
+  }
+  
+  var objList = typeof GAUGE_LIST !== 'undefined' ? GAUGE_LIST : [];
+  var match = objList.find(x => Math.abs(x.g - newGauge) < 0.0001);
+  if (match) {
+    newType = (match.w && !match.p) ? 'wound' : 'plain';
+  } else {
+    newType = newGauge >= 0.020 ? 'wound' : 'plain';
+  }
+  
+  var newString = { note: newNote, gauge: newGauge, type: newType };
+  if (addDir === 'high') settings.unshift(newString);
+  else settings.push(newString);
+  
+  return settings;
+}
+
+function removeOneString(settings, inst) {
+  var n = settings.length;
+  if (n <= 1) return settings;
+  
+  var removeDir = '';
+  if (inst === 'guitar') {
+    removeDir = (n >= 7) ? 'low' : 'high';
+  } else {
+    removeDir = 'high';
+  }
+  
+  if (removeDir === 'low') {
+    var removed = settings.pop();
+    _deletedStringsLowBuffer.push(removed);
+  } else {
+    var removed = settings.shift();
+    _deletedStringsHighBuffer.push(removed);
+  }
+  return settings;
+}
+
+function adjustStringSettings(oldSettings, newCount, state) {
+  if (oldSettings.length === newCount) return oldSettings;
+  var scaleMax = state ? Math.max(state.s1in, state.sNin) : 25.5;
+  var inst = 'guitar';
+  
+  if (scaleMax <= 30.0) {
+    inst = 'guitar';
+  } else if (scaleMax > 30.0) {
+    inst = 'bass';
+  } else {
+    var gScore = matchNotes(oldSettings, INSTRUMENT_TABLES.guitar.reference);
+    var bScore = matchNotes(oldSettings, INSTRUMENT_TABLES.bass.reference);
+    if (bScore > gScore) inst = 'bass';
+  }
+  
+  var settings = oldSettings.slice();
+  if (newCount > settings.length) {
+    while (settings.length < newCount) settings = addOneString(settings, inst, scaleMax);
+  } else if (newCount < settings.length) {
+    while (settings.length > newCount) settings = removeOneString(settings, inst);
+  }
+  return settings;
+}
+
+
+// ── Tuning Browser (loaded from tunings_unified.json) ──
 var _tuningData = null;
+var _tuningInst = 'guitar'; // 'guitar' or 'bass'
 var _tuningFilter = 0; // 0 = auto (match current string count)
 
 function loadTuningData() {
-  fetch('guitar_tunings.json')
+  fetch('tunings_unified.json')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       _tuningData = data;
@@ -1421,25 +1725,38 @@ function loadTuningData() {
 function renderTuningBrowser() {
   if (!_tuningData) return;
   var nStr = (_state ? _state.nStr : parseInt(document.getElementById('ns').value)) || 7;
-  var filterCount = _tuningFilter || nStr;
   
-  // Filter pills
-  var pillsEl = document.getElementById('tuning-filter-pills');
-  if (pillsEl) {
-    var counts = _tuningData.meta.string_counts;
-    var ph = '';
-    counts.forEach(function(c) {
-      var active = (c === filterCount) ? ' active' : '';
-      ph += '<div class="tuning-pill' + active + '" onclick="setTuningFilter(' + c + ')">' + c + 'str</div>';
-    });
-    pillsEl.innerHTML = ph;
+  // Auto-detect instrument from string count if filter is auto
+  // Guitar covers 1-10 strings, Bass covers 1-12 strings (with fallback generation)
+  // Keep current instrument if nStr is valid for both
+  if (!_tuningFilter) {
+    if (nStr > 10) _tuningInst = 'bass';
+    // Otherwise keep current _tuningInst (both guitar and bass support 1-10)
   }
   
-  // Filter presets
-  var filtered = _tuningData.presets.filter(function(p) { return p.string_count === filterCount; });
+  var filterCount = _tuningFilter || nStr;
+  var inst = _tuningInst;
   
+  // Instrument pills
+  var instEl = document.getElementById('tuning-inst-pills');
+  if (instEl) {
+    var ih = '';
+    ['guitar','bass'].forEach(function(t) {
+      var active = (t === inst) ? ' active' : '';
+      var label = t.charAt(0).toUpperCase() + t.slice(1);
+      ih += '<div class="tuning-pill' + active + '" onclick="setTuningInstrument(\'' + t + '\')">' + label + '</div>';
+    });
+    instEl.innerHTML = ih;
+  }
+  
+  // Filter presets by instrument AND string_count
+  var filtered = _tuningData.presets.filter(function(p) {
+    return p.instrument === inst && p.string_count === filterCount;
+  });
+  
+
   // Group by section
-  var sectionOrder = ['STD','DRP','OPN','MOD','D7G','UNQ'];
+  var sectionOrder = ['STD','DRP','OPN','MOD','D7G','EXT','UNQ'];
   var groups = {};
   filtered.forEach(function(p) {
     if (!groups[p.section]) groups[p.section] = [];
@@ -1450,41 +1767,51 @@ function renderTuningBrowser() {
   if (!bodyEl) return;
   var html = '';
   
-  sectionOrder.forEach(function(sec) {
-    if (!groups[sec]) return;
-    var desc = _tuningData.meta.sections[sec] || sec;
-    var shortDesc = desc.split('—')[0].trim();
-    html += '<div class="tuning-section">';
-    html += '<div class="tuning-section-hd" onclick="this.classList.toggle(\'collapsed\')" title="' + desc.replace(/"/g,'&quot;') + '">';
-    html += '<span class="tuning-section-arrow">▼</span> ' + sec + ' — ' + shortDesc;
-    html += '</div>';
-    html += '<div class="tuning-section-body"><div class="tuning-grid">';
-    groups[sec].forEach(function(p) {
-      var strDisplay = p.strings.slice().reverse().join(' ');
-      html += '<div class="tuning-card" data-id="' + p.id + '" onclick="applyTuningPreset(\'' + p.id + '\')">';
-      html += '<div><div class="tuning-card-name">' + p.label + '</div>';
-      if (p.aliases && p.aliases.length > 0) {
-        html += '<div class="tuning-card-alias">' + p.aliases.join(', ') + '</div>';
-      }
+  if (filtered.length === 0) {
+    html = '';
+  } else {
+    sectionOrder.forEach(function(sec) {
+      if (!groups[sec]) return;
+      var desc = _tuningData.meta.sections[sec] || sec;
+      var shortDesc = desc.split('—')[0].trim();
+      html += '<div class="tuning-section">';
+      html += '<div class="tuning-section-hd" onclick="this.classList.toggle(\'collapsed\')" title="' + desc.replace(/"/g,'&quot;') + '">';
+      html += '<span class="tuning-section-arrow">▼</span> ' + sec + ' — ' + shortDesc;
       html += '</div>';
-      html += '<div class="tuning-card-notes">' + strDisplay + '</div>';
-      if (p.notes) {
-        html += '<div class="tuning-card-info">' + p.notes + '</div>';
-      }
-      html += '</div>';
+      html += '<div class="tuning-section-body"><div class="tuning-grid">';
+      groups[sec].forEach(function(p) {
+        var strDisplay = p.strings.slice().reverse().join(' ');
+        html += '<div class="tuning-card" data-id="' + p.id + '" onclick="applyTuningPreset(\'' + p.id + '\')">';
+        html += '<div><div class="tuning-card-name">' + p.label + '</div>';
+        if (p.aliases && p.aliases.length > 0) {
+          html += '<div class="tuning-card-alias">' + p.aliases.join(', ') + '</div>';
+        }
+        html += '</div>';
+        html += '<div class="tuning-card-notes">' + strDisplay + '</div>';
+        if (p.notes) {
+          html += '<div class="tuning-card-info">' + p.notes + '</div>';
+        }
+        html += '</div>';
+      });
+      html += '</div></div></div>';
     });
-    html += '</div></div></div>';
-  });
+  }
   
   bodyEl.innerHTML = html;
   
-  // info toggle on right-click or long press
+  // info toggle on right-click
   bodyEl.querySelectorAll('.tuning-card').forEach(function(card) {
     card.addEventListener('contextmenu', function(e) {
       e.preventDefault();
       card.classList.toggle('expanded');
     });
   });
+}
+
+function setTuningInstrument(inst) {
+  _tuningInst = inst;
+  _tuningFilter = 0; // reset to auto
+  renderTuningBrowser();
 }
 
 function setTuningFilter(count) {
@@ -1509,10 +1836,6 @@ function applyTuningPreset(id) {
   
   // Wait for geometry to update, then apply notes
   setTimeout(function() {
-    // notes array is low→high, _stringSettings is also low→high (index 0 = 1st string treble... wait)
-    // Actually _stringSettings[0] = 1st string (highest), _stringSettings[nStr-1] = last string (lowest)
-    // But preset.strings[0] = lowest, preset.strings[n-1] = highest
-    // So we need to reverse
     var reversed = notes.slice().reverse();
     for (var i = 0; i < Math.min(reversed.length, _stringSettings.length); i++) {
       _stringSettings[i].note = reversed[i];
@@ -1589,24 +1912,74 @@ function calcTensionInternal(gauge, type, noteOrFreq, scaleLenInch) {
 }
 
 function getDefaultTuning(nStr) {
-  if (nStr === 4) return ['G2','D2','A1','E1']; 
-  if (nStr === 5) return ['G2','D2','A1','E1','B0']; 
-  if (nStr === 6) return ['E4','B3','G3','D3','A2','E2']; 
-  if (nStr === 7) return ['E4','B3','G3','D3','A2','E2','B1'];
-  if (nStr === 8) return ['E4','B3','G3','D3','A2','E2','B1','F#1'];
-  var res = [];
-  for(var i=0; i<nStr; i++) res.push('E4');
+  var inst = (typeof _tuningInst !== 'undefined') ? _tuningInst : 'guitar';
+  
+  if (inst === 'bass' || nStr <= 3) {
+    if (nStr === 1) return ['E1'];
+    if (nStr === 2) return ['A1', 'E1'];
+    if (nStr === 3) return ['D2', 'A1', 'E1'];
+    if (nStr === 4) return ['G2', 'D2', 'A1', 'E1'];
+    if (nStr === 5) return ['G2', 'D2', 'A1', 'E1', 'B0'];
+    if (nStr === 6) return ['C3', 'G2', 'D2', 'A1', 'E1', 'B0'];
+    if (nStr === 7) return ['C3', 'G2', 'D2', 'A1', 'E1', 'B0', 'F#0'];
+    
+    var res = ['C3', 'G2', 'D2', 'A1', 'E1', 'B0', 'F#0'];
+    var lowestMidi = noteToMidi('F#0');
+    while(res.length < nStr) {
+      lowestMidi -= 5; // perfect 4th down
+      res.push(midiToNote(lowestMidi));
+    }
+    return res;
+  }
+  
+  // Guitar defaults
+  var guitar8 = ['E4','B3','G3','D3','A2','E2','B1','F#1'];
+  if (nStr <= guitar8.length) {
+    return guitar8.slice(0, nStr);
+  }
+  
+  var res = guitar8.slice();
+  var lowestMidi = noteToMidi('F#1');
+  while (res.length < nStr) {
+    lowestMidi -= 5; // perfect 4th down
+    res.push(midiToNote(lowestMidi));
+  }
   return res;
 }
 
 function getDefaultGauges(nStr) {
-  if (nStr === 4) return [0.045, 0.065, 0.085, 0.105];
-  if (nStr === 5) return [0.045, 0.065, 0.085, 0.105, 0.135];
-  if (nStr === 6) return [0.010, 0.013, 0.017, 0.026, 0.036, 0.046];
-  if (nStr === 7) return [0.010, 0.013, 0.017, 0.026, 0.036, 0.046, 0.059];
-  if (nStr === 8) return [0.010, 0.013, 0.017, 0.026, 0.036, 0.046, 0.059, 0.080];
-  var res = [];
-  for(var i=0; i<nStr; i++) res.push(0.010);
+  var inst = (typeof _tuningInst !== 'undefined') ? _tuningInst : 'guitar';
+  
+  if (inst === 'bass' || nStr <= 3) {
+    if (nStr === 1) return [0.105];
+    if (nStr === 2) return [0.085, 0.105];
+    if (nStr === 3) return [0.065, 0.085, 0.105];
+    if (nStr === 4) return [0.045, 0.065, 0.085, 0.105];
+    if (nStr === 5) return [0.045, 0.065, 0.085, 0.105, 0.130];
+    if (nStr === 6) return [0.032, 0.045, 0.065, 0.085, 0.105, 0.130];
+    if (nStr === 7) return [0.032, 0.045, 0.065, 0.085, 0.105, 0.130, 0.160];
+    
+    var res = [0.032, 0.045, 0.065, 0.085, 0.105, 0.130, 0.160];
+    var heaviest = 0.160;
+    while(res.length < nStr) {
+      heaviest += 0.015;
+      res.push(Math.round(heaviest * 1000) / 1000);
+    }
+    return res;
+  }
+  
+  // Guitar defaults
+  var guitarGauges = [0.010, 0.013, 0.017, 0.026, 0.036, 0.046, 0.059, 0.074, 0.085, 0.095, 0.105, 0.120, 0.135];
+  if (nStr <= guitarGauges.length) {
+    return guitarGauges.slice(0, nStr);
+  }
+  
+  var res = guitarGauges.slice();
+  var heaviest = res[res.length - 1] || 0.130;
+  while (res.length < nStr) {
+    heaviest += 0.010;
+    res.push(Math.round(heaviest * 1000) / 1000);
+  }
   return res;
 }
 
@@ -1614,6 +1987,7 @@ function updateStringSetting(i, key, val) {
   if (_stringSettings[i]) {
     _stringSettings[i][key] = val;
     runTensionCalc();
+    if (typeof clearStringBuffers === 'function') clearStringBuffers();
   }
 }
 
@@ -1623,6 +1997,7 @@ function shiftNote(i, delta) {
   if (midi !== null) {
     s.note = midiToNote(midi + delta);
     updateTensionRows();
+    if (typeof clearStringBuffers === 'function') clearStringBuffers();
   }
 }
 
@@ -1632,8 +2007,17 @@ function stepGauge(i, dir) {
   if (idx === -1) return;
   var nextIdx = idx + dir;
   if (nextIdx >= 0 && nextIdx < GAUGE_LIST.length) {
-    updateGaugeSetting(i, GAUGE_LIST[nextIdx].g);
+    s.gauge = GAUGE_LIST[nextIdx].g;
     updateTensionRows();
+    if (typeof clearStringBuffers === 'function') clearStringBuffers();
+  }
+}
+
+function updateGaugeSetting(i, val) {
+  if (_stringSettings[i]) {
+    _stringSettings[i].gauge = parseFloat(val);
+    updateTensionRows();
+    if (typeof clearStringBuffers === 'function') clearStringBuffers();
   }
 }
 
@@ -1663,24 +2047,38 @@ function toggleDrop() {
 function updateTensionRows() {
   var nStr = (_state ? _state.nStr : 0) || 0;
   if (nStr === 0) return;
-  var tun = getDefaultTuning(nStr);
-  var ggs = getDefaultGauges(nStr);
   
-  var newSettings = [];
-  for(var i=0; i<nStr; i++) {
-    if (_stringSettings[i]) {
-      newSettings.push(_stringSettings[i]);
+  if (_stringSettings.length === 0) {
+    // Initialization with 7-string Drop G by default
+    if (nStr === 7) {
+      _stringSettings = [
+        { note: 'D4', gauge: 0.010, type: 'plain' },
+        { note: 'A3', gauge: 0.013, type: 'plain' },
+        { note: 'F3', gauge: 0.017, type: 'plain' },
+        { note: 'C3', gauge: 0.026, type: 'wound' },
+        { note: 'G2', gauge: 0.036, type: 'wound' },
+        { note: 'D2', gauge: 0.046, type: 'wound' },
+        { note: 'G1', gauge: 0.064, type: 'wound' }
+      ];
     } else {
-      var gVal = ggs[i] || 0.010;
-      var gMatch = GAUGE_LIST.find(x => Math.abs(x.g - gVal) < 0.0001) || GAUGE_LIST[5];
-      newSettings.push({ 
-        note: tun[i] || 'E4', 
-        gauge: gMatch.g, 
-        type: (gMatch.w && !gMatch.p) ? 'wound' : 'plain'
-      });
+      var tun = getDefaultTuning(nStr);
+      var ggs = getDefaultGauges(nStr);
+      var newSettings = [];
+      for(var i=0; i<nStr; i++) {
+        var gVal = ggs[i] || 0.010;
+        var gMatch = GAUGE_LIST.find(x => Math.abs(x.g - gVal) < 0.0001) || GAUGE_LIST[5];
+        newSettings.push({ 
+          note: tun[i] || 'E4', 
+          gauge: gMatch.g, 
+          type: (gMatch.w && !gMatch.p) ? 'wound' : 'plain'
+        });
+      }
+      _stringSettings = newSettings;
     }
+  } else if (_stringSettings.length !== nStr) {
+    // Apply increment/decrement algorithm
+    _stringSettings = adjustStringSettings(_stringSettings, nStr, _state);
   }
-  _stringSettings = newSettings;
 
   var body = document.getElementById('tension-body');
   if (!body) return;
@@ -1693,13 +2091,24 @@ function updateTensionRows() {
     html += '<td style="color:var(--text3);font-weight:600;">' + si + '</td>';
     html += '<td class="ro-val" id="t-sc-' + i + '">—</td>';
     html += '<td><div class="num-wrap"><input type="text" value="' + s.note + '" oninput="updateStringSetting(' + i + ', \'note\', this.value)" spellcheck="false"><div class="num-btns"><button class="num-btn" onclick="shiftNote(' + i + ',1)">▲</button><button class="num-btn" onclick="shiftNote(' + i + ',-1)">▼</button></div></div></td>';
-    html += '<td><div class="num-wrap"><select onchange="updateGaugeSetting(' + i + ', this.value)">';
+    html += '<td><div class="num-wrap"><select onchange="updateGaugeWithType(this.value, ' + i + ')">';
     GAUGE_LIST.forEach(g => {
-      var sel = (Math.abs(g.g - s.gauge) < 0.0001) ? ' selected' : '';
-      html += '<option value="' + g.g + '"' + sel + '>' + g.g.toFixed(3).replace(/^0/,'') + '</option>';
+      // Determine if this exact gauge+type is selected
+      var isWound = g.w && !g.p; // heuristic for simple cases, but we need to match current s.type
+      // Actually GAUGE_LIST items have p/w flags. We show both if available.
+      if (g.p) {
+        var valP = g.g + "|plain";
+        var selP = (Math.abs(g.g - s.gauge) < 0.0001 && s.type === 'plain') ? ' selected' : '';
+        html += '<option value="' + valP + '"' + selP + '>' + g.g.toFixed(3).replace(/^0/,'') + 'p</option>';
+      }
+      if (g.w) {
+        var valW = g.g + "|wound";
+        var selW = (Math.abs(g.g - s.gauge) < 0.0001 && s.type === 'wound') ? ' selected' : '';
+        html += '<option value="' + valW + '"' + selW + '>' + g.g.toFixed(3).replace(/^0/,'') + 'w</option>';
+      }
     });
     html += '</select><div class="num-btns"><button class="num-btn" onclick="stepGauge(' + i + ',1)">▲</button><button class="num-btn" onclick="stepGauge(' + i + ',-1)">▼</button></div></div></td>';
-    html += '<td><select onchange="updateStringSetting(' + i + ', \'type\', this.value)" id="t-type-' + i + '"></select></td>';
+    html += '<td style="vertical-align:middle;padding:0 8px;"><div class="tension-bar-wrap"><div class="tension-bar" id="t-bar-' + i + '" style="width:0%;"></div></div></td>';
     html += '<td style="text-align:right;" class="ro-val" id="t-res-' + i + '">—</td>';
     html += '</tr>';
   }
@@ -1727,10 +2136,10 @@ function syncTypeOptions(i) {
   else if (s.type === 'wound' && !gMatch.w) s.type = 'plain';
 }
 
-function updateGaugeSetting(i, val) {
-  var gVal = parseFloat(val);
-  _stringSettings[i].gauge = gVal;
-  syncTypeOptions(i);
+function updateGaugeWithType(val, i) {
+  var parts = val.split('|');
+  _stringSettings[i].gauge = parseFloat(parts[0]);
+  _stringSettings[i].type = parts[1];
   runTensionCalc();
 }
 
@@ -1741,31 +2150,180 @@ function updateStringSetting(i, key, val) {
   }
 }
 
+function syncTargetUnits(src) {
+  var elKg = document.getElementById('target-tension');
+  var elLb = document.getElementById('target-tension-lb');
+  var elPre = document.getElementById('target-preset');
+  if(!elKg || !elLb) return;
+
+  if (src === 'kg') {
+    var kg = parseFloat(elKg.value) || 0;
+    elLb.value = (kg / K2L).toFixed(1);
+  } else {
+    var lb = parseFloat(elLb.value) || 0;
+    elKg.value = (lb * K2L).toFixed(1);
+  }
+  if(elPre) elPre.value = 'custom';
+  runTensionCalc();
+}
+
+function applyTargetPreset(val) {
+  if (val === 'custom') return;
+  var parts = val.split('|');
+  var elKg = document.getElementById('target-tension');
+  var elLb = document.getElementById('target-tension-lb');
+  if(elKg) elKg.value = parts[0];
+  if(elLb) elLb.value = parts[1];
+  runTensionCalc();
+}
+
+function getTensionContext() {
+  // Use manual target tension value from input
+  var el = document.getElementById('target-tension');
+  var center = el ? parseFloat(el.value) : 8.0;
+  if (isNaN(center) || center <= 0) center = 8.0;
+  return { center: center, max: center * 2 };
+}
+
+function getInterpolatedColor(v, stops) {
+  if (v <= stops[0].v) return stops[0].c;
+  if (v >= stops[stops.length-1].v) return stops[stops.length-1].c;
+  for (var i=0; i<stops.length-1; i++) {
+    var s1 = stops[i], s2 = stops[i+1];
+    if (v >= s1.v && v <= s2.v) {
+      var f = (v - s1.v) / (s2.v - s1.v);
+      var c1 = s1.c, c2 = s2.c;
+      var r1 = parseInt(c1.slice(1,3),16), g1 = parseInt(c1.slice(3,5),16), b1 = parseInt(c1.slice(5,7),16);
+      var r2 = parseInt(c2.slice(1,3),16), g2 = parseInt(c2.slice(3,5),16), b2 = parseInt(c2.slice(5,7),16);
+      var r = Math.round(r1 + (r2-r1)*f), g = Math.round(g1 + (g2-g1)*f), b = Math.round(b1 + (b2-b1)*f);
+      return 'rgb(' + r + ',' + g + ',' + b + ')';
+    }
+  }
+  return stops[0].c;
+}
+
+function getTensionColor(kg, ctx) {
+  var c = ctx.center, m = ctx.max;
+  // Dynamic color stops mapped to context
+  var stops = [
+    { v: 0, c: '#94a3b8' },      // Weak
+    { v: c * 0.5, c: '#44aaff' }, // Low
+    { v: c, c: '#86efac' },       // Proper (Center)
+    { v: c * 1.5, c: '#ffaa00' }, // High
+    { v: m, c: '#ff0000' }        // Extreme
+  ];
+  return getInterpolatedColor(kg, stops);
+}
+
 function runTensionCalc() {
   if (!_state) return;
+  
+  // Manual Target Context
+  var ctx = getTensionContext();
+  
+  // Update Legend Gradient dynamically (Redraw if center changes)
+  var legBar = document.querySelector('.tension-gradient-legend');
+  if (legBar) {
+    var c1 = '#94a3b8', c2 = '#44aaff', c3 = '#86efac', c4 = '#ffaa00', c5 = '#ff0000';
+    legBar.style.background = 'linear-gradient(to right, '+c1+', '+c2+' 25%, '+c3+' 50%, '+c4+' 75%, '+c5+')';
+  }
+
   var totalLb = 0, totalKg = 0;
+  
+  // First pass: calculate results and find maxKgf
+  var results = [];
+  var localMaxKgf = 0;
   for (var i=0; i<_state.nStr; i++) {
     var s = _stringSettings[i];
-    if (!s) continue;
+    if (!s) { results.push(null); continue; }
     var sc_mm = _state.sc(i);
     var sc_in = sc_mm / I2M;
     var elSc = document.getElementById('t-sc-' + i);
     if (elSc) elSc.textContent = sc_in.toFixed(2);
     
     var res = calcTensionInternal(s.gauge, s.type, s.note, sc_in);
+    results.push(res);
+    if (res && res.kg > localMaxKgf) localMaxKgf = res.kg;
+  }
+  
+  // Second pass: Update UI (Bars, labels, colors)
+  var validCount = 0;
+  var minKgf = Infinity, currentMaxKgf = -Infinity;
+  for (var i=0; i<_state.nStr; i++) {
+    var s = _stringSettings[i];
+    var res = results[i];
     var elRes = document.getElementById('t-res-' + i);
+    var elBar = document.getElementById('t-bar-' + i);
+    
     if (res && elRes) {
-      elRes.innerHTML = res.lb.toFixed(1) + '<span style="font-size:10px;margin-left:2px;color:var(--text3);">lb</span> / ' + res.kg.toFixed(2) + '<span style="font-size:10px;margin-left:2px;color:var(--text3);">kg</span>';
+      var col = getTensionColor(res.kg, ctx);
+      elRes.innerHTML = '<span style="color:' + col + ';">' + res.lb.toFixed(1) + '</span><span style="font-size:10px;margin-left:2px;color:var(--text3);">lb</span> / <span style="color:' + col + ';">' + res.kg.toFixed(2) + '</span><span style="font-size:10px;margin-left:2px;color:var(--text3);">kg</span>';
+      if (elBar) {
+        // Horizontal bar uses relative width based on max in set
+        var pct = localMaxKgf > 0 ? Math.min(res.kg / (localMaxKgf * 1.15) * 100, 100) : 0;
+        elBar.style.width = pct + '%';
+        elBar.style.background = col;
+      }
       totalLb += res.lb;
       totalKg += res.kg;
-    } else if (elRes) {
-      elRes.textContent = '—';
+      validCount++;
+      if (res.kg < minKgf) minKgf = res.kg;
+      if (res.kg > currentMaxKgf) currentMaxKgf = res.kg;
+    } else {
+      if (elRes) elRes.textContent = '—';
+      if (elBar) { elBar.style.width = '0%'; elBar.style.background = 'transparent'; }
     }
   }
+  
   var tlb = document.getElementById('total-tension-lb');
   var tkg = document.getElementById('total-tension-kg');
-  if(tlb) tlb.textContent = totalLb.toFixed(1);
-  if(tkg) tkg.textContent = totalKg.toFixed(2);
+  
+  // Update Avg and Balance inline
+  var avgElLb = document.getElementById('avg-tension-lb');
+  var avgElKg = document.getElementById('avg-tension-kg');
+  var balEl = document.getElementById('tension-balance');
+  
+  var avgKg = validCount > 0 ? (totalKg / validCount) : 0;
+  var avgLb = validCount > 0 ? (totalLb / validCount) : 0;
+  var bal = avgKg > 0 ? Math.max(0, (1 - (currentMaxKgf - minKgf) / avgKg) * 100) : 0;
+  
+  // Balance indicator mapping: 100% is Center (Good), 0% is Right (Bad)
+  var balColStops = [
+    { v: 15, c: '#ff0000' },
+    { v: 40, c: '#ff6b35' },
+    { v: 65, c: '#ffaa00' },
+    { v: 85, c: '#86efac' },
+    { v: 100, c: '#86efac' }
+  ];
+  var balCol = getInterpolatedColor(bal, balColStops);
+  var avgCol = getTensionColor(avgKg, ctx);
+
+  if(tlb) { tlb.textContent = totalLb.toFixed(1); tlb.style.color = avgCol; }
+  if(tkg) { tkg.textContent = totalKg.toFixed(2); tkg.style.color = avgCol; }
+  
+  if(avgElLb) { avgElLb.textContent = avgLb.toFixed(1); avgElLb.style.color = avgCol; }
+  if(avgElKg) { avgElKg.textContent = avgKg.toFixed(2); avgElKg.style.color = avgCol; }
+  
+  if(balEl) {
+    balEl.textContent = bal.toFixed(0);
+    balEl.style.color = balCol;
+  }
+
+  // Update legend markers
+  var mAvg = document.getElementById('legend-marker-avg');
+  var mBal = document.getElementById('legend-marker-bal');
+  if(mAvg) {
+    // Map avgKg (1.5 - 19.0) to 0 - 100%
+    var avgPct = Math.max(0, Math.min(100, (avgKg - 1.5) / (19.0 - 1.5) * 100));
+    mAvg.style.left = avgPct + '%';
+    mAvg.style.color = avgCol;
+  }
+  if(mBal) {
+    // Map Balance: 100% -> Center (50%), 0% -> Right (100%)
+    var balPct = Math.max(0, Math.min(100, 50 + (100 - bal) * 0.5));
+    mBal.style.left = balPct + '%';
+    mBal.style.color = balCol;
+  }
   
   checkDropStatus();
 }
