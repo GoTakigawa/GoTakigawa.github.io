@@ -15,7 +15,7 @@
   --r:6px;--r2:10px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html{font-size:15px;}
+html{font-size:16px;}
 body{background:var(--bg);color:var(--text);font-family:'Barlow','DIN Condensed',sans-serif;min-height:100vh;}
 .app{display:grid;grid-template-columns:360px 1fr;min-height:100vh;}
 @media(max-width:900px){.app{grid-template-columns:1fr;}}
@@ -139,6 +139,64 @@ button.primary:active{transform:scale(.98);}
 #ver{position:fixed;bottom:10px;right:12px;font-size:10px;font-family:'Barlow',monospace,sans-serif;color:var(--text3);letter-spacing:.08em;pointer-events:none;user-select:none;z-index:9999;}
 .home-link{position:fixed;bottom:14px;left:16px;font-size:12px;color:var(--text3);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:6px;transition:color .2s;z-index:9999;}
 .home-link:hover{color:var(--accent1);}
+  /* tension section */
+  .tension-sec{margin-top:24px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px;overflow-x:auto;}
+  .tension-sec-title{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent1);margin-bottom:12px;font-weight:700;display:flex;align-items:center;gap:8px;}
+  .tension-table{width:100%;border-collapse:collapse;font-size:14px;min-width:450px;}
+  .tension-table th{text-align:left;color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:8px 4px;border-bottom:1px solid var(--border);}
+  .tension-table td{padding:8px 4px;border-bottom:1px solid var(--bg3);}
+  .tension-table tr:last-child td{border-bottom:none;}
+  .tension-table input,.tension-table select{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;padding:4px 6px;border-radius:4px;outline:none;width:100%;transition:border-color .15s;}
+  .tension-table input:focus{border-color:var(--accent1);}
+  .tension-table .ro-val{font-family:'Barlow',monospace;color:var(--text2);font-weight:500;}
+  .tension-total{margin-top:14px;padding-top:12px;border-top:2px solid var(--border);display:flex;justify-content:flex-end;gap:20px;align-items:center;}
+  .tension-total-lbl{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:600;}
+  .tension-total-val{font-size:20px;font-weight:700;color:var(--accent3);}
+  .tension-total-unit{font-size:12px;color:var(--text3);margin-left:2px;}
+  .tension-ctrls{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+  .tiny-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:9px;padding:2px 4px;border-radius:3px;cursor:pointer;transition:all .1s;user-select:none;display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;}
+  .tiny-btn:hover{background:var(--bg4);border-color:var(--accent1);color:var(--text);}
+  .tiny-btn:active{transform:translateY(1px);}
+  .btn-group{display:flex;flex-direction:column;gap:1px;}
+  .flex-row{display:flex;align-items:center;gap:6px;}
+  .dropped-badge{font-size:10px;font-weight:700;color:#1a1a1a;background:var(--accent2);padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.05em;display:none;}
+  .dropped-badge.active{display:inline-block;}
+
+  /* tension section improvements */
+  .tension-content{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start;}
+  @media(max-width:1100px){.tension-content{grid-template-columns:1fr;}}
+  .tuning-browser{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;max-height:600px;overflow-y:auto;}
+  .tuning-browser-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .tuning-browser-title{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent1);font-weight:700;}
+  .tuning-filter-pills{display:flex;gap:4px;}
+  .tuning-pill{font-size:11px;font-weight:600;padding:4px 12px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text3);cursor:pointer;transition:all .15s;user-select:none;}
+  .tuning-pill:hover{border-color:var(--accent1);color:var(--text);}
+  .tuning-pill.active{background:var(--accent1);border-color:var(--accent1);color:#1a1a1a;}
+  .tuning-section{margin-bottom:12px;}
+  .tuning-section:last-child{margin-bottom:0;}
+  .tuning-section-hd{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);font-weight:700;padding:6px 0 4px;border-bottom:1px solid var(--border);margin-bottom:6px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:color .15s;}
+  .tuning-section-hd:hover{color:var(--text);}
+  .tuning-section-arrow{font-size:8px;transition:transform .2s;display:inline-block;}
+  .tuning-section-hd.collapsed .tuning-section-arrow{transform:rotate(-90deg);}
+  .tuning-section-body{display:flex;flex-direction:column;gap:4px;}
+  .tuning-section-hd.collapsed+.tuning-section-body{display:none;}
+  .tuning-card{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;padding:7px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .15s;}
+  .tuning-card:hover{border-color:var(--accent1);background:var(--bg);}
+  .tuning-card-name{font-size:13px;font-weight:600;color:var(--text);}
+  .tuning-card-alias{font-size:10px;color:var(--accent2);margin-top:1px;}
+  .tuning-card-notes{font-size:11px;color:var(--text3);font-family:'Barlow',monospace;white-space:nowrap;}
+  .tuning-card-info{font-size:11px;color:var(--text3);line-height:1.5;padding:4px 10px 8px;display:none;grid-column:1/-1;}
+  .tuning-card.expanded .tuning-card-info{display:block;}
+  .tuning-card.expanded{border-color:var(--accent1);}
+  .tuning-grid{display:flex;flex-direction:column;gap:4px;}
+  
+  /* drop button active */
+  button.btn-drop.active{background:transparent;border-color:var(--accent1);color:var(--accent1);}
+  
+  /* inner table num-wrap */
+  .tension-table .num-wrap{width:100%;min-width:64px;height:28px;}
+  .tension-table .num-wrap input{font-size:14px;padding:4px 6px;}
+  .tension-table .num-wrap select{background:transparent;border:none;color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;padding:4px 6px;width:100%;outline:none;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -391,6 +449,55 @@ button.primary:active{transform:scale(.98);}
       <span class="dxf-fname" id="dxf-filename"></span>
       <a id="dxf-link">Click to download</a>
     </div>
+  <div class="tension-sec" id="tension-sec">
+    <div class="tension-sec-title"><span data-i18n="sec-tension">String Tension Calculator</span></div>
+    
+    <div class="tension-content">
+      <div class="tension-table-col">
+        <div class="tension-ctrls">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;font-weight:600;" data-i18n="lbl-pitch-shift">Pitch Shift</span>
+            <button class="std" style="padding:4px 10px;font-size:11px;" onclick="shiftAllNotes(1)">+1</button>
+            <button class="std" style="padding:4px 10px;font-size:11px;" onclick="shiftAllNotes(-1)">-1</button>
+          </div>
+          <div style="width:1px;height:16px;background:var(--border);margin:0 4px;"></div>
+          <button class="std btn-drop" id="btn-drop" style="padding:4px 16px;font-size:11px;font-weight:700;min-width:80px;" onclick="toggleDrop()" data-i18n="btn-drop">Drop</button>
+        </div>
+
+        <table class="tension-table">
+          <thead>
+            <tr>
+              <th style="width:40px;">#</th>
+              <th style="width:100px;" data-i18n="lbl-scale">Scale (in)</th>
+              <th style="width:120px;" data-i18n="lbl-note">Note</th>
+              <th style="width:120px;" data-i18n="lbl-gauge">Gauge</th>
+              <th style="width:105px;" data-i18n="lbl-type">Type</th>
+              <th style="text-align:right;" data-i18n="lbl-tension">Tension</th>
+            </tr>
+          </thead>
+          <tbody id="tension-body">
+            <!-- JS generated -->
+          </tbody>
+        </table>
+
+        <div class="tension-total">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="tension-total-lbl" data-i18n="lbl-total-tension">Total Tension</span>
+            <span class="tension-total-val" id="total-tension-lb">0.0</span><span class="tension-total-unit">lb</span>
+            <span style="color:var(--border);margin:0 4px;">/</span>
+            <span class="tension-total-val" id="total-tension-kg">0.00</span><span class="tension-total-unit">kg</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tuning-browser" id="tuning-browser">
+        <div class="tuning-browser-hd">
+          <span class="tuning-browser-title" data-i18n="lbl-presets">Tuning Presets</span>
+          <div class="tuning-filter-pills" id="tuning-filter-pills"></div>
+        </div>
+        <div id="tuning-browser-body"></div>
+      </div>
+    </div>
   </div>
 </main>
 </div>
@@ -574,7 +681,21 @@ const TRANSLATIONS = {
     'hint-span': 'Span',
     'hint-total': 'Total',
     'btn-apply-arr': '→ Apply',
-    'lbl-show-stock': 'Show Stock Size'
+    'lbl-show-stock': 'Show Stock Size',
+    'sec-tension': 'String Tension Calculator',
+    'lbl-scale': 'Scale (in)',
+    'lbl-note': 'Note',
+    'lbl-gauge': 'Gauge',
+    'lbl-type': 'Type',
+    'lbl-tension': 'Tension',
+    'lbl-total-tension': 'Total Tension',
+    'type-plain': 'Plain',
+    'type-wound': 'Wound',
+    'lbl-dropped': 'Dropped',
+    'lbl-pitch-shift': 'Pitch All',
+    'btn-drop': 'Drop',
+    'lbl-dropped-txt': 'Dropped',
+    'lbl-presets': 'Tuning Presets'
   },
   jp: {
     'logo': 'GTI / 指板ツール',
@@ -637,7 +758,21 @@ const TRANSLATIONS = {
     'hint-span': '弦間',
     'hint-total': '全幅',
     'btn-apply-arr': '→ 適用',
-    'lbl-show-stock': 'ストックを表示'
+    'lbl-show-stock': 'ストックを表示',
+    'sec-tension': '弦のテンション計算',
+    'lbl-scale': 'スケール (in)',
+    'lbl-note': '音程',
+    'lbl-gauge': 'ゲージ',
+    'lbl-type': '種類',
+    'lbl-tension': 'テンション',
+    'lbl-total-tension': '合計テンション',
+    'type-plain': 'プレーン',
+    'type-wound': 'ワウンド',
+    'lbl-dropped': 'Dropped',
+    'lbl-pitch-shift': '一括調律',
+    'btn-drop': 'Drop',
+    'lbl-dropped-txt': 'Dropped',
+    'lbl-presets': 'プリセット'
   }
 };
 var currentLang = 'en';
@@ -1227,6 +1362,9 @@ function run(){
   // update legend dir dynamic
   var legDir=document.querySelector('[data-i18n="legend-dir"]');
   if(legDir) legDir.innerHTML = i18n(lefty ? 'legend-dir-lefty' : 'legend-dir-righty');
+
+  // update tension calculator
+  syncTensionUI();
 }
 
 // ── event listeners ──
@@ -1240,6 +1378,442 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   });
   run();
+});
+
+// ── tension calculator logic ──
+const GAUGE_LIST = [
+  {g:0.007,p:true,w:false},{g:0.008,p:true,w:false},{g:0.0085,p:true,w:false},
+  {g:0.009,p:true,w:false},{g:0.0095,p:true,w:false},{g:0.010,p:true,w:false},
+  {g:0.0105,p:true,w:false},{g:0.011,p:true,w:false},{g:0.0115,p:true,w:false},
+  {g:0.012,p:true,w:false},{g:0.013,p:true,w:false},{g:0.0135,p:true,w:false},
+  {g:0.014,p:true,w:false},{g:0.015,p:true,w:false},{g:0.016,p:true,w:false},
+  {g:0.017,p:true,w:true},{g:0.018,p:true,w:true},{g:0.019,p:true,w:true},
+  {g:0.020,p:true,w:true},{g:0.021,p:false,w:true},{g:0.022,p:true,w:true},
+  {g:0.024,p:true,w:true},{g:0.026,p:false,w:true},{g:0.028,p:false,w:true},
+  {g:0.030,p:false,w:true},{g:0.032,p:false,w:true},{g:0.034,p:false,w:true},
+  {g:0.036,p:false,w:true},{g:0.038,p:false,w:true},{g:0.040,p:false,w:true},
+  {g:0.042,p:false,w:true},{g:0.044,p:false,w:true},{g:0.045,p:false,w:true},
+  {g:0.046,p:false,w:true},{g:0.048,p:false,w:true},{g:0.049,p:false,w:true},
+  {g:0.050,p:false,w:true},{g:0.052,p:false,w:true},{g:0.054,p:false,w:true},
+  {g:0.056,p:false,w:true},{g:0.058,p:false,w:true},{g:0.059,p:false,w:true},
+  {g:0.060,p:false,w:true},{g:0.062,p:false,w:true},{g:0.064,p:false,w:true},
+  {g:0.066,p:false,w:true},{g:0.068,p:false,w:true},{g:0.070,p:false,w:true},
+  {g:0.072,p:false,w:true},{g:0.074,p:false,w:true},{g:0.080,p:false,w:true},
+  {g:0.085,p:false,w:true},{g:0.090,p:false,w:true},{g:0.095,p:false,w:true},
+  {g:0.100,p:false,w:true},{g:0.105,p:false,w:true},{g:0.110,p:false,w:true},
+  {g:0.115,p:false,w:true},{g:0.120,p:false,w:true},  {g:0.125,p:false,w:true},{g:0.130,p:false,w:true},{g:0.135,p:false,w:true}
+];
+
+// ── Tuning Browser (loaded from guitar_tunings.json) ──
+var _tuningData = null;
+var _tuningFilter = 0; // 0 = auto (match current string count)
+
+function loadTuningData() {
+  fetch('guitar_tunings.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      _tuningData = data;
+      renderTuningBrowser();
+    })
+    .catch(function(e) { console.warn('Failed to load tuning data:', e); });
+}
+
+function renderTuningBrowser() {
+  if (!_tuningData) return;
+  var nStr = (_state ? _state.nStr : parseInt(document.getElementById('ns').value)) || 7;
+  var filterCount = _tuningFilter || nStr;
+  
+  // Filter pills
+  var pillsEl = document.getElementById('tuning-filter-pills');
+  if (pillsEl) {
+    var counts = _tuningData.meta.string_counts;
+    var ph = '';
+    counts.forEach(function(c) {
+      var active = (c === filterCount) ? ' active' : '';
+      ph += '<div class="tuning-pill' + active + '" onclick="setTuningFilter(' + c + ')">' + c + 'str</div>';
+    });
+    pillsEl.innerHTML = ph;
+  }
+  
+  // Filter presets
+  var filtered = _tuningData.presets.filter(function(p) { return p.string_count === filterCount; });
+  
+  // Group by section
+  var sectionOrder = ['STD','DRP','OPN','MOD','D7G','UNQ'];
+  var groups = {};
+  filtered.forEach(function(p) {
+    if (!groups[p.section]) groups[p.section] = [];
+    groups[p.section].push(p);
+  });
+  
+  var bodyEl = document.getElementById('tuning-browser-body');
+  if (!bodyEl) return;
+  var html = '';
+  
+  sectionOrder.forEach(function(sec) {
+    if (!groups[sec]) return;
+    var desc = _tuningData.meta.sections[sec] || sec;
+    var shortDesc = desc.split('—')[0].trim();
+    html += '<div class="tuning-section">';
+    html += '<div class="tuning-section-hd" onclick="this.classList.toggle(\'collapsed\')" title="' + desc.replace(/"/g,'&quot;') + '">';
+    html += '<span class="tuning-section-arrow">▼</span> ' + sec + ' — ' + shortDesc;
+    html += '</div>';
+    html += '<div class="tuning-section-body"><div class="tuning-grid">';
+    groups[sec].forEach(function(p) {
+      var strDisplay = p.strings.slice().reverse().join(' ');
+      html += '<div class="tuning-card" data-id="' + p.id + '" onclick="applyTuningPreset(\'' + p.id + '\')">';
+      html += '<div><div class="tuning-card-name">' + p.label + '</div>';
+      if (p.aliases && p.aliases.length > 0) {
+        html += '<div class="tuning-card-alias">' + p.aliases.join(', ') + '</div>';
+      }
+      html += '</div>';
+      html += '<div class="tuning-card-notes">' + strDisplay + '</div>';
+      if (p.notes) {
+        html += '<div class="tuning-card-info">' + p.notes + '</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div></div></div>';
+  });
+  
+  bodyEl.innerHTML = html;
+  
+  // info toggle on right-click or long press
+  bodyEl.querySelectorAll('.tuning-card').forEach(function(card) {
+    card.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      card.classList.toggle('expanded');
+    });
+  });
+}
+
+function setTuningFilter(count) {
+  _tuningFilter = count;
+  renderTuningBrowser();
+}
+
+function applyTuningPreset(id) {
+  if (!_tuningData) return;
+  var preset = _tuningData.presets.find(function(p) { return p.id === id; });
+  if (!preset) return;
+  
+  var notes = preset.strings; // low[0] → high[n]
+  var nStr = notes.length;
+  
+  // Update string count if needed
+  var nsEl = document.getElementById('ns');
+  if (nsEl && parseInt(nsEl.value) !== nStr) {
+    nsEl.value = nStr;
+    nsEl.dispatchEvent(new Event('input', {bubbles:true}));
+  }
+  
+  // Wait for geometry to update, then apply notes
+  setTimeout(function() {
+    // notes array is low→high, _stringSettings is also low→high (index 0 = 1st string treble... wait)
+    // Actually _stringSettings[0] = 1st string (highest), _stringSettings[nStr-1] = last string (lowest)
+    // But preset.strings[0] = lowest, preset.strings[n-1] = highest
+    // So we need to reverse
+    var reversed = notes.slice().reverse();
+    for (var i = 0; i < Math.min(reversed.length, _stringSettings.length); i++) {
+      _stringSettings[i].note = reversed[i];
+    }
+    updateTensionRows();
+  }, 150);
+}
+
+const UW_PLAIN = [
+  { gauge: 0.009, uw: 0.00001791 }, { gauge: 0.010, uw: 0.00002215 },
+  { gauge: 0.011, uw: 0.00002680 }, { gauge: 0.013, uw: 0.00003752 },
+  { gauge: 0.016, uw: 0.00005685 }, { gauge: 0.017, uw: 0.00006419 },
+  { gauge: 0.018, uw: 0.00007178 }
+];
+const UW_WOUND = [
+  { gauge: 0.024, uw: 0.00010818 }, { gauge: 0.025, uw: 0.00011861 },
+  { gauge: 0.026, uw: 0.00012679 }, { gauge: 0.032, uw: 0.00019038 },
+  { gauge: 0.035, uw: 0.00022514 }, { gauge: 0.036, uw: 0.00023327 },
+  { gauge: 0.042, uw: 0.00031499 }, { gauge: 0.045, uw: 0.00036979 },
+  { gauge: 0.046, uw: 0.00036968 }, { gauge: 0.054, uw: 0.00051834 },
+  { gauge: 0.059, uw: 0.00061967 }, { gauge: 0.065, uw: 0.00075030 },
+  { gauge: 0.080, uw: 0.00110774 }, { gauge: 0.085, uw: 0.00125139 },
+  { gauge: 0.100, uw: 0.00170826 }, { gauge: 0.105, uw: 0.00187564 },
+  { gauge: 0.135, uw: 0.00306912 }
+];
+const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+// ── tension UI management ──
+var _stringSettings = []; // array of { note, gauge, type }
+
+function noteToMidi(noteStr) {
+  var str = noteStr.trim().toUpperCase().replace('BB','A#').replace('EB','D#').replace('AB','G#').replace('DB','C#').replace('GB','F#');
+  var m = str.match(/^([A-G]#?)(-?\d)$/);
+  if (!m) return null;
+  var idx = NOTE_NAMES.indexOf(m[1]);
+  var octave = parseInt(m[2], 10);
+  return (octave + 1) * 12 + idx;
+}
+
+function midiToNote(midi) {
+  var idx = midi % 12;
+  var octave = Math.floor(midi / 12) - 1;
+  return NOTE_NAMES[idx] + octave;
+}
+
+function noteToFreq(noteStr) {
+  var midi = noteToMidi(noteStr);
+  if (midi === null) return null;
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+function interpolateUW(gauge, table) {
+  if (gauge <= table[0].gauge) return table[0].uw;
+  if (gauge >= table[table.length-1].gauge) return table[table.length-1].uw;
+  for (var i=0; i<table.length-1; i++) {
+    var lo = table[i], hi = table[i+1];
+    if (gauge >= lo.gauge && gauge <= hi.gauge) {
+      var t = (gauge - lo.gauge) / (hi.gauge - lo.gauge);
+      return lo.uw + t * (hi.uw - lo.uw);
+    }
+  }
+  return null;
+}
+
+function calcTensionInternal(gauge, type, noteOrFreq, scaleLenInch) {
+  var f = (typeof noteOrFreq === 'string') ? noteToFreq(noteOrFreq) : noteOrFreq;
+  if (!f || f <= 0) return null;
+  var table = (type === 'plain') ? UW_PLAIN : UW_WOUND;
+  var uw = interpolateUW(gauge, table);
+  if (!uw) return null;
+  var T_lb = uw * Math.pow(2 * scaleLenInch * f, 2) / 386.4;
+  var T_kg = T_lb / 2.20462;
+  return { lb: T_lb, kg: T_kg };
+}
+
+function getDefaultTuning(nStr) {
+  if (nStr === 4) return ['G2','D2','A1','E1']; 
+  if (nStr === 5) return ['G2','D2','A1','E1','B0']; 
+  if (nStr === 6) return ['E4','B3','G3','D3','A2','E2']; 
+  if (nStr === 7) return ['E4','B3','G3','D3','A2','E2','B1'];
+  if (nStr === 8) return ['E4','B3','G3','D3','A2','E2','B1','F#1'];
+  var res = [];
+  for(var i=0; i<nStr; i++) res.push('E4');
+  return res;
+}
+
+function getDefaultGauges(nStr) {
+  if (nStr === 4) return [0.045, 0.065, 0.085, 0.105];
+  if (nStr === 5) return [0.045, 0.065, 0.085, 0.105, 0.135];
+  if (nStr === 6) return [0.010, 0.013, 0.017, 0.026, 0.036, 0.046];
+  if (nStr === 7) return [0.010, 0.013, 0.017, 0.026, 0.036, 0.046, 0.059];
+  if (nStr === 8) return [0.010, 0.013, 0.017, 0.026, 0.036, 0.046, 0.059, 0.080];
+  var res = [];
+  for(var i=0; i<nStr; i++) res.push(0.010);
+  return res;
+}
+
+function updateStringSetting(i, key, val) {
+  if (_stringSettings[i]) {
+    _stringSettings[i][key] = val;
+    runTensionCalc();
+  }
+}
+
+function shiftNote(i, delta) {
+  var s = _stringSettings[i];
+  var midi = noteToMidi(s.note);
+  if (midi !== null) {
+    s.note = midiToNote(midi + delta);
+    updateTensionRows();
+  }
+}
+
+function stepGauge(i, dir) {
+  var s = _stringSettings[i];
+  var idx = GAUGE_LIST.findIndex(g => Math.abs(g.g - s.gauge) < 0.0001);
+  if (idx === -1) return;
+  var nextIdx = idx + dir;
+  if (nextIdx >= 0 && nextIdx < GAUGE_LIST.length) {
+    updateGaugeSetting(i, GAUGE_LIST[nextIdx].g);
+    updateTensionRows();
+  }
+}
+
+function shiftAllNotes(delta) {
+  _stringSettings.forEach((s, i) => {
+    var midi = noteToMidi(s.note);
+    if (midi !== null) s.note = midiToNote(midi + delta);
+  });
+  updateTensionRows();
+}
+
+function toggleDrop() {
+  if (_stringSettings.length < 2) return;
+  var sN = _stringSettings[_stringSettings.length-1];
+  var sN1 = _stringSettings[_stringSettings.length-2];
+  var mN = noteToMidi(sN.note), mN1 = noteToMidi(sN1.note);
+  if (mN === null || mN1 === null) return;
+  var interval = mN1 - mN;
+  if (interval === 7) {
+    sN.note = midiToNote(mN1 - 5);
+  } else {
+    sN.note = midiToNote(mN1 - 7);
+  }
+  updateTensionRows();
+}
+
+function updateTensionRows() {
+  var nStr = (_state ? _state.nStr : 0) || 0;
+  if (nStr === 0) return;
+  var tun = getDefaultTuning(nStr);
+  var ggs = getDefaultGauges(nStr);
+  
+  var newSettings = [];
+  for(var i=0; i<nStr; i++) {
+    if (_stringSettings[i]) {
+      newSettings.push(_stringSettings[i]);
+    } else {
+      var gVal = ggs[i] || 0.010;
+      var gMatch = GAUGE_LIST.find(x => Math.abs(x.g - gVal) < 0.0001) || GAUGE_LIST[5];
+      newSettings.push({ 
+        note: tun[i] || 'E4', 
+        gauge: gMatch.g, 
+        type: (gMatch.w && !gMatch.p) ? 'wound' : 'plain'
+      });
+    }
+  }
+  _stringSettings = newSettings;
+
+  var body = document.getElementById('tension-body');
+  if (!body) return;
+  var html = '';
+  // Loop in reverse so 1st string is at the bottom
+  for (var i=nStr-1; i>=0; i--) {
+    var s = _stringSettings[i];
+    var si = i+1;
+    html += '<tr>';
+    html += '<td style="color:var(--text3);font-weight:600;">' + si + '</td>';
+    html += '<td class="ro-val" id="t-sc-' + i + '">—</td>';
+    html += '<td><div class="num-wrap"><input type="text" value="' + s.note + '" oninput="updateStringSetting(' + i + ', \'note\', this.value)" spellcheck="false"><div class="num-btns"><button class="num-btn" onclick="shiftNote(' + i + ',1)">▲</button><button class="num-btn" onclick="shiftNote(' + i + ',-1)">▼</button></div></div></td>';
+    html += '<td><div class="num-wrap"><select onchange="updateGaugeSetting(' + i + ', this.value)">';
+    GAUGE_LIST.forEach(g => {
+      var sel = (Math.abs(g.g - s.gauge) < 0.0001) ? ' selected' : '';
+      html += '<option value="' + g.g + '"' + sel + '>' + g.g.toFixed(3).replace(/^0/,'') + '</option>';
+    });
+    html += '</select><div class="num-btns"><button class="num-btn" onclick="stepGauge(' + i + ',1)">▲</button><button class="num-btn" onclick="stepGauge(' + i + ',-1)">▼</button></div></div></td>';
+    html += '<td><select onchange="updateStringSetting(' + i + ', \'type\', this.value)" id="t-type-' + i + '"></select></td>';
+    html += '<td style="text-align:right;" class="ro-val" id="t-res-' + i + '">—</td>';
+    html += '</tr>';
+  }
+  body.innerHTML = html;
+  
+  // Sync all type selects
+  for (var i=0; i<nStr; i++) syncTypeOptions(i);
+  runTensionCalc();
+}
+
+function syncTypeOptions(i) {
+  var s = _stringSettings[i];
+  var gMatch = GAUGE_LIST.find(x => Math.abs(x.g - s.gauge) < 0.0001);
+  if (!gMatch) return;
+  var sel = document.getElementById('t-type-' + i);
+  if (!sel) return;
+  
+  var opts = '';
+  if (gMatch.p) opts += '<option value="plain"' + (s.type==='plain'?' selected':'') + '>' + i18n('type-plain') + '</option>';
+  if (gMatch.w) opts += '<option value="wound"' + (s.type==='wound'?' selected':'') + '>' + i18n('type-wound') + '</option>';
+  sel.innerHTML = opts;
+  
+  // If current type not available in new list, switch
+  if (s.type === 'plain' && !gMatch.p) s.type = 'wound';
+  else if (s.type === 'wound' && !gMatch.w) s.type = 'plain';
+}
+
+function updateGaugeSetting(i, val) {
+  var gVal = parseFloat(val);
+  _stringSettings[i].gauge = gVal;
+  syncTypeOptions(i);
+  runTensionCalc();
+}
+
+function updateStringSetting(i, key, val) {
+  if (_stringSettings[i]) {
+    _stringSettings[i][key] = val;
+    runTensionCalc();
+  }
+}
+
+function runTensionCalc() {
+  if (!_state) return;
+  var totalLb = 0, totalKg = 0;
+  for (var i=0; i<_state.nStr; i++) {
+    var s = _stringSettings[i];
+    if (!s) continue;
+    var sc_mm = _state.sc(i);
+    var sc_in = sc_mm / I2M;
+    var elSc = document.getElementById('t-sc-' + i);
+    if (elSc) elSc.textContent = sc_in.toFixed(2);
+    
+    var res = calcTensionInternal(s.gauge, s.type, s.note, sc_in);
+    var elRes = document.getElementById('t-res-' + i);
+    if (res && elRes) {
+      elRes.innerHTML = res.lb.toFixed(1) + '<span style="font-size:10px;margin-left:2px;color:var(--text3);">lb</span> / ' + res.kg.toFixed(2) + '<span style="font-size:10px;margin-left:2px;color:var(--text3);">kg</span>';
+      totalLb += res.lb;
+      totalKg += res.kg;
+    } else if (elRes) {
+      elRes.textContent = '—';
+    }
+  }
+  var tlb = document.getElementById('total-tension-lb');
+  var tkg = document.getElementById('total-tension-kg');
+  if(tlb) tlb.textContent = totalLb.toFixed(1);
+  if(tkg) tkg.textContent = totalKg.toFixed(2);
+  
+  checkDropStatus();
+}
+
+function checkDropStatus() {
+  var badge = document.getElementById('dropped-status');
+  var btn = document.getElementById('btn-drop');
+  if (_stringSettings.length < 2) {
+    if (badge) badge.classList.remove('active');
+    if (btn) { btn.classList.remove('active'); btn.textContent = i18n('btn-drop'); }
+    return;
+  }
+  var sN = _stringSettings[_stringSettings.length-1];
+  var sN1 = _stringSettings[_stringSettings.length-2];
+  var mN = noteToMidi(sN.note), mN1 = noteToMidi(sN1.note);
+  var isDropped = (mN !== null && mN1 !== null && (mN1 - mN === 7));
+  if (badge) {
+    if (isDropped) badge.classList.add('active');
+    else badge.classList.remove('active');
+  }
+  if (btn) {
+    if (isDropped) {
+      btn.classList.add('active');
+      btn.textContent = i18n('lbl-dropped-txt');
+    } else {
+      btn.classList.remove('active');
+      btn.textContent = i18n('btn-drop');
+    }
+  }
+}
+
+function syncTensionUI() {
+  var nsEl = document.getElementById('ns');
+  if(!nsEl) return;
+  var nStr = parseInt(nsEl.value)||7;
+  if (_stringSettings.length !== nStr) {
+    _tuningFilter = 0; // reset filter to auto on string count change
+    updateTensionRows();
+  } else {
+    runTensionCalc();
+  }
+  // always sync tuning browser
+  if (_tuningData) renderTuningBrowser();
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  setTimeout(updateTensionRows, 100);
+  loadTuningData();
 });
 </script>
 
