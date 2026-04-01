@@ -665,58 +665,124 @@ function buildFilename(nStr,s1in,sNin,pd){
 // fields: sN s1 pd-fret ns nf fb_end bpitch npitch ne1 neN ee1 eeN nut_thick nut_oh pd
 // encode: each value multiplied to integer, joined with hyphen, no decimals or dots
 // format: GTI-<sN*10>-<s1*10>-<pdfret*10>-<ns>-<nf>-<fbend>-<bpitch*10>-<npitch*10>-<ne1*10>-<neN*10>-<ee1*10>-<eeN*10>-<nutthick*10>-<nutoh*10>-<pd*100000>
+// ── Seed v2: ビットパック + Base36 固定長エンコード ──
+// フォーマット: GTI-[62文字固定]  (FB26文字 + Tension36文字)
+// 後方互換: GTI-数値-数値-... の旧形式も読める
+
+var SEED_FB_FIELDS = [
+  ['sN',200,8],['s1',200,8],['pd_fret',0,8],['ns',1,4],
+  ['nf',12,5],['fb_end',13,5],['bpitch',50,8],['npitch',40,7],
+  ['ne1',0,8],['neN',0,8],['ee1',0,8],['eeN',0,8],
+  ['nut_thick',10,8],['nut_oh',0,8],['pd',0,17],['curved',0,1],['curve_k',1000,11]
+];
+var SEED_FB_CHARS=26, SEED_TEN_PER_STR=14, SEED_MAX_STR=13, SEED_TEN_CHARS=36;
+
+function bigToBase36(big,chars){
+  var s='';
+  for(var i=0;i<chars;i++){s=(Number(big%BigInt(36))).toString(36)+s;big=big/BigInt(36);}
+  return s;
+}
+function base36ToBig(s){
+  var big=BigInt(0);
+  for(var i=0;i<s.length;i++){big=big*BigInt(36)+BigInt(parseInt(s[i],36));}
+  return big;
+}
+function seedPackBits(vals,specs){
+  var big=BigInt(0);
+  for(var i=0;i<specs.length;i++){
+    var bits=specs[i][2];
+    big=(big<<BigInt(bits))|BigInt(vals[i]&((1<<bits)-1));
+  }
+  return big;
+}
+function seedUnpackBits(big,specs){
+  var vals=new Array(specs.length);
+  for(var i=specs.length-1;i>=0;i--){
+    var bits=specs[i][2],mask=BigInt((1<<bits)-1);
+    vals[i]=Number(big&mask);big=big>>BigInt(bits);
+  }
+  return vals;
+}
+
 function encodeSeed(){
-  function g(id){return parseFloat(document.getElementById(id).value)||0;}
-  var parts=[
-    'GTI',
-    Math.round(g('sN')*10),
-    Math.round(g('s1')*10),
-    Math.round(g('pd-fret')*10),
-    Math.round(g('ns')),
-    Math.round(g('nf')),
-    Math.round(g('fb_end')),
-    Math.round(g('bpitch')*10),
-    Math.round(g('npitch')*10),
-    Math.round(g('ne1')*10),
-    Math.round(g('neN')*10),
-    Math.round(g('ee1')*10),
-    Math.round(g('eeN')*10),
-    Math.round(g('nut_thick')*10),
-    Math.round(g('nut_oh')*10),
-    Math.round(g('pd')*100000),
+  function gv(id){return parseFloat(document.getElementById(id).value)||0;}
+  var fbVals=[
+    Math.round(gv('sN')*10)-200, Math.round(gv('s1')*10)-200,
+    Math.round(gv('pd-fret')*10), Math.round(gv('ns'))-1,
+    Math.round(gv('nf'))-12, Math.round(gv('fb_end'))-13,
+    Math.round(gv('bpitch')*10)-50, Math.round(gv('npitch')*10)-40,
+    Math.round(gv('ne1')*10), Math.round(gv('neN')*10),
+    Math.round(gv('ee1')*10), Math.round(gv('eeN')*10),
+    Math.round(gv('nut_thick')*10)-10, Math.round(gv('nut_oh')*10),
+    Math.round(gv('pd')*100000),
     document.getElementById('curved-toggle').checked?1:0,
-    Math.round(g('curve-k')*100)
+    Math.round(gv('curve-k')*100)+1000
   ];
-  return parts.join('-');
+  var fbStr=bigToBase36(seedPackBits(fbVals,SEED_FB_FIELDS),SEED_FB_CHARS);
+
+  var combos=[];
+  GAUGE_LIST.forEach(function(g){
+    if(g.p)combos.push({g:g.g,t:'plain'});
+    if(g.w)combos.push({g:g.g,t:'wound'});
+  });
+  var tenBig=BigInt(0);
+  for(var i=0;i<SEED_MAX_STR;i++){
+    var midi=0,ci=0;
+    if(_stringSettings&&i<_stringSettings.length){
+      var ss=_stringSettings[i];
+      var m=noteToMidi(ss.note);
+      midi=(m!==null&&m>=0&&m<=127)?m:0;
+      var f=combos.findIndex(function(c){return Math.abs(c.g-ss.gauge)<0.0001&&c.t===ss.type;});
+      ci=f>=0?f:0;
+    }
+    tenBig=(tenBig<<BigInt(SEED_TEN_PER_STR))|BigInt(((midi<<7)|ci));
+  }
+  var tenStr=bigToBase36(tenBig,SEED_TEN_CHARS);
+  return 'GTI-'+fbStr+tenStr;
 }
 
 function decodeSeed(seed){
-  var parts=seed.trim().split('-');
-  if((parts.length!==16&&parts.length!==18)||parts[0]!=='GTI') return null;
-  var n=parts.slice(1).map(Number);
-  if(n.some(isNaN)) return null;
-  var d={
-    sN:    n[0]/10,
-    s1:    n[1]/10,
-    pdfret:n[2]/10,
-    ns:    n[3],
-    nf:    n[4],
-    fb_end:n[5],
-    bpitch:n[6]/10,
-    npitch:n[7]/10,
-    ne1:   n[8]/10,
-    neN:   n[9]/10,
-    ee1:   n[10]/10,
-    eeN:   n[11]/10,
-    nut_thick:n[12]/10,
-    nut_oh:n[13]/10,
-    pd:    n[14]/100000
-  };
-  if(parts.length===18){
-    d.curved = n[15]===1;
-    d.k      = n[16]/100;
+  seed=seed.trim();
+  // 旧形式後方互換
+  if(/^GTI-\d/.test(seed)){
+    var parts=seed.split('-');
+    if((parts.length!==16&&parts.length!==18)||parts[0]!=='GTI')return null;
+    var n=parts.slice(1).map(Number);
+    if(n.some(isNaN))return null;
+    var d={sN:n[0]/10,s1:n[1]/10,pdfret:n[2]/10,ns:n[3],nf:n[4],fb_end:n[5],
+      bpitch:n[6]/10,npitch:n[7]/10,ne1:n[8]/10,neN:n[9]/10,
+      ee1:n[10]/10,eeN:n[11]/10,nut_thick:n[12]/10,nut_oh:n[13]/10,pd:n[14]/100000};
+    if(parts.length===18){d.curved=n[15]===1;d.k=n[16]/100;}
+    return d;
   }
-  return d;
+  // 新形式
+  if(!/^GTI-[0-9a-z]{62}$/.test(seed))return null;
+  var body=seed.slice(4);
+  try{
+    var fbBig=base36ToBig(body.slice(0,SEED_FB_CHARS));
+    var fv=seedUnpackBits(fbBig,SEED_FB_FIELDS);
+    var d={sN:(fv[0]+200)/10,s1:(fv[1]+200)/10,pdfret:fv[2]/10,ns:fv[3]+1,
+      nf:fv[4]+12,fb_end:fv[5]+13,bpitch:(fv[6]+50)/10,npitch:(fv[7]+40)/10,
+      ne1:fv[8]/10,neN:fv[9]/10,ee1:fv[10]/10,eeN:fv[11]/10,
+      nut_thick:(fv[12]+10)/10,nut_oh:fv[13]/10,pd:fv[14]/100000,
+      curved:fv[15]===1,k:(fv[16]-1000)/100};
+    var combos=[];
+    GAUGE_LIST.forEach(function(g){
+      if(g.p)combos.push({g:g.g,t:'plain'});
+      if(g.w)combos.push({g:g.g,t:'wound'});
+    });
+    var tenBig=base36ToBig(body.slice(SEED_FB_CHARS));
+    var mask=BigInt((1<<SEED_TEN_PER_STR)-1);
+    var strings=[];
+    for(var i=SEED_MAX_STR-1;i>=0;i--){
+      var sv=Number(tenBig&mask);tenBig=tenBig>>BigInt(SEED_TEN_PER_STR);
+      var midi=(sv>>7)&0x7F,ci=sv&0x7F;
+      if(midi>0){var combo=combos[ci]||combos[0];strings[i]={note:midiToNote(midi),gauge:combo.g,type:combo.t};}
+    }
+    var valid=strings.filter(function(s){return s;});
+    if(valid.length>0)d.tension=valid;
+    return d;
+  }catch(e){return null;}
 }
 
 function copySeed(){
@@ -931,6 +997,12 @@ function applySeed(){
     var tog=document.getElementById('curved-toggle');
     if(tog) tog.checked=d.curved;
     s('curve-k', d.k);
+  }
+  // テンション設定を復元
+  if(d.tension&&d.tension.length>0){
+    if(typeof clearStringBuffers==='function')clearStringBuffers();
+    _stringSettings=d.tension;
+    _pendingPresetStrings=null;
   }
   // sync fb_end tracking
   var fbEndInp=document.getElementById('fb_end');
@@ -1586,7 +1658,7 @@ const GAUGE_LIST = [
   {g:0.014,p:true,w:false},{g:0.015,p:true,w:false},{g:0.016,p:true,w:false},
   {g:0.017,p:true,w:true},{g:0.018,p:true,w:true},{g:0.019,p:true,w:true},
   {g:0.020,p:true,w:true},{g:0.021,p:false,w:true},{g:0.022,p:true,w:true},
-  {g:0.024,p:true,w:true},{g:0.026,p:false,w:true},{g:0.028,p:false,w:true},
+  {g:0.023,p:false,w:true},{g:0.024,p:true,w:true},{g:0.026,p:false,w:true},{g:0.027,p:false,w:true},{g:0.028,p:false,w:true},
   {g:0.030,p:false,w:true},{g:0.032,p:false,w:true},{g:0.034,p:false,w:true},{g:0.035,p:false,w:true},
   {g:0.036,p:false,w:true},{g:0.038,p:false,w:true},{g:0.040,p:false,w:true},
   {g:0.042,p:false,w:true},{g:0.044,p:false,w:true},{g:0.045,p:false,w:true},
@@ -1946,25 +2018,47 @@ function applyTuningPreset(id) {
 }
 
 const UW_PLAIN = [
-  { gauge: 0.009, uw: 0.00001791 }, { gauge: 0.010, uw: 0.00002215 },
-  { gauge: 0.011, uw: 0.00002680 }, { gauge: 0.013, uw: 0.00003752 },
-  { gauge: 0.016, uw: 0.00005685 }, { gauge: 0.017, uw: 0.00006419 },
-  { gauge: 0.018, uw: 0.00007178 }
+  { gauge: 0.008,  uw: 0.00001420 }, { gauge: 0.0085, uw: 0.00001603 },
+  { gauge: 0.009,  uw: 0.00001797 }, { gauge: 0.0095, uw: 0.00002002 },
+  { gauge: 0.010,  uw: 0.00002219 }, { gauge: 0.0105, uw: 0.00002446 },
+  { gauge: 0.011,  uw: 0.00002684 }, { gauge: 0.0115, uw: 0.00002934 },
+  { gauge: 0.012,  uw: 0.00003195 }, { gauge: 0.0125, uw: 0.00003466 },
+  { gauge: 0.013,  uw: 0.00003749 }, { gauge: 0.0135, uw: 0.00004043 },
+  { gauge: 0.014,  uw: 0.00004348 }, { gauge: 0.015,  uw: 0.00004992 },
+  { gauge: 0.016,  uw: 0.00005679 }, { gauge: 0.017,  uw: 0.00006412 },
+  { gauge: 0.018,  uw: 0.00007188 }, { gauge: 0.019,  uw: 0.00008009 },
+  { gauge: 0.020,  uw: 0.00008874 }, { gauge: 0.022,  uw: 0.00010720 }
 ];
 const UW_WOUND = [
-  { gauge: 0.024, uw: 0.00010818 }, { gauge: 0.025, uw: 0.00011861 },
-  { gauge: 0.026, uw: 0.00012679 }, { gauge: 0.030, uw: 0.00017030 },
-  { gauge: 0.032, uw: 0.00019038 }, { gauge: 0.034, uw: 0.00021120 },
-  { gauge: 0.035, uw: 0.00022514 }, { gauge: 0.036, uw: 0.00023327 },
-  { gauge: 0.042, uw: 0.00031499 }, { gauge: 0.044, uw: 0.00034150 },
-  { gauge: 0.045, uw: 0.00036979 }, { gauge: 0.046, uw: 0.00036968 },
-  { gauge: 0.054, uw: 0.00051834 }, { gauge: 0.056, uw: 0.00055150 },
-  { gauge: 0.059, uw: 0.00061967 }, { gauge: 0.064, uw: 0.00072030 },
-  { gauge: 0.065, uw: 0.00075030 }, { gauge: 0.072, uw: 0.00090830 },
-  { gauge: 0.074, uw: 0.00095130 }, { gauge: 0.080, uw: 0.00110774 },
-  { gauge: 0.084, uw: 0.00125210 }, { gauge: 0.085, uw: 0.00125139 },
-  { gauge: 0.100, uw: 0.00170826 }, { gauge: 0.105, uw: 0.00187564 },
-  { gauge: 0.135, uw: 0.00306912 }
+  { gauge: 0.017, uw: 0.00005702 }, { gauge: 0.018, uw: 0.00006349 },
+  { gauge: 0.019, uw: 0.00007027 }, { gauge: 0.020, uw: 0.00007739 },
+  { gauge: 0.021, uw: 0.00008482 }, { gauge: 0.022, uw: 0.00009257 },
+  { gauge: 0.023, uw: 0.00010063 }, { gauge: 0.024, uw: 0.00010901 },
+  { gauge: 0.025, uw: 0.00011770 }, { gauge: 0.026, uw: 0.00012670 },
+  { gauge: 0.027, uw: 0.00013602 }, { gauge: 0.028, uw: 0.00014564 },
+  { gauge: 0.029, uw: 0.00015557 }, { gauge: 0.030, uw: 0.00016580 },
+  { gauge: 0.032, uw: 0.00018718 }, { gauge: 0.034, uw: 0.00020977 },
+  { gauge: 0.036, uw: 0.00023355 }, { gauge: 0.038, uw: 0.00025853 },
+  { gauge: 0.039, uw: 0.00027146 }, { gauge: 0.040, uw: 0.00028469 },
+  { gauge: 0.042, uw: 0.00031203 }, { gauge: 0.044, uw: 0.00034054 },
+  { gauge: 0.046, uw: 0.00037021 }, { gauge: 0.048, uw: 0.00040103 },
+  { gauge: 0.049, uw: 0.00041700 }, { gauge: 0.050, uw: 0.00043301 },
+  { gauge: 0.052, uw: 0.00046613 }, { gauge: 0.054, uw: 0.00050039 },
+  { gauge: 0.056, uw: 0.00053578 }, { gauge: 0.058, uw: 0.00057231 },
+  { gauge: 0.059, uw: 0.00058900 }, { gauge: 0.060, uw: 0.00060995 },
+  { gauge: 0.062, uw: 0.00064872 }, { gauge: 0.064, uw: 0.00068861 },
+  { gauge: 0.065, uw: 0.00072030 }, { gauge: 0.066, uw: 0.00072960 },
+  { gauge: 0.068, uw: 0.00077170 }, { gauge: 0.070, uw: 0.00081491 },
+  { gauge: 0.072, uw: 0.00085921 }, { gauge: 0.074, uw: 0.00090461 },
+  { gauge: 0.080, uw: 0.00104734 }, { gauge: 0.085, uw: 0.00117373 },
+  { gauge: 0.090, uw: 0.00130683 }, { gauge: 0.095, uw: 0.00144659 },
+  { gauge: 0.100, uw: 0.00159297 }, { gauge: 0.105, uw: 0.00174594 },
+  { gauge: 0.110, uw: 0.00190545 }, { gauge: 0.115, uw: 0.00207146 },
+  { gauge: 0.120, uw: 0.00224394 }, { gauge: 0.125, uw: 0.00242286 },
+  { gauge: 0.130, uw: 0.00260818 }, { gauge: 0.135, uw: 0.00279988 },
+  { gauge: 0.145, uw: 0.00310000 }, { gauge: 0.160, uw: 0.00384000 },
+  { gauge: 0.170, uw: 0.00420000 }, { gauge: 0.175, uw: 0.00450000 },
+  { gauge: 0.180, uw: 0.00480000 }, { gauge: 0.184, uw: 0.00510000 }
 ];
 const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 
@@ -2130,7 +2224,12 @@ function stepGauge(i, dir) {
   if (idx === -1) return;
   var nextIdx = idx + dir;
   if (nextIdx >= 0 && nextIdx < GAUGE_LIST.length) {
-    s.gauge = GAUGE_LIST[nextIdx].g;
+    var gMatch = GAUGE_LIST[nextIdx];
+    s.gauge = gMatch.g;
+    // ゲージ変更時にタイプを自動補正 (.024p→.026wなど)
+    if (s.type === 'plain' && !gMatch.p) s.type = 'wound';
+    else if (s.type === 'wound' && !gMatch.w) s.type = 'plain';
+    
     updateTensionRows();
     if (typeof clearStringBuffers === 'function') clearStringBuffers();
   }
@@ -2218,19 +2317,18 @@ function updateTensionRows() {
     html += '<td style="color:var(--text3);font-weight:600;">' + si + '</td>';
     html += '<td class="ro-val" id="t-sc-' + i + '" style="text-align:center;white-space:nowrap;">—</td>';
     html += '<td><div class="num-wrap"><input type="text" value="' + s.note + '" oninput="updateStringSetting(' + i + ', \'note\', this.value)" spellcheck="false"><div class="num-btns"><button class="num-btn" onclick="shiftNote(' + i + ',1)">▲</button><button class="num-btn" onclick="shiftNote(' + i + ',-1)">▼</button></div></div></td>';
-    html += '<td><div class="num-wrap"><select onchange="updateGaugeWithType(this.value, ' + i + ')">';
+    html += '<td><div class="num-wrap"><select id="t-gauge-' + i + '" onchange="updateGaugeWithType(this.value, ' + i + ')">';
     GAUGE_LIST.forEach(g => {
-      // Determine if this exact gauge+type is selected
-      var isWound = g.w && !g.p; // heuristic for simple cases, but we need to match current s.type
-      // Actually GAUGE_LIST items have p/w flags. We show both if available.
+      // ゲージが一致、かつタイプが一致（またはそのゲージに今のタイプがない場合のフォールバック）を selected にする
+      var isMatch = (Math.abs(g.g - s.gauge) < 0.0001);
       if (g.p) {
         var valP = g.g + "|plain";
-        var selP = (Math.abs(g.g - s.gauge) < 0.0001 && s.type === 'plain') ? ' selected' : '';
+        var selP = (isMatch && (s.type === 'plain' || !g.w)) ? ' selected' : '';
         html += '<option value="' + valP + '"' + selP + '>' + g.g.toFixed(3).replace(/^0/,'') + 'p</option>';
       }
       if (g.w) {
         var valW = g.g + "|wound";
-        var selW = (Math.abs(g.g - s.gauge) < 0.0001 && s.type === 'wound') ? ' selected' : '';
+        var selW = (isMatch && (s.type === 'wound' || !g.p)) ? ' selected' : '';
         html += '<option value="' + valW + '"' + selW + '>' + g.g.toFixed(3).replace(/^0/,'') + 'w</option>';
       }
     });
@@ -2707,7 +2805,7 @@ function syncTensionUI() {
 
 </script>
 
-<div id="ver">v044-e5n1</div>
+<div id="ver">v049-c8r1</div>
 <a href="https://www.gtinstruments.xyz/" class="home-link" data-i18n="back-home">← Back to homepage</a>
 </body>
 </html>
