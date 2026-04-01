@@ -61,8 +61,44 @@
   .result-num{font-size:10px;color:var(--text-dim);text-align:center;}
   .result-info .r-gauge{font-size:13px;color:var(--text);}
   .result-info .r-note{font-size:10px;color:var(--text-dim);margin-top:1px;}
-  .tension-bar-wrap{height:5px;background:#1e1e1e;border-radius:3px;overflow:hidden;}
+  .tension-bar-wrap{height:5px;background:#1e1e1e;border-radius:3px;overflow:hidden;position:relative;}
   .tension-bar{height:100%;border-radius:3px;transition:width .35s ease,background .35s ease;}
+
+.tension-dead-line {
+  position: absolute;
+  top: 0;
+  width: 1.5px;
+  height: 100%;
+  background: #ff4444;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.tension-low-limit {
+  position: absolute;
+  top: 0;
+  width: 1.5px;
+  height: 100%;
+  background: #44aaff;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.warn-icon {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 11px;
+  color: #ff4444;
+  line-height: 1;
+}
+
+.low-icon {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 11px;
+  color: #44aaff;
+  line-height: 1;
+}
   .tension-val{font-family:'Syne',sans-serif;font-weight:700;text-align:right;transition:color .3s;}
   .tension-val.lb{font-size:13px;}
   .tension-val.kgf{font-size:16px;}
@@ -105,6 +141,22 @@
           <option value="5">5 strings (Bass)</option>
           <option value="6b">6 strings (Bass)</option>
         </select>
+      </div>
+
+      <div class="panel-label" style="margin-top:10px;">Target Tension</div>
+      <div class="field" style="display:flex;gap:10px;align-items:center;">
+        <select id="target-preset" style="flex:1;" onchange="applyTargetPreset(this.value)">
+          <option value="custom">-- Custom --</option>
+          <option value="6.40" data-inst="guitar">09-42 (EXL120 avg 14.1 lb)</option>
+          <option value="7.85" data-inst="guitar">10-46 (EXL110 avg 17.3 lb)</option>
+          <option value="18.96" data-inst="bass">45-100 (EXL170 avg 41.8 lb)</option>
+          <option value="22.22" data-inst="bass">50-105 (EXL160 avg 49.0 lb)</option>
+          <option value="23.45" data-inst="bass">45-130 5str (EXL170-5 avg 51.7 lb/35")</option>
+        </select>
+        <div style="width:110px; display:flex; align-items:center; background:var(--surface2); border:1px solid var(--border); border-radius:2px; padding-right:8px;">
+          <input type="number" id="target-tension" value="" step="0.01" min="1" placeholder="Auto" style="background:transparent;color:var(--text);border:none;flex:1;outline:none;padding:8px 12px;font-family:'DM Mono',monospace;" oninput="onTargetTensionInput()">
+          <span style="font-size:10px;color:var(--text-dim);">kg</span>
+        </div>
       </div>
 
       <div class="panel-label" style="margin-top:4px;">Tuning</div>
@@ -283,11 +335,103 @@ function calcT(gauge, note, scaleIn) {
   const lb = uw * Math.pow(2*scaleIn*f, 2) / 386.4;
   return {lb, kgf: lb/2.20462};
 }
+
+// 楽器別の適正テンション中心値（lb/弦）
+const TARGET_TENSION_LB = {
+  guitar: 15.0,
+  bass:   43.0
+};
+
+// 上限係数（dead line） ← STIFFに敏感：+0.25半音相当
+// guitar: 15lb × 1.029 ≈ 15.4lb / bass: 43lb × 1.029 ≈ 44.2lb
+const DEAD_LINE_RATIO = {
+  guitar: Math.pow(2, 0.25 / 6),
+  bass:   Math.pow(2, 0.25 / 6)
+};
+
+// 下限係数（low limit）= 0.5半音相当（下方向は以前のまま）
+const LOW_LIMIT_RATIO = {
+  guitar: 1 / Math.pow(2, 0.5 / 6),  // ≈ 0.944 → 15lb × 0.944 ≈ 14.2lb
+  bass:   1 / Math.pow(2, 0.5 / 6)   // ≈ 0.944 → 43lb × 0.944 ≈ 40.6lb
+};
+
+function getInstrument() {
+  return (currentMode === '4' || currentMode === '5' || currentMode === '6b')
+    ? 'bass' : 'guitar';
+}
+
+function calcBaseFreq(gauge, scaleIn) {
+  const uw = UW[gauge];
+  if (!uw || scaleIn <= 0) return null;
+  const el = document.getElementById('target-tension');
+  const manualKg = el ? parseFloat(el.value) : NaN;
+  const targetLb = (!isNaN(manualKg) && manualKg > 0) ? (manualKg * 2.20462) : TARGET_TENSION_LB[getInstrument()];
+  return Math.sqrt(targetLb * 386.4 / uw) / (2 * scaleIn);
+}
+
+function applyTargetPreset(val) {
+  const el = document.getElementById('target-tension');
+  if (val !== 'custom') {
+    el.value = val;
+  }
+  calculate();
+}
+
+function onTargetTensionInput() {
+  document.getElementById('target-preset').value = 'custom';
+  calculate();
+}
+
+function syncTargetPresetVisibility() {
+  const inst = getInstrument();
+  const select = document.getElementById('target-preset');
+  if (!select) return;
+  let hasValid = false;
+  for (let i = 0; i < select.options.length; i++) {
+    const opt = select.options[i];
+    if (opt.value === 'custom') continue;
+    if (opt.getAttribute('data-inst') === inst) {
+      opt.style.display = '';
+      if (opt.selected) hasValid = true;
+    } else {
+      opt.style.display = 'none';
+      if (opt.selected) opt.selected = false;
+    }
+  }
+  if (!hasValid && select.value !== 'custom') {
+    select.value = 'custom';
+    document.getElementById('target-tension').value = '';
+  }
+}
+
+function calcBaseLb(gauge, scaleIn) {
+  const uw = UW[gauge];
+  const baseFreq = calcBaseFreq(gauge, scaleIn);
+  if (!uw || !baseFreq) return null;
+  return uw * Math.pow(2 * scaleIn * baseFreq, 2) / 386.4;
+}
+
+function calcDeadLine(gauge, scaleIn) {
+  const baseLb = calcBaseLb(gauge, scaleIn);
+  if (baseLb === null) return null;
+  const ratio = DEAD_LINE_RATIO[getInstrument()];
+  const deadLb = baseLb * ratio;
+  return { lb: deadLb, kgf: deadLb / 2.20462 };
+}
+
+function calcLowLimit(gauge, scaleIn) {
+  const baseLb = calcBaseLb(gauge, scaleIn);
+  if (baseLb === null) return null;
+  const ratio = LOW_LIMIT_RATIO[getInstrument()];
+  const lowLb = baseLb * ratio;
+  return { lb: lowLb, kgf: lowLb / 2.20462 };
+}
 function tColor(kgf) {
   if (kgf<5) return '#44aaff';
-  if (kgf<7) return '#c8ff00';
-  if (kgf<9) return '#ffaa00';
-  return '#ff6b35';
+  if (kgf<6.5) return '#c8ff00';
+  if (kgf<8) return '#ffaa00';
+  if (kgf<9) return '#ff6b35';
+  return '#ff2222';
 }
 function isMulti() { return document.getElementById('scaleMode').value === 'multi'; }
 
@@ -427,10 +571,23 @@ function calculate() {
   const maxKgf = Math.max(...results.map(r=>r.tension?.kgf||0));
   document.getElementById('results').innerHTML = results.map(r => {
     const t=r.tension, kgf=t?.kgf, lb=t?.lb;
-    const pct = kgf ? Math.min(kgf/(maxKgf*1.15)*100, 100) : 0;
-    const col = kgf ? tColor(kgf) : '#333';
+    const pct    = kgf ? Math.min(kgf / (maxKgf * 1.15) * 100, 100) : 0;
+    const col    = kgf ? tColor(kgf) : '#333';
     const wound = r.gauge?.endsWith('w');
     const scNote = multi ? ` · ${(r.scaleIn*25.4).toFixed(2)}mm` : '';
+
+    // 上限・下限を計算
+    const dl  = calcDeadLine(r.gauge, r.scaleIn);
+    const ll  = calcLowLimit(r.gauge, r.scaleIn);
+
+    const dlPct = (dl && maxKgf > 0)
+      ? Math.min(dl.kgf / (maxKgf * 1.15) * 100, 100) : null;
+    const llPct = (ll && maxKgf > 0)
+      ? Math.min(ll.kgf / (maxKgf * 1.15) * 100, 100) : null;
+
+    const isOverDead = dl && kgf && kgf >= dl.kgf;
+    const isUnderLow = ll && kgf && kgf <= ll.kgf;
+
     return `
       <div class="result-row">
         <div class="result-num">${r.idx}</div>
@@ -438,9 +595,21 @@ function calculate() {
           <div class="r-gauge">${gDisp(r.gauge)}</div>
           <div class="r-note">${r.note} · ${wound?'wound':'plain'}${scNote}</div>
         </div>
-        <div><div class="tension-bar-wrap"><div class="tension-bar" style="width:${pct}%;background:${col}"></div></div></div>
-        <div class="tension-val lb" style="color:${col}">${lb?lb.toFixed(2):'—'}<span class="t-unit"> lb</span></div>
-        <div class="tension-val kgf" style="color:${col}">${kgf?kgf.toFixed(2):'—'}<span class="t-unit"> kg</span></div>
+        <div>
+          <div class="tension-bar-wrap">
+            <div class="tension-bar" style="width:${pct}%;background:${col}"></div>
+            ${dlPct !== null ? `<div class="tension-dead-line" style="left:${dlPct}%"></div>` : ''}
+            ${llPct !== null ? `<div class="tension-low-limit" style="left:${llPct}%"></div>` : ''}
+          </div>
+        </div>
+        <div class="tension-val lb" style="color:${col}">
+          ${lb ? lb.toFixed(2) : '—'}<span class="t-unit"> lb</span>
+          ${isOverDead ? '<span class="warn-icon">⚠</span>' : ''}
+          ${isUnderLow ? '<span class="low-icon">↓</span>' : ''}
+        </div>
+        <div class="tension-val kgf" style="color:${col}">
+          ${kgf ? kgf.toFixed(2) : '—'}<span class="t-unit"> kg</span>
+        </div>
       </div>`;
   }).join('');
 
@@ -468,6 +637,7 @@ function calculate() {
 function updateStringCount() {
   currentMode = document.getElementById('stringCount').value;
   activePreset = 0;
+  syncTargetPresetVisibility();
   initState(PRESETS[currentMode]?.[0]);
   renderRows(); renderPresets(); renderDropBtns(); calculate();
 }
@@ -475,6 +645,7 @@ function updateStringCount() {
 // ── Boot ──────────────────────────────────────────────────────────────────────
 (function(){
   activePreset = 0;
+  syncTargetPresetVisibility();
   initState(PRESETS[currentMode][0]);
   renderRows(); renderPresets(); renderDropBtns(); calculate();
   document.getElementById('scale').addEventListener('input', calculate);

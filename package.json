@@ -1,0 +1,19 @@
+{
+  "name": "gotakigawa-instruments-fretboard-tools",
+  "version": "1.0.0",
+  "description": "GTI / Fretboard & Tension Tools",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "serve": "npx serve -l 8000"
+  },
+  "keywords": [
+    "multiscale",
+    "guitar",
+    "fretboard",
+    "tension",
+    "calculator"
+  ],
+  "author": "Go Takigawa Instruments",
+  "license": "MIT"
+}
