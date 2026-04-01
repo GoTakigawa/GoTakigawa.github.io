@@ -164,8 +164,10 @@ button.primary:active{transform:scale(.98);}
   .dropped-badge.active{display:inline-block;}
 
   /* tension section improvements */
-  .tension-content{display:grid;grid-template-columns:1fr auto auto;gap:16px;align-items:start;}
+  .tension-content{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start;}
   @media(max-width:1100px){.tension-content{grid-template-columns:1fr;}}
+  .presets-row{display:flex;gap:16px;align-items:start;}
+  @media(max-width:600px){.presets-row{flex-direction:column;}} /* 超小型画面（スマホ等）では流石に縦にする */
   .tuning-browser{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px;max-height:600px;overflow-y:auto;width:270px;min-width:0;}
   .tuning-browser-hd{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
   .tuning-browser-title{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent1);font-weight:700;}
@@ -590,19 +592,21 @@ button.primary:active{transform:scale(.98);}
         </div>
       </div>
 
-      <div class="tuning-browser" id="tuning-browser">
-        <div class="tuning-browser-hd">
-          <span class="tuning-browser-title" data-i18n="lbl-presets">Tuning Presets</span>
-          <div class="tuning-filter-pills" id="tuning-inst-pills"></div>
+      <div class="presets-row">
+        <div class="tuning-browser" id="tuning-browser">
+          <div class="tuning-browser-hd">
+            <span class="tuning-browser-title" data-i18n="lbl-presets">Tuning Presets</span>
+            <div class="tuning-filter-pills" id="tuning-inst-pills"></div>
+          </div>
+          <div id="tuning-browser-body"></div>
         </div>
-        <div id="tuning-browser-body"></div>
-      </div>
-      <div class="gauge-browser" id="gauge-browser">
-        <div class="gauge-browser-hd">
-          <span class="gauge-browser-title" data-i18n="lbl-gauge-presets">Gauge Presets</span>
-          <div class="gauge-filter-wrap" id="gauge-brand-pills"></div>
+        <div class="gauge-browser" id="gauge-browser">
+          <div class="gauge-browser-hd">
+            <span class="gauge-browser-title" data-i18n="lbl-gauge-presets">Gauge Presets</span>
+            <div class="gauge-filter-wrap" id="gauge-brand-pills"></div>
+          </div>
+          <div id="gauge-browser-body"></div>
         </div>
-        <div id="gauge-browser-body"></div>
       </div>
     </div>
   </div>
