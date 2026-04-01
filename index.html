@@ -204,9 +204,10 @@ button.primary:active{transform:scale(.98);}
   .tension-table select option { background: var(--bg2); color: var(--text); }
   
   /* Tension Chart & Summary Elements */
-  .tension-bar-wrap{height:6px;background:#1e1e1e;border-radius:3px;overflow:hidden;width:100%;position:relative;}
-  .tension-bar{height:100%;border-radius:2px;transition:width .35s ease,background .35s ease;}
-  .tension-dead-line{position:absolute;top:0;width:1px;height:100%;background:#ff4444;opacity:0.85;pointer-events:none;}
+  .tension-bar-wrap{height:6px;background:#1e1e1e;border-radius:3px;width:100%;position:relative;margin:6px 0;}
+  .tension-bar{height:100%;border-radius:2px;position:relative;z-index:2;transition:width .35s ease,background .35s ease;}
+  .tension-dead-line{position:absolute;top:50%;width:1px;height:250%;background:#ff4444;opacity:0;pointer-events:none;transform:translateY(-50%);z-index:3;transition:opacity 0.3s, left 0.3s ease-out;}
+  .tension-proper-line{position:absolute;top:50%;width:1px;height:250%;background:#86efac;opacity:0.6;pointer-events:none;transform:translateY(-50%);z-index:1;}
   .tension-gradient-legend-wrap { display:flex; flex-direction:column; align-items:center; width:100%; margin-bottom:8px; position:relative; }
   .tension-gradient-legend { 
     height:3px; width:100%; border-radius:2px; 
@@ -496,8 +497,8 @@ button.primary:active{transform:scale(.98);}
         <div class="tension-ctrls">
           <div style="display:flex;align-items:center;gap:6px;">
             <span style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;font-weight:600;" data-i18n="lbl-pitch-shift">Pitch Shift</span>
-            <button class="std" style="padding:4px 10px;font-size:11px;" onclick="shiftAllNotes(1)">+1</button>
             <button class="std" style="padding:4px 10px;font-size:11px;" onclick="shiftAllNotes(-1)">-1</button>
+            <button class="std" style="padding:4px 10px;font-size:11px;" onclick="shiftAllNotes(1)">+1</button>
           </div>
           <div style="width:1px;height:16px;background:var(--border);margin:0 4px;"></div>
           <button class="std btn-drop" id="btn-drop" style="padding:4px 16px;font-size:11px;font-weight:700;min-width:80px;" onclick="toggleDrop()" data-i18n="btn-drop">Drop</button>
@@ -2333,7 +2334,7 @@ function updateTensionRows() {
       }
     });
     html += '</select><div class="num-btns"><button class="num-btn" onclick="stepGauge(' + i + ',1)">▲</button><button class="num-btn" onclick="stepGauge(' + i + ',-1)">▼</button></div></div></td>';
-    html += '<td style="vertical-align:middle;padding:0 12px;"><div class="tension-bar-wrap"><div class="tension-bar" id="t-bar-' + i + '" style="width:0%;"></div><div class="tension-dead-line" id="t-dead-' + i + '"></div></div></td>';
+    html += '<td style="vertical-align:middle;padding:0 12px;"><div class="tension-bar-wrap"><div class="tension-bar" id="t-bar-' + i + '" style="width:0%;"></div><div class="tension-dead-line" id="t-dead-' + i + '"></div><div class="tension-proper-line" id="t-proper-' + i + '"></div></div></td>';
     html += '<td style="text-align:center;white-space:nowrap;width:110px;padding-left:1px;" class="ro-val" id="t-res-' + i + '">—</td>';
     html += '</tr>';
   }
@@ -2409,10 +2410,10 @@ const BREAK_TENSION_LB = {
     0.016: 89,  0.017: 100
   },
   wound: {
-    0.024: 28,  0.026: 33,  0.032: 50,
-    0.036: 63,  0.042: 86,  0.045: 98,
-    0.046: 100, 0.054: 138, 0.059: 165,
-    0.064: 193, 0.065: 198, 0.080: 300
+    0.024: 52,  0.026: 62,  0.032: 90,
+    0.036: 110, 0.042: 145, 0.045: 165,
+    0.046: 175, 0.054: 230, 0.059: 270,
+    0.064: 310, 0.065: 320, 0.080: 450
   }
 };
 
@@ -2434,20 +2435,22 @@ function getTensionContext() {
   var scaleIn = (_state ? _state.sc(0) : 863) / 25.4;
   var isGuitar = scaleIn <= 30.0;
 
-  // 楽器別の適正テンション中心値（kg/弦）
-  // guitar: 20lb = 9.07kg を中心に
-  // bass:   45lb = 20.41kg を中心に
-  var autoCenter = isGuitar ? 9.07 : 20.41;
-
-  // dead line閾値: guitar=25lb=11.34kg、bass=そのまま計算
-  var autoDead = isGuitar ? 10.43 : null;  // 23lb
+  // guitar: center=9.07kg(20lb) → c*1.6=赤(29lb), dead=(getDeadLine+23lb)/2
+  // bass:   center=16.44kg(36.25lb) → c*1.6=赤(58lb), dead=(getDeadLine+65lb)/2
+  var autoCenter = isGuitar ? 9.07 : 21.77;  // guitar=20lb, bass=48lb
+  var autoDead   = isGuitar ? 10.43 : 29.48;  // guitar=23lb, bass=65lb
 
   // 手動入力があればそちらを優先
   var el = document.getElementById('target-tension');
   var manual = el ? parseFloat(el.value) : NaN;
   var center = (!isNaN(manual) && manual > 0) ? manual : autoCenter;
 
-  return { center: center, max: center * 2, deadKg: autoDead, isGuitar: isGuitar };
+  // guitar: 黄=c*1.3, 赤=c*1.6  /  bass: 黄=c*1.1, 赤=c*1.21(≒58lb)
+  var coefHigh = isGuitar ? 1.3 : 1.1;
+  var coefRed  = isGuitar ? 1.6 : 1.21;
+  // グレー境界: guitar=12lb=5.44kg, bass=28lb=12.70kg
+  var greyBound = isGuitar ? 5.44 : 12.70;
+  return { center: center, max: center * 2, deadKg: autoDead, isGuitar: isGuitar, coefHigh: coefHigh, coefRed: coefRed, greyBound: greyBound };
 }
 
 function getInterpolatedColor(v, stops) {
@@ -2470,12 +2473,20 @@ function getInterpolatedColor(v, stops) {
 function getTensionColor(kg, ctx) {
   var c = ctx.center;
   // Color stops for individual string tension colors (tight STIFF sensitivity)
+  var ch = ctx.coefHigh || 1.3;
+  var cr = ctx.coefRed  || 1.6;
+  var gb = ctx.greyBound || (c * 0.4);
+  var lbFaded = c * 0.35;  // guitar: 7.0lb=3.18kg (bass: 16.8lb=7.62kg)
+  var lbGrey   = c * 0.475; // guitar: 9.5lb=4.31kg (bass: 22.8lb=10.34kg)
+  var bluePeak = gb;       // 12lb(gt)/28lb(ba)で青ピーク
   var stops = [
-    { v: 0,        c: '#94a3b8' },  // Weak
-    { v: c * 0.5,  c: '#44aaff' },  // Low
-    { v: c,        c: '#86efac' },  // CENTER
-    { v: c * 1.3,  c: '#ffaa00' },  // High  (~26lb)
-    { v: c * 1.6,  c: '#ff0000' }   // Extreme (~29lb)
+    { v: 0,        c: '#475569' },           // 低張力：読める程度の暗いグレー
+    { v: lbFaded,  c: '#475569' },           // 7lb: ここまで
+    { v: lbGrey,   c: '#94a3b8' },           // 9.5lb: 灰色（警告開始）
+    { v: bluePeak, c: '#44aaff' },           // 12lb: ここで青ピーク
+    { v: c,        c: '#86efac' },           // CENTER 緑
+    { v: c * ch,   c: '#ffaa00' },
+    { v: c * cr,   c: '#ff0000' }
   ];
   return getInterpolatedColor(kg, stops);
 }
@@ -2492,18 +2503,31 @@ function runTensionCalc() {
   var legBar = document.querySelector('.tension-gradient-legend');
   if (legBar) {
     var c = ctx.center;
-    var BAR_MAX_R = c * 1.6;  // STIFF side ends at red threshold
-    // Compute bar % positions from actual tension values using split-scale
+    var ch = ctx.coefHigh || 1.3;
+    var cr = ctx.coefRed  || 1.6;
+    var gb = ctx.greyBound || (c * 0.4);
+    var lbFaded = c * 0.35;
+    var lbGrey = c * 0.475;
+    var bluePeak = gb;
+    var BAR_MIN_L = c * 0.275; // guitar: 5.5lb=2.49kg (bass: 13.2lb=5.99kg)
+    var BAR_MAX_R = c * (ctx.coefRed || 1.6);
+
     function tensionToBarPct(v) {
-      if (v <= c) return (v / c) * 50;
+      if (v <= c) {
+        var p = ((v - BAR_MIN_L) / (c - BAR_MIN_L)) * 50;
+        return Math.max(0, p);
+      }
       return 50 + Math.min(50, ((v - c) / (BAR_MAX_R - c)) * 50);
     }
+
     var gStops = [
-      { v: 0,        col: '#94a3b8' },
-      { v: c * 0.5,  col: '#44aaff' },
+      { v: 0,        col: '#475569' },
+      { v: lbFaded,  col: '#475569' },
+      { v: lbGrey,   col: '#94a3b8' },
+      { v: bluePeak, col: '#44aaff' },
       { v: c,        col: '#86efac' },
-      { v: c * 1.3,  col: '#ffaa00' },
-      { v: c * 1.6,  col: '#ff0000' }
+      { v: c * ch,   col: '#ffaa00' },
+      { v: c * cr,   col: '#ff0000' }
     ];
     var gradParts = gStops.map(function(s) {
       return s.col + ' ' + tensionToBarPct(s.v).toFixed(1) + '%';
@@ -2530,6 +2554,9 @@ function runTensionCalc() {
   }
   
   // Second pass: Update UI (Bars, labels, colors)
+  var BAR_VIS_COEF = 1.15; // ターゲット値の1.15倍をバーの100%とする（余白用）
+  var effMaxKg = Math.max(ctx.center * BAR_VIS_COEF, localMaxKgf);
+  
   var validCount = 0;
   var minKgf = Infinity, currentMaxKgf = -Infinity;
   for (var i=0; i<_state.nStr; i++) {
@@ -2542,26 +2569,28 @@ function runTensionCalc() {
       var col = getTensionColor(res.kg, ctx);
       var dl = getDeadLine(s.gauge, s.type);
       var fixedDeadKg = (ctx.deadKg !== null && ctx.deadKg !== undefined) ? ctx.deadKg : null;
-      var deadLineKg;
-      if (fixedDeadKg !== null) {
-        // ゲージ固定値と指定値の中間（破断しやすいゲージに重み付け）
-        deadLineKg = (dl.kg + fixedDeadKg) / 2;
-      } else {
-        deadLineKg = dl.kg;
-      }
+      var deadLineKg = (fixedDeadKg !== null) ? (dl.kg + fixedDeadKg)/2 : dl.kg;
+
       var isWarn = res.kg >= deadLineKg;
       var warnHtml = isWarn ? '<span style="color:#ff4444;font-size:11px;margin-right:2px;">⚠</span>' : '';
       elRes.innerHTML = warnHtml + '<span style="color:' + col + ';">' + res.lb.toFixed(1) + '</span><span style="font-size:10px;margin-left:2px;color:var(--text3);">lb</span> / <span style="color:' + col + ';">' + res.kg.toFixed(2) + '</span><span style="font-size:10px;margin-left:2px;color:var(--text3);">kg</span>';
+      
       if (elBar) {
-        // Horizontal bar uses relative width based on max in set
-        var pct = localMaxKgf > 0 ? Math.min(res.kg / (localMaxKgf * 1.15) * 100, 100) : 0;
+        var pct = effMaxKg > 0 ? (res.kg / effMaxKg) * 100 : 0;
         elBar.style.width = pct + '%';
         elBar.style.background = col;
       }
       var tDead = document.getElementById('t-dead-' + i);
+      var tProp = document.getElementById('t-proper-' + i);
       if (tDead) {
-        var deadPct = localMaxKgf > 0 ? Math.min((deadLineKg / (localMaxKgf * 1.15)) * 100, 100) : 0;
+        var deadPct = effMaxKg > 0 ? (deadLineKg / effMaxKg) * 100 : 0;
         tDead.style.left = deadPct + '%';
+        // 98%以上（右端に張り付いている）なら非表示、内側に入ってきたら表示
+        tDead.style.opacity = (deadPct < 98) ? 0.85 : 0;
+      }
+      if (tProp) {
+        var propPct = effMaxKg > 0 ? (ctx.center / effMaxKg) * 100 : 0;
+        tProp.style.left = propPct + '%';
       }
       totalLb += res.lb;
       totalKg += res.kg;
@@ -2612,9 +2641,13 @@ function runTensionCalc() {
   var mAvg = document.getElementById('legend-marker-avg');
   var mBal = document.getElementById('legend-marker-bal');
   var c_ctx = ctx.center;
-  var BAR_MAX_R = c_ctx * 1.6;  // must match gradient bar split-scale
+  var BAR_MIN_L = c_ctx * 0.275;
+  var BAR_MAX_R = c_ctx * (ctx ? (ctx.coefRed || 1.6) : 1.6);
   function kgToBarPct(kg) {
-    if (kg <= c_ctx) return Math.max(0, (kg / c_ctx) * 50);
+    if (kg <= c_ctx) {
+      var p = ((kg - BAR_MIN_L) / (c_ctx - BAR_MIN_L)) * 50;
+      return Math.max(0, p);
+    }
     return Math.min(100, 50 + ((kg - c_ctx) / (BAR_MAX_R - c_ctx)) * 50);
   }
   if(mAvg) {
@@ -2628,7 +2661,7 @@ function runTensionCalc() {
     mBal.style.left = currentBalPct + '%';
     // Color: convert bar % back to kg using split-scale, then get color
     var balKg = currentBalPct <= 50
-      ? (currentBalPct / 50) * c_ctx
+      ? BAR_MIN_L + (currentBalPct / 50) * (c_ctx - BAR_MIN_L)
       : c_ctx + ((currentBalPct - 50) / 50) * (BAR_MAX_R - c_ctx);
     mBal.style.color = getTensionColor(balKg, ctx);
   }
@@ -2805,7 +2838,7 @@ function syncTensionUI() {
 
 </script>
 
-<div id="ver">v049-c8r1</div>
+<div id="ver">v053-p4w6</div>
 <a href="https://www.gtinstruments.xyz/" class="home-link" data-i18n="back-home">← Back to homepage</a>
 </body>
 </html>
