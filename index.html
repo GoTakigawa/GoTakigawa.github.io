@@ -1012,13 +1012,15 @@ function applySeed(){
   // テンション設定を復元
   if(d.tension&&d.tension.length>0){
     if(typeof clearStringBuffers==='function')clearStringBuffers();
-    _stringSettings=d.tension;
+    _stringSettings=d.tension.map(function(s){return Object.assign({},s);});
     _pendingPresetStrings=null;
   }
   // sync fb_end tracking
   var fbEndInp=document.getElementById('fb_end');
   fbEndInp._isDefault=false;
   run();
+  // run()後にDOMを強制再構築（弦数が変わらない場合でもnote/gaugeを反映）
+  if(typeof updateTensionRows==='function') updateTensionRows();
 }
 
 // ── presets ──
@@ -2848,7 +2850,7 @@ function syncTensionUI() {
 
 </script>
 
-<div id="ver">v058-seed-decode-priority-fix</div>
+<div id="ver">v059-seed-tension-dom-fix</div>
 <a href="https://www.gtinstruments.xyz/" class="home-link" data-i18n="back-home">← Back to homepage</a>
 </body>
 </html>
