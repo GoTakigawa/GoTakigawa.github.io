@@ -667,11 +667,13 @@ function buildFilename(nStr,s1in,sNin,pd){
 }
 
 // ── seed encode/decode ──
-// fields: sN s1 pd-fret ns nf fb_end bpitch npitch ne1 neN ee1 eeN nut_thick nut_oh pd
-// encode: each value multiplied to integer, joined with hyphen, no decimals or dots
-// format: GTI-<sN*10>-<s1*10>-<pdfret*10>-<ns>-<nf>-<fbend>-<bpitch*10>-<npitch*10>-<ne1*10>-<neN*10>-<ee1*10>-<eeN*10>-<nutthick*10>-<nutoh*10>-<pd*100000>
 // ── Seed v2: ビットパック + Base36 固定長エンコード ──
-// フォーマット: GTI-[62文字固定]  (FB26文字 + Tension36文字)
+// フォーマット: GTI-[62文字固定]  (FB部26文字 + Tension部36文字)
+// FB部: 130bit を Base36 26文字でエンコード
+//   sN(8) s1(8) pd_fret(8) ns(4) nf(5) fb_end(5) bpitch(8) npitch(7)
+//   ne1(8) neN(8) ee1(8) eeN(8) nut_thick(8) nut_oh(8) pd(17) curved(1) curve_k(11)
+// Tension部: 14bit/弦 × 13弦 = 182bit を Base36 36文字でエンコード
+//   各弦: [midi:7bit | combo_index:7bit] (midi=0は未使用弦)
 // 後方互換: GTI-数値-数値-... の旧形式も読める
 
 var SEED_FB_FIELDS = [
@@ -683,9 +685,7 @@ var SEED_FB_FIELDS = [
 var SEED_FB_CHARS=26, SEED_TEN_PER_STR=14, SEED_MAX_STR=13, SEED_TEN_CHARS=36;
 
 function bigToBase36(big,chars){
-  var s='';
-  for(var i=0;i<chars;i++){s=(Number(big%BigInt(36))).toString(36)+s;big=big/BigInt(36);}
-  return s;
+  return big.toString(36).padStart(chars, '0');
 }
 function base36ToBig(s){
   var big=BigInt(0);
@@ -695,16 +695,19 @@ function base36ToBig(s){
 function seedPackBits(vals,specs){
   var big=BigInt(0);
   for(var i=0;i<specs.length;i++){
-    var bits=specs[i][2];
-    big=(big<<BigInt(bits))|BigInt(vals[i]&((1<<bits)-1));
+    var bits=BigInt(specs[i][2]);
+    var mask=(BigInt(1)<<bits)-BigInt(1);
+    big=(big<<bits)|(BigInt(vals[i])&mask);
   }
   return big;
 }
 function seedUnpackBits(big,specs){
   var vals=new Array(specs.length);
   for(var i=specs.length-1;i>=0;i--){
-    var bits=specs[i][2],mask=BigInt((1<<bits)-1);
-    vals[i]=Number(big&mask);big=big>>BigInt(bits);
+    var bits=BigInt(specs[i][2]);
+    var mask=(BigInt(1)<<bits)-BigInt(1);
+    vals[i]=Number(big&mask);
+    big=big>>bits;
   }
   return vals;
 }
@@ -740,7 +743,8 @@ function encodeSeed(){
       var f=combos.findIndex(function(c){return Math.abs(c.g-ss.gauge)<0.0001&&c.t===ss.type;});
       ci=f>=0?f:0;
     }
-    tenBig=(tenBig<<BigInt(SEED_TEN_PER_STR))|BigInt(((midi<<7)|ci));
+    var packed=BigInt((midi<<7)|ci)&((BigInt(1)<<BigInt(SEED_TEN_PER_STR))-BigInt(1));
+    tenBig=(tenBig<<BigInt(SEED_TEN_PER_STR))|packed;
   }
   var tenStr=bigToBase36(tenBig,SEED_TEN_CHARS);
   return 'GTI-'+fbStr+tenStr;
@@ -748,7 +752,36 @@ function encodeSeed(){
 
 function decodeSeed(seed){
   seed=seed.trim();
-  // 旧形式後方互換
+  // 新形式を最優先: GTI- + 62文字固定(Base36)
+  if(/^GTI-[0-9a-z]{62}$/.test(seed)){
+    var body=seed.slice(4);
+    try{
+      var fbBig=base36ToBig(body.slice(0,SEED_FB_CHARS));
+      var fv=seedUnpackBits(fbBig,SEED_FB_FIELDS);
+      var d={sN:(fv[0]+200)/10,s1:(fv[1]+200)/10,pdfret:fv[2]/10,ns:fv[3]+1,
+        nf:fv[4]+12,fb_end:fv[5]+13,bpitch:(fv[6]+50)/10,npitch:(fv[7]+40)/10,
+        ne1:fv[8]/10,neN:fv[9]/10,ee1:fv[10]/10,eeN:fv[11]/10,
+        nut_thick:(fv[12]+10)/10,nut_oh:fv[13]/10,pd:fv[14]/100000,
+        curved:fv[15]===1,k:(fv[16]-1000)/100};
+      var combos=[];
+      GAUGE_LIST.forEach(function(g){
+        if(g.p)combos.push({g:g.g,t:'plain'});
+        if(g.w)combos.push({g:g.g,t:'wound'});
+      });
+      var tenBig=base36ToBig(body.slice(SEED_FB_CHARS));
+      var tenMask=(BigInt(1)<<BigInt(SEED_TEN_PER_STR))-BigInt(1);
+      var strings=[];
+      for(var i=SEED_MAX_STR-1;i>=0;i--){
+        var sv=Number(tenBig&tenMask);tenBig=tenBig>>BigInt(SEED_TEN_PER_STR);
+        var midi=(sv>>7)&0x7F,ci=sv&0x7F;
+        if(midi>0){var combo=combos[ci]||combos[0];strings[i]={note:midiToNote(midi),gauge:combo.g,type:combo.t};}
+      }
+      var valid=strings.filter(function(s){return s;});
+      if(valid.length>0)d.tension=valid;
+      return d;
+    }catch(e){return null;}
+  }
+  // 旧形式後方互換 (GTI-数値-数値-... 形式)
   if(/^GTI-\d/.test(seed)){
     var parts=seed.split('-');
     if((parts.length!==16&&parts.length!==18)||parts[0]!=='GTI')return null;
@@ -760,34 +793,7 @@ function decodeSeed(seed){
     if(parts.length===18){d.curved=n[15]===1;d.k=n[16]/100;}
     return d;
   }
-  // 新形式
-  if(!/^GTI-[0-9a-z]{62}$/.test(seed))return null;
-  var body=seed.slice(4);
-  try{
-    var fbBig=base36ToBig(body.slice(0,SEED_FB_CHARS));
-    var fv=seedUnpackBits(fbBig,SEED_FB_FIELDS);
-    var d={sN:(fv[0]+200)/10,s1:(fv[1]+200)/10,pdfret:fv[2]/10,ns:fv[3]+1,
-      nf:fv[4]+12,fb_end:fv[5]+13,bpitch:(fv[6]+50)/10,npitch:(fv[7]+40)/10,
-      ne1:fv[8]/10,neN:fv[9]/10,ee1:fv[10]/10,eeN:fv[11]/10,
-      nut_thick:(fv[12]+10)/10,nut_oh:fv[13]/10,pd:fv[14]/100000,
-      curved:fv[15]===1,k:(fv[16]-1000)/100};
-    var combos=[];
-    GAUGE_LIST.forEach(function(g){
-      if(g.p)combos.push({g:g.g,t:'plain'});
-      if(g.w)combos.push({g:g.g,t:'wound'});
-    });
-    var tenBig=base36ToBig(body.slice(SEED_FB_CHARS));
-    var mask=BigInt((1<<SEED_TEN_PER_STR)-1);
-    var strings=[];
-    for(var i=SEED_MAX_STR-1;i>=0;i--){
-      var sv=Number(tenBig&mask);tenBig=tenBig>>BigInt(SEED_TEN_PER_STR);
-      var midi=(sv>>7)&0x7F,ci=sv&0x7F;
-      if(midi>0){var combo=combos[ci]||combos[0];strings[i]={note:midiToNote(midi),gauge:combo.g,type:combo.t};}
-    }
-    var valid=strings.filter(function(s){return s;});
-    if(valid.length>0)d.tension=valid;
-    return d;
-  }catch(e){return null;}
+  return null;
 }
 
 function copySeed(){
@@ -2842,7 +2848,7 @@ function syncTensionUI() {
 
 </script>
 
-<div id="ver">v053-p4w6</div>
+<div id="ver">v058-seed-decode-priority-fix</div>
 <a href="https://www.gtinstruments.xyz/" class="home-link" data-i18n="back-home">← Back to homepage</a>
 </body>
 </html>
