@@ -239,6 +239,17 @@ button.primary:active{transform:scale(.98);}
   .gauge-card-gauges{font-size:10px;color:var(--text3);font-family:'Barlow',monospace;white-space:nowrap;}
   .gauge-section{margin-bottom:8px;}
   .gauge-section-hd{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);font-weight:700;padding:4px 0 3px;border-bottom:1px solid var(--border);margin-bottom:4px;}
+  /* slant disabled (curved mode) */
+  .slant-disabled{opacity:0.38;pointer-events:none;}
+  .slant-disabled .adv-sec-title{color:var(--text3);}
+  .slant-disabled .num-wrap{background:var(--bg2);}
+  .slant-disabled .ro-wrap{color:var(--bg4);}
+  /* pitch mode toggle */
+  .pitch-mode-toggle{display:flex;gap:0;margin-bottom:8px;}
+  .pitch-mode-btn{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text3);font-family:'Barlow',sans-serif;font-size:10px;font-weight:700;padding:4px 0;cursor:pointer;transition:all .15s;letter-spacing:.06em;text-transform:uppercase;}
+  .pitch-mode-btn:first-child{border-radius:var(--r) 0 0 var(--r);}
+  .pitch-mode-btn:last-child{border-radius:0 var(--r) var(--r) 0;border-left:none;}
+  .pitch-mode-btn.active{background:var(--accent1);border-color:var(--accent1);color:#1a1a1a;}
 </style>
 </head>
 <body>
@@ -292,7 +303,7 @@ button.primary:active{transform:scale(.98);}
     <div class="toggle-row" style="margin-top:10px;margin-bottom:0;">
       <span class="toggle-label" data-i18n="lbl-curved">Curved Multiscale</span>
       <label class="toggle-switch">
-        <input type="checkbox" id="curved-toggle" onchange="run()">
+        <input type="checkbox" id="curved-toggle" onchange="syncSlantDisable();run()">
         <span class="toggle-slider"></span>
       </label>
     </div>
@@ -387,6 +398,20 @@ button.primary:active{transform:scale(.98);}
         </div>
       </div>
 
+      <!-- Fret Slant -->
+      <div class="adv-sec" id="slant-sec">
+        <div class="adv-sec-title" data-i18n="sec-slant">Fret Slant</div>
+        <div style="max-width:160px;">
+          <div class="field">
+            <label data-i18n="lbl-slant">Slant Angle (°)</label>
+            <div class="num-wrap">
+              <input type="number" id="fret_slant" value="0" step="0.5" min="-45" max="45">
+              <div class="num-btns"><button class="num-btn" data-target="fret_slant" data-dir="up">▲</button><button class="num-btn" data-target="fret_slant" data-dir="dn">▼</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Board End -->
       <div class="adv-sec">
         <div class="adv-sec-title" data-i18n="sec-board-end">Board End</div>
@@ -403,23 +428,59 @@ button.primary:active{transform:scale(.98);}
       <!-- String Spacing -->
       <div class="adv-sec">
         <div class="adv-sec-title" data-i18n="sec-spacing">String Spacing</div>
-        <div class="g2">
-          <div class="field">
-            <label data-i18n="lbl-bpitch">Bridge Spacing (mm)</label>
-            <div class="num-wrap">
-              <input type="number" id="bpitch" value="10.5" step="0.1" min="5" max="25">
-              <div class="num-btns"><button class="num-btn" data-target="bpitch" data-dir="up">▲</button><button class="num-btn" data-target="bpitch" data-dir="dn">▼</button></div>
+        <div class="pitch-mode-toggle">
+          <button class="pitch-mode-btn active" id="pitch-mode-even" onclick="setPitchMode(0)" data-i18n="lbl-pitch-even">Even</button>
+          <button class="pitch-mode-btn" id="pitch-mode-linear" onclick="setPitchMode(1)" data-i18n="lbl-pitch-linear">Linear</button>
+        </div>
+        <!-- Even mode -->
+        <div id="pitch-even-wrap">
+          <div class="g2">
+            <div class="field">
+              <label data-i18n="lbl-bpitch">Bridge Spacing (mm)</label>
+              <div class="num-wrap">
+                <input type="number" id="bpitch" value="10.5" step="0.1" min="5" max="25">
+                <div class="num-btns"><button class="num-btn" data-target="bpitch" data-dir="up">▲</button><button class="num-btn" data-target="bpitch" data-dir="dn">▼</button></div>
+              </div>
+              <div class="hint"><span data-i18n="hint-span">Span</span> <span id="bw-calc">—</span> / <span data-i18n="hint-total">Total</span> <span id="bw-total">—</span> mm</div>
             </div>
-            <div class="hint"><span data-i18n="hint-span">Span</span> <span id="bw-calc">—</span> / <span data-i18n="hint-total">Total</span> <span id="bw-total">—</span> mm</div>
-          </div>
-          <div class="field">
-            <label data-i18n="lbl-npitch">Nut Spacing (mm)</label>
-            <div class="num-wrap">
-              <input type="number" id="npitch" value="7.0" step="0.1" min="4" max="15">
-              <div class="num-btns"><button class="num-btn" data-target="npitch" data-dir="up">▲</button><button class="num-btn" data-target="npitch" data-dir="dn">▼</button></div>
+            <div class="field">
+              <label data-i18n="lbl-npitch">Nut Spacing (mm)</label>
+              <div class="num-wrap">
+                <input type="number" id="npitch" value="7.0" step="0.1" min="5" max="25">
+                <div class="num-btns"><button class="num-btn" data-target="npitch" data-dir="up">▲</button><button class="num-btn" data-target="npitch" data-dir="dn">▼</button></div>
+              </div>
+              <div class="hint"><span data-i18n="hint-span">Span</span> <span id="nw-calc">—</span> / <span data-i18n="hint-total">Total</span> <span id="nw-total">—</span> mm</div>
             </div>
-            <div class="hint"><span data-i18n="hint-span">Span</span> <span id="nw-calc">—</span> / <span data-i18n="hint-total">Total</span> <span id="nw-total">—</span> mm</div>
           </div>
+        </div>
+        <!-- Linear mode -->
+        <div id="pitch-linear-wrap" style="display:none;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px;">
+            <div style="font-size:10px;color:var(--accent1);text-align:center;font-weight:700;padding:2px 0;border-bottom:1px solid var(--border);" data-i18n="lbl-bridge-side">Bridge</div>
+            <div style="font-size:10px;color:var(--accent1);text-align:center;font-weight:700;padding:2px 0;border-bottom:1px solid var(--border);" data-i18n="lbl-nut-side">Nut</div>
+          </div>
+          <div class="g2" style="margin-bottom:6px;">
+            <div class="field">
+              <label data-i18n="lbl-bNpitch">Low~adj (mm)</label>
+              <div class="num-wrap"><input type="number" id="b_pitch_N" value="11.0" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="b_pitch_N" data-dir="up">▲</button><button class="num-btn" data-target="b_pitch_N" data-dir="dn">▼</button></div></div>
+            </div>
+            <div class="field">
+              <label data-i18n="lbl-nNpitch">Low~adj (mm)</label>
+              <div class="num-wrap"><input type="number" id="n_pitch_N" value="7.5" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="n_pitch_N" data-dir="up">▲</button><button class="num-btn" data-target="n_pitch_N" data-dir="dn">▼</button></div></div>
+            </div>
+          </div>
+          <div class="g2" style="margin-bottom:6px;">
+            <div class="field">
+              <label data-i18n="lbl-b1pitch">1~2 str (mm)</label>
+              <div class="num-wrap"><input type="number" id="b_pitch_1" value="10.0" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="b_pitch_1" data-dir="up">▲</button><button class="num-btn" data-target="b_pitch_1" data-dir="dn">▼</button></div></div>
+            </div>
+            <div class="field">
+              <label data-i18n="lbl-n1pitch">1~2 str (mm)</label>
+              <div class="num-wrap"><input type="number" id="n_pitch_1" value="6.5" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="n_pitch_1" data-dir="up">▲</button><button class="num-btn" data-target="n_pitch_1" data-dir="dn">▼</button></div></div>
+            </div>
+          </div>
+          <div class="hint" style="margin-top:2px;" id="linear-span-hint">—</div>
+          <div class="hint" style="margin-top:2px;" id="linear-pitch-hint">—</div>
         </div>
       </div>
 
@@ -668,21 +729,30 @@ function buildFilename(nStr,s1in,sNin,pd){
 
 // ── seed encode/decode ──
 // ── Seed v2: ビットパック + Base36 固定長エンコード ──
-// フォーマット: GTI-[62文字固定]  (FB部26文字 + Tension部36文字)
-// FB部: 130bit を Base36 26文字でエンコード
+// フォーマット v2: GTI-[70文字固定]  (FB部34文字 + Tension部36文字)
+// FB部: 171bit を Base36 34文字でエンコード
 //   sN(8) s1(8) pd_fret(8) ns(4) nf(5) fb_end(5) bpitch(8) npitch(7)
 //   ne1(8) neN(8) ee1(8) eeN(8) nut_thick(8) nut_oh(8) pd(17) curved(1) curve_k(11)
+//   fret_slant(8) pitch_mode(1) b_pitch_1(8) b_pitch_N(8) n_pitch_1(8) n_pitch_N(8)
 // Tension部: 14bit/弦 × 13弦 = 182bit を Base36 36文字でエンコード
 //   各弦: [midi:7bit | combo_index:7bit] (midi=0は未使用弦)
-// 後方互換: GTI-数値-数値-... の旧形式も読める
+// 後方互換: v1(62文字) および GTI-数値-... の旧旧形式も読める
 
 var SEED_FB_FIELDS = [
   ['sN',200,8],['s1',200,8],['pd_fret',0,8],['ns',1,4],
   ['nf',12,5],['fb_end',13,5],['bpitch',50,8],['npitch',40,7],
   ['ne1',0,8],['neN',0,8],['ee1',0,8],['eeN',0,8],
-  ['nut_thick',10,8],['nut_oh',0,8],['pd',0,17],['curved',0,1],['curve_k',1000,11]
+  ['nut_thick',10,8],['nut_oh',0,8],['pd',0,17],['curved',0,1],['curve_k',1000,11],
+  // v2 additions
+  ['fret_slant',90,8],  // stored = round(deg*2)+90, range -45~+45 -> 0~180
+  ['pitch_mode',0,1],   // 0=even, 1=linear
+  ['b_pitch_1',50,8],['b_pitch_N',50,8], // stored = round(mm*10)-50, 5~25mm -> 0~200
+  ['n_pitch_1',50,8],['n_pitch_N',50,8]
 ];
-var SEED_FB_CHARS=26, SEED_TEN_PER_STR=14, SEED_MAX_STR=13, SEED_TEN_CHARS=36;
+// FB: 171bit -> 34chars; Tension: 182bit -> 36chars; Body total: 70chars
+var SEED_FB_CHARS=34, SEED_TEN_PER_STR=14, SEED_MAX_STR=13, SEED_TEN_CHARS=36;
+// Legacy body length (before v2 additions)
+var SEED_FB_CHARS_V1=26;
 
 function bigToBase36(big,chars){
   return big.toString(36).padStart(chars, '0');
@@ -713,7 +783,9 @@ function seedUnpackBits(big,specs){
 }
 
 function encodeSeed(){
-  function gv(id){return parseFloat(document.getElementById(id).value)||0;}
+  function gv(id){var el=document.getElementById(id);return el?parseFloat(el.value)||0:0;}
+  var slantStored=Math.round(gv('fret_slant')*2)+90;
+  slantStored=Math.max(0,Math.min(180,slantStored));
   var fbVals=[
     Math.round(gv('sN')*10)-200, Math.round(gv('s1')*10)-200,
     Math.round(gv('pd-fret')*10), Math.round(gv('ns'))-1,
@@ -724,7 +796,12 @@ function encodeSeed(){
     Math.round(gv('nut_thick')*10)-10, Math.round(gv('nut_oh')*10),
     Math.round(gv('pd')*100000),
     document.getElementById('curved-toggle').checked?1:0,
-    Math.round(gv('curve-k')*100)+1000
+    Math.round(gv('curve-k')*100)+1000,
+    // v2
+    slantStored,
+    _pitchMode||0,
+    Math.round(gv('b_pitch_1')*10)-50, Math.round(gv('b_pitch_N')*10)-50,
+    Math.round(gv('n_pitch_1')*10)-50, Math.round(gv('n_pitch_N')*10)-50
   ];
   var fbStr=bigToBase36(seedPackBits(fbVals,SEED_FB_FIELDS),SEED_FB_CHARS);
 
@@ -752,8 +829,8 @@ function encodeSeed(){
 
 function decodeSeed(seed){
   seed=seed.trim();
-  // 新形式を最優先: GTI- + 62文字固定(Base36)
-  if(/^GTI-[0-9a-z]{62}$/.test(seed)){
+  // 新形式v2: GTI- + 70文字固定(Base36)
+  if(/^GTI-[0-9a-z]{70}$/.test(seed)){
     var body=seed.slice(4);
     try{
       var fbBig=base36ToBig(body.slice(0,SEED_FB_CHARS));
@@ -762,7 +839,11 @@ function decodeSeed(seed){
         nf:fv[4]+12,fb_end:fv[5]+13,bpitch:(fv[6]+50)/10,npitch:(fv[7]+40)/10,
         ne1:fv[8]/10,neN:fv[9]/10,ee1:fv[10]/10,eeN:fv[11]/10,
         nut_thick:(fv[12]+10)/10,nut_oh:fv[13]/10,pd:fv[14]/100000,
-        curved:fv[15]===1,k:(fv[16]-1000)/100};
+        curved:fv[15]===1,k:(fv[16]-1000)/100,
+        fret_slant:(fv[17]-90)/2,
+        pitch_mode:fv[18],
+        b_pitch_1:(fv[19]+50)/10,b_pitch_N:(fv[20]+50)/10,
+        n_pitch_1:(fv[21]+50)/10,n_pitch_N:(fv[22]+50)/10};
       var combos=[];
       GAUGE_LIST.forEach(function(g){
         if(g.p)combos.push({g:g.g,t:'plain'});
@@ -781,7 +862,38 @@ function decodeSeed(seed){
       return d;
     }catch(e){return null;}
   }
-  // 旧形式後方互換 (GTI-数値-数値-... 形式)
+  // 旧形式v1: GTI- + 62文字固定(Base36) - slant/linearなし
+  if(/^GTI-[0-9a-z]{62}$/.test(seed)){
+    var body=seed.slice(4);
+    try{
+      var v1Fields=SEED_FB_FIELDS.slice(0,17); // curve_kまで
+      var fbBig=base36ToBig(body.slice(0,SEED_FB_CHARS_V1));
+      var fv=seedUnpackBits(fbBig,v1Fields);
+      var d={sN:(fv[0]+200)/10,s1:(fv[1]+200)/10,pdfret:fv[2]/10,ns:fv[3]+1,
+        nf:fv[4]+12,fb_end:fv[5]+13,bpitch:(fv[6]+50)/10,npitch:(fv[7]+40)/10,
+        ne1:fv[8]/10,neN:fv[9]/10,ee1:fv[10]/10,eeN:fv[11]/10,
+        nut_thick:(fv[12]+10)/10,nut_oh:fv[13]/10,pd:fv[14]/100000,
+        curved:fv[15]===1,k:(fv[16]-1000)/100,
+        fret_slant:0,pitch_mode:0};
+      var combos=[];
+      GAUGE_LIST.forEach(function(g){
+        if(g.p)combos.push({g:g.g,t:'plain'});
+        if(g.w)combos.push({g:g.g,t:'wound'});
+      });
+      var tenBig=base36ToBig(body.slice(SEED_FB_CHARS_V1));
+      var tenMask=(BigInt(1)<<BigInt(SEED_TEN_PER_STR))-BigInt(1);
+      var strings=[];
+      for(var i=SEED_MAX_STR-1;i>=0;i--){
+        var sv=Number(tenBig&tenMask);tenBig=tenBig>>BigInt(SEED_TEN_PER_STR);
+        var midi=(sv>>7)&0x7F,ci=sv&0x7F;
+        if(midi>0){var combo=combos[ci]||combos[0];strings[i]={note:midiToNote(midi),gauge:combo.g,type:combo.t};}
+      }
+      var valid=strings.filter(function(s){return s;});
+      if(valid.length>0)d.tension=valid;
+      return d;
+    }catch(e){return null;}
+  }
+  // 旧旧形式後方互換 (GTI-数値-数値-... 形式)
   if(/^GTI-\d/.test(seed)){
     var parts=seed.split('-');
     if((parts.length!==16&&parts.length!==18)||parts[0]!=='GTI')return null;
@@ -880,7 +992,18 @@ const TRANSLATIONS = {
     'btn-drop': 'Drop',
     'lbl-dropped-txt': 'Dropped',
     'lbl-presets': 'Tuning Presets',
-    'lbl-gauge-presets': 'Gauge Presets'
+    'lbl-gauge-presets': 'Gauge Presets',
+    'sec-slant': 'Fret Slant',
+    'lbl-slant': 'Slant Angle (°)',
+    'hint-slant-dir': '+ = Bass→Bridge',
+    'lbl-pitch-even': 'Even',
+    'lbl-pitch-linear': 'Linear',
+    'lbl-bridge-side': 'Bridge',
+    'lbl-nut-side': 'Nut',
+    'lbl-b1pitch': '1~2 str (mm)',
+    'lbl-n1pitch': '1~2 str (mm)',
+    'lbl-bNpitch': 'Low~adj (mm)',
+    'lbl-nNpitch': 'Low~adj (mm)'
   },
   jp: {
     'logo': 'GTI / 指板ツール',
@@ -958,7 +1081,18 @@ const TRANSLATIONS = {
     'btn-drop': 'Drop',
     'lbl-dropped-txt': 'Dropped',
     'lbl-presets': 'プリセット',
-    'lbl-gauge-presets': 'ゲージプリセット'
+    'lbl-gauge-presets': 'ゲージプリセット',
+    'sec-slant': 'フレット・スラント',
+    'lbl-slant': 'スラント角 (°)',
+    'hint-slant-dir': '+ = 低音弦→ブリッジ方向',
+    'lbl-pitch-even': '均等',
+    'lbl-pitch-linear': 'リニア',
+    'lbl-bridge-side': 'ブリッジ側',
+    'lbl-nut-side': 'ナット側',
+    'lbl-b1pitch': '1~2弦間 (mm)',
+    'lbl-n1pitch': '1~2弦間 (mm)',
+    'lbl-bNpitch': '最低音~隣 (mm)',
+    'lbl-nNpitch': '最低音~隣 (mm)'
   }
 };
 var currentLang = 'en';
@@ -1008,6 +1142,14 @@ function applySeed(){
     var tog=document.getElementById('curved-toggle');
     if(tog) tog.checked=d.curved;
     s('curve-k', d.k);
+  }
+  if(d.fret_slant!==undefined) s('fret_slant', d.fret_slant);
+  if(d.pitch_mode!==undefined){
+    setPitchMode(d.pitch_mode);
+    if(d.b_pitch_1!==undefined) s('b_pitch_1',d.b_pitch_1);
+    if(d.b_pitch_N!==undefined) s('b_pitch_N',d.b_pitch_N);
+    if(d.n_pitch_1!==undefined) s('n_pitch_1',d.n_pitch_1);
+    if(d.n_pitch_N!==undefined) s('n_pitch_N',d.n_pitch_N);
   }
   // テンション設定を復元
   if(d.tension&&d.tension.length>0){
@@ -1133,43 +1275,112 @@ function lineIntersect(p1,p2,p3,p4){
 }
 
 var _state=null;
-var _pdSource='fret'; // 'fret' or 'direct' — tracks which PD field was last edited
+var _pdSource='fret';
+var _pitchMode=0; // 0=even, 1=linear
+
+function syncSlantDisable(){
+  var curved=document.getElementById('curved-toggle');
+  var sec=document.getElementById('slant-sec');
+  var inp=document.getElementById('fret_slant');
+  if(!curved||!sec||!inp) return;
+  if(curved.checked){
+    sec.classList.add('slant-disabled');
+    inp.value=0;
+    inp.dispatchEvent(new Event('input',{bubbles:true}));
+  } else {
+    sec.classList.remove('slant-disabled');
+  }
+}
+
+function setPitchMode(mode){
+  _pitchMode=mode;
+  var evWrap=document.getElementById('pitch-even-wrap');
+  var liWrap=document.getElementById('pitch-linear-wrap');
+  var btnEv=document.getElementById('pitch-mode-even');
+  var btnLi=document.getElementById('pitch-mode-linear');
+  if(evWrap) evWrap.style.display=mode===0?'':'none';
+  if(liWrap) liWrap.style.display=mode===1?'':'none';
+  if(btnEv){btnEv.classList.toggle('active',mode===0);}
+  if(btnLi){btnLi.classList.toggle('active',mode===1);}
+  run();
+} // 'fret' or 'direct' — tracks which PD field was last edited
 
 function calcGeometry(){
-  var s1in=+document.getElementById('s1').value||25.5;
-  var sNin=+document.getElementById('sN').value||27.0;
-  var nStr=+document.getElementById('ns').value||7;
-  var nFret=Math.min(+document.getElementById('nf').value||24,37);
-  var bpitch=+document.getElementById('bpitch').value||10.5;
-  var npitch=+document.getElementById('npitch').value||7.0;
-  var ne1=+document.getElementById('ne1').value||3.5;
-  var neN=+document.getElementById('neN').value||4.0;
-  var ee1=+document.getElementById('ee1').value||4.5;
-  var eeN=+document.getElementById('eeN').value||5.0;
-  var fbEnd=Math.min(+document.getElementById('fb_end').value||25,37);
-  var nutThick=+document.getElementById('nut_thick').value||3.0;
-  var nutOH=+document.getElementById('nut_oh').value||8.0;
-  var pd=+document.getElementById('pd').value;
+  function gEl(id){return document.getElementById(id);}
+  var s1in=+gEl('s1').value||25.5;
+  var sNin=+gEl('sN').value||27.0;
+  var nStr=+gEl('ns').value||7;
+  var nFret=Math.min(+gEl('nf').value||24,37);
+  var ne1=+gEl('ne1').value||3.5;
+  var neN=+gEl('neN').value||4.0;
+  var ee1=+gEl('ee1').value||4.5;
+  var eeN=+gEl('eeN').value||5.0;
+  var fbEnd=Math.min(+gEl('fb_end').value||25,37);
+  var nutThick=+gEl('nut_thick').value||3.0;
+  var nutOH=+gEl('nut_oh').value||8.0;
+  var pd=+gEl('pd').value;
   pd=Math.max(0,Math.min(1,isNaN(pd)?0.37004:pd));
+  var fretSlant=(+gEl('fret_slant').value)||0; // degrees
 
-  var brgW=bpitch*(nStr-1),nutW=npitch*(nStr-1);
-  var iForY = function(y, t){
-    var pEff = npitch*(1-t) + bpitch*t;
-    if(nStr<=1) {
-      if(pEff === 0) return 0;
-      return y / pEff;
+  // ── 弦間ピッチ: 均等 / リニア ──
+  var pitchMode=_pitchMode||0;
+  var bpitch_even=+gEl('bpitch').value||10.5;
+  var npitch_even=+gEl('npitch').value||7.0;
+  // 弦iのブリッジ/ナット側ピッチを返す関数
+  var bpitchAt, npitchAt;
+  if(pitchMode===1&&nStr>1){
+    var bp1=+gEl('b_pitch_1').value||10.0;
+    var bpN=+gEl('b_pitch_N').value||11.0;
+    var np1=+gEl('n_pitch_1').value||6.5;
+    var npN=+gEl('n_pitch_N').value||7.5;
+    // t: 0=1弦側(i=0), 1=低音弦側(i=nStr-1)
+    // 弦i間(i~i+1)のピッチ → i=0が1~2弦間, i=nStr-2が最低音~隣
+    bpitchAt=function(i){var t=(nStr<=2)?0:i/(nStr-2);return bp1+(bpN-bp1)*t;};
+    npitchAt=function(i){var t=(nStr<=2)?0:i/(nStr-2);return np1+(npN-np1)*t;};
+  } else {
+    bpitchAt=function(){ return bpitch_even; };
+    npitchAt=function(){ return npitch_even; };
+  }
+  // 弦iのY座標(ナット/ブリッジ)を累積ピッチで計算
+  // i=0: 1弦(最高音), i=nStr-1: 最低音
+  var nutYs=[], brgYs=[];
+  if(nStr<=1){ nutYs=[0]; brgYs=[0]; }
+  else {
+    // 合計幅を計算してセンタリング
+    var nutSpan=0, brgSpan=0;
+    for(var ii=0;ii<nStr-1;ii++){ nutSpan+=npitchAt(ii); brgSpan+=bpitchAt(ii); }
+    var ny=-nutSpan/2, by=-brgSpan/2;
+    nutYs[0]=ny; brgYs[0]=by;
+    for(var ii=0;ii<nStr-1;ii++){
+      nutYs[ii+1]=nutYs[ii]+npitchAt(ii);
+      brgYs[ii+1]=brgYs[ii]+bpitchAt(ii);
     }
-    var yOff = (-nutW/2)*(1-t) + (-brgW/2)*t;
-    return (y - yOff) / pEff;
-  };
-  document.getElementById('bw-calc').textContent=brgW.toFixed(1);
-  document.getElementById('bw-total').textContent=(brgW+ee1+eeN).toFixed(1);
-  document.getElementById('nw-calc').textContent=nutW.toFixed(1);
-  document.getElementById('nw-total').textContent=(nutW+ne1+neN).toFixed(1);
+  }
+  // 表示用: span/total
+  var brgSpanDisp=(nStr<=1)?0:(brgYs[nStr-1]-brgYs[0]);
+  var nutSpanDisp=(nStr<=1)?0:(nutYs[nStr-1]-nutYs[0]);
+  gEl('bw-calc').textContent=brgSpanDisp.toFixed(1);
+  gEl('bw-total').textContent=(brgSpanDisp+ee1+eeN).toFixed(1);
+  gEl('nw-calc').textContent=nutSpanDisp.toFixed(1);
+  gEl('nw-total').textContent=(nutSpanDisp+ne1+neN).toFixed(1);
+  // Linear: Span/Total表示 + hint更新
+  if(pitchMode===1){
+    var lsh=gEl('linear-span-hint');
+    if(lsh) lsh.textContent='Bridge Span '+brgSpanDisp.toFixed(1)+' / Total '+(brgSpanDisp+ee1+eeN).toFixed(1)+' mm  |  Nut Span '+nutSpanDisp.toFixed(1)+' / Total '+(nutSpanDisp+ne1+neN).toFixed(1)+' mm';
+    var lh=gEl('linear-pitch-hint');
+    if(lh&&nStr>1){
+      var lines=[];
+      for(var ii=0;ii<Math.min(nStr-1,5);ii++){
+        lines.push('B'+(ii+1)+'~'+(ii+2)+': '+bpitchAt(ii).toFixed(2)+' / N: '+npitchAt(ii).toFixed(2)+'mm');
+      }
+      if(nStr-1>5) lines.push('...');
+      lh.textContent=lines.join(' | ');
+    }
+  }
 
   var s1=s1in*I2M,sN=sNin*I2M;
-  var curved=document.getElementById('curved-toggle').checked;
-  var curveK=curved?(+document.getElementById('curve-k').value||0):0;
+  var curved=gEl('curved-toggle').checked;
+  var curveK=curved?(+gEl('curve-k').value||0):0;
   var sc=function(i){
     if(nStr===1) return s1;
     var t=i/(nStr-1);
@@ -1178,27 +1389,68 @@ function calcGeometry(){
     return s1+(sN-s1)*(Math.exp(k*t)-1)/(Math.exp(k)-1);
   };
   var xShift=function(i){return (s1+sN)/2*pd-sc(i)*pd;};
+  // nutYs/brgYs を連続インデックスiで線形補間・外挿して返す
+  var interpY=function(ys,i){
+    if(nStr<=1) return ys[0]||0;
+    var n=ys.length;
+    if(i<=0){
+      // 外挿: 弦0-1間のピッチで延長
+      return ys[0]+(i)*(n>1?ys[1]-ys[0]:0);
+    }
+    if(i>=n-1){
+      // 外挿: 弦(n-2)-(n-1)間のピッチで延長
+      return ys[n-1]+(i-(n-1))*(n>1?ys[n-1]-ys[n-2]:0);
+    }
+    var i0=Math.floor(i), i1=i0+1;
+    return ys[i0]+(ys[i1]-ys[i0])*(i-i0);
+  };
+  // ── Fret Slant: Y位置に比例したXオフセットとして実装 ──
+  // Bp(i).x += brgYs[i] * tan(slant),  Np(i).x += nutYs[i] * tan(slant)
+  // → 弦のY位置に応じてX方向にずれる（低音弦ほどブリッジ寄り）
+  // → フレットを各弦交点で結ぶと自然にスラント
+  // → 指板全体の向きは変わらない
+  var slantRad=fretSlant*Math.PI/180;
+  var tanSlant=Math.tan(slantRad);
+  var midI=(nStr-1)/2;
+
   var Np=function(i){
-    var y = (nStr<=1) ? (i * npitch) : (-nutW/2+nutW*i/(nStr-1));
-    return {x:xShift(i), y:y};
+    var y=interpY(nutYs,i);
+    return{x:xShift(i)+y*tanSlant, y:y};
   };
   var Bp=function(i){
-    var y = (nStr<=1) ? (i * bpitch) : (-brgW/2+brgW*i/(nStr-1));
-    return {x:sc(i)+xShift(i), y:y};
+    var y=interpY(brgYs,i);
+    return{x:sc(i)+xShift(i)+y*tanSlant, y:y};
   };
   var Sp=function(i,t){var n=Np(i),b=Bp(i);return{x:n.x+(b.x-n.x)*t,y:n.y+(b.y-n.y)*t};};
 
+  var brgW=bpitch_even*(nStr-1), nutW=npitch_even*(nStr-1);
+  var iForY = function(y, t){
+    var pEff = npitch_even*(1-t) + bpitch_even*t;
+    if(nStr<=1) {
+      if(pEff === 0) return 0;
+      return y / pEff;
+    }
+    var yOff = (-nutW/2)*(1-t) + (-brgW/2)*t;
+    return (y - yOff) / pEff;
+  };
+
   var tEnd=FR(fbEnd);
-  var cornerNut1 = Np(iForY(Np(0).y - ne1, 0));
-  var cornerNutN = Np(iForY(Np(nStr-1).y + neN, 0));
-  var cornerEnd1 = Sp(iForY(Sp(0, tEnd).y - ee1, tEnd), tEnd);
-  var cornerEndN = Sp(iForY(Sp(nStr-1, tEnd).y + eeN, tEnd), tEnd);
+  // Edge Overhang: 端弦の交点からY方向に固定オフセット（Even/Linear共通）
+  // ナット側: 弦0/nStr-1のナット点(t=0)からY方向にne1/neNオフセット
+  // エンド側: 弦0/nStr-1のfbEnd位置(t=tEnd)からY方向にee1/eeNオフセット
+  var _n0=Np(0), _nN=Np(nStr-1);
+  var _e0=Sp(0,tEnd), _eN=Sp(nStr-1,tEnd);
+  // コーナー点: 端弦の点からYオフセット後、X座標はそのまま（iForYの代わり）
+  // iForYはEvenピッチ前提なのでLinear時に誤差が出る → 直接計算
+  var cornerNut1 = {x:_n0.x - ne1*Math.tan(slantRad), y:_n0.y - ne1};
+  var cornerNutN = {x:_nN.x + neN*Math.tan(slantRad), y:_nN.y + neN};
+  var cornerEnd1 = {x:_e0.x - ee1*Math.tan(slantRad), y:_e0.y - ee1};
+  var cornerEndN = {x:_eN.x + eeN*Math.tan(slantRad), y:_eN.y + eeN};
 
   var dx1=cornerNut1.x-cornerEnd1.x,dy1=cornerNut1.y-cornerEnd1.y,L1=Math.sqrt(dx1*dx1+dy1*dy1);
   var s1ux=dx1/L1,s1uy=dy1/L1;
   var dxN=cornerNutN.x-cornerEndN.x,dyN=cornerNutN.y-cornerEndN.y,LN=Math.sqrt(dxN*dxN+dyN*dyN);
   var sNux=dxN/LN,sNuy=dyN/LN;
-
   var nutNx=-(Np(nStr-1).y-Np(0).y), nutNy=(Np(nStr-1).x-Np(0).x);
   var nLen=Math.sqrt(nutNx*nutNx+nutNy*nutNy);
   if(nLen>1e-6){nutNx/=nLen; nutNy/=nLen;}
@@ -1206,7 +1458,6 @@ function calcGeometry(){
   var dotN=Math.abs(sNux*nutNx+sNuy*nutNy);
   var nutThickAdj1=dot1>1e-6?nutThick/dot1:nutThick;
   var nutThickAdjN=dotN>1e-6?nutThick/dotN:nutThick;
-
   var nutHeadSide1={x:cornerNut1.x+s1ux*nutThickAdj1,y:cornerNut1.y+s1uy*nutThickAdj1};
   var nutHeadSideN={x:cornerNutN.x+sNux*nutThickAdjN,y:cornerNutN.y+sNuy*nutThickAdjN};
   var oh1={x:nutHeadSide1.x+s1ux*nutOH,y:nutHeadSide1.y+s1uy*nutOH};
@@ -1239,14 +1490,23 @@ function calcGeometry(){
     return {ix1:Sp(iMin,t), ixN:Sp(iMax,t), iMin:iMin, iMax:iMax};
   }
 
+  // rotatePt: slantはNp/Bpに組み込み済みなので恒等関数
+  var rotatePt=function(p){return p;};
+
+  // slant表示更新
+  // slant-disp removed
+
   return{s1in:s1in,sNin:sNin,s1:s1,sN:sN,nStr:nStr,nFret:nFret,nutW:nutW,brgW:brgW,pd:pd,
+    nutYs:nutYs,brgYs:brgYs,fretSlant:fretSlant,pitchMode:pitchMode,
     ne1:ne1,neN:neN,ee1:ee1,eeN:eeN,fbEnd:fbEnd,nutThick:nutThick,nutOH:nutOH,
-    Np:Np,Bp:Bp,Sp:Sp,cornerNut1:cornerNut1,cornerNutN:cornerNutN,cornerEnd1:cornerEnd1,cornerEndN:cornerEndN,
-    nutHeadSide1:nutHeadSide1,nutHeadSideN:nutHeadSideN,oh1:oh1,ohN:ohN,fretEdgePts:fretEdgePts,sc:sc,curved:curved,iForY:iForY,
-    stockMinX: Math.min(oh1.x, ohN.x, cornerEnd1.x, cornerEndN.x),
-    stockMaxX: Math.max(oh1.x, ohN.x, cornerEnd1.x, cornerEndN.x),
-    stockMinY: Math.min(oh1.y, ohN.y, cornerEnd1.y, cornerEndN.y),
-    stockMaxY: Math.max(oh1.y, ohN.y, cornerEnd1.y, cornerEndN.y)
+    Np:Np,Bp:Bp,Sp:Sp,rotatePt:rotatePt,
+    cornerNut1:cornerNut1,cornerNutN:cornerNutN,cornerEnd1:cornerEnd1,cornerEndN:cornerEndN,
+    nutHeadSide1:nutHeadSide1,nutHeadSideN:nutHeadSideN,oh1:oh1,ohN:ohN,
+    fretEdgePts:fretEdgePts,sc:sc,curved:curved,iForY:iForY,
+    stockMinX:Math.min(oh1.x,ohN.x,cornerEnd1.x,cornerEndN.x),
+    stockMaxX:Math.max(oh1.x,ohN.x,cornerEnd1.x,cornerEndN.x),
+    stockMinY:Math.min(oh1.y,ohN.y,cornerEnd1.y,cornerEndN.y),
+    stockMaxY:Math.max(oh1.y,ohN.y,cornerEnd1.y,cornerEndN.y)
   };
 }
 
@@ -1279,7 +1539,7 @@ function getMathPts(bF,isCurved,ofn,iMin,iMax){
 
 function toDXF(g,px,py,lefty){
   var x=-py;
-  if(lefty) x=py;  // flip x axis for lefty
+  if(lefty) x=py;
   return{x:x,z:-(px-g.Bp(0).x)};
 }
 function dxfLine(x1,z1,x2,z2,l){
@@ -1417,6 +1677,8 @@ function run(){
       if (typeof clearStringBuffers === 'function') clearStringBuffers();
     }
   }
+  // pitchModeをstateに同期
+  _pitchMode = g.pitchMode;
   
   _state=g;
   var s1in=g.s1in,sNin=g.sNin,s1=g.s1,sN=g.sN,nStr=g.nStr,nFret=g.nFret,pd=g.pd;
@@ -1465,9 +1727,10 @@ function run(){
   var lefty=(currentHand==='left');
 
   var allPts=[];
-  for(var fn=0;fn<=nFret;fn++){var ep=fretEdgePts(fn);allPts.push(ep.ix1,ep.ixN);}
-  for(var si=0;si<nStr;si++) allPts.push(Bp(si));
-  allPts.push(cornerNut1,cornerNutN,cornerEnd1,cornerEndN,oh1,ohN);
+  var rp0=g.rotatePt;
+  for(var fn=0;fn<=nFret;fn++){var ep=fretEdgePts(fn);allPts.push(rp0(ep.ix1),rp0(ep.ixN));}
+  for(var si=0;si<nStr;si++) allPts.push(rp0(Bp(si)));
+  allPts.push(rp0(cornerNut1),rp0(cornerNutN),rp0(cornerEnd1),rp0(cornerEndN),rp0(oh1),rp0(ohN));
   var xs=allPts.map(function(p){return p.x;}),ys=allPts.map(function(p){return p.y;});
   var x0=Math.min.apply(null,xs),x1=Math.max.apply(null,xs);
   var y0=Math.min.apply(null,ys),y1=Math.max.apply(null,ys);
@@ -1485,9 +1748,10 @@ function run(){
   // map raw geometry coords to SVG px
   // x axis: nut at right (x=x1 → px=PL), bridge at left (x=x0 → px=PL+drawW)
   var mxf=function(x){return PL+drawW*(1-(x-x0)/rx);};
-  var myf=function(y){return PT+(y1-y)*SC;};  // y-flipped: bass(large y) → top
-  var sp=function(i,t){var p=Sp(i,t);return{x:mxf(p.x),y:myf(p.y)};};
-  var mp=function(p){return{x:mxf(p.x),y:myf(p.y)};};
+  var myf=function(y){return PT+(y1-y)*SC;};
+  var rp=g.rotatePt; // スラント回転（slant=0なら恒等）
+  var sp=function(i,t){var p=rp(Sp(i,t));return{x:mxf(p.x),y:myf(p.y)};};
+  var mp=function(p){var r=rp(p);return{x:mxf(r.x),y:myf(r.y)};};
 
   var svg=document.getElementById('fsv');
   svg.setAttribute('viewBox','0 0 '+SW.toFixed(0)+' '+SH.toFixed(0));
@@ -1657,6 +1921,7 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   });
   // 初期化
+  syncSlantDisable();
   loadTuningData(); // _tuningData をセット → renderTuningBrowser() を呼ぶ
   setTimeout(updateTensionRows, 100);
   run();
@@ -2850,7 +3115,7 @@ function syncTensionUI() {
 
 </script>
 
-<div id="ver">v059-seed-tension-dom-fix</div>
+<div id="ver">v075-ui-edge-fix</div>
 <a href="https://www.gtinstruments.xyz/" class="home-link" data-i18n="back-home">← Back to homepage</a>
 </body>
 </html>
