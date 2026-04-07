@@ -75,6 +75,10 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow','DIN Condensed'
 .adv-sec{margin-bottom:12px;}
 .adv-sec:last-child{margin-bottom:0;}
 .adv-sec-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:7px;font-weight:600;}
+  .adv-group{border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
+  .adv-group-title{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);font-weight:700;padding:5px 10px 4px;background:var(--bg2);border-bottom:1px solid var(--border);}
+  .adv-group>.adv-sec{padding:10px 10px 8px;border-bottom:1px solid var(--border);}
+  .adv-group>.adv-sec:last-child{border-bottom:none;}
 .edge-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;}
 .edge-col{display:flex;flex-direction:column;gap:6px;}
 .edge-col-hd{font-size:11px;color:var(--text2);text-align:center;padding-bottom:4px;border-bottom:1px solid var(--border);font-weight:500;}
@@ -367,73 +371,110 @@ button.primary:active{transform:scale(.98);}
       <span data-i18n="btn-adv">Advanced</span> <span class="adv-arrow">▼</span>
     </button>
     <div class="adv-body" id="adv-body">
-      <!-- PD fine control -->
-      <div class="adv-sec">
-        <div class="adv-sec-title">PD Fine Control</div>
-        <div class="pd-row">
-          <div class="field">
-            <label data-i18n="lbl-pd-direct">P.D. Value (direct)</label>
-            <div class="num-wrap">
-              <input type="number" id="pd" value="0.37004" step="0.001" min="0" max="1">
-              <div class="num-btns"><button class="num-btn" data-target="pd" data-dir="up">▲</button><button class="num-btn" data-target="pd" data-dir="dn">▼</button></div>
+
+      <!-- GROUP 1: Fretting -->
+      <div class="adv-group">
+        <div class="adv-group-title" data-i18n="grp-fretting">Fretting</div>
+        <!-- PD fine control -->
+        <div class="adv-sec">
+          <div class="adv-sec-title" data-i18n="sec-fine-pd">PD Fine Control</div>
+          <div class="pd-row">
+            <div class="field">
+              <label data-i18n="lbl-pd-direct">P.D. Value (direct)</label>
+              <div class="num-wrap">
+                <input type="number" id="pd" value="0.37004" step="0.001" min="0" max="1">
+                <div class="num-btns"><button class="num-btn" data-target="pd" data-dir="up">▲</button><button class="num-btn" data-target="pd" data-dir="dn">▼</button></div>
+              </div>
+            </div>
+            <div class="field">
+              <label data-i18n="lbl-equiv-fret">Equiv. Fret</label>
+              <div class="ro-wrap" id="pdFret">—</div>
             </div>
           </div>
-          <div class="field">
-            <label data-i18n="lbl-equiv-fret">Equiv. Fret</label>
-            <div class="ro-wrap" id="pdFret">—</div>
+          <div class="pd-row" style="margin-top:6px;">
+            <div class="field">
+              <label data-i18n="lbl-ref-fret">Reference Fret No.</label>
+              <div class="num-wrap">
+                <input type="number" id="pfref" value="8" step="1" min="0" max="36">
+                <div class="num-btns"><button class="num-btn" data-target="pfref" data-dir="up">▲</button><button class="num-btn" data-target="pfref" data-dir="dn">▼</button></div>
+              </div>
+            </div>
+            <button class="std" onclick="applyFretPD()" style="align-self:end;" data-i18n="btn-apply-arr">→ Apply</button>
+          </div>
+          <div class="pd-ref">
+            <span>nut = 0.000</span><span>7f ≈ 0.333</span><span>12f = 0.500</span><span>17f ≈ 0.625</span><span>bridge = 1.000</span>
           </div>
         </div>
-        <div class="pd-row" style="margin-top:6px;">
-          <div class="field">
-            <label data-i18n="lbl-ref-fret">Reference Fret No.</label>
-            <div class="num-wrap">
-              <input type="number" id="pfref" value="8" step="1" min="0" max="36">
-              <div class="num-btns"><button class="num-btn" data-target="pfref" data-dir="up">▲</button><button class="num-btn" data-target="pfref" data-dir="dn">▼</button></div>
+        <!-- Fret Slant -->
+        <div class="adv-sec" id="slant-sec">
+          <div class="adv-sec-title" data-i18n="sec-slant">Fret Slant</div>
+          <div style="max-width:160px;">
+            <div class="field">
+              <label data-i18n="lbl-slant">Slant Angle (°)</label>
+              <div class="num-wrap">
+                <input type="number" id="fret_slant" value="0" step="0.5" min="-45" max="45">
+                <div class="num-btns"><button class="num-btn" data-target="fret_slant" data-dir="up">▲</button><button class="num-btn" data-target="fret_slant" data-dir="dn">▼</button></div>
+              </div>
             </div>
           </div>
-          <button class="std" onclick="applyFretPD()" style="align-self:end;" data-i18n="btn-apply-arr">→ Apply</button>
-        </div>
-        <div class="pd-ref">
-          <span>nut = 0.000</span><span>7f ≈ 0.333</span><span>12f = 0.500</span><span>17f ≈ 0.625</span><span>bridge = 1.000</span>
         </div>
       </div>
 
-      <!-- Fret Slant -->
-      <div class="adv-sec" id="slant-sec">
-        <div class="adv-sec-title" data-i18n="sec-slant">Fret Slant</div>
-        <div style="max-width:160px;">
-          <div class="field">
-            <label data-i18n="lbl-slant">Slant Angle (°)</label>
+      <!-- GROUP 2: Fretboard -->
+      <div class="adv-group">
+        <div class="adv-group-title" data-i18n="grp-fretboard">Fretboard</div>
+        <!-- Board End -->
+        <div class="adv-sec">
+          <div class="adv-sec-title" data-i18n="sec-board-end">Board End</div>
+          <div class="field" style="max-width:160px;">
+            <label><span data-i18n="lbl-fb-end">Board End (fret no.)</span></label>
             <div class="num-wrap">
-              <input type="number" id="fret_slant" value="0" step="0.5" min="-45" max="45">
-              <div class="num-btns"><button class="num-btn" data-target="fret_slant" data-dir="up">▲</button><button class="num-btn" data-target="fret_slant" data-dir="dn">▼</button></div>
+              <input type="number" id="fb_end" value="25" step="1" min="1" max="37">
+              <div class="num-btns"><button class="num-btn" data-target="fb_end" data-dir="up">▲</button><button class="num-btn" data-target="fb_end" data-dir="dn">▼</button></div>
+            </div>
+          </div>
+          <div style="margin-top:4px;font-size:11px;color:var(--text3);"><span data-i18n="hint-fb-end">Min: Frets + 1 =</span> <span id="fb-end-min">—</span></div>
+        </div>
+        <!-- Edge Overhang -->
+        <div class="adv-sec">
+          <div class="adv-sec-title" data-i18n="sec-edge">Edge Overhang (mm)</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:11px;color:var(--text2);font-weight:500;" data-i18n="lbl-edge-end">← End side</span>
+            <span style="font-size:11px;color:var(--text2);font-weight:500;" data-i18n="lbl-edge-nut">Nut side →</span>
+          </div>
+          <div class="edge-wrap">
+            <div class="edge-col">
+              <div class="field"><label data-i18n="lbl-bass">Bass Side</label><div class="num-wrap"><input type="number" id="eeN" value="5.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="eeN" data-dir="up">▲</button><button class="num-btn" data-target="eeN" data-dir="dn">▼</button></div></div></div>
+              <div class="field"><label data-i18n="lbl-treble">Treble Side</label><div class="num-wrap"><input type="number" id="ee1" value="4.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ee1" data-dir="up">▲</button><button class="num-btn" data-target="ee1" data-dir="dn">▼</button></div></div></div>
+            </div>
+            <div class="edge-col">
+              <div class="field"><label data-i18n="lbl-bass">Bass Side</label><div class="num-wrap"><input type="number" id="neN" value="4.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="neN" data-dir="up">▲</button><button class="num-btn" data-target="neN" data-dir="dn">▼</button></div></div></div>
+              <div class="field"><label data-i18n="lbl-treble">Treble Side</label><div class="num-wrap"><input type="number" id="ne1" value="3.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ne1" data-dir="up">▲</button><button class="num-btn" data-target="ne1" data-dir="dn">▼</button></div></div></div>
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Board End -->
-      <div class="adv-sec">
-        <div class="adv-sec-title" data-i18n="sec-board-end">Board End</div>
-        <div class="field" style="max-width:160px;">
-          <label><span data-i18n="lbl-fb-end">Board End (fret no.)</span></label>
-          <div class="num-wrap">
-            <input type="number" id="fb_end" value="25" step="1" min="1" max="37">
-            <div class="num-btns"><button class="num-btn" data-target="fb_end" data-dir="up">▲</button><button class="num-btn" data-target="fb_end" data-dir="dn">▼</button></div>
+        <!-- Nut Overhang -->
+        <div class="adv-sec">
+          <div class="adv-sec-title" data-i18n="sec-nut">Nut Overhang (mm)</div>
+          <div class="g2">
+            <div class="field"><label data-i18n="lbl-nut-thick">Nut Thickness (mm)</label><div class="num-wrap"><input type="number" id="nut_thick" value="3.0" step="0.5" min="1" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_thick" data-dir="up">▲</button><button class="num-btn" data-target="nut_thick" data-dir="dn">▼</button></div></div></div>
+            <div class="field"><label data-i18n="lbl-nut-oh">Headstock Overhang (mm)</label><div class="num-wrap"><input type="number" id="nut_oh" value="8.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_oh" data-dir="up">▲</button><button class="num-btn" data-target="nut_oh" data-dir="dn">▼</button></div></div></div>
           </div>
         </div>
-        <div class="hint" style="margin-top:4px;"><span data-i18n="hint-fb-end">Min: Frets + 1 =</span> <span id="fb-end-min">—</span></div>
       </div>
 
-      <!-- String Spacing -->
-      <div class="adv-sec">
-        <div class="adv-sec-title" data-i18n="sec-spacing">String Spacing</div>
+      <!-- GROUP 3: String Spacing -->
+      <div class="adv-group">
+        <div class="adv-group-title" data-i18n="grp-spacing">String Spacing</div>
+        <div class="adv-sec">
+          <div class="adv-sec-title" data-i18n="sec-spacing">String Spacing</div>
         <div class="pitch-mode-toggle">
           <button class="pitch-mode-btn active" id="pitch-mode-even" onclick="setPitchMode(0)" data-i18n="lbl-pitch-even">Even</button>
           <button class="pitch-mode-btn" id="pitch-mode-linear" onclick="setPitchMode(1)" data-i18n="lbl-pitch-linear">Linear</button>
         </div>
         <!-- Even mode -->
         <div id="pitch-even-wrap">
+
           <div class="g2">
             <div class="field">
               <label data-i18n="lbl-bpitch">Bridge Spacing (mm)</label>
@@ -455,62 +496,49 @@ button.primary:active{transform:scale(.98);}
         </div>
         <!-- Linear mode -->
         <div id="pitch-linear-wrap" style="display:none;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px;">
-            <div style="font-size:10px;color:var(--accent1);text-align:center;font-weight:700;padding:2px 0;border-bottom:1px solid var(--border);" data-i18n="lbl-bridge-side">Bridge</div>
-            <div style="font-size:10px;color:var(--accent1);text-align:center;font-weight:700;padding:2px 0;border-bottom:1px solid var(--border);" data-i18n="lbl-nut-side">Nut</div>
-          </div>
-          <div class="g2" style="margin-bottom:6px;">
+          <div class="g2" style="margin-bottom:4px;">
             <div class="field">
-              <label data-i18n="lbl-bNpitch">Low~adj (mm)</label>
+              <label data-i18n="lbl-bpitch">Bridge Spacing (mm)</label>
+            </div>
+            <div class="field">
+              <label data-i18n="lbl-npitch">Nut Spacing (mm)</label>
+            </div>
+          </div>
+          <div class="g2" style="margin-bottom:4px;">
+            <div class="field">
               <div class="num-wrap"><input type="number" id="b_pitch_N" value="11.0" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="b_pitch_N" data-dir="up">▲</button><button class="num-btn" data-target="b_pitch_N" data-dir="dn">▼</button></div></div>
+              <div class="hint" style="font-size:10px;" data-i18n="lbl-bNpitch">Low~adj</div>
             </div>
             <div class="field">
-              <label data-i18n="lbl-nNpitch">Low~adj (mm)</label>
               <div class="num-wrap"><input type="number" id="n_pitch_N" value="7.5" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="n_pitch_N" data-dir="up">▲</button><button class="num-btn" data-target="n_pitch_N" data-dir="dn">▼</button></div></div>
+              <div class="hint" style="font-size:10px;" data-i18n="lbl-nNpitch">Low~adj</div>
             </div>
           </div>
-          <div class="g2" style="margin-bottom:6px;">
+          <div class="g2" style="margin-bottom:4px;">
             <div class="field">
-              <label data-i18n="lbl-b1pitch">1~2 str (mm)</label>
               <div class="num-wrap"><input type="number" id="b_pitch_1" value="10.0" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="b_pitch_1" data-dir="up">▲</button><button class="num-btn" data-target="b_pitch_1" data-dir="dn">▼</button></div></div>
+              <div class="hint" style="font-size:10px;" data-i18n="lbl-b1pitch">1~2 str</div>
             </div>
             <div class="field">
-              <label data-i18n="lbl-n1pitch">1~2 str (mm)</label>
               <div class="num-wrap"><input type="number" id="n_pitch_1" value="6.5" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="n_pitch_1" data-dir="up">▲</button><button class="num-btn" data-target="n_pitch_1" data-dir="dn">▼</button></div></div>
+              <div class="hint" style="font-size:10px;" data-i18n="lbl-n1pitch">1~2 str</div>
             </div>
           </div>
-          <div class="hint" style="margin-top:2px;" id="linear-span-hint">—</div>
-          <div class="hint" style="margin-top:2px;" id="linear-pitch-hint">—</div>
-        </div>
-      </div>
-
-      <!-- Edge Overhang -->
-      <div class="adv-sec">
-        <div class="adv-sec-title" data-i18n="sec-edge">Edge Overhang (mm)</div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-          <span style="font-size:11px;color:var(--text2);font-weight:500;" data-i18n="lbl-edge-end">← End side</span>
-          <span style="font-size:11px;color:var(--text2);font-weight:500;" data-i18n="lbl-edge-nut">Nut side →</span>
-        </div>
-        <div class="edge-wrap">
-          <div class="edge-col">
-            <div class="field"><label data-i18n="lbl-bass">Bass Side</label><div class="num-wrap"><input type="number" id="eeN" value="5.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="eeN" data-dir="up">▲</button><button class="num-btn" data-target="eeN" data-dir="dn">▼</button></div></div></div>
-            <div class="field"><label data-i18n="lbl-treble">Treble Side</label><div class="num-wrap"><input type="number" id="ee1" value="4.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ee1" data-dir="up">▲</button><button class="num-btn" data-target="ee1" data-dir="dn">▼</button></div></div></div>
-          </div>
-          <div class="edge-col">
-            <div class="field"><label data-i18n="lbl-bass">Bass Side</label><div class="num-wrap"><input type="number" id="neN" value="4.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="neN" data-dir="up">▲</button><button class="num-btn" data-target="neN" data-dir="dn">▼</button></div></div></div>
-            <div class="field"><label data-i18n="lbl-treble">Treble Side</label><div class="num-wrap"><input type="number" id="ne1" value="3.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ne1" data-dir="up">▲</button><button class="num-btn" data-target="ne1" data-dir="dn">▼</button></div></div></div>
+          <div class="hint" style="margin-top:3px;" id="linear-span-hint">—</div>
+          <div id="linear-pitch-table" style="margin-top:6px;display:none;">
+            <table style="width:100%;border-collapse:collapse;font-size:10px;font-family:'Barlow',monospace;table-layout:fixed;">
+              <colgroup><col style="width:34%"><col style="width:33%"><col style="width:33%"></colgroup>
+              <thead><tr>
+                <th style="color:var(--text3);text-align:center;padding:2px 4px;border-bottom:1px solid var(--border);" data-i18n="lbl-bridge-txt">Bridge</th>
+                <th style="color:var(--text3);text-align:center;padding:2px 4px;border-bottom:1px solid var(--border);" data-i18n="lbl-str-pair">Strings</th>
+                <th style="color:var(--text3);text-align:center;padding:2px 4px;border-bottom:1px solid var(--border);" data-i18n="lbl-nut-txt2">Nut</th>
+              </tr></thead>
+              <tbody id="linear-pitch-tbody"></tbody>
+            </table>
           </div>
         </div>
-      </div>
-
-      <!-- Nut Overhang -->
-      <div class="adv-sec">
-        <div class="adv-sec-title" data-i18n="sec-nut">Nut Overhang (mm)</div>
-        <div class="g2">
-          <div class="field"><label data-i18n="lbl-nut-thick">Nut Thickness (mm)</label><div class="num-wrap"><input type="number" id="nut_thick" value="3.0" step="0.5" min="1" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_thick" data-dir="up">▲</button><button class="num-btn" data-target="nut_thick" data-dir="dn">▼</button></div></div></div>
-          <div class="field"><label data-i18n="lbl-nut-oh">Headstock Overhang (mm)</label><div class="num-wrap"><input type="number" id="nut_oh" value="8.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_oh" data-dir="up">▲</button><button class="num-btn" data-target="nut_oh" data-dir="dn">▼</button></div></div></div>
         </div>
-      </div>
+      </div><!-- /adv-group String Spacing -->
 
     </div>
   </div>
@@ -1002,8 +1030,22 @@ const TRANSLATIONS = {
     'lbl-nut-side': 'Nut',
     'lbl-b1pitch': '1~2 str (mm)',
     'lbl-n1pitch': '1~2 str (mm)',
-    'lbl-bNpitch': 'Low~adj (mm)',
-    'lbl-nNpitch': 'Low~adj (mm)'
+    'lbl-bNpitch': 'Low~adj',
+    'grp-fretting': 'Fretting',
+    'grp-fretboard': 'Fretboard',
+    'grp-spacing': 'String Spacing',
+    'lbl-nNpitch': 'Low~adj',
+    'lbl-b1pitch': '1~2 str',
+    'lbl-n1pitch': '1~2 str',
+    'lbl-nut-txt2': 'Nut',
+    'lbl-hint-lowhigh': 'Low → High',
+    'lbl-str-pair': 'Strings',
+    'btn-drop': 'Drop',
+    'lbl-dropped': 'Dropped',
+    'lbl-dropped-txt': 'Dropped',
+    'lbl-ba': 'Bridge Angle',
+    'lbl-na': 'Nut Angle',
+    'lbl-sd': 'Scale Diff.'
   },
   jp: {
     'logo': 'GTI / 指板ツール',
@@ -1091,8 +1133,43 @@ const TRANSLATIONS = {
     'lbl-nut-side': 'ナット側',
     'lbl-b1pitch': '1~2弦間 (mm)',
     'lbl-n1pitch': '1~2弦間 (mm)',
-    'lbl-bNpitch': '最低音~隣 (mm)',
-    'lbl-nNpitch': '最低音~隣 (mm)'
+    'lbl-bNpitch': '低音側',
+    'grp-fretting': 'フレッティング',
+    'grp-fretboard': '指板',
+    'grp-spacing': '弦間ピッチ',
+    'lbl-nNpitch': '低音側',
+    'lbl-b1pitch': '高音側',
+    'lbl-n1pitch': '高音側',
+    'lbl-nut-txt2': 'ナット',
+    'lbl-hint-lowhigh': '低音弦 → 高音弦',
+    'lbl-str-pair': '弦間',
+    'btn-drop': 'ドロップ',
+    'lbl-dropped': 'ドロップ',
+    'lbl-dropped-txt': 'ドロップ',
+    'lbl-ba': 'ブリッジ角度',
+    'lbl-na': 'ナット角度',
+    'lbl-sd': 'スケール差',
+    'lbl-bpitch': 'ブリッジ弦間 (mm)',
+    'lbl-npitch': 'ナット弦間 (mm)',
+    'sec-tension': '弦テンション計算',
+    'lbl-scale': 'スケール (in)',
+    'lbl-note': '音程',
+    'lbl-gauge': 'ゲージ',
+    'lbl-tension': 'テンション',
+    'lbl-total-tension': '合計テンション',
+    'lbl-pitch-shift': '全弦移調',
+    'lbl-presets': 'チューニング',
+    'lbl-gauge-presets': 'ゲージ',
+    'lbl-show-stock': '素材サイズ表示',
+    'hint-span': '弦間幅',
+    'hint-total': '全幅',
+    'sec-spacing': '弦間ピッチ',
+    'sec-edge': '指板エッジ幅 (mm)',
+    'sec-nut': 'ナット厚・オーバーハング (mm)',
+    'sec-slant': 'フレット・スラント',
+    'lbl-slant': 'スラント角 (°)',
+    'lbl-pitch-even': '均等',
+    'lbl-pitch-linear': 'リニア'
   }
 };
 var currentLang = 'en';
@@ -1363,19 +1440,34 @@ function calcGeometry(){
   gEl('bw-total').textContent=(brgSpanDisp+ee1+eeN).toFixed(1);
   gEl('nw-calc').textContent=nutSpanDisp.toFixed(1);
   gEl('nw-total').textContent=(nutSpanDisp+ne1+neN).toFixed(1);
-  // Linear: Span/Total表示 + hint更新
+  // Linear: Span/Total表示 + テーブル形式ピッチ表示
   if(pitchMode===1){
     var lsh=gEl('linear-span-hint');
-    if(lsh) lsh.textContent='Bridge Span '+brgSpanDisp.toFixed(1)+' / Total '+(brgSpanDisp+ee1+eeN).toFixed(1)+' mm  |  Nut Span '+nutSpanDisp.toFixed(1)+' / Total '+(nutSpanDisp+ne1+neN).toFixed(1)+' mm';
-    var lh=gEl('linear-pitch-hint');
-    if(lh&&nStr>1){
-      var lines=[];
-      for(var ii=0;ii<Math.min(nStr-1,5);ii++){
-        lines.push('B'+(ii+1)+'~'+(ii+2)+': '+bpitchAt(ii).toFixed(2)+' / N: '+npitchAt(ii).toFixed(2)+'mm');
-      }
-      if(nStr-1>5) lines.push('...');
-      lh.textContent=lines.join(' | ');
+    if(lsh){
+      lsh.textContent=
+        'Bridge '+i18n('hint-span')+' '+brgSpanDisp.toFixed(1)+' / '+i18n('hint-total')+' '+(brgSpanDisp+ee1+eeN).toFixed(1)+' mm'
+        +'  |  '
+        +'Nut '+i18n('hint-span')+' '+nutSpanDisp.toFixed(1)+' / '+i18n('hint-total')+' '+(nutSpanDisp+ne1+neN).toFixed(1)+' mm';
     }
+    // テーブル形式ピッチ表示（低音弦→高音弦の順）
+    var tbl=gEl('linear-pitch-table');
+    var tbody=gEl('linear-pitch-tbody');
+    if(tbl&&tbody&&nStr>1){
+      tbl.style.display='';
+      var rows='';
+      for(var ii=nStr-2;ii>=0;ii--){
+        var strLabel=(ii+1)+'~'+(ii+2);
+        rows+='<tr>'
+          +'<td style="color:var(--text);text-align:center;padding:2px 4px;font-family:monospace">'+bpitchAt(ii).toFixed(2)+'</td>'
+          +'<td style="color:var(--text3);text-align:center;padding:2px 4px;">'+strLabel+'</td>'
+          +'<td style="color:var(--text);text-align:center;padding:2px 4px;font-family:monospace">'+npitchAt(ii).toFixed(2)+'</td>'
+          +'</tr>';
+      }
+      tbody.innerHTML=rows;
+    }
+  } else {
+    var tbl2=gEl('linear-pitch-table');
+    if(tbl2) tbl2.style.display='none';
   }
 
   var s1=s1in*I2M,sN=sNin*I2M;
@@ -1435,17 +1527,25 @@ function calcGeometry(){
   };
 
   var tEnd=FR(fbEnd);
-  // Edge Overhang: 端弦の交点からY方向に固定オフセット（Even/Linear共通）
-  // ナット側: 弦0/nStr-1のナット点(t=0)からY方向にne1/neNオフセット
-  // エンド側: 弦0/nStr-1のfbEnd位置(t=tEnd)からY方向にee1/eeNオフセット
-  var _n0=Np(0), _nN=Np(nStr-1);
-  var _e0=Sp(0,tEnd), _eN=Sp(nStr-1,tEnd);
-  // コーナー点: 端弦の点からYオフセット後、X座標はそのまま（iForYの代わり）
-  // iForYはEvenピッチ前提なのでLinear時に誤差が出る → 直接計算
-  var cornerNut1 = {x:_n0.x - ne1*Math.tan(slantRad), y:_n0.y - ne1};
-  var cornerNutN = {x:_nN.x + neN*Math.tan(slantRad), y:_nN.y + neN};
-  var cornerEnd1 = {x:_e0.x - ee1*Math.tan(slantRad), y:_e0.y - ee1};
-  var cornerEndN = {x:_eN.x + eeN*Math.tan(slantRad), y:_eN.y + eeN};
+  // コーナー点の計算:
+  //   slant=0（curved含む）: iForYで正確にインデックス逆算（REFと同じ）
+  //   slant≠0: 端弦からY方向固定オフセット（Linearピッチ対応）
+  var cornerNut1, cornerNutN, cornerEnd1, cornerEndN;
+  if(Math.abs(tanSlant)<1e-6){
+    // slantなし: iForYベース（curved modeでも正確）
+    cornerNut1 = Np(iForY(Np(0).y - ne1, 0));
+    cornerNutN = Np(iForY(Np(nStr-1).y + neN, 0));
+    cornerEnd1 = Sp(iForY(Sp(0, tEnd).y - ee1, tEnd), tEnd);
+    cornerEndN = Sp(iForY(Sp(nStr-1, tEnd).y + eeN, tEnd), tEnd);
+  } else {
+    // slantあり: 端弦からY方向固定オフセット（iForYはEvenピッチ前提なので不使用）
+    var _n0=Np(0), _nN=Np(nStr-1);
+    var _e0=Sp(0,tEnd), _eN=Sp(nStr-1,tEnd);
+    cornerNut1 = {x:_n0.x - ne1*tanSlant, y:_n0.y - ne1};
+    cornerNutN = {x:_nN.x + neN*tanSlant, y:_nN.y + neN};
+    cornerEnd1 = {x:_e0.x - ee1*tanSlant, y:_e0.y - ee1};
+    cornerEndN = {x:_eN.x + eeN*tanSlant, y:_eN.y + eeN};
+  }
 
   var dx1=cornerNut1.x-cornerEnd1.x,dy1=cornerNut1.y-cornerEnd1.y,L1=Math.sqrt(dx1*dx1+dy1*dy1);
   var s1ux=dx1/L1,s1uy=dy1/L1;
@@ -1458,11 +1558,8 @@ function calcGeometry(){
   var dotN=Math.abs(sNux*nutNx+sNuy*nutNy);
   var nutThickAdj1=dot1>1e-6?nutThick/dot1:nutThick;
   var nutThickAdjN=dotN>1e-6?nutThick/dotN:nutThick;
-  var nutHeadSide1={x:cornerNut1.x+s1ux*nutThickAdj1,y:cornerNut1.y+s1uy*nutThickAdj1};
-  var nutHeadSideN={x:cornerNutN.x+sNux*nutThickAdjN,y:cornerNutN.y+sNuy*nutThickAdjN};
-  var oh1={x:nutHeadSide1.x+s1ux*nutOH,y:nutHeadSide1.y+s1uy*nutOH};
-  var ohN={x:nutHeadSideN.x+sNux*nutOH,y:nutHeadSideN.y+sNuy*nutOH};
 
+  // solveIをfretEdgePts依存より前に定義
   var solveI = function(pLine1, pLine2, tVal, iInit){
     var lx = pLine2.x - pLine1.x, ly = pLine2.y - pLine1.y;
     var iC = iInit;
@@ -1489,6 +1586,21 @@ function calcGeometry(){
     var iMax = solveI(cornerNutN, cornerEndN, t, iMaxGuess);
     return {ix1:Sp(iMin,t), ixN:Sp(iMax,t), iMin:iMin, iMax:iMax};
   }
+
+  // nutHeadSide/ohの起点:
+  //   slantなし(curved含む) → cornerNut1/N（iForYと一致、dPSVGで正確に繋がる）
+  //   slantあり → fretEdgePts(0)端点（スラント後の0フレット端点に合わせる）
+  var _nutBase1, _nutBaseN;
+  if(Math.abs(tanSlant)<1e-6){
+    _nutBase1=cornerNut1; _nutBaseN=cornerNutN;
+  } else {
+    var _nutEp0=fretEdgePts(0);
+    _nutBase1=_nutEp0.ix1; _nutBaseN=_nutEp0.ixN;
+  }
+  var nutHeadSide1={x:_nutBase1.x+s1ux*nutThickAdj1,y:_nutBase1.y+s1uy*nutThickAdj1};
+  var nutHeadSideN={x:_nutBaseN.x+sNux*nutThickAdjN,y:_nutBaseN.y+sNuy*nutThickAdjN};
+  var oh1={x:nutHeadSide1.x+s1ux*nutOH,y:nutHeadSide1.y+s1uy*nutOH};
+  var ohN={x:nutHeadSideN.x+sNux*nutOH,y:nutHeadSideN.y+sNuy*nutOH};
 
   // rotatePt: slantはNp/Bpに組み込み済みなので恒等関数
   var rotatePt=function(p){return p;};
@@ -1584,7 +1696,8 @@ function buildDXF(g,lefty){
   for(var i=0;i<nStr;i++){var an=toDXF(g,Np(i).x,Np(i).y,lefty),bn=toDXF(g,Bp(i).x,Bp(i).y,lefty);L.push(dxfLine(an.x,an.z,bn.x,bn.z,'STRING'));}
   
   var nEp = fretEdgePts(0);
-  dMD(getMathPts(Np, g.curved, null, nEp.iMin, nEp.iMax), 'NUT');
+  // NUTラインはfretEdgePts(0)の端点間（0フレットラインと一致）
+  dMD([nEp.ix1, nEp.ixN], 'NUT');
   var tE = FR(g.fbEnd);
   var bMin = g.iForY(cornerEnd1.y, tE);
   var bMax = g.iForY(cornerEndN.y, tE);
@@ -1786,6 +1899,8 @@ function run(){
   var fEp=function(i){return Sp(i,FR(g.fbEnd));};
 
   // board outline (amber)
+  // cornerNut/End を基準とし、curved時は dPSVG で曲線描画
+  // サイドラインは cornerNut1↔cornerEnd1 で閉じる（エッジオーバーハング込みの頂点）
   var tE_svg = FR(g.fbEnd);
   dPSVG(cornerNut1,cornerNutN,Np,'#f59e0b',1.5,null,0);
   dPSVG(cornerEnd1,cornerEndN,fEp,'#f59e0b',1.5,null,tE_svg);
@@ -3115,7 +3230,7 @@ function syncTensionUI() {
 
 </script>
 
-<div id="ver">v075-ui-edge-fix</div>
+<div id="ver">v084-adv-groups</div>
 <a href="https://www.gtinstruments.xyz/" class="home-link" data-i18n="back-home">← Back to homepage</a>
 </body>
 </html>
