@@ -283,49 +283,6 @@ button.primary:active{transform:scale(.98);}
     </div>
   </div>
 
-  <!-- Scale Length -->
-  <div class="sec">
-    <div class="sec-title" data-i18n="sec-scale">Scale Length (inch)</div>
-    <div class="g4">
-      <div class="field">
-        <label data-i18n="lbl-last">Last String</label>
-        <div class="num-wrap">
-          <input type="number" id="sN" value="27.0" step="0.1" min="20" max="40">
-          <div class="num-btns"><button class="num-btn" data-target="sN" data-dir="up">▲</button><button class="num-btn" data-target="sN" data-dir="dn">▼</button></div>
-        </div>
-      </div>
-      <div class="field"><label>→ mm</label><div class="ro-wrap" id="sNmm">—</div></div>
-      <div class="field">
-        <label data-i18n="lbl-first">1st String</label>
-        <div class="num-wrap">
-          <input type="number" id="s1" value="25.5" step="0.1" min="20" max="35">
-          <div class="num-btns"><button class="num-btn" data-target="s1" data-dir="up">▲</button><button class="num-btn" data-target="s1" data-dir="dn">▼</button></div>
-        </div>
-      </div>
-      <div class="field"><label>→ mm</label><div class="ro-wrap" id="s1mm">—</div></div>
-    </div>
-    <div class="toggle-row" style="margin-top:10px;margin-bottom:0;">
-      <span class="toggle-label" data-i18n="lbl-curved">Curved Multiscale</span>
-      <label class="toggle-switch">
-        <input type="checkbox" id="curved-toggle" onchange="syncSlantDisable();run()">
-        <span class="toggle-slider"></span>
-      </label>
-    </div>
-    <div id="curve-coeff-wrap" style="display:none;margin-top:8px;">
-      <div class="g2">
-        <div class="field">
-          <label data-i18n="lbl-k">Curvature (k)</label>
-          <div class="num-wrap">
-            <input type="number" id="curve-k" value="0.5" step="0.1" min="-10" max="10">
-            <div class="num-btns"><button class="num-btn" data-target="curve-k" data-dir="up">▲</button><button class="num-btn" data-target="curve-k" data-dir="dn">▼</button></div>
-          </div>
-        </div>
-        <div class="field"><label data-i18n="lbl-mid">Mid-scale</label><div class="ro-wrap" id="curve-mid">—</div></div>
-      </div>
-      <div class="hint" style="margin-top:4px;" data-i18n="hint-k">k=0: linear &nbsp; k&gt;0: shorter mids &nbsp; k&lt;0: longer mids</div>
-    </div>
-  </div>
-
   <!-- Strings & Frets -->
   <div class="sec">
     <div class="sec-title" data-i18n="sec-strings">Strings &amp; Frets</div>
@@ -347,8 +304,68 @@ button.primary:active{transform:scale(.98);}
     </div>
   </div>
 
-  <!-- Multiscale PD -->
+  <!-- Scale Length -->
   <div class="sec">
+    <div class="sec-title" data-i18n="sec-scale">Scale Length (inch)</div>
+    <div class="toggle-row" style="margin-top:10px;margin-bottom:10px;">
+      <span class="toggle-label" data-i18n="lbl-multiscale">Multiscale</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="multiscale-toggle" onchange="syncScaleToggle();run()" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="g4" id="scale-multi-ui" style="margin-bottom:10px;">
+      <div class="field">
+        <label data-i18n="lbl-last">Last String</label>
+        <div class="num-wrap">
+          <input type="number" id="sN" value="27.0" step="0.1" min="20" max="40">
+          <div class="num-btns"><button class="num-btn" data-target="sN" data-dir="up">▲</button><button class="num-btn" data-target="sN" data-dir="dn">▼</button></div>
+        </div>
+      </div>
+      <div class="field"><label>→ mm</label><div class="ro-wrap" id="sNmm">—</div></div>
+      <div class="field">
+        <label data-i18n="lbl-first">1st String</label>
+        <div class="num-wrap">
+          <input type="number" id="s1" value="25.5" step="0.1" min="20" max="35">
+          <div class="num-btns"><button class="num-btn" data-target="s1" data-dir="up">▲</button><button class="num-btn" data-target="s1" data-dir="dn">▼</button></div>
+        </div>
+      </div>
+      <div class="field"><label>→ mm</label><div class="ro-wrap" id="s1mm">—</div></div>
+      <div class="toggle-row" style="grid-column: 1 / -1; margin-top:8px; margin-bottom:0px; justify-content: flex-start; gap: 8px;">
+        <label class="toggle-switch" style="transform: scale(0.85); transform-origin: left;">
+          <input type="checkbox" id="curved-toggle" onchange="syncSlantDisable();run()">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label" style="font-size:12px;" data-i18n="lbl-curved">Curved Multiscale</span>
+      </div>
+    </div>
+    <div class="g2" id="scale-single-ui" style="display:none; margin-bottom:10px;">
+      <div class="field" style="max-width:160px;">
+        <label data-i18n="lbl-allstring">All Strings</label>
+        <div class="num-wrap">
+          <input type="number" id="sAll" value="25.5" step="0.1" min="20" max="40">
+          <div class="num-btns"><button class="num-btn" data-target="sAll" data-dir="up">▲</button><button class="num-btn" data-target="sAll" data-dir="dn">▼</button></div>
+        </div>
+      </div>
+      <div class="field" style="max-width:80px;"><label>→ mm</label><div class="ro-wrap" id="sAllmm">—</div></div>
+    </div>
+    <div id="curve-coeff-wrap" style="display:none;margin-top:8px;">
+      <div class="g2">
+        <div class="field">
+          <label data-i18n="lbl-k">Curvature (k)</label>
+          <div class="num-wrap">
+            <input type="number" id="curve-k" value="0.5" step="0.1" min="-10" max="10">
+            <div class="num-btns"><button class="num-btn" data-target="curve-k" data-dir="up">▲</button><button class="num-btn" data-target="curve-k" data-dir="dn">▼</button></div>
+          </div>
+        </div>
+        <div class="field"><label data-i18n="lbl-mid">Mid-scale</label><div class="ro-wrap" id="curve-mid">—</div></div>
+      </div>
+      <div class="hint" style="margin-top:4px;" data-i18n="hint-k">k=0: linear &nbsp; k&gt;0: shorter mids &nbsp; k&lt;0: longer mids</div>
+    </div>
+  </div>
+
+  <!-- Multiscale PD -->
+  <div class="sec" id="pd-sec">
     <div class="sec-title" data-i18n="sec-pd">Multiscale PD</div>
     <div class="g2">
       <div class="field">
@@ -506,7 +523,7 @@ button.primary:active{transform:scale(.98);}
           </div>
           <div class="g2" style="margin-bottom:4px;">
             <div class="field">
-              <div class="num-wrap"><input type="number" id="b_pitch_N" value="11.0" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="b_pitch_N" data-dir="up">▲</button><button class="num-btn" data-target="b_pitch_N" data-dir="dn">▼</button></div></div>
+              <div class="num-wrap"><input type="number" id="b_pitch_N" value="11.5" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="b_pitch_N" data-dir="up">▲</button><button class="num-btn" data-target="b_pitch_N" data-dir="dn">▼</button></div></div>
               <div class="hint" style="font-size:10px;" data-i18n="lbl-bNpitch">Low~adj</div>
             </div>
             <div class="field">
@@ -516,7 +533,7 @@ button.primary:active{transform:scale(.98);}
           </div>
           <div class="g2" style="margin-bottom:4px;">
             <div class="field">
-              <div class="num-wrap"><input type="number" id="b_pitch_1" value="10.0" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="b_pitch_1" data-dir="up">▲</button><button class="num-btn" data-target="b_pitch_1" data-dir="dn">▼</button></div></div>
+              <div class="num-wrap"><input type="number" id="b_pitch_1" value="10.5" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="b_pitch_1" data-dir="up">▲</button><button class="num-btn" data-target="b_pitch_1" data-dir="dn">▼</button></div></div>
               <div class="hint" style="font-size:10px;" data-i18n="lbl-b1pitch">1~2 str</div>
             </div>
             <div class="field">
@@ -1220,6 +1237,19 @@ function applySeed(){
     if(tog) tog.checked=d.curved;
     s('curve-k', d.k);
   }
+  var isMulti = Math.abs(d.sN - d.s1) > 0.01;
+  var isCurved = !!d.curved;
+  var mtog=document.getElementById('multiscale-toggle');
+  if(mtog) mtog.checked = isMulti || isCurved;
+  
+  // reset multi mems so we don't carry over states cross-presets unnecessarily 
+  if(typeof syncScaleToggle === 'function') {
+      _mem_s1 = d.s1;
+      _mem_sN = d.sN;
+      _mem_curved = isCurved;
+      syncScaleToggle(true);
+  }
+
   if(d.fret_slant!==undefined) s('fret_slant', d.fret_slant);
   if(d.pitch_mode!==undefined){
     setPitchMode(d.pitch_mode);
@@ -1244,25 +1274,25 @@ function applySeed(){
 
 // ── presets ──
 var PRESETS={
-  guitar:'GTI-255-255-0-6-22-23-105-70-35-40-45-50-30-80-0',
-  bass:  'GTI-340-340-0-4-21-22-190-100-40-45-50-55-35-100-0'
+  guitar:'GTI-0a6xar1g7dtgtm8qa2760m31aweni75vrt11c808kww8ulmhky2ttjt53t5ul2wpnurv28',
+  bass:  'GTI-0pxz7rfqdjyb9k6f51xerqoauheb0u77zm0p4ankeki5bb6iv1k9cci6ey78y0rcu4hxj4'
 };
 
 // Preset string definitions (note: index 0 = highest string, like _stringSettings)
 var PRESET_STRING_DEFS = {
   guitar: [
-    { note: 'E4', gauge: 0.009, type: 'plain'  },
-    { note: 'B3', gauge: 0.011, type: 'plain'  },
-    { note: 'G3', gauge: 0.016, type: 'plain'  },
-    { note: 'D3', gauge: 0.024, type: 'wound'  },
-    { note: 'A2', gauge: 0.032, type: 'wound'  },
-    { note: 'E2', gauge: 0.042, type: 'wound'  }
+    { note: 'E4', gauge: 0.010, type: 'plain'  },
+    { note: 'B3', gauge: 0.013, type: 'plain'  },
+    { note: 'G3', gauge: 0.017, type: 'plain'  },
+    { note: 'D3', gauge: 0.026, type: 'wound'  },
+    { note: 'A2', gauge: 0.036, type: 'wound'  },
+    { note: 'E2', gauge: 0.046, type: 'wound'  }
   ],
   bass: [
     { note: 'G2',  gauge: 0.045, type: 'wound' },
     { note: 'D2',  gauge: 0.065, type: 'wound' },
-    { note: 'A1',  gauge: 0.085, type: 'wound' },
-    { note: 'E1',  gauge: 0.105, type: 'wound' }
+    { note: 'A1',  gauge: 0.080, type: 'wound' },
+    { note: 'E1',  gauge: 0.100, type: 'wound' }
   ]
 };
 
@@ -1279,19 +1309,19 @@ function applyPreset(key){
     _tuningFilter = 0; // auto: follow No. of Strings
     var elLb = document.getElementById('target-tension-lb');
     var elKg = document.getElementById('target-tension');
-    if (elLb) elLb.value = '45.0';
-    if (elKg) elKg.value = (45.0 * 0.453592).toFixed(1);
+    if (elLb) elLb.value = '41.8';
+    if (elKg) elKg.value = (41.8 * 0.453592).toFixed(1);
     var elPre = document.getElementById('target-preset');
-    if (elPre) elPre.value = 'custom';
+    if (elPre) elPre.value = '18.96|41.80';
   } else if (key === 'guitar') {
     _tuningInst = 'guitar';
     _tuningFilter = 0; // auto: follow No. of Strings
     var elLb = document.getElementById('target-tension-lb');
     var elKg = document.getElementById('target-tension');
-    if (elLb) elLb.value = '14.1';
-    if (elKg) elKg.value = (14.1 * 0.453592).toFixed(1);
+    if (elLb) elLb.value = '17.3';
+    if (elKg) elKg.value = (17.3 * 0.453592).toFixed(1);
     var elPre = document.getElementById('target-preset');
-    if (elPre) elPre.value = 'custom';
+    if (elPre) elPre.value = '7.85|17.31';
   }
 
   // _stringSettings を空にして弦数不一致を確実に発生させる。
@@ -1366,6 +1396,60 @@ function syncSlantDisable(){
     inp.dispatchEvent(new Event('input',{bubbles:true}));
   } else {
     sec.classList.remove('slant-disabled');
+  }
+}
+
+var _mem_sAll = null;
+var _mem_s1 = 25.5;
+var _mem_sN = 27.0;
+var _mem_curved = false;
+
+function syncScaleToggle(fromInit) {
+  var mToggle = document.getElementById('multiscale-toggle');
+  var cToggle = document.getElementById('curved-toggle');
+  if (!mToggle || !cToggle) return;
+  
+  var isMulti = mToggle.checked;
+  var isCurved = cToggle.checked;
+  var multiUI = document.getElementById('scale-multi-ui');
+  var singleUI = document.getElementById('scale-single-ui');
+  var pdSec = document.getElementById('pd-sec');
+  var sAll = document.getElementById('sAll');
+  var sN = document.getElementById('sN');
+  var s1 = document.getElementById('s1');
+
+  if (isMulti) {
+      if (multiUI) multiUI.style.display = '';
+      if (singleUI) singleUI.style.display = 'none';
+      if (pdSec) pdSec.style.display = '';
+      if (!fromInit && _mem_sAll !== null) {
+          if (Math.abs(parseFloat(sAll.value) - _mem_sAll) > 0.001 || Math.abs(parseFloat(_mem_sN) - parseFloat(_mem_s1)) < 0.01) {
+              s1.value = sAll.value;
+              sN.value = (parseFloat(sAll.value) + 1.5).toFixed(1);
+          } else {
+              s1.value = _mem_s1;
+              sN.value = _mem_sN;
+          }
+          cToggle.checked = _mem_curved;
+          syncSlantDisable();
+      }
+  } else {
+      if (multiUI) multiUI.style.display = 'none';
+      if (singleUI) singleUI.style.display = '';
+      if (pdSec) pdSec.style.display = 'none';
+      if (!fromInit) {
+          _mem_s1 = s1.value;
+          _mem_sN = sN.value;
+          _mem_curved = cToggle.checked;
+          
+          cToggle.checked = false;
+          syncSlantDisable();
+          
+          s1.value = s1.value;
+          sN.value = s1.value; 
+      }
+      sAll.value = s1.value; 
+      _mem_sAll = parseFloat(s1.value);
   }
 }
 
@@ -1517,13 +1601,30 @@ function calcGeometry(){
 
   var brgW=bpitch_even*(nStr-1), nutW=npitch_even*(nStr-1);
   var iForY = function(y, t){
-    var pEff = npitch_even*(1-t) + bpitch_even*t;
     if(nStr<=1) {
+      var pEff = npitch_even*(1-t) + bpitch_even*t;
       if(pEff === 0) return 0;
       return y / pEff;
     }
-    var yOff = (-nutW/2)*(1-t) + (-brgW/2)*t;
-    return (y - yOff) / pEff;
+    var ys=[];
+    for(var j=0; j<nStr; j++){
+      ys.push((1-t)*nutYs[j] + t*brgYs[j]);
+    }
+    if(y <= ys[0]){
+      var diff = ys[1] - ys[0];
+      return diff === 0 ? 0 : (y - ys[0]) / diff;
+    }
+    if(y >= ys[nStr-1]){
+      var diff = ys[nStr-1] - ys[nStr-2];
+      return diff === 0 ? nStr-1 : (nStr-1) + (y - ys[nStr-1]) / diff;
+    }
+    for(var j=0; j<nStr-1; j++){
+      if(y >= ys[j] && y <= ys[j+1]){
+        var diff = ys[j+1] - ys[j];
+        return diff === 0 ? j : j + (y - ys[j]) / diff;
+      }
+    }
+    return 0;
   };
 
   var tEnd=FR(fbEnd);
@@ -1814,6 +1915,8 @@ function run(){
   document.getElementById('pd-val-disp').textContent=pd.toFixed(5);
   document.getElementById('s1mm').textContent=s1.toFixed(2);
   document.getElementById('sNmm').textContent=sN.toFixed(2);
+  var sAllmmEl=document.getElementById('sAllmm');
+  if(sAllmmEl) sAllmmEl.textContent = sN.toFixed(2);
   document.getElementById('dxf-filename').textContent=buildFilename(nStr,s1in,sNin,pd);
   document.getElementById('dxf-link').style.display='none';
 
@@ -1977,18 +2080,21 @@ function run(){
   }
 
   // perpendicular line
-  var perpPts=[];
-  for(var pi=0;pi<nStr;pi++) perpPts.push(sp(pi,pd));
-  var pp='M'+perpPts[0].x.toFixed(1)+','+perpPts[0].y.toFixed(1);
-  for(var pj=1;pj<nStr;pj++) pp+=' L'+perpPts[pj].x.toFixed(1)+','+perpPts[pj].y.toFixed(1);
-  o+='<path d="'+pp+'" stroke="#a78bfa" stroke-width="1.8" fill="none"/>';
-  var ptop=perpPts.reduce(function(a,b){return a.y<b.y?a:b;});
-  if(lefty){
-    o+='<g transform="scale(-1,1) translate(-'+SW.toFixed(0)+',0)">';
-    o+='<text x="'+(SW-ptop.x).toFixed(1)+'" y="'+(ptop.y-25).toFixed(1)+'" text-anchor="middle" font-size="12" fill="#a78bfa" '+FF+'>'+pdToFret(pd)+'f</text>';
-    o+='</g>';
-  } else {
-    o+='<text x="'+ptop.x.toFixed(1)+'" y="'+(ptop.y-25).toFixed(1)+'" text-anchor="middle" font-size="12" fill="#a78bfa" '+FF+'>'+pdToFret(pd)+'f</text>';
+  var isMultiUI = document.getElementById('multiscale-toggle').checked;
+  if(isMultiUI && Math.abs(g.s1 - g.sN) > 1e-4){
+    var perpPts=[];
+    for(var pi=0;pi<nStr;pi++) perpPts.push(sp(pi,pd));
+    var pp='M'+perpPts[0].x.toFixed(1)+','+perpPts[0].y.toFixed(1);
+    for(var pj=1;pj<nStr;pj++) pp+=' L'+perpPts[pj].x.toFixed(1)+','+perpPts[pj].y.toFixed(1);
+    o+='<path d="'+pp+'" stroke="#a78bfa" stroke-width="1.8" fill="none"/>';
+    var ptop=perpPts.reduce(function(a,b){return a.y<b.y?a:b;});
+    if(lefty){
+      o+='<g transform="scale(-1,1) translate(-'+SW.toFixed(0)+',0)">';
+      o+='<text x="'+(SW-ptop.x).toFixed(1)+'" y="'+(ptop.y-25).toFixed(1)+'" text-anchor="middle" font-size="12" fill="#a78bfa" '+FF+'>'+pdToFret(pd)+'f</text>';
+      o+='</g>';
+    } else {
+      o+='<text x="'+ptop.x.toFixed(1)+'" y="'+(ptop.y-25).toFixed(1)+'" text-anchor="middle" font-size="12" fill="#a78bfa" '+FF+'>'+pdToFret(pd)+'f</text>';
+    }
   }
 
   // bridge line
@@ -2027,6 +2133,12 @@ document.addEventListener('DOMContentLoaded',function(){
     el.addEventListener('input',function(){
       if(el.id==='pd') _pdSource='direct';
       else if(el.id==='pd-fret') _pdSource='fret';
+      else if(el.id==='sAll') {
+         var vStr=this.value;
+         var en=document.getElementById('sN'), e1=document.getElementById('s1');
+         if(en) en.value=vStr;
+         if(e1) e1.value=vStr;
+      }
       run();
       // ns変更時にTuning Presetsを即時更新
       if(el.id==='ns'){
@@ -2037,6 +2149,7 @@ document.addEventListener('DOMContentLoaded',function(){
   });
   // 初期化
   syncSlantDisable();
+  if(typeof syncScaleToggle==='function') syncScaleToggle(true);
   loadTuningData(); // _tuningData をセット → renderTuningBrowser() を呼ぶ
   setTimeout(updateTensionRows, 100);
   run();
