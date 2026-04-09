@@ -29,8 +29,8 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow','DIN Condensed'
 .g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}
 .field{display:flex;flex-direction:column;gap:3px;}
 .field>label{font-size:11px;color:var(--text2);letter-spacing:.03em;font-weight:500;}
-.hint{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.5;}
-.hint span{color:var(--accent3);font-weight:600;}
+.hint{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.5;font-weight:400;}
+.hint span{color:var(--accent3);}
 
 /* number input */
 .num-wrap{display:flex;align-items:stretch;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .15s;}
@@ -103,10 +103,10 @@ button.primary:active{transform:scale(.98);}
 .metric-unit{font-size:12px;color:var(--text2);margin-left:3px;}
 .preview-layout{display:flex;gap:16px;align-items:stretch;}
 @media(max-width:900px){.preview-layout{flex-direction:column;}}
-.scale-list{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:14px;display:flex;flex-direction:column;justify-content:center;gap:6px;flex-shrink:0;}
+.scale-list{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px;display:flex;flex-direction:column;justify-content:center;gap:5px;flex-shrink:0;width:fit-content;min-width:0;}
 .scale-list-title{font-size:11px;color:var(--text3);font-family:sans-serif;font-weight:600;margin-bottom:4px;letter-spacing:0.04em;text-align:center;}
-.scale-item{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text);font-family:'Barlow',monospace;}
-.scale-item-lbl{color:var(--text3);font-family:sans-serif;font-size:11px;width:55px;text-align:right;}
+.scale-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);font-family:'Barlow',monospace;}
+.scale-item-lbl{color:var(--text3);font-family:sans-serif;font-size:11px;width:20px;text-align:right;}
 .canvas-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;flex:1;min-width:0;display:flex;}
 #fsv{width:100%;display:block;margin:auto;}
 .legend{font-size:11px;color:var(--text3);display:flex;flex-wrap:wrap;gap:4px 16px;line-height:1.8;font-weight:500;}
@@ -169,8 +169,8 @@ button.primary:active{transform:scale(.98);}
 
   /* tension section improvements */
   .tension-content{display:grid;grid-template-columns:minmax(0, 1fr) auto;gap:16px;align-items:start;}
-  @media(max-width:1100px){.tension-content{grid-template-columns:1fr;}}
-  .presets-row{display:flex;gap:16px;align-items:start;}
+  @media(max-width:1480px){.tension-content{grid-template-columns:1fr;}}
+  .presets-row{display:flex;gap:16px;align-items:start;flex-wrap:wrap;}
   @media(max-width:600px){.presets-row{flex-direction:column;}} /* 超小型画面（スマホ等）では流石に縦にする */
   .tuning-browser{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px;max-height:600px;overflow-y:auto;width:270px;min-width:0;}
   .tuning-browser-hd{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
@@ -288,7 +288,7 @@ button.primary:active{transform:scale(.98);}
     <div class="sec-title" data-i18n="sec-strings">Strings &amp; Frets</div>
     <div class="g2">
       <div class="field">
-        <label><span data-i18n="lbl-ns">No. of Strings</span> <span class="strings-warn" id="ns-warn" style="display:none;">Too many strings!</span></label>
+        <label style="white-space:nowrap; display:flex; gap:6px; align-items:center;"><span data-i18n="lbl-ns">No. of Strings</span> <span class="strings-warn" id="ns-warn" style="display:none;">Too many strings!</span></label>
         <div class="num-wrap">
           <input type="number" id="ns" value="7" step="1" min="1">
           <div class="num-btns"><button class="num-btn" data-target="ns" data-dir="up">▲</button><button class="num-btn" data-target="ns" data-dir="dn">▼</button></div>
@@ -297,7 +297,7 @@ button.primary:active{transform:scale(.98);}
       <div class="field">
         <label data-i18n="lbl-nf">No. of Frets</label>
         <div class="num-wrap">
-          <input type="number" id="nf" value="24" step="1" min="12" max="37">
+          <input type="number" id="nf" value="24" step="1" min="12" max="48">
           <div class="num-btns"><button class="num-btn" data-target="nf" data-dir="up">▲</button><button class="num-btn" data-target="nf" data-dir="dn">▼</button></div>
         </div>
       </div>
@@ -393,7 +393,7 @@ button.primary:active{transform:scale(.98);}
       <div class="adv-group">
         <div class="adv-group-title" data-i18n="grp-fretting">Fretting</div>
         <!-- PD fine control -->
-        <div class="adv-sec">
+        <div class="adv-sec" id="pd-fine-sec">
           <div class="adv-sec-title" data-i18n="sec-fine-pd">PD Fine Control</div>
           <div class="pd-row">
             <div class="field">
@@ -446,7 +446,7 @@ button.primary:active{transform:scale(.98);}
           <div class="field" style="max-width:160px;">
             <label><span data-i18n="lbl-fb-end">Board End (fret no.)</span></label>
             <div class="num-wrap">
-              <input type="number" id="fb_end" value="25" step="1" min="1" max="37">
+              <input type="number" id="fb_end" value="25" step="1" min="1" max="49">
               <div class="num-btns"><button class="num-btn" data-target="fb_end" data-dir="up">▲</button><button class="num-btn" data-target="fb_end" data-dir="dn">▼</button></div>
             </div>
           </div>
@@ -475,13 +475,13 @@ button.primary:active{transform:scale(.98);}
           <div class="adv-sec-title" data-i18n="sec-nut">Nut Overhang (mm)</div>
           <div class="g2">
             <div class="field"><label data-i18n="lbl-nut-thick">Nut Thickness (mm)</label><div class="num-wrap"><input type="number" id="nut_thick" value="3.0" step="0.5" min="1" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_thick" data-dir="up">▲</button><button class="num-btn" data-target="nut_thick" data-dir="dn">▼</button></div></div></div>
-            <div class="field"><label data-i18n="lbl-nut-oh">Headstock Overhang (mm)</label><div class="num-wrap"><input type="number" id="nut_oh" value="8.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_oh" data-dir="up">▲</button><button class="num-btn" data-target="nut_oh" data-dir="dn">▼</button></div></div></div>
+            <div class="field"><label data-i18n="lbl-nut-oh" style="white-space:nowrap; letter-spacing:-0.2px;">Headstock Overhang (mm)</label><div class="num-wrap"><input type="number" id="nut_oh" value="8.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_oh" data-dir="up">▲</button><button class="num-btn" data-target="nut_oh" data-dir="dn">▼</button></div></div></div>
           </div>
         </div>
       </div>
 
       <!-- GROUP 3: String Spacing -->
-      <div class="adv-group">
+      <div class="adv-group" id="grp-spacing">
         <div class="adv-group-title" data-i18n="grp-spacing">String Spacing</div>
         <div class="adv-sec">
           <div class="adv-sec-title" data-i18n="sec-spacing">String Spacing</div>
@@ -499,7 +499,7 @@ button.primary:active{transform:scale(.98);}
                 <input type="number" id="bpitch" value="10.5" step="0.1" min="5" max="25">
                 <div class="num-btns"><button class="num-btn" data-target="bpitch" data-dir="up">▲</button><button class="num-btn" data-target="bpitch" data-dir="dn">▼</button></div>
               </div>
-              <div class="hint"><span data-i18n="hint-span">Span</span> <span id="bw-calc">—</span> / <span data-i18n="hint-total">Total</span> <span id="bw-total">—</span> mm</div>
+              <div class="hint"><span style="color:var(--accent3);" data-i18n="hint-span">Span</span> <span id="bw-calc" style="color:var(--accent3);">—</span> / <span style="color:var(--accent3);" data-i18n="hint-total">Total</span> <span id="bw-total" style="color:var(--accent3);">—</span> mm</div>
             </div>
             <div class="field">
               <label data-i18n="lbl-npitch">Nut Spacing (mm)</label>
@@ -507,7 +507,7 @@ button.primary:active{transform:scale(.98);}
                 <input type="number" id="npitch" value="7.0" step="0.1" min="5" max="25">
                 <div class="num-btns"><button class="num-btn" data-target="npitch" data-dir="up">▲</button><button class="num-btn" data-target="npitch" data-dir="dn">▼</button></div>
               </div>
-              <div class="hint"><span data-i18n="hint-span">Span</span> <span id="nw-calc">—</span> / <span data-i18n="hint-total">Total</span> <span id="nw-total">—</span> mm</div>
+              <div class="hint"><span style="color:var(--accent3);" data-i18n="hint-span">Span</span> <span id="nw-calc" style="color:var(--accent3);">—</span> / <span style="color:var(--accent3);" data-i18n="hint-total">Total</span> <span id="nw-total" style="color:var(--accent3);">—</span> mm</div>
             </div>
           </div>
         </div>
@@ -541,7 +541,16 @@ button.primary:active{transform:scale(.98);}
               <div class="hint" style="font-size:10px;" data-i18n="lbl-n1pitch">1~2 str</div>
             </div>
           </div>
-          <div class="hint" style="margin-top:3px;" id="linear-span-hint">—</div>
+          <!-- Bridge/Nut Span hint (Even modeと同様にhighlight表示) -->
+          <div class="g2" style="margin-top:2px;margin-bottom:2px;">
+            <div class="field">
+              <div class="hint" id="linear-bspan-hint"><span style="color:var(--accent3);" data-i18n="hint-span">Span</span> <span id="linear-bw-calc" style="color:var(--accent3);">—</span> / <span style="color:var(--accent3);" data-i18n="hint-total">Total</span> <span id="linear-bw-total" style="color:var(--accent3);">—</span> mm</div>
+            </div>
+            <div class="field">
+              <div class="hint" id="linear-nspan-hint"><span style="color:var(--accent3);" data-i18n="hint-span">Span</span> <span id="linear-nw-calc" style="color:var(--accent3);">—</span> / <span style="color:var(--accent3);" data-i18n="hint-total">Total</span> <span id="linear-nw-total" style="color:var(--accent3);">—</span> mm</div>
+            </div>
+          </div>
+          <div id="linear-span-hint" style="display:none;">—</div>
           <div id="linear-pitch-table" style="margin-top:6px;display:none;">
             <table style="width:100%;border-collapse:collapse;font-size:10px;font-family:'Barlow',monospace;table-layout:fixed;">
               <colgroup><col style="width:34%"><col style="width:33%"><col style="width:33%"></colgroup>
@@ -556,6 +565,25 @@ button.primary:active{transform:scale(.98);}
         </div>
         </div>
       </div><!-- /adv-group String Spacing -->
+
+      <!-- GROUP 4: Extra -->
+      <div class="adv-group" style="margin-bottom:0; border-bottom:none;">
+        <button class="adv-toggle" id="extra-toggle" onclick="toggleExtra()" style="background:var(--bg2); border-radius: var(--r);">
+          <span data-i18n="btn-extra">Extra</span> <span class="adv-arrow">▼</span>
+        </button>
+        <div class="adv-body" id="extra-body" style="padding-bottom:12px;">
+          <div class="adv-sec">
+            <div class="adv-sec-title" data-i18n="sec-edo">Divisions per Octave (EDO)</div>
+            <div class="field">
+              <label data-i18n="lbl-edo">Equal Temperament (N-TET)</label>
+              <div class="num-wrap">
+                <input type="number" id="edo" value="12" step="1" min="1" max="100">
+                <div class="num-btns"><button class="num-btn" data-target="edo" data-dir="up">▲</button><button class="num-btn" data-target="edo" data-dir="dn">▼</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </div>
   </div>
@@ -755,17 +783,18 @@ button.primary:active{transform:scale(.98);}
 // ── constants ──
 var I2M=25.4;
 var K2L=0.45359237; // kg per lb
-var FR=function(n){return 1-Math.pow(2,-n/12);};
+function getEDO(){ var el=document.getElementById('edo'); return el?(parseInt(el.value)||12):12; }
+var FR=function(n){return 1-Math.pow(2,-n/getEDO());};
 
 function pdToFret(pd){
   if(pd<=0) return '0.000';
   if(pd>=1) return '∞';
-  return (-12*Math.log2(1-pd)).toFixed(3);
+  return (-getEDO()*Math.log2(1-pd)).toFixed(3);
 }
 function fretToPD(n){
   if(n>=24.999) return 0.75;
   if(n<=0) return 0;
-  return 1-Math.pow(2,-n/12);
+  return 1-Math.pow(2,-n/getEDO());
 }
 function buildFilename(nStr,s1in,sNin,pd){
   var f=pdToFret(pd);
@@ -869,14 +898,18 @@ function encodeSeed(){
     tenBig=(tenBig<<BigInt(SEED_TEN_PER_STR))|packed;
   }
   var tenStr=bigToBase36(tenBig,SEED_TEN_CHARS);
-  return 'GTI-'+fbStr+tenStr;
+  var edo=(typeof getEDO!=='undefined')?getEDO():12;
+  var suffix=(edo&&edo!==12)?('-tet'+edo):'';
+  return 'GTI-'+fbStr+tenStr+suffix;
 }
 
 function decodeSeed(seed){
   seed=seed.trim();
+  var m=seed.match(/-tet(\d+)$/);
+  var edo=m?parseInt(m[1]):12;
   // 新形式v2: GTI- + 70文字固定(Base36)
-  if(/^GTI-[0-9a-z]{70}$/.test(seed)){
-    var body=seed.slice(4);
+  if(/^GTI-[0-9a-z]{70}(?:-tet\d+)?$/.test(seed)){
+    var body=seed.slice(4, 74);
     try{
       var fbBig=base36ToBig(body.slice(0,SEED_FB_CHARS));
       var fv=seedUnpackBits(fbBig,SEED_FB_FIELDS);
@@ -888,7 +921,7 @@ function decodeSeed(seed){
         fret_slant:(fv[17]-90)/2,
         pitch_mode:fv[18],
         b_pitch_1:(fv[19]+50)/10,b_pitch_N:(fv[20]+50)/10,
-        n_pitch_1:(fv[21]+50)/10,n_pitch_N:(fv[22]+50)/10};
+        n_pitch_1:(fv[21]+50)/10,n_pitch_N:(fv[22]+50)/10,edo:edo};
       var combos=[];
       GAUGE_LIST.forEach(function(g){
         if(g.p)combos.push({g:g.g,t:'plain'});
@@ -908,8 +941,8 @@ function decodeSeed(seed){
     }catch(e){return null;}
   }
   // 旧形式v1: GTI- + 62文字固定(Base36) - slant/linearなし
-  if(/^GTI-[0-9a-z]{62}$/.test(seed)){
-    var body=seed.slice(4);
+  if(/^GTI-[0-9a-z]{62}(?:-tet\d+)?$/.test(seed)){
+    var body=seed.slice(4, 66);
     try{
       var v1Fields=SEED_FB_FIELDS.slice(0,17); // curve_kまで
       var fbBig=base36ToBig(body.slice(0,SEED_FB_CHARS_V1));
@@ -919,7 +952,7 @@ function decodeSeed(seed){
         ne1:fv[8]/10,neN:fv[9]/10,ee1:fv[10]/10,eeN:fv[11]/10,
         nut_thick:(fv[12]+10)/10,nut_oh:fv[13]/10,pd:fv[14]/100000,
         curved:fv[15]===1,k:(fv[16]-1000)/100,
-        fret_slant:0,pitch_mode:0};
+        fret_slant:0,pitch_mode:0,edo:edo};
       var combos=[];
       GAUGE_LIST.forEach(function(g){
         if(g.p)combos.push({g:g.g,t:'plain'});
@@ -940,13 +973,13 @@ function decodeSeed(seed){
   }
   // 旧旧形式後方互換 (GTI-数値-数値-... 形式)
   if(/^GTI-\d/.test(seed)){
-    var parts=seed.split('-');
+    var parts=seed.replace(/-tet\d+$/, '').split('-');
     if((parts.length!==16&&parts.length!==18)||parts[0]!=='GTI')return null;
     var n=parts.slice(1).map(Number);
     if(n.some(isNaN))return null;
     var d={sN:n[0]/10,s1:n[1]/10,pdfret:n[2]/10,ns:n[3],nf:n[4],fb_end:n[5],
       bpitch:n[6]/10,npitch:n[7]/10,ne1:n[8]/10,neN:n[9]/10,
-      ee1:n[10]/10,eeN:n[11]/10,nut_thick:n[12]/10,nut_oh:n[13]/10,pd:n[14]/100000};
+      ee1:n[10]/10,eeN:n[11]/10,nut_thick:n[12]/10,nut_oh:n[13]/10,pd:n[14]/100000,edo:edo};
     if(parts.length===18){d.curved=n[15]===1;d.k=n[16]/100;}
     return d;
   }
@@ -1231,6 +1264,7 @@ function applySeed(){
   s('eeN',    d.eeN);
   s('nut_thick',d.nut_thick);
   s('nut_oh', d.nut_oh);
+  s('edo',    d.edo||12);
   s('pd',     d.pd);
   if(d.curved!==undefined){
     var tog=document.getElementById('curved-toggle');
@@ -1350,6 +1384,12 @@ function toggleAdv(){
   document.getElementById('adv-toggle').classList.toggle('open');
   document.getElementById('adv-body').classList.toggle('open');
 }
+function toggleExtra(){
+  var extT = document.getElementById('extra-toggle');
+  var extB = document.getElementById('extra-body');
+  if(extT) extT.classList.toggle('open');
+  if(extB) extB.classList.toggle('open');
+}
 
 // ── applyFretPD (advanced) ──
 function applyFretPD(){
@@ -1418,6 +1458,10 @@ function syncScaleToggle(fromInit) {
   var sN = document.getElementById('sN');
   var s1 = document.getElementById('s1');
 
+  // PD Fine Control はMultiscale ONのときのみ表示
+  var pdFineSec = document.getElementById('pd-fine-sec');
+  if (pdFineSec) pdFineSec.style.display = isMulti ? '' : 'none';
+
   if (isMulti) {
       if (multiUI) multiUI.style.display = '';
       if (singleUI) singleUI.style.display = 'none';
@@ -1471,12 +1515,12 @@ function calcGeometry(){
   var s1in=+gEl('s1').value||25.5;
   var sNin=+gEl('sN').value||27.0;
   var nStr=+gEl('ns').value||7;
-  var nFret=Math.min(+gEl('nf').value||24,37);
+  var nFret=Math.min(+gEl('nf').value||24,48);
   var ne1=+gEl('ne1').value||3.5;
   var neN=+gEl('neN').value||4.0;
   var ee1=+gEl('ee1').value||4.5;
   var eeN=+gEl('eeN').value||5.0;
-  var fbEnd=Math.min(+gEl('fb_end').value||25,37);
+  var fbEnd=Math.min(+gEl('fb_end').value||25,49);
   var nutThick=+gEl('nut_thick').value||3.0;
   var nutOH=+gEl('nut_oh').value||8.0;
   var pd=+gEl('pd').value;
@@ -1526,13 +1570,18 @@ function calcGeometry(){
   gEl('nw-total').textContent=(nutSpanDisp+ne1+neN).toFixed(1);
   // Linear: Span/Total表示 + テーブル形式ピッチ表示
   if(pitchMode===1){
+    // Bridge Span/Total
+    var lbwCalc = gEl('linear-bw-calc');
+    var lbwTotal = gEl('linear-bw-total');
+    var lnwCalc = gEl('linear-nw-calc');
+    var lnwTotal = gEl('linear-nw-total');
+    if(lbwCalc) lbwCalc.textContent = brgSpanDisp.toFixed(1);
+    if(lbwTotal) lbwTotal.textContent = (brgSpanDisp+ee1+eeN).toFixed(1);
+    if(lnwCalc) lnwCalc.textContent = nutSpanDisp.toFixed(1);
+    if(lnwTotal) lnwTotal.textContent = (nutSpanDisp+ne1+neN).toFixed(1);
+    // legacy hint (hidden)
     var lsh=gEl('linear-span-hint');
-    if(lsh){
-      lsh.textContent=
-        'Bridge '+i18n('hint-span')+' '+brgSpanDisp.toFixed(1)+' / '+i18n('hint-total')+' '+(brgSpanDisp+ee1+eeN).toFixed(1)+' mm'
-        +'  |  '
-        +'Nut '+i18n('hint-span')+' '+nutSpanDisp.toFixed(1)+' / '+i18n('hint-total')+' '+(nutSpanDisp+ne1+neN).toFixed(1)+' mm';
-    }
+    if(lsh) lsh.style.display='none';
     // テーブル形式ピッチ表示（低音弦→高音弦の順）
     var tbl=gEl('linear-pitch-table');
     var tbody=gEl('linear-pitch-tbody');
@@ -1567,7 +1616,11 @@ function calcGeometry(){
   var xShift=function(i){return (s1+sN)/2*pd-sc(i)*pd;};
   // nutYs/brgYs を連続インデックスiで線形補間・外挿して返す
   var interpY=function(ys,i){
-    if(nStr<=1) return ys[0]||0;
+    if(nStr<=1) {
+      if(ys===nutYs) return (ys[0]||0) + i * npitch_even;
+      if(ys===brgYs) return (ys[0]||0) + i * bpitch_even;
+      return ys[0]||0;
+    }
     var n=ys.length;
     if(i<=0){
       // 外挿: 弦0-1間のピッチで延長
@@ -1872,6 +1925,44 @@ function run(){
   else if(nsVal>=12){warnEl.textContent='Too many strings!';warnEl.style.display='inline';}
   else{warnEl.style.display='none';}
 
+  var grpSpacing = document.getElementById('grp-spacing');
+  var pitchBtnLinear = document.getElementById('pitch-mode-linear');
+  if(grpSpacing) {
+    if(nsVal === 1) {
+      grpSpacing.style.display = 'none';
+      if(_pitchMode !== 0) forcePitchModeEven();
+    } else {
+      grpSpacing.style.display = '';
+      if(nsVal === 2) {
+        if(pitchBtnLinear) {
+          pitchBtnLinear.disabled = true;
+          pitchBtnLinear.style.opacity = '0.3';
+          pitchBtnLinear.style.cursor = 'not-allowed';
+        }
+        if(_pitchMode !== 0) forcePitchModeEven();
+      } else {
+        if(pitchBtnLinear) {
+          pitchBtnLinear.disabled = false;
+          pitchBtnLinear.style.opacity = '';
+          pitchBtnLinear.style.cursor = 'pointer';
+        }
+      }
+    }
+  }
+
+  function forcePitchModeEven() {
+    _pitchMode = 0;
+    pitchMode = 0;
+    var evWrap=document.getElementById('pitch-even-wrap');
+    var liWrap=document.getElementById('pitch-linear-wrap');
+    var btnEv=document.getElementById('pitch-mode-even');
+    var btnLi=document.getElementById('pitch-mode-linear');
+    if(evWrap) evWrap.style.display='';
+    if(liWrap) liWrap.style.display='none';
+    if(btnEv) btnEv.classList.add('active');
+    if(btnLi) btnLi.classList.remove('active');
+  }
+
   // ── board end floor = nf+1 ──
   var nfVal=parseInt(document.getElementById('nf').value)||24;
   var fbEndInp=document.getElementById('fb_end');
@@ -1935,7 +2026,7 @@ function run(){
     var sc_mm=g.sc(i);
     var sc_in=sc_mm/I2M;
     var lbl=String(i+1);
-    shtml+='<div class="scale-item"><span class="scale-item-lbl">'+lbl+'</span><span>'+sc_in.toFixed(3)+'" / '+sc_mm.toFixed(3)+' mm</span></div>';
+    shtml+='<div class="scale-item"><span class="scale-item-lbl">'+lbl+'</span><span style="white-space:nowrap;">'+sc_in.toFixed(3)+'" / '+sc_mm.toFixed(3)+' mm</span></div>';
   }
   sl.innerHTML=shtml;
 
@@ -2050,7 +2141,7 @@ function run(){
   o+='<line x1="'+mxf(x0).toFixed(1)+'" y1="'+myf(0).toFixed(1)+'" x2="'+mxf(x1).toFixed(1)+'" y2="'+myf(0).toFixed(1)+'" stroke="#2d3748" stroke-width="0.6" stroke-dasharray="4,3"/>';
 
   // fret lines + numbers
-  var showNums=new Set([0,3,5,7,9,12,15,17,19,21,24,27,29,31,33,36]);
+  var showNums=new Set([0,3,5,7,9,12,15,17,19,21,24,27,29,31,33,36,39,41,43,45,48]);
   for(var fn2=0;fn2<=nFret;fn2++){
     var ep2=fretEdgePts(fn2);
     var fa=mp(ep2.ix1),fb=mp(ep2.ixN);
