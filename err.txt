@@ -1,0 +1,11 @@
+ReferenceError: SEED_FB_FIELDS is not defined
+    at encodeSeed (about:blank:625:45)
+    at run (about:blank:2426:31)
+    at Document.<anonymous> (about:blank:3375:3)
+    at Document.callTheUserObjectsOperation (C:\Users\gotak\OneDrive\デスクトップ\GoTakigawa.github.io-extra\node_modules\jsdom\lib\generated\idl\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\Users\gotak\OneDrive\デスクトップ\GoTakigawa.github.io-extra\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\Users\gotak\OneDrive\デスクトップ\GoTakigawa.github.io-extra\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at DocumentImpl._dispatch (C:\Users\gotak\OneDrive\デスクトップ\GoTakigawa.github.io-extra\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at fireAnEvent (C:\Users\gotak\OneDrive\デスクトップ\GoTakigawa.github.io-extra\node_modules\jsdom\lib\jsdom\living\helpers\events.js:18:36)
+    at dispatchEvent (C:\Users\gotak\OneDrive\デスクトップ\GoTakigawa.github.io-extra\node_modules\jsdom\lib\jsdom\living\nodes\Document-impl.js:528:9)
+    at C:\Users\gotak\OneDrive\デスクトップ\GoTakigawa.github.io-extra\node_modules\jsdom\lib\jsdom\living\nodes\Document-impl.js:533:11

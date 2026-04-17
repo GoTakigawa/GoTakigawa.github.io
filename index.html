@@ -19,7 +19,7 @@ html{font-size:16px;overflow-x:hidden;}
 body{background:var(--bg);color:var(--text);font-family:'Barlow','DIN Condensed',sans-serif;min-height:100vh;overflow-x:hidden;}
 .app{display:grid;grid-template-columns:360px minmax(0, 1fr);min-height:100vh;}
 @media(max-width:900px){.app{grid-template-columns:1fr;}}
-.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:20px 16px;overflow-y:auto;max-height:100vh;position:sticky;top:0;}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:20px 16px;overflow-y:auto;overflow-x:hidden;max-height:100vh;position:sticky;top:0;width:360px;min-width:360px;max-width:360px;box-sizing:border-box;}
 @media(max-width:900px){.sidebar{max-height:none;height:auto;position:static;border-right:none;border-bottom:1px solid var(--border);}}
 .logo{font-size:11px;letter-spacing:.2em;color:var(--accent1);text-transform:uppercase;margin-bottom:4px;font-weight:600;}
 .app-title{font-size:20px;font-weight:600;color:var(--text);margin-bottom:20px;line-height:1.2;letter-spacing:.02em;}
@@ -47,15 +47,20 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow','DIN Condensed'
 .ro-wrap{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:7px 9px;font-size:14px;color:var(--text3);font-family:'Barlow',sans-serif;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
 
 /* seed section */
-.seed-wrap{display:flex;gap:6px;align-items:stretch;}
-.seed-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);-webkit-text-fill-color:var(--text);font-family:'Barlow',monospace,sans-serif;font-size:11px;font-weight:500;padding:7px 9px;outline:none;transition:border-color .15s;letter-spacing:.04em;}
+.seed-container{display:flex;flex-direction:column;gap:6px;}
+.seed-row{display:flex;gap:6px;align-items:stretch;}
+.seed-display-wrap{flex:1;min-width:0;display:flex;background:none !important;border:none !important;box-shadow:none !important;}
+.seed-display{flex:1;background:none !important;border:none !important;color:var(--text3);font-family:'Barlow',monospace;font-size:10px;padding:7px 0;outline:none;cursor:default;display:flex;align-items:center;min-width:0;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;box-shadow:none !important;}
+.seed-input-wrap{flex:1;min-width:0;display:flex;}
+.seed-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);-webkit-text-fill-color:var(--text);font-family:'Barlow',monospace;font-size:11px;font-weight:500;padding:7px 9px;outline:none;transition:border-color .15s;letter-spacing:.04em;}
 .seed-input:focus{border-color:var(--accent1);}
-.seed-copy{background:var(--bg4);border:1px solid var(--border2);color:var(--text2);font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;padding:0 10px;border-radius:var(--r);cursor:pointer;white-space:nowrap;transition:background .12s,color .12s;}
+.seed-btn{width:64px;flex-shrink:0;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;border-radius:var(--r);cursor:pointer;white-space:nowrap;transition:all .12s;display:flex;align-items:center;justify-content:center;border:1px solid transparent;}
+.seed-copy{background:var(--bg4);border-color:var(--border2);color:var(--text2);}
 .seed-copy:hover{background:var(--bg3);color:var(--text);}
-.seed-apply{background:var(--accent1);border:1px solid var(--accent1);color:#1a1a1a;font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;padding:0 10px;border-radius:var(--r);cursor:pointer;white-space:nowrap;transition:background .12s;}
+.seed-apply{background:var(--accent1);border-color:var(--accent1);color:#1a1a1a;font-weight:700;}
 .seed-apply:hover{background:#c4b5fd;}
 .seed-err{font-size:10px;color:#f87171;margin-top:3px;min-height:14px;}
-.preset-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.preset-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
 .preset-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;padding:6px 12px;border-radius:var(--r);cursor:pointer;transition:background .15s,border-color .15s,color .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;}
 .preset-btn:hover{background:var(--bg4);border-color:var(--accent1);color:var(--text);}
 .preset-btn .preset-icon{font-size:13px;}
@@ -259,7 +264,7 @@ button.primary:active{transform:scale(.98);}
   .slant-disabled .ro-wrap{color:var(--bg4);}
   /* pitch mode toggle */
   .pitch-mode-toggle{display:flex;gap:0;margin-bottom:8px;}
-  .pitch-mode-btn{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text3);font-family:'Barlow',sans-serif;font-size:10px;font-weight:700;padding:4px 0;cursor:pointer;transition:all .15s;letter-spacing:.06em;text-transform:uppercase;}
+  .pitch-mode-btn{flex:1;min-width:0;background:var(--bg2);border:1px solid var(--border);color:var(--text3);font-family:'Barlow',sans-serif;font-size:10px;font-weight:700;padding:4px 2px;cursor:pointer;transition:all .15s;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .pitch-mode-btn:first-child{border-radius:var(--r) 0 0 var(--r);}
   .pitch-mode-btn:last-child{border-radius:0 var(--r) var(--r) 0;border-left:none;}
   .pitch-mode-btn.active{background:var(--accent1);border-color:var(--accent1);color:#1a1a1a;}
@@ -280,15 +285,24 @@ button.primary:active{transform:scale(.98);}
   <!-- Seed -->
   <div class="sec">
     <div class="sec-title" data-i18n="sec-seed">Seed</div>
-    <div class="seed-wrap">
-      <input type="text" class="seed-input" id="seed-input" placeholder="Paste seed here…" spellcheck="false">
-      <button class="seed-copy" onclick="copySeed()" data-i18n="btn-copy">Copy</button>
-      <button class="seed-apply" onclick="applySeed()" data-i18n="btn-apply">Apply</button>
+    <div class="seed-container">
+      <div class="seed-row">
+        <div class="seed-display-wrap">
+          <input type="text" class="seed-display" id="seed-display" readonly spellcheck="false" title="Current settings seed">
+        </div>
+        <button class="seed-btn seed-copy" id="btn-copy-seed" onclick="copySeed()" data-i18n="btn-copy">Copy</button>
+      </div>
+      <div class="seed-row">
+        <div class="seed-input-wrap">
+          <input type="text" class="seed-input" id="seed-input" placeholder="Paste seed here…" spellcheck="false">
+        </div>
+        <button class="seed-btn seed-apply" onclick="applySeed()" data-i18n="btn-apply">Apply</button>
+      </div>
     </div>
     <div class="seed-err" id="seed-err"></div>
     <div class="preset-wrap">
-      <button class="preset-btn" onclick="applyPreset('guitar')" title="6弦 25.5&quot; 22フレット">Guitar Standard</button>
-      <button class="preset-btn" onclick="applyPreset('bass')" title="4弦 34&quot; 21フレット">Bass Standard</button>
+      <button class="preset-btn" onclick="applyPreset('guitar')" title="6弦 25.5&quot; 22フレット">Guitar Std</button>
+      <button class="preset-btn" onclick="applyPreset('bass')" title="4弦 34&quot; 21フレット">Bass Std</button>
     </div>
   </div>
 
@@ -460,6 +474,44 @@ button.primary:active{transform:scale(.98);}
             </div>
           </div>
           <div style="margin-top:4px;font-size:11px;color:var(--text3);"><span data-i18n="hint-fb-end">Min: Frets + 1 =</span> <span id="fb-end-min">—</span></div>
+          <!-- End Shape -->
+          <div style="margin-top:8px;">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">End Shape</div>
+            <div style="display:flex;gap:0;margin-bottom:6px;">
+              <button id="end-shape-line-btn" onclick="_endShape='line';updateEndShapeUI();run();" style="flex:1;padding:4px 0;font-size:11px;border:1px solid var(--border);border-radius:var(--r2) 0 0 var(--r2);background:var(--accent);color:#fff;cursor:pointer;">Line</button>
+              <button id="end-shape-r-btn" onclick="_endShape='r';var el=document.getElementById('end-offset');if(el)el._userEdited=false;updateEndShapeUI();run();" style="flex:1;padding:4px 0;font-size:11px;border:1px solid var(--border);border-left:none;border-radius:0 var(--r2) var(--r2) 0;background:var(--bg2);color:var(--text2);cursor:pointer;">R-End</button>
+            </div>
+            <div id="end-shape-r-opts" style="display:none;">
+              <div class="field">
+                <label style="font-size:11px;">Corner R (mm)</label>
+                <div class="num-wrap" style="width:90px;">
+                  <input type="number" id="end-corner-r" value="6" step="0.5" min="0" max="30" oninput="run();">
+                  <div class="num-btns"><button class="num-btn" data-target="end-corner-r" data-dir="up">▲</button><button class="num-btn" data-target="end-corner-r" data-dir="dn">▼</button></div>
+                </div>
+              </div>
+              <div class="field">
+                <label style="font-size:11px;">Arc radius</label>
+                <div style="display:flex;gap:4px;align-items:center;">
+                  <div class="num-wrap" style="width:80px;">
+                    <input type="number" id="end-arc-r" value="5" step="0.5" min="1" max="999" oninput="run();">
+                    <div class="num-btns"><button class="num-btn" data-target="end-arc-r" data-dir="up">▲</button><button class="num-btn" data-target="end-arc-r" data-dir="dn">▼</button></div>
+                  </div>
+                  <div style="display:flex;gap:0;">
+                    <button id="end-arc-unit-in-btn" onclick="_endArcUnit='in';updateEndShapeUI();run();" style="padding:3px 7px;font-size:10px;border:1px solid var(--border);border-radius:var(--r2) 0 0 var(--r2);background:var(--accent);color:#fff;cursor:pointer;">in</button>
+                    <button id="end-arc-unit-mm-btn" onclick="_endArcUnit='mm';updateEndShapeUI();run();" style="padding:3px 7px;font-size:10px;border:1px solid var(--border);border-left:none;border-radius:0 var(--r2) var(--r2) 0;background:var(--bg2);color:var(--text2);cursor:pointer;">mm</button>
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label style="font-size:11px;">Offset from last fret (mm)</label>
+                <div class="num-wrap" style="width:90px;">
+                  <input type="number" id="end-offset" value="15" step="1" min="0" max="100" oninput="this._userEdited=true;run();">
+                  <div class="num-btns"><button class="num-btn" data-target="end-offset" data-dir="up">▲</button><button class="num-btn" data-target="end-offset" data-dir="dn">▼</button></div>
+                </div>
+              </div>
+              <div id="end-shape-curved-note" style="display:none;font-size:10px;color:var(--text3);margin-top:3px;">Curved mode: Line only</div>
+            </div>
+          </div>
         </div>
         <!-- Edge Overhang -->
         <div class="adv-sec">
@@ -485,6 +537,16 @@ button.primary:active{transform:scale(.98);}
           <div class="g2">
             <div class="field"><label data-i18n="lbl-nut-thick">Nut Thickness (mm)</label><div class="num-wrap"><input type="number" id="nut_thick" value="3.0" step="0.5" min="1" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_thick" data-dir="up">▲</button><button class="num-btn" data-target="nut_thick" data-dir="dn">▼</button></div></div></div>
             <div class="field"><label data-i18n="lbl-nut-oh" style="white-space:nowrap; letter-spacing:-0.2px;">Headstock Overhang (mm)</label><div class="num-wrap"><input type="number" id="nut_oh" value="8.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_oh" data-dir="up">▲</button><button class="num-btn" data-target="nut_oh" data-dir="dn">▼</button></div></div></div>
+          </div>
+          <!-- 0フレット設定 -->
+          <div style="margin-top:8px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text2);">
+              <input type="checkbox" id="zero-fret-toggle" onchange="run()" style="accent-color:var(--accent);">
+              <span data-i18n="lbl-zero-fret">0 Fret</span>
+            </label>
+          </div>
+          <div id="zero-fret-offset-wrap" style="display:none;margin-top:6px;">
+            <div class="field"><label data-i18n="lbl-zero-fret-offset" style="white-space:nowrap;">0 Fret → Nut offset (mm)</label><div class="num-wrap"><input type="number" id="zero_fret_offset" value="2.0" step="0.5" min="0" max="20" oninput="run()"><div class="num-btns"><button class="num-btn" data-target="zero_fret_offset" data-dir="up">▲</button><button class="num-btn" data-target="zero_fret_offset" data-dir="dn">▼</button></div></div></div>
           </div>
         </div>
       </div>
@@ -574,6 +636,151 @@ button.primary:active{transform:scale(.98);}
         </div>
         </div>
       </div><!-- /adv-group String Spacing -->
+
+      <!-- GROUP 5: Inlay -->
+      <div class="adv-group" id="grp-inlay" style="margin-bottom:10px;">
+        <div class="adv-group-title">Inlay</div>
+        <div class="adv-sec">
+          <div class="field" style="margin-bottom:6px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+              <input type="checkbox" id="inlay-enabled" onchange="_inlaySettings.enabled=this.checked;updateInlayUI();run();" style="width:14px;height:14px;">
+              <span>Enable Inlay</span>
+            </label>
+          </div>
+          <div id="inlay-body" style="display:none;">
+            <!-- Mode: pitch-mode-toggleスタイル -->
+            <div class="pitch-mode-toggle" style="margin-bottom:8px;">
+              <button class="pitch-mode-btn active" id="inlay-mode-center" onclick="_inlaySettings.mode='center';updateInlayUI();run();" style="font-size:10px;letter-spacing:.04em;">Center Dot</button>
+              <button class="pitch-mode-btn" id="inlay-mode-offset" onclick="_inlaySettings.mode='offset';updateInlayUI();run();" style="font-size:10px;letter-spacing:.04em;">Offset Dot</button>
+              <button class="pitch-mode-btn" id="inlay-mode-block" onclick="_inlaySettings.mode='block';updateInlayUI();run();" style="font-size:10px;letter-spacing:.04em;">Block</button>
+            </div>
+
+              <!-- Center Dot settings -->
+              <div id="inlay-center-opts">
+                <div class="field">
+                  <label>Diameter (mm)</label>
+                  <div class="num-wrap" style="width:90px;">
+                    <input type="number" id="inlay-center-diam" value="6.0" step="0.5" min="1" max="20" oninput="_inlaySettings.centerDiam=parseFloat(this.value)||6;updateInlayUI();run();">
+                    <div class="num-btns"><button class="num-btn" data-target="inlay-center-diam" data-dir="up">▲</button><button class="num-btn" data-target="inlay-center-diam" data-dir="dn">▼</button></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Offset Dot settings -->
+              <div id="inlay-offset-opts" style="display:none;">
+
+                <div class="field">
+                  <label>Diameter (mm)</label>
+                  <div class="num-wrap" style="width:90px;">
+                    <input type="number" id="inlay-offset-diam" value="5.0" step="0.5" min="1" max="20" oninput="_inlaySettings.offsetDiam=parseFloat(this.value)||5;updateInlayUI();run();">
+                    <div class="num-btns"><button class="num-btn" data-target="inlay-offset-diam" data-dir="up">▲</button><button class="num-btn" data-target="inlay-offset-diam" data-dir="dn">▼</button></div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Pattern</label>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <label style="cursor:pointer;display:flex;align-items:center;gap:4px;font-size:11px;"><input type="radio" name="inlay-offset-pat" value="1" checked onchange="_inlaySettings.offsetPattern=parseInt(this.value);run();"> 1 (Treble)</label>
+                    <label style="cursor:pointer;display:flex;align-items:center;gap:4px;font-size:11px;"><input type="radio" name="inlay-offset-pat" value="2" onchange="_inlaySettings.offsetPattern=parseInt(this.value);run();"> 2 (Split)</label>
+                    <label style="cursor:pointer;display:flex;align-items:center;gap:4px;font-size:11px;"><input type="radio" name="inlay-offset-pat" value="3" onchange="_inlaySettings.offsetPattern=parseInt(this.value);run();"> 3 (Bass)</label>
+                  </div>
+                </div>
+                <div class="field" id="inlay-offset-dbl-pos-wrap">
+                  <label style="font-size:11px;">Double dot 2nd position</label>
+                  <div style="display:flex;gap:6px;">
+                    <label style="cursor:pointer;display:flex;align-items:center;gap:4px;font-size:11px;"><input type="radio" name="inlay-offset-dbl" value="adjacent" checked onchange="_inlaySettings.offsetDblSide=this.value;run();"> Adjacent</label>
+                    <label style="cursor:pointer;display:flex;align-items:center;gap:4px;font-size:11px;"><input type="radio" name="inlay-offset-dbl" value="opposite" onchange="_inlaySettings.offsetDblSide=this.value;run();"> Opposite end</label>
+                  </div>
+                </div>
+              </div>
+
+              
+
+              <!-- Block settings -->
+              <div id="inlay-block-opts" style="display:none;">
+                <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">H = fret spacing × coef &nbsp; W = string span × coef</div>
+                <div class="field">
+                  <label style="font-size:11px;">Start fret &nbsp; H × W</label>
+                  <div style="display:flex;gap:4px;align-items:center;">
+                    <div class="num-wrap" style="width:72px;">
+                      <input type="number" id="inlay-hc-start" value="0.50" step="0.01" min="0.1" max="1" oninput="_inlaySettings.hCoefStart=parseFloat(this.value)||0.5;run();">
+                      <div class="num-btns"><button class="num-btn" data-target="inlay-hc-start" data-dir="up">▲</button><button class="num-btn" data-target="inlay-hc-start" data-dir="dn">▼</button></div>
+                    </div>
+                    <span style="color:var(--text3);">×</span>
+                    <div class="num-wrap" style="width:72px;">
+                      <input type="number" id="inlay-wc-start" value="0.60" step="0.01" min="0.1" max="1" oninput="_inlaySettings.wCoefStart=parseFloat(this.value)||0.6;run();">
+                      <div class="num-btns"><button class="num-btn" data-target="inlay-wc-start" data-dir="up">▲</button><button class="num-btn" data-target="inlay-wc-start" data-dir="dn">▼</button></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label style="font-size:11px;">End fret &nbsp; H × W</label>
+                  <div style="display:flex;gap:4px;align-items:center;">
+                    <div class="num-wrap" style="width:72px;">
+                      <input type="number" id="inlay-hc-end" value="0.50" step="0.01" min="0.1" max="1" oninput="_inlaySettings.hCoefEnd=parseFloat(this.value)||0.5;run();">
+                      <div class="num-btns"><button class="num-btn" data-target="inlay-hc-end" data-dir="up">▲</button><button class="num-btn" data-target="inlay-hc-end" data-dir="dn">▼</button></div>
+                    </div>
+                    <span style="color:var(--text3);">×</span>
+                    <div class="num-wrap" style="width:72px;">
+                      <input type="number" id="inlay-wc-end" value="0.60" step="0.01" min="0.1" max="1" oninput="_inlaySettings.wCoefEnd=parseFloat(this.value)||0.6;run();">
+                      <div class="num-btns"><button class="num-btn" data-target="inlay-wc-end" data-dir="up">▲</button><button class="num-btn" data-target="inlay-wc-end" data-dir="dn">▼</button></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="field" id="inlay-radius-wrap">
+                  <label style="font-size:11px;">Corner radius (mm, 0=square)</label>
+                  <div class="num-wrap" style="width:90px;">
+                    <input type="number" id="inlay-radius" value="2.0" step="0.5" min="0" max="20" oninput="_inlaySettings.radius=parseFloat(this.value);run();">
+                    <div class="num-btns"><button class="num-btn" data-target="inlay-radius" data-dir="up">▲</button><button class="num-btn" data-target="inlay-radius" data-dir="dn">▼</button></div>
+                  </div>
+                  <div id="inlay-radius-curved-note" style="display:none;font-size:10px;color:var(--text3);margin-top:3px;">Curved mode: R=0 fixed</div>
+                </div>
+                <div class="field">
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:11px;">
+                    <input type="checkbox" id="inlay-block-no1f" onchange="_inlaySettings.blockNo1f=this.checked;run();" style="accent-color:var(--accent);">
+                    <span>Skip 1st fret</span>
+                  </label>
+                </div>
+            </div>
+
+            <!-- Double dot settings（center/offset共通） -->
+            <div id="inlay-dbl-opts">
+              <div style="border-top:1px solid var(--border);margin:8px 0 6px;"></div>
+              <div class="field" style="margin-bottom:6px;">
+                <label style="font-size:11px;color:var(--text3);margin-bottom:4px;display:block;">Octave frets (12f, 24f, 36f, 48f)</label>
+                <div style="display:flex;gap:0;">
+                  <button id="inlay-dbl-single-btn" onclick="_inlaySettings.dblEnabled=false;updateInlayUI();run();" style="flex:1;padding:4px 0;font-size:11px;border:1px solid var(--border);border-radius:var(--r2) 0 0 var(--r2);background:var(--accent);color:#fff;cursor:pointer;">Single</button>
+                  <button id="inlay-dbl-double-btn" onclick="_inlaySettings.dblEnabled=true;updateInlayUI();run();" style="flex:1;padding:4px 0;font-size:11px;border:1px solid var(--border);border-left:none;border-radius:0 var(--r2) var(--r2) 0;background:var(--bg2);color:var(--text2);cursor:pointer;">Double</button>
+                </div>
+              </div>
+              <div id="inlay-dbl-ctc-wrap" class="field">
+                <label style="font-size:11px;">C-to-C at 12f (mm)</label>
+                <div class="num-wrap" style="width:90px;">
+                  <input type="number" id="inlay-center-ctc" value="28.0" step="1" min="5" max="60" oninput="_inlaySettings.centerCtc=parseFloat(this.value)||28;run();">
+                  <div class="num-btns"><button class="num-btn" data-target="inlay-center-ctc" data-dir="up">▲</button><button class="num-btn" data-target="inlay-center-ctc" data-dir="dn">▼</button></div>
+                </div>
+              </div>
+              <div id="inlay-dbl-per-fret"></div>
+            </div>
+
+            <!-- Custom Positions -->
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:6px;">
+                <input type="checkbox" id="inlay-custom-enabled" onchange="_inlaySettings.customEnabled=this.checked;updateCustomPositionsUI();run();" style="width:13px;height:13px;accent-color:var(--accent);">
+                <span style="font-size:11px;font-weight:600;">Custom Fret Positions</span>
+              </label>
+              <div id="inlay-custom-pos-wrap" style="display:none;">
+                <div style="font-size:10px;color:var(--text3);margin-bottom:4px;">Fret numbers (comma separated)</div>
+                <input type="text" id="inlay-custom-pos-input"
+                  value="3,5,7,9,12,15,17,19,21,24"
+                  style="width:100%;box-sizing:border-box;padding:5px 8px;font-size:11px;font-family:'Barlow',monospace;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:var(--r2);outline:none;"
+                  oninput="_inlaySettings.customPositions=this.value.split(',').map(function(s){return parseInt(s.trim());}).filter(function(n){return !isNaN(n)&&n>=1;});run();"
+                  placeholder="e.g. 3,5,7,9,12,15,17,19,21,24">
+              </div>
+            </div>
+
+          </div><!-- /inlay-body -->
+        </div>
+      </div><!-- /adv-group Inlay -->
 
       <!-- GROUP 4: Extra -->
       <div class="adv-group" style="margin-bottom:0; border-bottom:none;">
@@ -808,10 +1015,224 @@ button.primary:active{transform:scale(.98);}
 var I2M=25.4;
 var K2L=0.45359237; // kg per lb
 function getEDO(){ var el=document.getElementById('edo'); return el?(parseInt(el.value)||12):12; }
+
+function updateInlayUI(){
+  var en=_inlaySettings.enabled;
+  var body=document.getElementById('inlay-body');
+  if(body) body.style.display=en?'block':'none';
+  if(!en) return;
+  var mode=_inlaySettings.mode||'center';
+
+  // モードボタンのアクティブ状態同期
+  ['center','offset','block'].forEach(function(m){
+    var btn=document.getElementById('inlay-mode-'+m);
+    if(btn){btn.classList.toggle('active',mode===m);}
+  });
+
+  var cOpts=document.getElementById('inlay-center-opts');
+  var oOpts=document.getElementById('inlay-offset-opts');
+  var bOpts=document.getElementById('inlay-block-opts');
+  var dblOpts=document.getElementById('inlay-dbl-opts');
+  if(cOpts) cOpts.style.display=mode==='center'?'':'none';
+  if(oOpts) oOpts.style.display=mode==='offset'?'':'none';
+  if(bOpts) bOpts.style.display=mode==='block'?'':'none';
+  if(dblOpts) dblOpts.style.display=(mode==='block')?'none':'';
+
+
+
+  var dblEnabled=_inlaySettings.dblEnabled!==false;
+
+  // Single/Doubleボタンのアクティブ状態を更新
+  var sBtn=document.getElementById('inlay-dbl-single-btn');
+  var dBtn=document.getElementById('inlay-dbl-double-btn');
+  if(sBtn&&dBtn){
+    sBtn.style.background=dblEnabled?'var(--bg2)':'var(--accent)';
+    sBtn.style.color=dblEnabled?'var(--text2)':'#fff';
+    dBtn.style.background=dblEnabled?'var(--accent)':'var(--bg2)';
+    dBtn.style.color=dblEnabled?'#fff':'var(--text2)';
+  }
+
+  // Double dot 2nd position: offsetモード + dblEnabled=trueのみ表示
+  var dbl2ndWrap=document.getElementById('inlay-offset-dbl-pos-wrap');
+  if(dbl2ndWrap) dbl2ndWrap.style.display=(mode==='offset'&&dblEnabled)?'':'none';
+
+  // C-to-Cはcenterモード + dblEnabled=trueのみ
+  var ctcWrap=document.getElementById('inlay-dbl-ctc-wrap');
+  if(ctcWrap) ctcWrap.style.display=(mode==='center'&&dblEnabled)?'':'none';
+
+  // 各フレット個別設定を動的生成
+  var nFretEl=document.getElementById('nf');
+  var nFret=nFretEl?Math.min(parseInt(nFretEl.value)||24,48):24;
+  var perFretDiv=document.getElementById('inlay-dbl-per-fret');
+  if(perFretDiv){
+    var DFRETS=[12,24,36,48].filter(function(f){return f<=nFret;});
+    var baseDiam=mode==='offset'?(_inlaySettings.offsetDiam||5.0):(_inlaySettings.centerDiam||6.0);
+    var html='';
+    DFRETS.forEach(function(f){
+      var cfg=(_inlaySettings.dblFrets&&_inlaySettings.dblFrets[f]);
+      if(!cfg){cfg={shape:'dot',diam:baseDiam,inner:4.0,outer:7.0,linked:true};if(_inlaySettings.dblFrets)_inlaySettings.dblFrets[f]=cfg;}
+      if(cfg.linked) cfg.diam=baseDiam;
+      // Center Dotモードはshape=dot固定
+      if(mode==='center') cfg.shape='dot';
+      var isDot=(cfg.shape||'dot')==='dot';
+      var d=cfg.diam||baseDiam;
+      html+='<div style="margin-bottom:5px;padding:5px 7px;background:var(--bg2);border-radius:var(--r2);border:1px solid var(--border);">';
+      // ヘッダー行: フレット番号 + single/double
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">';
+      html+='<span style="font-size:11px;font-weight:600;color:var(--text2);">'+f+'f</span>';
+      if(mode!=='center'){
+        html+='<div style="display:flex;gap:6px;">';
+        html+='<label style="cursor:pointer;display:flex;align-items:center;gap:3px;font-size:11px;"><input type="radio" name="inlay-dbl-shape-'+f+'" value="dot"'+(isDot?' checked':'')+' onchange="_inlaySettings.dblFrets['+f+'].shape=this.value;updateInlayUI();run();"> Dot</label>';
+        html+='<label style="cursor:pointer;display:flex;align-items:center;gap:3px;font-size:11px;"><input type="radio" name="inlay-dbl-shape-'+f+'" value="ring"'+(!isDot?' checked':'')+' onchange="_inlaySettings.dblFrets['+f+'].shape=this.value;updateInlayUI();run();"> Ring</label>';
+        html+='</div>';
+      }
+      html+='</div>';
+      // サイズ行
+      if(isDot){
+        html+='<div style="display:flex;align-items:center;gap:5px;">';
+        html+='<span style="font-size:10px;color:var(--text3);">\u00d8</span>';
+        // oninputでlinkedを解除: getElementById不要、this.form経由も不要、直接フラグだけ
+        html+='<div class="num-wrap" style="width:72px;"><input type="number" id="inlay-dbl-diam-'+f+'" value="'+(d.toFixed(1))+'" step="0.5" min="1" max="20" oninput="_inlaySettings.dblFrets['+f+'].diam=parseFloat(this.value)||'+baseDiam+';_inlaySettings.dblFrets['+f+'].linked=false;updateInlayUI();run();">';
+        html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-diam-'+f+'" data-dir="up">\u25b2</button><button class="num-btn" data-target="inlay-dbl-diam-'+f+'" data-dir="dn">\u25bc</button></div></div>';
+        html+='<span style="font-size:10px;color:var(--text3);">mm</span>';
+        var linkId='inlay-dbl-link-'+f;
+        html+='<label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:10px;color:var(--text3);margin-left:3px;">';
+        html+='<input type="checkbox" id="'+linkId+'"'+(cfg.linked?' checked':'')+' onchange="_inlaySettings.dblFrets['+f+'].linked=this.checked;if(this.checked){_inlaySettings.dblFrets['+f+'].diam='+baseDiam+';updateInlayUI();}run();" style="accent-color:var(--accent);width:11px;height:11px;">';
+        html+=' link</label>';
+        html+='</div>';
+      } else {
+        html+='<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">';
+        html+='<span style="font-size:10px;color:var(--text3);">Out</span>';
+        html+='<div class="num-wrap" style="width:68px;"><input type="number" id="inlay-dbl-outer-'+f+'" value="'+(cfg.outer||7.0).toFixed(1)+'" step="0.5" min="1" max="20" oninput="_inlaySettings.dblFrets['+f+'].outer=parseFloat(this.value)||7;run();">';
+        html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-outer-'+f+'" data-dir="up">\u25b2</button><button class="num-btn" data-target="inlay-dbl-outer-'+f+'" data-dir="dn">\u25bc</button></div></div>';
+        html+='<span style="font-size:10px;color:var(--text3);">In</span>';
+        html+='<div class="num-wrap" style="width:68px;"><input type="number" id="inlay-dbl-inner-'+f+'" value="'+(cfg.inner||4.0).toFixed(1)+'" step="0.5" min="1" max="20" oninput="_inlaySettings.dblFrets['+f+'].inner=parseFloat(this.value)||4;run();">';
+        html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-inner-'+f+'" data-dir="up">▲</button><button class="num-btn" data-target="inlay-dbl-inner-'+f+'" data-dir="dn">▼</button></div></div>';
+        html+='<span style="font-size:10px;color:var(--text3);">mm</span>';
+        if (mode === 'offset' && !dblEnabled) {
+          var offVal = cfg.offset || 0;
+          html+='<div style="flex-basis:100%;height:0;"></div>';
+          html+='<span style="font-size:10px;color:var(--text3);margin-left:4px;">Offset</span>';
+          html+='<div class="num-wrap" style="width:64px;"><input type="number" id="inlay-dbl-offset-'+f+'" value="'+offVal.toFixed(1)+'" step="0.5" min="-50" max="50" oninput="_inlaySettings.dblFrets['+f+'].offset=parseFloat(this.value)||0;run();">';
+          html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-offset-'+f+'" data-dir="up">▲</button><button class="num-btn" data-target="inlay-dbl-offset-'+f+'" data-dir="dn">▼</button></div></div>';
+          html+='<span style="font-size:10px;color:var(--text3);">mm</span>';
+        }
+        html+='</div>';
+      }
+      html+='</div>';
+    });
+    perFretDiv.innerHTML=html;
+  }
+}
+function updateInlayPositions(val,type){
+  var nums=val.split(',').map(function(s){return parseInt(s.trim());}).filter(function(n){return !isNaN(n)&&n>=1;});
+  if(type==='block') _inlaySettings.blockPositions=nums;
+  else _inlaySettings.positions=nums;
+  run();
+}
+
+function updateCustomPositionsUI(){
+  var en=_inlaySettings.customEnabled;
+  var wrap=document.getElementById('inlay-custom-pos-wrap');
+  if(wrap) wrap.style.display=en?'block':'none';
+}
+
+// inlay-enabled checkbox toggle
+document.addEventListener('change',function(e){
+  if(e.target.id==='inlay-enabled'){
+    _inlaySettings.enabled=e.target.checked;
+    updateInlayUI();
+    run();
+  }
+});
+// inlay-x-ratio range input
+document.addEventListener('input',function(e){
+  if(e.target.id==='inlay-x-ratio'){
+    _inlaySettings.offsetRatio=parseFloat(e.target.value);
+    var lbl=document.getElementById('inlay-x-ratio-lbl');
+    if(lbl){var v=Math.round(_inlaySettings.offsetRatio*100);lbl.textContent='Center ('+v+'%)';}
+    run();
+  }
+});
 var FR=function(n){return 1-Math.pow(2,-n/getEDO());};
+var _endShape='line';    // 'line' | 'r'
+var _endArcUnit='in';    // 'in' | 'mm'
+
+function updateEndShapeUI(){
+  var isR=_endShape==='r';
+  // curvedマルチ時はRモード無効
+  var isCurvedMulti=false;
+  var curvedEl=document.getElementById('curved-toggle');
+  var s1El=document.getElementById('s1'),sNEl=document.getElementById('sN');
+  if(curvedEl&&s1El&&sNEl) isCurvedMulti=curvedEl.checked&&Math.abs(parseFloat(s1El.value)-parseFloat(sNEl.value))>0.01;
+  if(isCurvedMulti&&isR){_endShape='line';isR=false;}
+
+  var rBtn=document.getElementById('end-shape-r-btn');
+  var lBtn=document.getElementById('end-shape-line-btn');
+  var opts=document.getElementById('end-shape-r-opts');
+  var note=document.getElementById('end-shape-curved-note');
+  if(lBtn){lBtn.style.background=isR?'var(--bg2)':'var(--accent)';lBtn.style.color=isR?'var(--text2)':'#fff';}
+  if(rBtn){
+    rBtn.style.background=isR?'var(--accent)':'var(--bg2)';
+    rBtn.style.color=isR?'#fff':'var(--text2)';
+    rBtn.style.opacity=isCurvedMulti?'0.35':'1';
+    rBtn.style.pointerEvents=isCurvedMulti?'none':'';
+  }
+  if(opts) opts.style.display=isR?'':'none';
+  if(note) note.style.display=isCurvedMulti?'':'none';
+  // arc unit ボタン
+  var inBtn=document.getElementById('end-arc-unit-in-btn');
+  var mmBtn=document.getElementById('end-arc-unit-mm-btn');
+  var isIn=_endArcUnit==='in';
+  if(inBtn){inBtn.style.background=isIn?'var(--accent)':'var(--bg2)';inBtn.style.color=isIn?'#fff':'var(--text2)';}
+  if(mmBtn){mmBtn.style.background=isIn?'var(--bg2)':'var(--accent)';mmBtn.style.color=isIn?'var(--text2)':'#fff';}
+}
 
 // ── Extended Frets state ──
 var _extFrets = []; // array per string (index 0 = highest string), value = number of minus frets
+
+// Inlay settings
+var _inlaySettings = {
+  enabled: false,
+  mode: 'center',
+  // Center/Offset共通
+  centerDiam: 6.0,
+  centerCtc: 28.0,
+  // ダブルドット設定
+  dblEnabled: true,
+  dblShape: 'dot',      // dblEnabled=falseのときのglobal shape
+  dblDiam: 6.0,
+  dblInner: 4.0,
+  dblOuter: 7.0,
+  dblLinked: true,      // true=上のDiameter(mm)とリンク中
+  // 各フレット個別設定（dblEnabled問わず使用）
+  dblFrets: {
+    12: {shape:'dot', diam:6.0, inner:4.0, outer:7.0, linked:true},
+    24: {shape:'dot', diam:6.0, inner:4.0, outer:7.0, linked:true},
+    36: {shape:'dot', diam:6.0, inner:4.0, outer:7.0, linked:true},
+    48: {shape:'dot', diam:6.0, inner:4.0, outer:7.0, linked:true}
+  },
+  // Offset Dot
+  offsetDiam: 5.0,
+  offsetPattern: 1,
+  offsetDblSide: 'adjacent',
+  // Block
+  hCoefStart: 0.50,
+  hCoefEnd: 0.50,
+  wCoefStart: 0.60,
+  wCoefEnd: 0.60,
+  radius: 2.0,
+  blockPositions: [3,5,7,9,12,15,17,19,21,24],
+  blockNo1f: false,
+  // Custom positions
+  customEnabled: false,
+  customPositions: [3,5,7,9,12,15,17,19,21,24],
+  // 共通
+  offsetRatio: 0.5,
+  // 後方互換
+  positions: [3,5,7,9,12,15,17,19,21,24],
+  shape: 'dot', diameter: 6.0, length: 8.0, yRatio: 0.5
+};
 
 function getExtFret(i){ return (_extFrets[i]||0); }
 
@@ -844,6 +1265,13 @@ function renderExtFretTable(){
     var val=_extFrets[i]||0;
     var sc_in=_state.sc(i)/I2M;
     var sc_mm=_state.sc(i);
+    // Extended Fretsがある場合は実効スケール長（元スケール × 2^(n/EDO)）
+    var ef=val||0;
+    if(ef>0){
+      var edo=getEDO();
+      sc_mm=sc_mm*Math.pow(2,ef/edo);
+      sc_in=sc_mm/I2M;
+    }
     var maxFret=_state.nFret;
     html+='<tr>';
     html+='<td style="color:var(--text3);font-weight:600;">'+si+'</td>';
@@ -898,252 +1326,109 @@ function fretToPD(n){
   if(n<=0) return 0;
   return 1-Math.pow(2,-n/getEDO());
 }
+
+// ── seed encode/decode (Base36 v3 logic) ──
+function encodeSeed(){
+  var sN=parseFloat(document.getElementById('sN').value);
+  var s1=parseFloat(document.getElementById('s1').value);
+  var pdf=parseFloat(document.getElementById('pd-fret').value);
+  var ns=parseInt(document.getElementById('ns').value);
+  var nf=parseInt(document.getElementById('nf').value);
+  var eb=parseInt(document.getElementById('fb_end').value);
+  var bp=parseFloat(document.getElementById('bpitch').value);
+  var np=parseFloat(document.getElementById('npitch').value);
+  var ne1=parseFloat(document.getElementById('ne1').value);
+  var neN=parseFloat(document.getElementById('neN').value);
+  var ee1=parseFloat(document.getElementById('ee1').value);
+  var eeN=parseFloat(document.getElementById('eeN').value);
+  var nt=parseFloat(document.getElementById('nut_thick').value);
+  var no=parseFloat(document.getElementById('nut_oh').value);
+  var zfo=parseFloat(document.getElementById('zero_fret_offset').value);
+  var zf=document.getElementById('zero-fret-toggle').checked?1:0;
+  var cur=document.getElementById('curved-toggle').checked?1:0;
+  var ck=parseFloat(document.getElementById('curve-k').value);
+  var edo=getEDO();
+  var pdSourceValue=parseFloat(document.getElementById('pd').value);
+
+  var arr=[sN,s1,pdf,ns,nf,eb,bp,np,ne1,neN,ee1,eeN,nt,no,zfo,zf,cur,ck,edo,pdSourceValue];
+  var s="";
+  for(var i=0;i<arr.length;i++){
+    var v=arr[i]; if(isNaN(v)) v=0;
+    var iv=Math.round(v*1000);
+    var b36=(iv+1000000).toString(36);
+    s+=b36;
+  }
+  return 'GTI-'+s;
+}
+
+function decodeSeed(seed){
+  seed=seed.trim();
+  if(!seed.startsWith('GTI-')) return null;
+  var body=seed.substring(4);
+  if(body.length % 4 !== 0) return null;
+  var res=[];
+  for(var i=0;i<body.length;i+=4){
+    var b36=body.substring(i,i+4);
+    var iv=parseInt(b36,36);
+    res.push((iv-1000000)/1000);
+  }
+  if(res.length<15) return null;
+  return {
+    sN:res[0], s1:res[1], pdfret:res[2], ns:res[3], nf:res[4], fb_end:res[5],
+    bpitch:res[6], npitch:res[7], ne1:res[8], neN:res[9], ee1:res[10], eeN:res[11],
+    nut_thick:res[12], nut_oh:res[13], zeroFretOffset:res[14], 
+    zfOn:res[15], curved:res[16], k:res[17], edo:res[18]||12, pd:res[19]
+  };
+}
+
 function buildFilename(nStr,s1in,sNin,pd){
   var f=pdToFret(pd);
   return 'fb'+nStr+'st'+parseFloat(s1in.toFixed(1))+'-'+parseFloat(sNin.toFixed(1))+'pd'+(f==='∞'?'bridge':f)+'.dxf';
 }
 
-// ── seed encode/decode ──
-// ── Seed v3: ビットパック + Base36 固定長エンコード ──
-// フォーマット v3: GTI-[82文字固定]  (FB部34文字 + Tension部36文字 + ExtFret部12文字)
-// FB部: 171bit を Base36 34文字でエンコード (v2と同じ)
-// Tension部: 182bit → 36文字 (v2と同じ)
-// ExtFret部: 各弦5bit × 13弦 = 65bit → Base36 13文字 + 1文字パディング = 14文字
-//   ただし13文字で65bitは ceil(65*log2(36)/log2(2)) ≒ 13.4 → 14文字に
-// v2(70文字)後方互換あり
-
-var SEED_FB_FIELDS = [
-  ['sN',200,8],['s1',200,8],['pd_fret',0,8],['ns',1,4],
-  ['nf',12,5],['fb_end',13,5],['bpitch',50,8],['npitch',40,7],
-  ['ne1',0,8],['neN',0,8],['ee1',0,8],['eeN',0,8],
-  ['nut_thick',10,8],['nut_oh',0,8],['pd',0,17],['curved',0,1],['curve_k',1000,11],
-  // v2 additions
-  ['fret_slant',90,8],  // stored = round(deg*2)+90, range -45~+45 -> 0~180
-  ['pitch_mode',0,1],   // 0=even, 1=linear
-  ['b_pitch_1',50,8],['b_pitch_N',50,8], // stored = round(mm*10)-50, 5~25mm -> 0~200
-  ['n_pitch_1',50,8],['n_pitch_N',50,8]
-];
-// FB: 171bit -> 34chars; Tension: 182bit -> 36chars; Body total: 70chars (v2)
-// ExtFret: 5bit/str * 13str = 65bit -> 14chars (Base36); v3 body = 84chars
-var SEED_FB_CHARS=34, SEED_TEN_PER_STR=14, SEED_MAX_STR=13, SEED_TEN_CHARS=36;
-var SEED_EF_PER_STR=5, SEED_EF_CHARS=14; // v3
-// Legacy body length (before v2 additions)
-var SEED_FB_CHARS_V1=26;
-
-function bigToBase36(big,chars){
-  return big.toString(36).padStart(chars, '0');
-}
-function base36ToBig(s){
-  var big=BigInt(0);
-  for(var i=0;i<s.length;i++){big=big*BigInt(36)+BigInt(parseInt(s[i],36));}
-  return big;
-}
-function seedPackBits(vals,specs){
-  var big=BigInt(0);
-  for(var i=0;i<specs.length;i++){
-    var bits=BigInt(specs[i][2]);
-    var mask=(BigInt(1)<<bits)-BigInt(1);
-    big=(big<<bits)|(BigInt(vals[i])&mask);
-  }
-  return big;
-}
-function seedUnpackBits(big,specs){
-  var vals=new Array(specs.length);
-  for(var i=specs.length-1;i>=0;i--){
-    var bits=BigInt(specs[i][2]);
-    var mask=(BigInt(1)<<bits)-BigInt(1);
-    vals[i]=Number(big&mask);
-    big=big>>bits;
-  }
-  return vals;
-}
-
-function encodeSeed(){
-  function gv(id){var el=document.getElementById(id);return el?parseFloat(el.value)||0:0;}
-  var slantStored=Math.round(gv('fret_slant')*2)+90;
-  slantStored=Math.max(0,Math.min(180,slantStored));
-  var fbVals=[
-    Math.round(gv('sN')*10)-200, Math.round(gv('s1')*10)-200,
-    Math.round(gv('pd-fret')*10), Math.round(gv('ns'))-1,
-    Math.round(gv('nf'))-12, Math.round(gv('fb_end'))-13,
-    Math.round(gv('bpitch')*10)-50, Math.round(gv('npitch')*10)-40,
-    Math.round(gv('ne1')*10), Math.round(gv('neN')*10),
-    Math.round(gv('ee1')*10), Math.round(gv('eeN')*10),
-    Math.round(gv('nut_thick')*10)-10, Math.round(gv('nut_oh')*10),
-    Math.round(gv('pd')*100000),
-    document.getElementById('curved-toggle').checked?1:0,
-    Math.round(gv('curve-k')*100)+1000,
-    // v2
-    slantStored,
-    _pitchMode||0,
-    Math.round(gv('b_pitch_1')*10)-50, Math.round(gv('b_pitch_N')*10)-50,
-    Math.round(gv('n_pitch_1')*10)-50, Math.round(gv('n_pitch_N')*10)-50
-  ];
-  var fbStr=bigToBase36(seedPackBits(fbVals,SEED_FB_FIELDS),SEED_FB_CHARS);
-
-  var combos=[];
-  GAUGE_LIST.forEach(function(g){
-    if(g.p)combos.push({g:g.g,t:'plain'});
-    if(g.w)combos.push({g:g.g,t:'wound'});
-  });
-  var tenBig=BigInt(0);
-  for(var i=0;i<SEED_MAX_STR;i++){
-    var midi=0,ci=0;
-    if(_stringSettings&&i<_stringSettings.length){
-      var ss=_stringSettings[i];
-      var m=noteToMidi(ss.note);
-      midi=(m!==null&&m>=0&&m<=127)?m:0;
-      var f=combos.findIndex(function(c){return Math.abs(c.g-ss.gauge)<0.0001&&c.t===ss.type;});
-      ci=f>=0?f:0;
-    }
-    var packed=BigInt((midi<<7)|ci)&((BigInt(1)<<BigInt(SEED_TEN_PER_STR))-BigInt(1));
-    tenBig=(tenBig<<BigInt(SEED_TEN_PER_STR))|packed;
-  }
-  var tenStr=bigToBase36(tenBig,SEED_TEN_CHARS);
-  // v3: ExtFret part (5bit per string * 13 strings = 65bit -> 14 chars)
-  var efBig=BigInt(0);
-  for(var i=0;i<SEED_MAX_STR;i++){
-    var efVal=(_extFrets&&i<_extFrets.length)?Math.min(_extFrets[i]||0,31):0;
-    efBig=(efBig<<BigInt(SEED_EF_PER_STR))|BigInt(efVal);
-  }
-  var efStr=bigToBase36(efBig,SEED_EF_CHARS);
-  var edo=(typeof getEDO!=='undefined')?getEDO():12;
-  var suffix=(edo&&edo!==12)?('-tet'+edo):'';
-  return 'GTI-'+fbStr+tenStr+efStr+suffix;
-}
-
-function decodeSeed(seed){
-  seed=seed.trim();
-  var m=seed.match(/-tet(\d+)$/);
-  var edo=m?parseInt(m[1]):12;
-  // 新形式v3: GTI- + 84文字固定(Base36) ExtFret付き
-  if(/^GTI-[0-9a-z]{84}(?:-tet\d+)?$/.test(seed)){
-    var body=seed.slice(4,88);
-    try{
-      var fbBig=base36ToBig(body.slice(0,SEED_FB_CHARS));
-      var fv=seedUnpackBits(fbBig,SEED_FB_FIELDS);
-      var d={sN:(fv[0]+200)/10,s1:(fv[1]+200)/10,pdfret:fv[2]/10,ns:fv[3]+1,
-        nf:fv[4]+12,fb_end:fv[5]+13,bpitch:(fv[6]+50)/10,npitch:(fv[7]+40)/10,
-        ne1:fv[8]/10,neN:fv[9]/10,ee1:fv[10]/10,eeN:fv[11]/10,
-        nut_thick:(fv[12]+10)/10,nut_oh:fv[13]/10,pd:fv[14]/100000,
-        curved:fv[15]===1,k:(fv[16]-1000)/100,
-        fret_slant:(fv[17]-90)/2,
-        pitch_mode:fv[18],
-        b_pitch_1:(fv[19]+50)/10,b_pitch_N:(fv[20]+50)/10,
-        n_pitch_1:(fv[21]+50)/10,n_pitch_N:(fv[22]+50)/10,edo:edo};
-      var combos=[];
-      GAUGE_LIST.forEach(function(g){
-        if(g.p)combos.push({g:g.g,t:'plain'});
-        if(g.w)combos.push({g:g.g,t:'wound'});
-      });
-      var tenBig=base36ToBig(body.slice(SEED_FB_CHARS,SEED_FB_CHARS+SEED_TEN_CHARS));
-      var tenMask=(BigInt(1)<<BigInt(SEED_TEN_PER_STR))-BigInt(1);
-      var strings=[];
-      for(var i=SEED_MAX_STR-1;i>=0;i--){
-        var sv=Number(tenBig&tenMask);tenBig=tenBig>>BigInt(SEED_TEN_PER_STR);
-        var midi=(sv>>7)&0x7F,ci=sv&0x7F;
-        if(midi>0){var combo=combos[ci]||combos[0];strings[i]={note:midiToNote(midi),gauge:combo.g,type:combo.t};}
-      }
-      var valid=strings.filter(function(s){return s;});
-      if(valid.length>0)d.tension=valid;
-      // ExtFret
-      var efBig2=base36ToBig(body.slice(SEED_FB_CHARS+SEED_TEN_CHARS));
-      var efMask=(BigInt(1)<<BigInt(SEED_EF_PER_STR))-BigInt(1);
-      var efArr=new Array(SEED_MAX_STR).fill(0);
-      for(var i=SEED_MAX_STR-1;i>=0;i--){
-        efArr[i]=Number(efBig2&efMask);
-        efBig2=efBig2>>BigInt(SEED_EF_PER_STR);
-      }
-      d.extFrets=efArr;
-      return d;
-    }catch(e){return null;}
-  }
-  // 新形式v2: GTI- + 70文字固定(Base36)
-  if(/^GTI-[0-9a-z]{70}(?:-tet\d+)?$/.test(seed)){
-    var body=seed.slice(4, 74);
-    try{
-      var fbBig=base36ToBig(body.slice(0,SEED_FB_CHARS));
-      var fv=seedUnpackBits(fbBig,SEED_FB_FIELDS);
-      var d={sN:(fv[0]+200)/10,s1:(fv[1]+200)/10,pdfret:fv[2]/10,ns:fv[3]+1,
-        nf:fv[4]+12,fb_end:fv[5]+13,bpitch:(fv[6]+50)/10,npitch:(fv[7]+40)/10,
-        ne1:fv[8]/10,neN:fv[9]/10,ee1:fv[10]/10,eeN:fv[11]/10,
-        nut_thick:(fv[12]+10)/10,nut_oh:fv[13]/10,pd:fv[14]/100000,
-        curved:fv[15]===1,k:(fv[16]-1000)/100,
-        fret_slant:(fv[17]-90)/2,
-        pitch_mode:fv[18],
-        b_pitch_1:(fv[19]+50)/10,b_pitch_N:(fv[20]+50)/10,
-        n_pitch_1:(fv[21]+50)/10,n_pitch_N:(fv[22]+50)/10,edo:edo};
-      var combos=[];
-      GAUGE_LIST.forEach(function(g){
-        if(g.p)combos.push({g:g.g,t:'plain'});
-        if(g.w)combos.push({g:g.g,t:'wound'});
-      });
-      var tenBig=base36ToBig(body.slice(SEED_FB_CHARS));
-      var tenMask=(BigInt(1)<<BigInt(SEED_TEN_PER_STR))-BigInt(1);
-      var strings=[];
-      for(var i=SEED_MAX_STR-1;i>=0;i--){
-        var sv=Number(tenBig&tenMask);tenBig=tenBig>>BigInt(SEED_TEN_PER_STR);
-        var midi=(sv>>7)&0x7F,ci=sv&0x7F;
-        if(midi>0){var combo=combos[ci]||combos[0];strings[i]={note:midiToNote(midi),gauge:combo.g,type:combo.t};}
-      }
-      var valid=strings.filter(function(s){return s;});
-      if(valid.length>0)d.tension=valid;
-      return d;
-    }catch(e){return null;}
-  }
-  // 旧形式v1: GTI- + 62文字固定(Base36) - slant/linearなし
-  if(/^GTI-[0-9a-z]{62}(?:-tet\d+)?$/.test(seed)){
-    var body=seed.slice(4, 66);
-    try{
-      var v1Fields=SEED_FB_FIELDS.slice(0,17); // curve_kまで
-      var fbBig=base36ToBig(body.slice(0,SEED_FB_CHARS_V1));
-      var fv=seedUnpackBits(fbBig,v1Fields);
-      var d={sN:(fv[0]+200)/10,s1:(fv[1]+200)/10,pdfret:fv[2]/10,ns:fv[3]+1,
-        nf:fv[4]+12,fb_end:fv[5]+13,bpitch:(fv[6]+50)/10,npitch:(fv[7]+40)/10,
-        ne1:fv[8]/10,neN:fv[9]/10,ee1:fv[10]/10,eeN:fv[11]/10,
-        nut_thick:(fv[12]+10)/10,nut_oh:fv[13]/10,pd:fv[14]/100000,
-        curved:fv[15]===1,k:(fv[16]-1000)/100,
-        fret_slant:0,pitch_mode:0,edo:edo};
-      var combos=[];
-      GAUGE_LIST.forEach(function(g){
-        if(g.p)combos.push({g:g.g,t:'plain'});
-        if(g.w)combos.push({g:g.g,t:'wound'});
-      });
-      var tenBig=base36ToBig(body.slice(SEED_FB_CHARS_V1));
-      var tenMask=(BigInt(1)<<BigInt(SEED_TEN_PER_STR))-BigInt(1);
-      var strings=[];
-      for(var i=SEED_MAX_STR-1;i>=0;i--){
-        var sv=Number(tenBig&tenMask);tenBig=tenBig>>BigInt(SEED_TEN_PER_STR);
-        var midi=(sv>>7)&0x7F,ci=sv&0x7F;
-        if(midi>0){var combo=combos[ci]||combos[0];strings[i]={note:midiToNote(midi),gauge:combo.g,type:combo.t};}
-      }
-      var valid=strings.filter(function(s){return s;});
-      if(valid.length>0)d.tension=valid;
-      return d;
-    }catch(e){return null;}
-  }
-  // 旧旧形式後方互換 (GTI-数値-数値-... 形式)
-  if(/^GTI-\d/.test(seed)){
-    var parts=seed.replace(/-tet\d+$/, '').split('-');
-    if((parts.length!==16&&parts.length!==18)||parts[0]!=='GTI')return null;
-    var n=parts.slice(1).map(Number);
-    if(n.some(isNaN))return null;
-    var d={sN:n[0]/10,s1:n[1]/10,pdfret:n[2]/10,ns:n[3],nf:n[4],fb_end:n[5],
-      bpitch:n[6]/10,npitch:n[7]/10,ne1:n[8]/10,neN:n[9]/10,
-      ee1:n[10]/10,eeN:n[11]/10,nut_thick:n[12]/10,nut_oh:n[13]/10,pd:n[14]/100000,edo:edo};
-    if(parts.length===18){d.curved=n[15]===1;d.k=n[16]/100;}
-    return d;
-  }
-  return null;
-}
-
 function copySeed(){
-  var seed=encodeSeed();
-  document.getElementById('seed-input').value=seed;
-  navigator.clipboard.writeText(seed).catch(function(){});
-  var btn=document.querySelector('.seed-copy');
-  btn.textContent=i18n('copied');
-  setTimeout(function(){btn.textContent=i18n('btn-copy');},1200);
+  var seed = encodeSeed();
+  navigator.clipboard.writeText(seed).then(function(){
+    var btn = document.getElementById('btn-copy-seed');
+    if (btn) {
+      var oldText = btn.textContent;
+      btn.textContent = i18n('copied');
+      setTimeout(function(){ btn.textContent = oldText; }, 1200);
+    }
+  }).catch(function(){});
+}
+
+function applySeed(){
+  var input = document.getElementById('seed-input');
+  if(!input) return;
+  var d = decodeSeed(input.value);
+  if(!d) return;
+
+  _isUpdating = true;
+  function sv(id, v){ var el=document.getElementById(id); if(el){ el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); } }
+
+  sv('sN', d.sN);
+  sv('s1', d.s1);
+  sv('pd-fret', d.pdfret);
+  sv('ns', d.ns);
+  sv('nf', d.nf);
+  sv('fb_end', d.fb_end);
+  sv('bpitch', d.bpitch);
+  sv('npitch', d.npitch);
+  sv('ne1', d.ne1);
+  sv('neN', d.neN);
+  sv('ee1', d.ee1);
+  sv('eeN', d.eeN);
+  sv('nut_thick', d.nut_thick);
+  sv('nut_oh', d.nut_oh);
+  sv('zero_fret_offset', d.zeroFretOffset);
+
+  var ct=document.getElementById('curved-toggle'); if(ct) ct.checked = !!d.curved;
+  var zf=document.getElementById('zero-fret-toggle'); if(zf) zf.checked = !!d.zfOn;
+
+  _isUpdating = false;
+  run();
+  input.value = ""; 
 }
 
 // ── i18n ──
@@ -1168,6 +1453,7 @@ const TRANSLATIONS = {
     'sec-pd': 'Multiscale PD',
     'lbl-pfret': 'Perpendicular Fret',
     'lbl-pdval': 'P.D. Value',
+    'invalid-seed': 'Invalid seed format.',
     'btn-adv': 'Advanced',
     'sec-fine-pd': 'PD Fine Control',
     'btn-pd-apply': '→ Apply',
@@ -1184,6 +1470,8 @@ const TRANSLATIONS = {
     'sec-nut': 'Nut Overhang (mm)',
     'lbl-nut-thick': 'Nut Thickness (mm)',
     'lbl-nut-oh': 'Headstock Overhang (mm)',
+    'lbl-zero-fret': '0 Fret',
+    'lbl-zero-fret-offset': '0 Fret → Nut offset (mm)',
     'btn-dxf': '⬇ Export DXF',
     'legend-dir-righty': 'Right = Nut &nbsp; Left = Bridge &nbsp; Top = Bass &nbsp; Bottom = Treble',
     'legend-dir-lefty': 'Left = Nut &nbsp; Right = Bridge &nbsp; Top = Bass &nbsp; Bottom = Treble',
@@ -1283,6 +1571,8 @@ const TRANSLATIONS = {
     'sec-nut': 'ナット厚・オーバーハング (mm)',
     'lbl-nut-thick': 'ナット厚 (mm)',
     'lbl-nut-oh': 'ヘッド側への延長 (mm)',
+    'lbl-zero-fret': '0フレット',
+    'lbl-zero-fret-offset': '0フレット → ナット間隔 (mm)',
     'btn-dxf': '⬇ DXFを書き出す',
     'legend-dir-righty': '右 = ナット &nbsp; 左 = ブリッジ &nbsp; 上 = 低音弦 &nbsp; 下 = 1弦側',
     'legend-dir-lefty': '左 = ナット &nbsp; 右 = ブリッジ &nbsp; 上 = 低音弦 &nbsp; 下 = 1弦側',
@@ -1394,79 +1684,10 @@ function toggleHand(){
   run();
 }
 
-function applySeed(){
-  var seed=document.getElementById('seed-input').value.trim();
-  var errEl=document.getElementById('seed-err');
-  var d=decodeSeed(seed);
-  if(!d){errEl.textContent=i18n('invalid-seed'); return;}
-  errEl.textContent='';
-  function s(id,v){var el=document.getElementById(id); if(el){el.value=v;}}
-  s('sN',     d.sN);
-  s('s1',     d.s1);
-  s('pd-fret',d.pdfret);
-  s('ns',     d.ns);
-  s('nf',     d.nf);
-  s('fb_end', d.fb_end);
-  s('bpitch', d.bpitch);
-  s('npitch', d.npitch);
-  s('ne1',    d.ne1);
-  s('neN',    d.neN);
-  s('ee1',    d.ee1);
-  s('eeN',    d.eeN);
-  s('nut_thick',d.nut_thick);
-  s('nut_oh', d.nut_oh);
-  s('edo',    d.edo||12);
-  s('pd',     d.pd);
-  if(d.curved!==undefined){
-    var tog=document.getElementById('curved-toggle');
-    if(tog) tog.checked=d.curved;
-    s('curve-k', d.k);
-  }
-  var isMulti = Math.abs(d.sN - d.s1) > 0.01;
-  var isCurved = !!d.curved;
-  var mtog=document.getElementById('multiscale-toggle');
-  if(mtog) mtog.checked = isMulti || isCurved;
-  
-  // reset multi mems so we don't carry over states cross-presets unnecessarily 
-  if(typeof syncScaleToggle === 'function') {
-      _mem_s1 = d.s1;
-      _mem_sN = d.sN;
-      _mem_curved = isCurved;
-      syncScaleToggle(true);
-  }
-
-  if(d.fret_slant!==undefined) s('fret_slant', d.fret_slant);
-  if(d.pitch_mode!==undefined){
-    setPitchMode(d.pitch_mode);
-    if(d.b_pitch_1!==undefined) s('b_pitch_1',d.b_pitch_1);
-    if(d.b_pitch_N!==undefined) s('b_pitch_N',d.b_pitch_N);
-    if(d.n_pitch_1!==undefined) s('n_pitch_1',d.n_pitch_1);
-    if(d.n_pitch_N!==undefined) s('n_pitch_N',d.n_pitch_N);
-  }
-  // テンション設定を復元
-  if(d.tension&&d.tension.length>0){
-    if(typeof clearStringBuffers==='function')clearStringBuffers();
-    _stringSettings=d.tension.map(function(s){return Object.assign({},s);});
-    _pendingPresetStrings=null;
-  }
-  // ExtFrets復元
-  if(d.extFrets){
-    var ns2=d.ns||7;
-    _extFrets=[];
-    for(var i=0;i<ns2;i++) _extFrets.push(d.extFrets[i]||0);
-  }
-  // sync fb_end tracking
-  var fbEndInp=document.getElementById('fb_end');
-  fbEndInp._isDefault=false;
-  run();
-  // run()後にDOMを強制再構築（弦数が変わらない場合でもnote/gaugeを反映）
-  if(typeof updateTensionRows==='function') updateTensionRows();
-}
-
-// ── presets ──
+// ── presets (Base36 v3 logic) ──
 var PRESETS={
-  guitar:'GTI-0a6xar1g7dtgtm8qa2760m31aweni75vrt11c808kww8ulmhky2ttjt53t5ul2wpnurv28',
-  bass:  'GTI-0pxz7rfqdjyb9k6f51xerqoauheb0u77zm0p4ankeki5bb6iv1k9cci6ey78y0rcu4hxj4'
+  guitar:'GTI-lza4lza4lls0lk8glwkwlxcolnpgll08lib0liowlj2sljgolhx4lls0lh5clflslflslfzolov4lfw2',
+  bass:  'GTI-m5u8m5u8lls0liowlvt4lwkwlu9klu9kliowlj2sljgoljuklhx4lls0lh5clflslflslfzolov4lfzo'
 };
 
 // Preset string definitions (note: index 0 = highest string, like _stringSettings)
@@ -1581,6 +1802,7 @@ function lineIntersect(p1,p2,p3,p4){
 var _state=null;
 var _pdSource='fret';
 var _pitchMode=0; // 0=even, 1=linear
+var _isUpdating=false; // applySeedなど一括更新中の描画抑制フラグ
 
 function syncSlantDisable(){
   var curved=document.getElementById('curved-toggle');
@@ -1679,7 +1901,11 @@ function calcGeometry(){
   var eeN=+gEl('eeN').value||5.0;
   var fbEnd=Math.min(+gEl('fb_end').value||25,49);
   var nutThick=+gEl('nut_thick').value||3.0;
-  var nutOH=+gEl('nut_oh').value||8.0;
+  var nutOH_raw=gEl('nut_oh').value;
+  var nutOH=nutOH_raw===''||nutOH_raw===null?8.0:Math.max(0,+nutOH_raw);
+  var zeroFretOn=!!(gEl('zero-fret-toggle')&&gEl('zero-fret-toggle').checked);
+  var zeroFretOffset=+( (gEl('zero_fret_offset')&&gEl('zero_fret_offset').value)||2.0);
+  if(zeroFretOffset<0) zeroFretOffset=0;
   var pd=+gEl('pd').value;
   pd=Math.max(0,Math.min(1,isNaN(pd)?0.37004:pd));
   var fretSlant=(+gEl('fret_slant').value)||0; // degrees
@@ -1849,13 +2075,11 @@ function calcGeometry(){
     cornerEnd1 = Sp(iForY(Sp(0, tEnd).y - ee1, tEnd), tEnd);
     cornerEndN = Sp(iForY(Sp(nStr-1, tEnd).y + eeN, tEnd), tEnd);
   } else {
-    // slantあり: 端弦からY方向固定オフセット（iForYはEvenピッチ前提なので不使用）
-    var _n0=Np(0), _nN=Np(nStr-1);
-    var _e0=Sp(0,tEnd), _eN=Sp(nStr-1,tEnd);
-    cornerNut1 = {x:_n0.x - ne1*tanSlant, y:_n0.y - ne1};
-    cornerNutN = {x:_nN.x + neN*tanSlant, y:_nN.y + neN};
-    cornerEnd1 = {x:_e0.x - ee1*tanSlant, y:_e0.y - ee1};
-    cornerEndN = {x:_eN.x + eeN*tanSlant, y:_eN.y + eeN};
+    // slantあり: iForYベースで計算（slantはSp/Npに組み込み済み）
+    cornerNut1 = Np(iForY(Np(0).y - ne1, 0));
+    cornerNutN = Np(iForY(Np(nStr-1).y + neN, 0));
+    cornerEnd1 = Sp(iForY(Sp(0, tEnd).y - ee1, tEnd), tEnd);
+    cornerEndN = Sp(iForY(Sp(nStr-1, tEnd).y + eeN, tEnd), tEnd);
   }
 
   var dx1=cornerNut1.x-cornerEnd1.x,dy1=cornerNut1.y-cornerEnd1.y,L1=Math.sqrt(dx1*dx1+dy1*dy1);
@@ -1908,10 +2132,46 @@ function calcGeometry(){
     var _nutEp0=fretEdgePts(0);
     _nutBase1=_nutEp0.ix1; _nutBaseN=_nutEp0.ixN;
   }
-  var nutHeadSide1={x:_nutBase1.x+s1ux*nutThickAdj1,y:_nutBase1.y+s1uy*nutThickAdj1};
-  var nutHeadSideN={x:_nutBaseN.x+sNux*nutThickAdjN,y:_nutBaseN.y+sNuy*nutThickAdjN};
-  var oh1={x:nutHeadSide1.x+s1ux*nutOH,y:nutHeadSide1.y+s1uy*nutOH};
-  var ohN={x:nutHeadSideN.x+sNux*nutOH,y:nutHeadSideN.y+sNuy*nutOH};
+  var nutHeadSide1,nutHeadSideN,oh1,ohN;
+  if(nutOH<=0 && !zeroFretOn){
+    // nutOH=0 かつ 0フレットなし: 指板上端をナットラインに一致（Gibson style）
+    nutHeadSide1={x:_nutBase1.x,y:_nutBase1.y};
+    nutHeadSideN={x:_nutBaseN.x,y:_nutBaseN.y};
+    oh1={x:_nutBase1.x,y:_nutBase1.y};
+    ohN={x:_nutBaseN.x,y:_nutBaseN.y};
+  } else if(zeroFretOn){
+    // 0フレットモード: 0フレット位置を基準に
+    // nutHeadSide = 0フレット + zeroFretOffset（→ナット弦溝）+ nutThick（ナット本体厚）
+    var zfAdj1 = zeroFretOffset + nutThickAdj1;
+    var zfAdjN = zeroFretOffset + nutThickAdjN;
+    nutHeadSide1={x:_nutBase1.x+s1ux*zfAdj1,y:_nutBase1.y+s1uy*zfAdj1};
+    nutHeadSideN={x:_nutBaseN.x+sNux*zfAdjN,y:_nutBaseN.y+sNuy*zfAdjN};
+    if(nutOH<=0){
+      oh1={x:nutHeadSide1.x,y:nutHeadSide1.y};
+      ohN={x:nutHeadSideN.x,y:nutHeadSideN.y};
+    } else {
+      oh1={x:nutHeadSide1.x+s1ux*nutOH,y:nutHeadSide1.y+s1uy*nutOH};
+      ohN={x:nutHeadSideN.x+sNux*nutOH,y:nutHeadSideN.y+sNuy*nutOH};
+    }
+  } else {
+    nutHeadSide1={x:_nutBase1.x+s1ux*nutThickAdj1,y:_nutBase1.y+s1uy*nutThickAdj1};
+    nutHeadSideN={x:_nutBaseN.x+sNux*nutThickAdjN,y:_nutBaseN.y+sNuy*nutThickAdjN};
+    oh1={x:nutHeadSide1.x+s1ux*nutOH,y:nutHeadSide1.y+s1uy*nutOH};
+    ohN={x:nutHeadSideN.x+sNux*nutOH,y:nutHeadSideN.y+sNuy*nutOH};
+  }
+
+  // 0フレットモード: ナットラインをzeroFretOffset分だけヘッド側にオフセット
+  // zeroFretLine = 0フレット位置（既存のNUTライン）
+  // nutLine = 0フレットからzeroFretOffset mm離れたヘッド側の弦溝位置
+  var zeroFretLine1=null, zeroFretLineN=null; // 0フレット端点
+  var nutLine1=null, nutLineN=null;            // ナット（弦溝）端点
+  if(zeroFretOn){
+    zeroFretLine1=cornerNut1;
+    zeroFretLineN=cornerNutN;
+    // ナットラインはzeroFretOffsetだけヘッド方向にオフセット
+    nutLine1={x:cornerNut1.x+s1ux*zeroFretOffset,y:cornerNut1.y+s1uy*zeroFretOffset};
+    nutLineN={x:cornerNutN.x+sNux*zeroFretOffset,y:cornerNutN.y+sNuy*zeroFretOffset};
+  }
 
   // rotatePt: slantはNp/Bpに組み込み済みなので恒等関数
   var rotatePt=function(p){return p;};
@@ -1936,15 +2196,80 @@ function calcGeometry(){
   return{s1in:s1in,sNin:sNin,s1:s1,sN:sN,nStr:nStr,nFret:nFret,nutW:nutW,brgW:brgW,pd:pd,
     nutYs:nutYs,brgYs:brgYs,fretSlant:fretSlant,pitchMode:pitchMode,
     ne1:ne1,neN:neN,ee1:ee1,eeN:eeN,fbEnd:fbEnd,nutThick:nutThick,nutOH:nutOH,
+    zeroFretOn:zeroFretOn,zeroFretOffset:zeroFretOffset,
+    zeroFretLine1:zeroFretLine1,zeroFretLineN:zeroFretLineN,
+    nutLine1:nutLine1,nutLineN:nutLineN,
     Np:Np,Bp:Bp,Sp:Sp,SpExt:SpExt,rotatePt:rotatePt,
     extFrets:extFretsArr,
     cornerNut1:cornerNut1,cornerNutN:cornerNutN,cornerEnd1:cornerEnd1,cornerEndN:cornerEndN,
     nutHeadSide1:nutHeadSide1,nutHeadSideN:nutHeadSideN,oh1:oh1,ohN:ohN,
     fretEdgePts:fretEdgePts,sc:sc,curved:curved,iForY:iForY,
-    stockMinX:Math.min(oh1.x,ohN.x,cornerEnd1.x,cornerEndN.x),
-    stockMaxX:Math.max(oh1.x,ohN.x,cornerEnd1.x,cornerEndN.x),
-    stockMinY:Math.min(oh1.y,ohN.y,cornerEnd1.y,cornerEndN.y),
-    stockMaxY:Math.max(oh1.y,ohN.y,cornerEnd1.y,cornerEndN.y)
+    stockMinX:(function(){
+      var xs=[oh1.x,ohN.x,cornerEnd1.x,cornerEndN.x];
+      // Extended Fretsがある場合: 各グループ端のohPt x座標も含める
+      if(extFretsArr.some(function(v){return v>0;})){
+        var dx1h=cornerNut1.x-cornerEnd1.x,dy1h=cornerNut1.y-cornerEnd1.y,L1h=Math.sqrt(dx1h*dx1h+dy1h*dy1h);
+        var ux1s=dx1h/L1h,uy1s=dy1h/L1h;
+        var dxNh=cornerNutN.x-cornerEndN.x,dyNh=cornerNutN.y-cornerEndN.y,LNh=Math.sqrt(dxNh*dxNh+dyNh*dyNh);
+        var uxNs=dxNh/LNh,uyNs=dyNh/LNh;
+        var fEpts=fretEdgePts; var SpExtL=SpExt;
+        for(var ei2=0;ei2<nStr;ei2++){
+          var efv2=extFretsArr[ei2]||0; if(!efv2) continue;
+          var ep2=fEpts(-efv2);
+          var tip2=(ei2===0)?ep2.ix1:(ei2===nStr-1)?ep2.ixN:SpExtL(ei2,-efv2);
+          var t2=(nStr<=1)?0:ei2/(nStr-1);
+          var uxI2=ux1s*(1-t2)+uxNs*t2,uyI2=uy1s*(1-t2)+uyNs*t2;
+          var ohDist2=nutThick+nutOH;
+          xs.push(tip2.x+uxI2*ohDist2);
+        }
+      }
+      return Math.min.apply(null,xs);
+    })(),
+    stockMaxX:(function(){
+      var xs=[oh1.x,ohN.x,cornerEnd1.x,cornerEndN.x];
+      if(extFretsArr.some(function(v){return v>0;})){
+        var dx1h=cornerNut1.x-cornerEnd1.x,dy1h=cornerNut1.y-cornerEnd1.y,L1h=Math.sqrt(dx1h*dx1h+dy1h*dy1h);
+        var ux1s=dx1h/L1h,uy1s=dy1h/L1h;
+        var dxNh=cornerNutN.x-cornerEndN.x,dyNh=cornerNutN.y-cornerEndN.y,LNh=Math.sqrt(dxNh*dxNh+dyNh*dyNh);
+        var uxNs=dxNh/LNh,uyNs=dyNh/LNh;
+        var fEpts=fretEdgePts; var SpExtL=SpExt;
+        for(var ei2=0;ei2<nStr;ei2++){
+          var efv2=extFretsArr[ei2]||0; if(!efv2) continue;
+          var ep2=fEpts(-efv2);
+          var tip2=(ei2===0)?ep2.ix1:(ei2===nStr-1)?ep2.ixN:SpExtL(ei2,-efv2);
+          var t2=(nStr<=1)?0:ei2/(nStr-1);
+          var uxI2=ux1s*(1-t2)+uxNs*t2,uyI2=uy1s*(1-t2)+uyNs*t2;
+          xs.push(tip2.x+(nutThick+nutOH));
+        }
+      }
+      return Math.max.apply(null,xs);
+    })(),
+    stockMinY:(function(){
+      var ys=[oh1.y,ohN.y,cornerEnd1.y,cornerEndN.y];
+      if(extFretsArr.some(function(v){return v>0;})){
+        var fEpts=fretEdgePts; var SpExtL=SpExt;
+        for(var ei2=0;ei2<nStr;ei2++){
+          var efv2=extFretsArr[ei2]||0; if(!efv2) continue;
+          var ep2=fEpts(-efv2);
+          var tip2=(ei2===0)?ep2.ix1:(ei2===nStr-1)?ep2.ixN:SpExtL(ei2,-efv2);
+          ys.push(tip2.y);
+        }
+      }
+      return Math.min.apply(null,ys);
+    })(),
+    stockMaxY:(function(){
+      var ys=[oh1.y,ohN.y,cornerEnd1.y,cornerEndN.y];
+      if(extFretsArr.some(function(v){return v>0;})){
+        var fEpts=fretEdgePts; var SpExtL=SpExt;
+        for(var ei2=0;ei2<nStr;ei2++){
+          var efv2=extFretsArr[ei2]||0; if(!efv2) continue;
+          var ep2=fEpts(-efv2);
+          var tip2=(ei2===0)?ep2.ix1:(ei2===nStr-1)?ep2.ixN:SpExtL(ei2,-efv2);
+          ys.push(tip2.y);
+        }
+      }
+      return Math.max.apply(null,ys);
+    })()
   };
 }
 
@@ -1994,7 +2319,7 @@ function buildDXF(g,lefty){
   L.push('0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1009\n9\n$INSUNITS\n70\n4\n0\nENDSEC');
   L.push('0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nLAYER\n70\n7');
   var ld=function(n,c){return '0\nLAYER\n2\n'+n+'\n70\n0\n62\n'+c+'\n6\nCONTINUOUS';};
-  L.push(ld('STRING',7),ld('NUT',3),ld('BRIDGE',1),ld('FRET',7),ld('CENTERLINE',8),ld('EDGE',2),ld('NUT_OH',3));
+  L.push(ld('STRING',7),ld('NUT',3),ld('BRIDGE',1),ld('FRET',7),ld('CENTERLINE',8),ld('EDGE',2),ld('NUT_OH',3),ld('INLAY',4));
   L.push('0\nENDTAB\n0\nENDSEC\n0\nSECTION\n2\nENTITIES');
   var dMD=function(pts,layer){
     for(var j=0;j<pts.length-1;j++){
@@ -2027,6 +2352,12 @@ function buildDXF(g,lefty){
   var bMin = g.iForY(cornerEnd1.y, tE);
   var bMax = g.iForY(cornerEndN.y, tE);
   dMD(getMathPts(fEp, g.curved, null, bMin, bMax), 'BRIDGE');
+  // 0フレットモード: fn=0を通常FRETとして出力（0フレットライン）
+  if(g.zeroFretOn){
+    var ep0=fretEdgePts(0);
+    var pts0=getMathPts(function(i){return Sp(i,0);},g.curved,null,ep0.iMin,ep0.iMax);
+    dMD(pts0,'FRET');
+  }
   for(var fn=1;fn<=nFret;fn++){
     var ep=fretEdgePts(fn);
     var tFret=FR(fn);
@@ -2034,9 +2365,58 @@ function buildDXF(g,lefty){
     dMD(pts,'FRET');
   }
   dp_wrap(cornerNut1,cornerNutN,Np,'EDGE',null,0);
-  dp_wrap(cornerEnd1,cornerEndN,fEp,'EDGE',null,tE);
-  dMD([cornerNut1,cornerEnd1],'EDGE');
-  dMD([cornerNutN,cornerEndN],'EDGE');
+  if(_endShape==='r'&&!(g.curved&&Math.abs(g.s1-g.sN)>1e-4)){
+    // R-EndモードDXF: SVGと同じ計算でポリライン近似出力
+    var cRd=parseFloat(document.getElementById('end-corner-r').value)||6;
+    var arcRvald=parseFloat(document.getElementById('end-arc-r').value)||5;
+    var Rd=_endArcUnit==='in'? arcRvald*I2M : arcRvald;
+    var offD=parseFloat(document.getElementById('end-offset').value)||15;
+    if(Rd<=cRd) cRd=Rd*0.49;
+    var epFbd=fretEdgePts(g.fbEnd);
+    var fdxd=epFbd.ixN.x-epFbd.ix1.x,fdyd=epFbd.ixN.y-epFbd.ix1.y,fdld=Math.sqrt(fdxd*fdxd+fdyd*fdyd)||1;
+    var uxd=fdxd/fdld,uyd=fdyd/fdld;
+    var lxad=uyd,lyad=-uxd,lxbd=-uyd,lybd=uxd;
+    var lxd=lxad>=0?lxad:lxbd,lyd=lxad>=0?lyad:lybd;
+    var cIdxd=(nStr-1)/2;
+    var pNFd=Sp(cIdxd,FR(nFret));
+    var CxD=pNFd.x+(offD-Rd)*lxd, CyD=pNFd.y+(offD-Rd)*lyd;
+    var sd1xd=cornerEnd1.x-cornerNut1.x,sd1yd=cornerEnd1.y-cornerNut1.y,sd1ld=Math.sqrt(sd1xd*sd1xd+sd1yd*sd1yd)||1;
+    sd1xd/=sd1ld;sd1yd/=sd1ld;
+    var sdNxd=cornerEndN.x-cornerNutN.x,sdNyd=cornerEndN.y-cornerNutN.y,sdNld=Math.sqrt(sdNxd*sdNxd+sdNyd*sdNyd)||1;
+    sdNxd/=sdNld;sdNyd/=sdNld;
+    var n1xd=-sd1yd,n1yd=sd1xd,nNxd=sdNyd,nNyd=-sdNxd;
+    function calcKD(cx,cy,sdx,sdy,nx,ny){
+      var P0x=cx+cRd*nx,P0y=cy+cRd*ny,bx=P0x-CxD,by=P0y-CyD;
+      var b2=2*(bx*sdx+by*sdy),c2=bx*bx+by*by-(Rd-cRd)*(Rd-cRd),disc=b2*b2-4*c2;
+      if(disc<0)return null;
+      var t1=(-b2-Math.sqrt(disc))/2,t2=(-b2+Math.sqrt(disc))/2;
+      var t=Math.abs(t1)<Math.abs(t2)?t1:t2;
+      return{x:P0x+t*sdx,y:P0y+t*sdy};
+    }
+    var K1d=calcKD(cornerEnd1.x,cornerEnd1.y,sd1xd,sd1yd,n1xd,n1yd);
+    var KNd=calcKD(cornerEndN.x,cornerEndN.y,sdNxd,sdNyd,nNxd,nNyd);
+    if(K1d&&KNd){
+      function tPtD(kx,ky){var dx=kx-CxD,dy=ky-CyD,dl=Math.sqrt(dx*dx+dy*dy)||1;return{x:CxD+dx/dl*Rd,y:CyD+dy/dl*Rd};}
+      var T1d=tPtD(K1d.x,K1d.y),TNd=tPtD(KNd.x,KNd.y);
+      var S1d={x:K1d.x-n1xd*cRd,y:K1d.y-n1yd*cRd};
+      var SNd={x:KNd.x-nNxd*cRd,y:KNd.y-nNyd*cRd};
+      function arcPoly(from,to,cx,cy,r,segs){
+        var a1=Math.atan2(from.y-cy,from.x-cx),a2=Math.atan2(to.y-cy,to.x-cx);
+        var da=a2-a1;while(da>Math.PI)da-=2*Math.PI;while(da<-Math.PI)da+=2*Math.PI;
+        var pts=[];for(var si=0;si<=segs;si++)pts.push({x:cx+r*Math.cos(a1+da*si/segs),y:cy+r*Math.sin(a1+da*si/segs)});
+        return pts;
+      }
+      dMD([cornerNut1,S1d],'EDGE');
+      dMD(arcPoly(S1d,T1d,K1d.x,K1d.y,cRd,8),'EDGE');
+      dMD(arcPoly(T1d,TNd,CxD,CyD,Rd,32),'EDGE');
+      dMD(arcPoly(TNd,SNd,KNd.x,KNd.y,cRd,8),'EDGE');
+      dMD([SNd,cornerNutN],'EDGE');
+    } else { dp_wrap(cornerEnd1,cornerEndN,fEp,'EDGE',null,tE); dMD([cornerNut1,cornerEnd1],'EDGE'); dMD([cornerNutN,cornerEndN],'EDGE'); }
+  } else {
+    dp_wrap(cornerEnd1,cornerEndN,fEp,'EDGE',null,tE);
+    dMD([cornerNut1,cornerEnd1],'EDGE');
+    dMD([cornerNutN,cornerEndN],'EDGE');
+  }
 
   // ── NUT / NUT_OH ──
   // Extended Fretsがある場合、グループ（同じef値の連続弦）ごとに
@@ -2089,59 +2469,80 @@ function buildDXF(g,lefty){
     groups.forEach(function(grp,gi){
       var iA=grp.from,iB=grp.to,fn=grp.v;
 
-      // 端点計算: fretEdgePts(-fn)を使って正確なEdge交点を取得
       var eA, eB;
+      var epFn = (fn===0) ? null : fretEdgePts(-fn);
+      var iS = (iA===0) ? ((fn===0) ? g.iForY(g.cornerNut1.y, 0) : epFn.iMin) : (iA - 0.5);
+      var iE = (iB===nStr-1) ? ((fn===0) ? g.iForY(g.cornerNutN.y, 0) : epFn.iMax) : (iB + 0.5);
+
       if(fn===0){
         eA = (iA===0) ? g.cornerNut1 : Np(iA-0.5);
         eB = (iB===nStr-1) ? g.cornerNutN : Np(iB+0.5);
       } else {
-        var ep=fretEdgePts(-fn);
-        eA = (iA===0) ? ep.ix1 : g.SpExt(iA-0.5,-fn);
-        eB = (iB===nStr-1) ? ep.ixN : g.SpExt(iB+0.5,-fn);
+        eA = (iA===0) ? epFn.ix1 : g.SpExt(iA-0.5,-fn);
+        eB = (iB===nStr-1) ? epFn.ixN : g.SpExt(iB+0.5,-fn);
       }
 
-      // NUT（折れ線 - 各弦を通過）
-      (function(){
-        var nutPts=[];
-        if(fn===0){
-          // ナット位置: cornerNut1/N + 各弦Np
-          nutPts.push(eA);
-          for(var ni=iA;ni<=iB;ni++) nutPts.push(Np(ni));
-          nutPts.push(eB);
-        } else {
-          // マイナスフレット位置: 各弦SpExt
-          nutPts.push(eA);
-          for(var ni=iA;ni<=iB;ni++) nutPts.push(g.SpExt(ni,-fn));
-          nutPts.push(eB);
+      var bFDXF = function(i){ return (fn===0) ? Np(i) : g.SpExt(i, -fn); };
+
+      function makeOfnDXF(isOh){
+        var zfExtraDXF=(g.zeroFretOn && fn===0)?g.zeroFretOffset:0;
+        return function(i){
+          var dot = Math.abs(hux(i)*nutNx+huy(i)*nutNy);
+          var adj = dot>1e-6 ? nutThickG/dot : nutThickG;
+          adj += zfExtraDXF;
+          var totalAdj = isOh ? adj + nutOHG : adj;
+          return {x: hux(i)*totalAdj, y: huy(i)*totalAdj};
+        };
+      }
+
+      var nutPts, hsPts, ohPts;
+
+      if(g.curved){
+        nutPts = getMathPts(bFDXF, true, null, iS, iE);
+        hsPts = getMathPts(bFDXF, true, makeOfnDXF(false), iS, iE);
+        ohPts = getMathPts(bFDXF, true, makeOfnDXF(true), iS, iE);
+      } else {
+        nutPts=[];
+        nutPts.push(eA);
+        for(var ni=iA;ni<=iB;ni++) nutPts.push(bFDXF(ni));
+        nutPts.push(eB);
+        var dot1=Math.abs(hux(iS)*nutNx+huy(iS)*nutNy);
+        var dotN=Math.abs(hux(iE)*nutNx+huy(iE)*nutNy);
+        var adj1=dot1>1e-6?nutThickG/dot1:nutThickG;
+        var adjN=dotN>1e-6?nutThickG/dotN:nutThickG;
+        // 0フレットモード時: zeroFretOffset分追加
+        if(g.zeroFretOn && fn===0){
+          adj1+=g.zeroFretOffset;
+          adjN+=g.zeroFretOffset;
         }
-        dMD(nutPts,'NUT');
-      })();
+        var hsA={x:eA.x+hux(iS)*adj1,y:eA.y+huy(iS)*adj1};
+        var hsB={x:eB.x+hux(iE)*adjN,y:eB.y+huy(iE)*adjN};
+        var ohA={x:hsA.x+hux(iS)*nutOHG,y:hsA.y+huy(iS)*nutOHG};
+        var ohB={x:hsB.x+hux(iE)*nutOHG,y:hsB.y+huy(iE)*nutOHG};
+        hsPts=[hsA,hsB];
+        ohPts=[ohA,ohB];
+      }
 
-      // nutHeadSide / oh の端点
-      var dot1=Math.abs(hux(iA)*nutNx+huy(iA)*nutNy);
-      var dotN=Math.abs(hux(iB)*nutNx+huy(iB)*nutNy);
-      var adj1=dot1>1e-6?nutThickG/dot1:nutThickG;
-      var adjN=dotN>1e-6?nutThickG/dotN:nutThickG;
-
-      var hsA={x:eA.x+hux(iA)*adj1,y:eA.y+huy(iA)*adj1};
-      var hsB={x:eB.x+hux(iB)*adjN,y:eB.y+huy(iB)*adjN};
-      var ohA={x:hsA.x+hux(iA)*nutOHG,y:hsA.y+huy(iA)*nutOHG};
-      var ohB={x:hsB.x+hux(iB)*nutOHG,y:hsB.y+huy(iB)*nutOHG};
-
-      // NUT_OH: nutHeadSide横ライン（折れ線）
-      dL(hsA,hsB,'NUT_OH');
-      // NUT_OH: oh横ライン（折れ線）
-      dL(ohA,ohB,'NUT_OH');
-      // NUT_OH: edge→nutHeadSide (縦, treble側)
-      dL(eA,hsA,'NUT_OH');
-      // NUT_OH: edge→nutHeadSide (縦, bass側)
-      dL(eB,hsB,'NUT_OH');
-      // NUT_OH: nutHeadSide→oh (縦, treble側)
-      dL(hsA,ohA,'NUT_OH');
-      // NUT_OH: nutHeadSide→oh (縦, bass側)
-      dL(hsB,ohB,'NUT_OH');
+      dMD(nutPts,'NUT');
+      // 0フレットモード: 開放弦位置（nutPts）からzeroFretOffset分ヘッド側にオフセットしたナット弦溝ライン
+      if(g.zeroFretOn){
+        var zfOff=g.zeroFretOffset;
+        var slotPts=nutPts.map(function(p,pi){
+          var idx=Math.min(iB,Math.max(iA,iA+(pi-1)));
+          return {x:p.x+hux(idx)*zfOff, y:p.y+huy(idx)*zfOff};
+        });
+        dMD(slotPts,'NUT');
+      }
+      dMD(hsPts,'NUT_OH');
+      dMD(ohPts,'NUT_OH');
+      dL(nutPts[0], hsPts[0], 'NUT_OH');
+      dL(nutPts[nutPts.length-1], hsPts[hsPts.length-1], 'NUT_OH');
+      dL(hsPts[0], ohPts[0], 'NUT_OH');
+      dL(hsPts[hsPts.length-1], ohPts[ohPts.length-1], 'NUT_OH');
     });
   })();
+
+  // 0フレットモードの単一ナットライン描画は上記グループブロックで階段状に処理済み
 
   // ── Extended Frets DXF ──
   (function(){
@@ -2222,6 +2623,180 @@ function buildDXF(g,lefty){
     if(ef13>0){dL(cornerNut1,fretEdgePts(-ef13).ix1,'EDGE');}
   })();
 
+  // ── INLAY DXF ──
+  (function(){
+    if(!_inlaySettings||!_inlaySettings.enabled) return;
+    var ins=_inlaySettings;
+    var mode=ins.mode||'center';
+    var edo=getEDO();
+    var FRl=function(n){return 1-Math.pow(2,-n/edo);};
+    function fretTcL(fn){var t1=FRl(fn-1),t2=FRl(fn);return t1+(t2-t1)*(ins.offsetRatio||0.5);}
+    function dCircle(p,r){var d=toDXF(g,p.x,p.y,lefty);L.push('0\nCIRCLE\n8\nINLAY\n10\n'+d.x.toFixed(6)+'\n20\n'+d.z.toFixed(6)+'\n30\n0.000000\n40\n'+r.toFixed(6));}
+    function dLine4(corners){for(var k=0;k<4;k++){var a=toDXF(g,corners[k].x,corners[k].y,lefty),b=toDXF(g,corners[(k+1)%4].x,corners[(k+1)%4].y,lefty);L.push(dxfLine(a.x,a.z,b.x,b.z,'INLAY'));}}
+    function midPt(iA,iB,tc){var pA=Sp(iA,tc),pB=Sp(iB,tc);return{x:(pA.x+pB.x)/2,y:(pA.y+pB.y)/2};}
+    function ctcAt(fn){var tc12=FRl(11)+(FRl(12)-FRl(11))*0.5,tc_fn=FRl(fn-1)+(FRl(fn)-FRl(fn-1))*0.5;var w12=Math.abs(Sp(nStr-1,tc12).y-Sp(0,tc12).y),wFn=Math.abs(Sp(nStr-1,tc_fn).y-Sp(0,tc_fn).y);return ins.centerCtc*(w12>0?wFn/w12:1);}
+
+    if(mode==='center'){
+      var DSET2=new Set([12,24,36,48]);
+      var SSET=new Set([3,5,7,9,15,17,19,21,27,29,31,33,39,41,43,45]);
+      if(ins.customEnabled && ins.customPositions && ins.customPositions.length){
+        var _cp=ins.customPositions;
+        DSET2=new Set(_cp.filter(function(f){return DSET2.has(f);}));
+        SSET=new Set(_cp.filter(function(f){return !DSET2.has(f);}));
+      }
+      var r=ins.centerDiam/2;
+      for(var fn=1;fn<=nFret;fn++){
+        if(!SSET.has(fn)&&!DSET2.has(fn)) continue;
+        var tc=fretTcL(fn);
+        var pC=midPt(0,nStr-1,tc);
+        if(SSET.has(fn)){dCircle(pC,r);}
+        else{
+          var ctc=ctcAt(fn);
+          function fretDirDXFc(f){var ep=fretEdgePts(f);var dx=ep.ixN.x-ep.ix1.x,dy=ep.ixN.y-ep.ix1.y;var l=Math.sqrt(dx*dx+dy*dy)||1;return{x:dx/l,y:dy/l};}
+          var d0c=fretDirDXFc(fn-1),d1c=fretDirDXFc(fn);
+          var adx=(d0c.x+d1c.x)/2,ady=(d0c.y+d1c.y)/2,adl=Math.sqrt(adx*adx+ady*ady)||1;
+          var dir={x:adx/adl,y:ady/adl};
+          var pC2={x:(Sp(0,tc).x+Sp(nStr-1,tc).x)/2,y:(Sp(0,tc).y+Sp(nStr-1,tc).y)/2};
+          dCircle({x:pC2.x+dir.x*ctc/2,y:pC2.y+dir.y*ctc/2},r);
+          dCircle({x:pC2.x-dir.x*ctc/2,y:pC2.y-dir.y*ctc/2},r);
+        }
+      }
+    } else if(mode==='offset'){
+      var r2=ins.offsetDiam/2;
+      var pat=ins.offsetPattern||1;
+      var dblMode2=ins.offsetDblSide||'adjacent'; // 'adjacent' | 'opposite'
+      var DSET3=new Set([12,24,36,48]);
+      var ASET=new Set([3,5,7,9,12,15,17,19,21,24,27,29,31,33,36,39,41,43,45,48]);
+      if(ins.customEnabled && ins.customPositions && ins.customPositions.length){
+        ASET=new Set(ins.customPositions);
+        DSET3=new Set(ins.customPositions.filter(function(f){return DSET3.has(f);}));
+      }
+      function t15(tc){return midPt(0,1,tc);}
+      function t25(tc){return midPt(1,2,tc);}
+      function bm05(tc){return midPt(nStr-2,nStr-1,tc);}
+      function bm15(tc){return midPt(nStr-3,nStr-2,tc);}
+      function dbl2ndDXF(isBaseBass,tc){
+        return dblMode2==='adjacent'?(isBaseBass?midPt(nStr-3,nStr-2,tc):midPt(1,2,tc)):(isBaseBass?midPt(0,1,tc):midPt(nStr-2,nStr-1,tc));
+      }
+      var dblEnabled=ins.dblEnabled!==false;
+      function drawDblDotDXF(p, fNum){
+        var cfg=(ins.dblFrets&&ins.dblFrets[fNum])||{shape:'dot',diam:ins.offsetDiam||5};
+        if((cfg.shape||'dot')==='ring'){
+          dCircle(p, (cfg.outer||7)/2); dCircle(p, (cfg.inner||4)/2);
+        } else {
+          dCircle(p, (cfg.diam||5)/2);
+        }
+      }
+      for(var fn=1;fn<=nFret;fn++){
+        if(!ASET.has(fn)) continue;
+        var tc=fretTcL(fn);
+        var isDbl=DSET3.has(fn)&&dblEnabled;
+        var p1=null,p2=null,p1Side='',i1=null;
+        if(pat===1){
+          p1=t15(tc); p1Side='treble'; i1=0.5;
+          if(isDbl) p2=dbl2ndDXF(false,tc);
+        } else if(pat===2){
+          if(fn<=9&&!isDbl){p1=bm05(tc); p1Side='bass'; i1=nStr-1.5;}
+          else if(fn===12){p1=bm05(tc); p1Side='bass'; i1=nStr-1.5; if(isDbl)p2=dbl2ndDXF(true,tc);}
+          else if(isDbl&&fn>12){p1=t15(tc); p1Side='treble'; i1=0.5; p2=dbl2ndDXF(false,tc);}
+          else{p1=t15(tc); p1Side='treble'; i1=0.5;}
+        } else {
+          p1=bm05(tc); p1Side='bass'; i1=nStr-1.5;
+          if(isDbl) p2=dbl2ndDXF(true,tc);
+        }
+        if(p1){
+          if(DSET3.has(fn)){
+            if(!dblEnabled && ins.dblFrets && ins.dblFrets[fn] && ins.dblFrets[fn].shape === 'ring'){
+              var off = ins.dblFrets[fn].offset || 0;
+              if(off !== 0){
+                if(g.curved){
+                  var eps=0.01;
+                  var sign=(p1Side==='bass')?-1:1;
+                  var pA=Sp(i1,tc);
+                  var pB=Sp(i1+sign*eps,tc);
+                  var localDist=Math.sqrt((pB.x-pA.x)**2+(pB.y-pA.y)**2);
+                  if(localDist>1e-6){
+                    var di=(off/localDist)*eps*sign;
+                    p1=Sp(i1+di,tc);
+                  }
+                } else {
+                  function fretDirDXF_o(f){var ep=fretEdgePts(f);var dx=ep.ixN.x-ep.ix1.x,dy=ep.ixN.y-ep.ix1.y;var l=Math.sqrt(dx*dx+dy*dy)||1;return{x:dx/l,y:dy/l};}
+                  var d0_o=fretDirDXF_o(fn-1), d1_o=fretDirDXF_o(fn);
+                  var ax_o=(d0_o.x+d1_o.x)/2, ay_o=(d0_o.y+d1_o.y)/2, al_o=Math.sqrt(ax_o*ax_o+ay_o*ay_o)||1;
+                  var dir = {x: ax_o/al_o, y: ay_o/al_o};
+                  if(p1Side==='bass'){ dir.x*=-1; dir.y*=-1; }
+                  p1.x += dir.x * off; p1.y += dir.y * off;
+                }
+              }
+            }
+            drawDblDotDXF(p1, fn);
+          } else {
+            dCircle(p1, r2);
+          }
+        }
+        if(p2) drawDblDotDXF(p2, fn);
+      }
+    } else if(mode==='block'){
+      var isMultiDXF=Math.abs(g.s1-g.sN)>1e-4;
+      function fretDirDXF(f){
+        var ep=fretEdgePts(f);
+        var dx=ep.ixN.x-ep.ix1.x,dy=ep.ixN.y-ep.ix1.y;
+        var l=Math.sqrt(dx*dx+dy*dy)||1;
+        return{x:dx/l,y:dy/l};
+      }
+      function fretAvgDirDXF(fn){
+        var d0=fretDirDXF(fn-1),d1=fretDirDXF(fn);
+        var ax=(d0.x+d1.x)/2,ay=(d0.y+d1.y)/2;
+        var al=Math.sqrt(ax*ax+ay*ay)||1;
+        return{x:ax/al,y:ay/al};
+      }
+      // positions自動生成
+      var blockNo1f=ins.blockNo1f||false;
+      var bposd=[];
+      var basePatD=blockNo1f?[3,5,7,9]:[1,3,5,7,9];
+      basePatD.forEach(function(f){if(f<=nFret)bposd.push(f);});
+      var octBaseD=[12,15,17,19,21,24],octD=0;
+      while(true){
+        var addedD=false;
+        octBaseD.forEach(function(f){var ff=f+octD*12;if(ff>9&&ff<=nFret){bposd.push(ff);addedD=true;}});
+        if(!addedD||octD>5) break;
+        octD++;
+      }
+      bposd=bposd.filter(function(v,i,a){return a.indexOf(v)===i;}).sort(function(a,b){return a-b;});
+      var fS=bposd[0]||1,fE=bposd[bposd.length-1]||24;
+      function coefAtL(fn,cS,cE){return fE===fS?cS:cS+(cE-cS)*(fn-fS)/(fE-fS);}
+      bposd.forEach(function(fn){
+        if(fn<1||fn>nFret) return;
+        var tc=fretTcL(fn);
+        var cIdxD=(nStr-1)/2;
+        var pCA=Sp(cIdxD,FRl(fn-1)),pCB=Sp(cIdxD,FRl(fn));
+        var fsp=Math.sqrt((pCB.x-pCA.x)*(pCB.x-pCA.x)+(pCB.y-pCA.y)*(pCB.y-pCA.y));
+        // フレットライン平均長さ
+        var ep1d=fretEdgePts(fn-1),ep2d=fretEdgePts(fn);
+        var ll1=Math.sqrt((ep1d.ixN.x-ep1d.ix1.x)**2+(ep1d.ixN.y-ep1d.ix1.y)**2);
+        var ll2=Math.sqrt((ep2d.ixN.x-ep2d.ix1.x)**2+(ep2d.ixN.y-ep2d.ix1.y)**2);
+        var spanLenD=(ll1+ll2)/2||1;
+        var bh=fsp*coefAtL(fn,ins.hCoefStart,ins.hCoefEnd);
+        var bw=spanLenD*coefAtL(fn,ins.wCoefStart,ins.wCoefEnd);
+        var p0b=Sp(0,tc),pNb=Sp(nStr-1,tc);
+        var pMidB={x:(p0b.x+pNb.x)/2,y:(p0b.y+pNb.y)/2};
+        // 幅辺方向
+        var ux4,uy4;
+        if(isMultiDXF){var fd=fretAvgDirDXF(fn);ux4=fd.x;uy4=fd.y;}
+        else{var sv={x:pNb.x-p0b.x,y:pNb.y-p0b.y};var sl=Math.sqrt(sv.x*sv.x+sv.y*sv.y)||1;ux4=sv.x/sl;uy4=sv.y/sl;}
+        // 高さ辺: X軸平行（水平）
+        var lx4=1,ly4=0;
+        var hw4=bw/2,hl4=bh/2;
+        dLine4([
+          {x:pMidB.x-ux4*hw4-lx4*hl4,y:pMidB.y-uy4*hw4-ly4*hl4},
+          {x:pMidB.x+ux4*hw4-lx4*hl4,y:pMidB.y+uy4*hw4-ly4*hl4},
+          {x:pMidB.x+ux4*hw4+lx4*hl4,y:pMidB.y+uy4*hw4+ly4*hl4},
+          {x:pMidB.x-ux4*hw4+lx4*hl4,y:pMidB.y-uy4*hw4+ly4*hl4}
+        ]);
+      });
+    }
+  })();
+
   L.push('0\nENDSEC\n0\nEOF');
   return L.join('\n');
 }
@@ -2243,6 +2818,11 @@ function exportDXF(){
 }
 
 function run(){
+  if(_isUpdating) return; // 更新中はスキップ
+  // ── ゼロフレットUI制御 ──
+  var zfToggle=document.getElementById('zero-fret-toggle');
+  var zfWrap=document.getElementById('zero-fret-offset-wrap');
+  if(zfToggle && zfWrap) zfWrap.style.display=zfToggle.checked?'block':'none';
   // ── PD dual-source sync ──
   var pdFretInp=document.getElementById('pd-fret');
   var pdInp=document.getElementById('pd');
@@ -2322,6 +2902,18 @@ function run(){
   fbEndInp.min=fbMin;
 
   var g=calcGeometry();
+
+  // R-Endモード時: offsetのデフォルト値をnFret〜fb_end間距離に自動設定（初回のみ）
+  if(_endShape==='r'){
+    var offEl=document.getElementById('end-offset');
+    if(offEl&&!offEl._userEdited){
+      var cIdxOff=(g.nStr-1)/2;
+      var pNf=g.Sp(cIdxOff,FR(g.nFret));
+      var pFb=g.Sp(cIdxOff,FR(g.fbEnd));
+      var distOff=Math.sqrt((pFb.x-pNf.x)**2+(pFb.y-pNf.y)**2);
+      offEl.value=distOff.toFixed(1);
+    }
+  }
   
   // Clear buffers if core geometry parameters changed (other than nStr)
   if (_state) {
@@ -2359,7 +2951,8 @@ function run(){
   document.getElementById('dxf-link').style.display='none';
 
   // update seed display
-  document.getElementById('seed-input').value=encodeSeed();
+  var sDisp = document.getElementById('seed-display');
+  if(sDisp) sDisp.value = encodeSeed();
 
   var nAng=Math.atan2(Np(nStr-1).x-Np(0).x,Np(nStr-1).y-Np(0).y)*180/Math.PI;
   var bAng=Math.atan2(Bp(nStr-1).x-Bp(0).x,Bp(nStr-1).y-Bp(0).y)*180/Math.PI;
@@ -2372,6 +2965,13 @@ function run(){
   for(var i=nStr-1;i>=0;i--){
     var sc_mm=g.sc(i);
     var sc_in=sc_mm/I2M;
+    // Extended Fretsがある場合は実効スケール長
+    var ef_i=(g.extFrets&&g.extFrets[i])||0;
+    if(ef_i>0){
+      var edo_sc=getEDO();
+      sc_mm=sc_mm*Math.pow(2,ef_i/edo_sc);
+      sc_in=sc_mm/I2M;
+    }
     var lbl=String(i+1);
     shtml+='<div class="scale-item"><span class="scale-item-lbl">'+lbl+'</span><span style="white-space:nowrap;">'+sc_in.toFixed(3)+'" / '+sc_mm.toFixed(3)+' mm</span></div>';
   }
@@ -2495,14 +3095,110 @@ function run(){
   var fNp=function(i){return Np(i);};
   var fEp=function(i){return Sp(i,FR(g.fbEnd));};
 
+  // ── R-End 計算（エンドR弧 + コーナーR） ──
+  function buildREndPath(){
+    var cR  = parseFloat(document.getElementById('end-corner-r').value)||6;
+    var arcRval = parseFloat(document.getElementById('end-arc-r').value)||5;
+    var R   = _endArcUnit==='in' ? arcRval*I2M : arcRval;
+    var off = parseFloat(document.getElementById('end-offset').value)||15;
+    if(g.curved&&Math.abs(g.s1-g.sN)>1e-4) return null;
+    if(R <= cR) cR = R * 0.49;
+
+    // fb_endフレット方向（弦方向）+ ブリッジ方向
+    var epFb = fretEdgePts(g.fbEnd);
+    var fdx=epFb.ixN.x-epFb.ix1.x, fdy=epFb.ixN.y-epFb.ix1.y;
+    var fdl=Math.sqrt(fdx*fdx+fdy*fdy)||1;
+    var ux=fdx/fdl, uy=fdy/fdl;
+    var lxa=uy,lya=-ux, lxb=-uy,lyb=ux;
+    var lx=lxa>=0?lxa:lxb, ly=lxa>=0?lya:lyb;
+
+    // エンドR弧の中心C（nFretから off-R だけブリッジ方向）
+    var cIdx=(nStr-1)/2;
+    var pNFret=Sp(cIdx, FR(nFret));
+    var Cx = pNFret.x + (off - R)*lx;
+    var Cy = pNFret.y + (off - R)*ly;
+
+    // サイドライン方向 + 内側法線
+    var sd1x=cornerEnd1.x-cornerNut1.x, sd1y=cornerEnd1.y-cornerNut1.y;
+    var sd1l=Math.sqrt(sd1x*sd1x+sd1y*sd1y)||1; sd1x/=sd1l; sd1y/=sd1l;
+    var sdNx=cornerEndN.x-cornerNutN.x, sdNy=cornerEndN.y-cornerNutN.y;
+    var sdNl=Math.sqrt(sdNx*sdNx+sdNy*sdNy)||1; sdNx/=sdNl; sdNy/=sdNl;
+    var n1x=-sd1y, n1y=sd1x;
+    var nNx=sdNy,  nNy=-sdNx;
+
+    // コーナーR中心K:
+    // サイドライン内側cRの平行線上 かつ |K-C| = R-cR
+    function calcK(cx,cy,sdx,sdy,nx,ny){
+      var P0x=cx+cR*nx, P0y=cy+cR*ny;
+      var bx=P0x-Cx, by=P0y-Cy;
+      var b2=2*(bx*sdx+by*sdy);
+      var c2=bx*bx+by*by-(R-cR)*(R-cR);
+      var disc=b2*b2-4*c2;
+      if(disc<0) return null;
+      var t1=(-b2-Math.sqrt(disc))/2;
+      var t2=(-b2+Math.sqrt(disc))/2;
+      // cornerEndに最も近い解（絶対値が小さいt）を選ぶ
+      var t=Math.abs(t1)<Math.abs(t2)?t1:t2;
+      return{x:P0x+t*sdx, y:P0y+t*sdy};
+    }
+    var K1=calcK(cornerEnd1.x,cornerEnd1.y, sd1x,sd1y, n1x,n1y);
+    var KN=calcK(cornerEndN.x,cornerEndN.y, sdNx,sdNy, nNx,nNy);
+    if(!K1||!KN) return null;
+
+    // 接触点T（エンドR弧とコーナーR弧の接点）= C→K方向にR進む
+    function touchPt(kx,ky){
+      var dx=kx-Cx, dy=ky-Cy, dl=Math.sqrt(dx*dx+dy*dy)||1;
+      return{x:Cx+dx/dl*R, y:Cy+dy/dl*R};
+    }
+    var T1=touchPt(K1.x,K1.y);
+    var TN=touchPt(KN.x,KN.y);
+
+    // 接触点S（コーナーRとサイドラインの接点）
+    var S1={x:K1.x-n1x*cR, y:K1.y-n1y*cR};
+    var SN={x:KN.x-nNx*cR, y:KN.y-nNy*cR};
+
+    // SVGpxに変換
+    var pS1=mp(S1), pSN=mp(SN);
+    var pK1=mp(K1), pKN=mp(KN);
+    var pT1=mp(T1), pTN=mp(TN);
+    var pCN1=mp(cornerNut1), pCNN=mp(cornerNutN);
+    var pArcC=mp({x:Cx,y:Cy});
+    var arcRpx=R*SC, cRpx=cR*SC;
+
+    // sweep判定（外積）
+    function crossZ(ax,ay,bx,by){return ax*by-ay*bx;}
+    // treble側コーナーR: S1→K1→T1
+    var c1sw = crossZ(pK1.x-pS1.x,pK1.y-pS1.y, pT1.x-pK1.x,pT1.y-pK1.y)>0?0:1;
+    // bass側コーナーR: TN→KN→SN
+    var cNsw = crossZ(pKN.x-pTN.x,pKN.y-pTN.y, pSN.x-pKN.x,pSN.y-pKN.y)>0?0:1;
+    // エンドR弧: T1→TN
+    var arcSw = crossZ(pTN.x-pT1.x,pTN.y-pT1.y, pArcC.x-pT1.x,pArcC.y-pT1.y)>0?1:0;
+
+    // path: ナット端treble → S1 → コーナーR弧 → T1 → エンドR弧 → TN → コーナーR弧 → SN → ナット端bass
+    var path='M'+pCN1.x.toFixed(1)+','+pCN1.y.toFixed(1);
+    path+=' L'+pS1.x.toFixed(1)+','+pS1.y.toFixed(1);
+    path+=' A'+cRpx.toFixed(1)+','+cRpx.toFixed(1)+' 0 0 '+c1sw+' '+pT1.x.toFixed(1)+','+pT1.y.toFixed(1);
+    path+=' A'+arcRpx.toFixed(1)+','+arcRpx.toFixed(1)+' 0 0 '+arcSw+' '+pTN.x.toFixed(1)+','+pTN.y.toFixed(1);
+    path+=' A'+cRpx.toFixed(1)+','+cRpx.toFixed(1)+' 0 0 '+cNsw+' '+pSN.x.toFixed(1)+','+pSN.y.toFixed(1);
+    path+=' L'+pCNN.x.toFixed(1)+','+pCNN.y.toFixed(1);
+
+    return {path:path};
+  }
   // board outline (amber)
   // cornerNut/End を基準とし、curved時は dPSVG で曲線描画
   // サイドラインは cornerNut1↔cornerEnd1 で閉じる（エッジオーバーハング込みの頂点）
   var tE_svg = FR(g.fbEnd);
   dPSVG(cornerNut1,cornerNutN,Np,'#f59e0b',1.5,null,0);
-  dPSVG(cornerEnd1,cornerEndN,fEp,'#f59e0b',1.5,null,tE_svg);
-  o+='<line x1="'+cn1.x.toFixed(1)+'" y1="'+cn1.y.toFixed(1)+'" x2="'+ce1.x.toFixed(1)+'" y2="'+ce1.y.toFixed(1)+'" stroke="#f59e0b" stroke-width="1.5"/>';
-  o+='<line x1="'+cnN.x.toFixed(1)+'" y1="'+cnN.y.toFixed(1)+'" x2="'+ceN.x.toFixed(1)+'" y2="'+ceN.y.toFixed(1)+'" stroke="#f59e0b" stroke-width="1.5"/>';
+  var rEndData=(_endShape==='r')?buildREndPath():null;
+  if(rEndData){
+    o+='<path d="'+rEndData.path+'" stroke="#f59e0b" stroke-width="1.5" fill="none"/>';
+    // ナットライン（別途）
+    dPSVG(cornerNut1,cornerNutN,Np,'#f59e0b',1.5,null,0);
+  } else {
+    dPSVG(cornerEnd1,cornerEndN,fEp,'#f59e0b',1.5,null,tE_svg);
+    o+='<line x1="'+cn1.x.toFixed(1)+'" y1="'+cn1.y.toFixed(1)+'" x2="'+ce1.x.toFixed(1)+'" y2="'+ce1.y.toFixed(1)+'" stroke="#f59e0b" stroke-width="1.5"/>';
+    o+='<line x1="'+cnN.x.toFixed(1)+'" y1="'+cnN.y.toFixed(1)+'" x2="'+ceN.x.toFixed(1)+'" y2="'+ceN.y.toFixed(1)+'" stroke="#f59e0b" stroke-width="1.5"/>';
+  }
 
   // nut overhang (green) - グループ対応版
   var nutLines=[]; // NUT白太線は最後に描画（他ラインに隠れないよう）
@@ -2550,30 +3246,90 @@ function run(){
       var dotNS=Math.abs(huxS(iB)*nutNxS+huyS(iB)*nutNyS);
       var adj1S=dot1S>1e-6?nutThickS/dot1S:nutThickS;
       var adjNS=dotNS>1e-6?nutThickS/dotNS:nutThickS;
+      // 0フレットモード時: nutHeadSideはzeroFretOffset分追加でヘッド側にオフセット
+      if(g.zeroFretOn && fn===0){
+        var zfAdj=g.zeroFretOffset;
+        adj1S+=zfAdj;
+        adjNS+=zfAdj;
+      }
       var hsA={x:eA.x+huxS(iA)*adj1S,y:eA.y+huyS(iA)*adj1S};
       var hsB={x:eB.x+huxS(iB)*adjNS,y:eB.y+huyS(iB)*adjNS};
       var ohA={x:hsA.x+huxS(iA)*nutOHS,y:hsA.y+huyS(iA)*nutOHS};
       var ohB={x:hsB.x+huxS(iB)*nutOHS,y:hsB.y+huyS(iB)*nutOHS};
-      svgLS(hsA,hsB,'#86efac',1.5);
-      svgLS(ohA,ohB,'#86efac',1.5);
-      svgLS(eA,hsA,'#86efac',1.5);
-      svgLS(eB,hsB,'#86efac',1.5);
-      svgLS(hsA,ohA,'#86efac',1.5);
-      svgLS(hsB,ohB,'#86efac',1.5);
+      var epS = (fn===0) ? null : g.fretEdgePts(-fn);
+      var iS2 = (iA===0) ? ((fn===0) ? g.iForY(g.cornerNut1.y, 0) : epS.iMin) : (iA - 0.5);
+      var iE2 = (iB===nStr-1) ? ((fn===0) ? g.iForY(g.cornerNutN.y, 0) : epS.iMax) : (iB + 0.5);
+      var bFSVG = function(i){ return (fn===0) ? Np(i) : g.SpExt(i, -fn); };
+
+      function makeOfnSVG(isOh){
+        var zfExtra=(g.zeroFretOn && fn===0)?g.zeroFretOffset:0;
+        return function(i){
+          var dot = Math.abs(huxS(i)*nutNxS+huyS(i)*nutNyS);
+          var adj = dot>1e-6 ? nutThickS/dot : nutThickS;
+          adj += zfExtra;
+          var totalAdj = isOh ? adj + nutOHS : adj;
+          return {x: huxS(i)*totalAdj, y: huyS(i)*totalAdj};
+        };
+      }
+
+      var nutPtsSVG, hsPtsSVG, ohPtsSVG;
+      if(g.curved){
+        nutPtsSVG = getMathPts(bFSVG, true, null, iS2, iE2);
+        hsPtsSVG = getMathPts(bFSVG, true, makeOfnSVG(false), iS2, iE2);
+        ohPtsSVG = getMathPts(bFSVG, true, makeOfnSVG(true), iS2, iE2);
+      } else {
+        nutPtsSVG=[];
+        nutPtsSVG.push(eA);
+        for(var ni=iA;ni<=iB;ni++) nutPtsSVG.push(bFSVG(ni));
+        nutPtsSVG.push(eB);
+        var dot1S2=Math.abs(huxS(iS2)*nutNxS+huyS(iS2)*nutNyS);
+        var dotNS2=Math.abs(huxS(iE2)*nutNxS+huyS(iE2)*nutNyS);
+        var adj1S2=dot1S2>1e-6?nutThickS/dot1S2:nutThickS;
+        var adjNS2=dotNS2>1e-6?nutThickS/dotNS2:nutThickS;
+        // 0フレットモード時: zeroFretOffset分追加
+        if(g.zeroFretOn && fn===0){
+          adj1S2+=g.zeroFretOffset;
+          adjNS2+=g.zeroFretOffset;
+        }
+        var hsA2={x:eA.x+huxS(iS2)*adj1S2,y:eA.y+huyS(iS2)*adj1S2};
+        var hsB2={x:eB.x+huxS(iE2)*adjNS2,y:eB.y+huyS(iE2)*adjNS2};
+        var ohA2={x:hsA2.x+huxS(iS2)*nutOHS,y:hsA2.y+huyS(iS2)*nutOHS};
+        var ohB2={x:hsB2.x+huxS(iE2)*nutOHS,y:hsB2.y+huyS(iE2)*nutOHS};
+        hsPtsSVG=[hsA2,hsB2];
+        ohPtsSVG=[ohA2,ohB2];
+      }
+
+      function drawPolySVG(ptsArr, col, w){
+        if(!ptsArr||ptsArr.length<2) return;
+        var pd='';ptsArr.forEach(function(p,j){var q=mp(p);pd+=(j?'L':'M')+q.x.toFixed(1)+','+q.y.toFixed(1);});
+        o+='<path d="'+pd+'" stroke="'+col+'" stroke-width="'+w+'" fill="none"/>';
+      }
+
+      drawPolySVG(hsPtsSVG, '#86efac', 1.5);
+      drawPolySVG(ohPtsSVG, '#86efac', 1.5);
+      svgLS(nutPtsSVG[0], hsPtsSVG[0], '#86efac', 1.5);
+      svgLS(nutPtsSVG[nutPtsSVG.length-1], hsPtsSVG[hsPtsSVG.length-1], '#86efac', 1.5);
+      svgLS(hsPtsSVG[0], ohPtsSVG[0], '#86efac', 1.5);
+      svgLS(hsPtsSVG[hsPtsSVG.length-1], ohPtsSVG[ohPtsSVG.length-1], '#86efac', 1.5);
       // NUTライン（後で最前面に描くためnutLinesに格納）
       (function(){
-        var nutPts=[];
-        if(fn===0){
-          nutPts.push(eA);
-          for(var ni=iA;ni<=iB;ni++) nutPts.push(Np(ni));
-          nutPts.push(eB);
-        } else {
-          nutPts.push(eA);
-          for(var ni=iA;ni<=iB;ni++) nutPts.push(g.SpExt(ni,-fn));
-          nutPts.push(eB);
-        }
-        var pd='';nutPts.forEach(function(p,j){var q=mp(p);pd+=(j?'L':'M')+q.x.toFixed(1)+','+q.y.toFixed(1);});
+        var pd='';nutPtsSVG.forEach(function(p,j){var q=mp(p);pd+=(j?'L':'M')+q.x.toFixed(1)+','+q.y.toFixed(1);});
         nutLines.push(pd);
+        // 0フレットモード: 開放弦位置からzeroFretOffset分ヘッド側にオフセットしたナット弦溝ライン
+        if(g.zeroFretOn){
+          var zfOff=g.zeroFretOffset;
+          var pd2='';
+          nutPtsSVG.forEach(function(p,j){
+            // 各点をヘッド方向（huxS）にzeroFretOffsetだけ移動
+            var idx=iA+(j===0?0:j===nutPtsSVG.length-1?iB-iA:j-1);
+            var hxI=huxS(Math.min(iB,Math.max(iA,iA+(j-1))));
+            var hyI=huyS(Math.min(iB,Math.max(iA,iA+(j-1))));
+            var px=p.x+hxI*zfOff, py=p.y+hyI*zfOff;
+            var q=mp({x:px,y:py});
+            pd2+=(j?'L':'M')+q.x.toFixed(1)+','+q.y.toFixed(1);
+          });
+          nutLines.push({pd:pd2,isNutSlot:true});
+        }
       })();
     });
   })();
@@ -2734,7 +3490,9 @@ function run(){
   for(var fn2=0;fn2<=nFret;fn2++){
     var ep2=fretEdgePts(fn2);
     var fa=mp(ep2.ix1),fb=mp(ep2.ixN);
-    var isNut=fn2===0;
+    // 0フレットモード時: fn2=0はFRETとして描き、ナットラインは別途描画
+    var isNut=fn2===0 && !g.zeroFretOn;
+    var isZeroFret=fn2===0 && g.zeroFretOn;
     if(g.curved){
       var pts=getMathPts(function(i){return Sp(i,isNut?0:FR(fn2));}, true, null, ep2.iMin, ep2.iMax);
       var pD = "";
@@ -2745,19 +3503,23 @@ function run(){
     } else {
       var pD='M'+fa.x.toFixed(1)+','+fa.y.toFixed(1)+' L'+fb.x.toFixed(1)+','+fb.y.toFixed(1);
     }
-    o+='<path d="'+pD+'" stroke="'+(isNut?'#d1d5db':'#6b7280')+'" stroke-width="'+(isNut?2:0.8)+'" fill="none"/>';
+    var lineCol=isNut?'#d1d5db':isZeroFret?'#86efac':'#6b7280';
+    var lineW=isNut?2:isZeroFret?1.5:0.8;
+    o+='<path d="'+pD+'" stroke="'+lineCol+'" stroke-width="'+lineW+'" fill="none"/>';
     if(showNums.has(fn2)){
       var top2=fa.y<fb.y?fa:fb;
-      // fret number label: use a nested g to counter lefty flip if needed
+      var labelTxt=fn2===0?(g.zeroFretOn?'0f':i18n('lbl-nut-txt')):fn2;
+      var labelCol=isNut?'#9ca3af':isZeroFret?'#86efac':'#4b5563';
       if(lefty){
         o+='<g transform="scale(-1,1) translate(-'+SW.toFixed(0)+',0)">';
-        o+='<text x="'+(SW-top2.x).toFixed(1)+'" y="'+(top2.y-6).toFixed(1)+'" text-anchor="middle" font-size="12" fill="'+(isNut?'#9ca3af':'#4b5563')+'" '+FF+'>'+(fn2===0?i18n('lbl-nut-txt'):fn2)+'</text>';
+        o+='<text x="'+(SW-top2.x).toFixed(1)+'" y="'+(top2.y-6).toFixed(1)+'" text-anchor="middle" font-size="12" fill="'+labelCol+'" '+FF+'>'+labelTxt+'</text>';
         o+='</g>';
       } else {
-        o+='<text x="'+top2.x.toFixed(1)+'" y="'+(top2.y-6).toFixed(1)+'" text-anchor="middle" font-size="12" fill="'+(isNut?'#9ca3af':'#4b5563')+'" '+FF+'>'+(fn2===0?i18n('lbl-nut-txt'):fn2)+'</text>';
+        o+='<text x="'+top2.x.toFixed(1)+'" y="'+(top2.y-6).toFixed(1)+'" text-anchor="middle" font-size="12" fill="'+labelCol+'" '+FF+'>'+labelTxt+'</text>';
       }
     }
   }
+  // 0フレットモード時のナットラインはNUT_OHグループブロックで階段状に描画済み
 
   // perpendicular line
   var isMultiUI = document.getElementById('multiscale-toggle').checked;
@@ -2798,9 +3560,292 @@ function run(){
 
   // NUTライン（白太線）を最前面に描画
   if(nutLines.length){
-    nutLines.forEach(function(pd){
-      o+='<path d="'+pd+'" stroke="#d1d5db" stroke-width="2" fill="none"/>';
+    nutLines.forEach(function(entry){
+      var pd=typeof entry==='string'?entry:entry.pd;
+      var isSlot=entry&&entry.isNutSlot;
+      // 開放弦位置ライン: 白太線 / ナット弦溝ライン（0フレットモード時）: やや細い白線
+      o+='<path d="'+pd+'" stroke="#d1d5db" stroke-width="'+(isSlot?1.5:2)+'" fill="none"/>';
     });
+  }
+
+  // ── Inlay SVG ──
+  if(_inlaySettings&&_inlaySettings.enabled){
+    var ins=_inlaySettings;
+    var mode=ins.mode||'center';
+    var inlayCol='#7dd3fc';
+    var inlayStr='#38bdf8';
+
+    // ── ヘルパー ──
+    function fretTc(fn){var t1=FR(fn-1),t2=FR(fn);return t1+(t2-t1)*0.5;}
+    function midStrPt(iA,iB,tc){
+      var pA=Sp(iA,tc),pB=Sp(iB,tc);
+      return mp({x:(pA.x+pB.x)/2,y:(pA.y+pB.y)/2});
+    }
+    function drawDot(p,r,col,str){
+      o+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+(r*SC).toFixed(1)+'" fill="'+(col||inlayCol)+'" fill-opacity="0.8" stroke="'+(str||inlayStr)+'" stroke-width="0.8"/>';
+    }
+    // fn-1とfnのフレットラインの平均方向unit vector（フレット方向）
+    function fretAvgDir(fn){
+      // fnフレットの方向 = fretEdgePts(fn).ix1 → ixN
+      function fretDir(f){
+        var ep=fretEdgePts(f);
+        var dx=ep.ixN.x-ep.ix1.x, dy=ep.ixN.y-ep.ix1.y;
+        var l=Math.sqrt(dx*dx+dy*dy)||1;
+        return {x:dx/l,y:dy/l};
+      }
+      var d0=fretDir(fn-1), d1=fretDir(fn);
+      var ax=(d0.x+d1.x)/2, ay=(d0.y+d1.y)/2;
+      var al=Math.sqrt(ax*ax+ay*ay)||1;
+      return {x:ax/al,y:ay/al};
+    }
+    // マルチスケールかどうか
+    var isMultiScale=Math.abs(g.s1-g.sN)>1e-4;
+
+    // ダブルドット描画ヘルパー（fn=フレット番号）
+    var dblEnabled=ins.dblEnabled!==false;
+    function drawDblDot(p, fn){
+      var cfg=(ins.dblFrets&&ins.dblFrets[fn])||{shape:'dot',diam:ins.centerDiam||6};
+      if((cfg.shape||'dot')==='ring'){
+        var riPx=(cfg.inner||4)/2*SC, roPx=(cfg.outer||7)/2*SC;
+        o+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+roPx.toFixed(1)+'" fill="'+inlayCol+'" fill-opacity="0.8" stroke="'+inlayStr+'" stroke-width="0.8"/>';
+        o+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+riPx.toFixed(1)+'" fill="#222" fill-opacity="1" stroke="'+inlayStr+'" stroke-width="0.5"/>';
+      } else {
+        drawDot(p, (cfg.diam||6)/2);
+      }
+    }
+
+    // ── センタードット ──
+    if(mode==='center'){
+      var DOUBLE_FRETS=new Set([12,24,36,48]);
+      var SINGLE_FRETS=new Set([3,5,7,9,15,17,19,21,27,29,31,33,39,41,43,45]);
+      if(ins.customEnabled && ins.customPositions && ins.customPositions.length){
+        var _cp=ins.customPositions;
+        DOUBLE_FRETS=new Set(_cp.filter(function(f){return DOUBLE_FRETS.has(f);}));
+        SINGLE_FRETS=new Set(_cp.filter(function(f){return !DOUBLE_FRETS.has(f);}));
+      }
+      var r=ins.centerDiam/2;
+      var tc12ref=FR(11)+(FR(12)-FR(11))*0.5;
+      var span12=Math.abs(Sp(nStr-1,tc12ref).y-Sp(0,tc12ref).y)||1;
+      for(var fn=1;fn<=nFret;fn++){
+        if(!SINGLE_FRETS.has(fn)&&!DOUBLE_FRETS.has(fn)) continue;
+        var tc=fretTc(fn);
+        var cIdx=(nStr-1)/2;
+        var pMidRaw=Sp(cIdx,tc);
+        var pMid=mp(pMidRaw);
+        if(SINGLE_FRETS.has(fn)||!dblEnabled){
+          // シングル（またはdblDisabledで12f等もシングル扱い）
+          if(!dblEnabled && DOUBLE_FRETS.has(fn)){
+            drawDblDot(pMid,fn); // global設定を使う
+          } else {
+            drawDot(pMid,r);
+          }
+        } else {
+          // ダブルドット: fretAvgDir方向にctcオフセット
+          var tcFnRef=FR(fn-1)+(FR(fn)-FR(fn-1))*0.5;
+          var spanFn=Math.abs(Sp(nStr-1,tcFnRef).y-Sp(0,tcFnRef).y)||1;
+          var ctc=ins.centerCtc*(spanFn/span12);
+          var dir=fretAvgDir(fn);
+          var pa=mp({x:pMidRaw.x+dir.x*(ctc/2),y:pMidRaw.y+dir.y*(ctc/2)});
+          var pb=mp({x:pMidRaw.x-dir.x*(ctc/2),y:pMidRaw.y-dir.y*(ctc/2)});
+          drawDblDot(pa,fn);drawDblDot(pb,fn);
+        }
+      }
+    }
+
+    // ── オフセットドット ──
+    else if(mode==='offset'){
+      var r2=ins.offsetDiam/2;
+      var pat=ins.offsetPattern||1;
+      var dblMode=ins.offsetDblSide||'adjacent';
+      var DSET=new Set([12,24,36,48]);
+      if(ins.customEnabled && ins.customPositions && ins.customPositions.length){
+        var ASET2=new Set(ins.customPositions);
+        var DSET2b=new Set(ins.customPositions.filter(function(f){return DSET.has(f);}));
+      } else {
+        var ASET2=new Set([3,5,7,9,12,15,17,19,21,24,27,29,31,33,36,39,41,43,45,48]);
+        var DSET2b=DSET;
+      }
+      var ASET=ASET2; var DSET=DSET2b;
+      function t15Raw(tc){return {x:(Sp(0,tc).x+Sp(1,tc).x)/2, y:(Sp(0,tc).y+Sp(1,tc).y)/2};}
+      function t25Raw(tc){return {x:(Sp(1,tc).x+Sp(2,tc).x)/2, y:(Sp(1,tc).y+Sp(2,tc).y)/2};}
+      function bm05Raw(tc){return {x:(Sp(nStr-2,tc).x+Sp(nStr-1,tc).x)/2, y:(Sp(nStr-2,tc).y+Sp(nStr-1,tc).y)/2};}
+      function bm15Raw(tc){return {x:(Sp(nStr-3,tc).x+Sp(nStr-2,tc).x)/2, y:(Sp(nStr-3,tc).y+Sp(nStr-2,tc).y)/2};}
+      function dblPos2Raw(isBaseBass,tc){
+        if(dblMode==='adjacent') return isBaseBass?bm15Raw(tc):t25Raw(tc);
+        else return isBaseBass?t15Raw(tc):bm05Raw(tc);
+      }
+      for(var fn=1;fn<=nFret;fn++){
+        if(!ASET.has(fn)) continue;
+        var tc=fretTc(fn);
+        var isDbl=DSET.has(fn)&&dblEnabled;
+        var rp1=null,rp2=null,p1Side='',i1=null;
+        if(pat===1){
+          rp1=t15Raw(tc); p1Side='treble'; i1=0.5;
+          if(isDbl) rp2=dblPos2Raw(false,tc);
+        } else if(pat===2){
+          if(fn<=9&&!isDbl){ rp1=bm05Raw(tc); p1Side='bass'; i1=nStr-1.5; }
+          else if(fn===12){
+            rp1=bm05Raw(tc); p1Side='bass'; i1=nStr-1.5;
+            if(isDbl) rp2=dblPos2Raw(true,tc);
+          } else if(isDbl&&fn>12){
+            rp1=t15Raw(tc); p1Side='treble'; i1=0.5;
+            rp2=dblPos2Raw(false,tc);
+          } else { rp1=t15Raw(tc); p1Side='treble'; i1=0.5; }
+        } else {
+          rp1=bm05Raw(tc); p1Side='bass'; i1=nStr-1.5;
+          if(isDbl) rp2=dblPos2Raw(true,tc);
+        }
+        if(rp1){
+          if(DSET.has(fn)){
+            if(!dblEnabled && ins.dblFrets && ins.dblFrets[fn] && ins.dblFrets[fn].shape === 'ring'){
+              var off = ins.dblFrets[fn].offset || 0;
+              if(off !== 0){
+                if(g.curved){
+                  var eps=0.01;
+                  var sign=(p1Side==='bass')?-1:1;
+                  var pA=Sp(i1,tc);
+                  var pB=Sp(i1+sign*eps,tc);
+                  var localDist=Math.sqrt((pB.x-pA.x)**2+(pB.y-pA.y)**2);
+                  if(localDist>1e-6){
+                    var di=(off/localDist)*eps*sign;
+                    rp1=Sp(i1+di,tc);
+                  }
+                } else {
+                  var dir = fretAvgDir(fn);
+                  if(p1Side==='bass') { dir.x*=-1; dir.y*=-1; }
+                  rp1.x += dir.x * off; rp1.y += dir.y * off;
+                }
+              }
+            }
+            drawDblDot(mp(rp1), fn);
+          } else {
+            drawDot(mp(rp1), r2);
+          }
+        }
+        if(rp2) drawDblDot(mp(rp2), fn);
+      }
+    }
+
+    // ── ブロックインレイ ──
+    else if(mode==='block'){
+      // positionsをnFretまで自動生成（1fあり/なしモード）
+      var blockNo1f=ins.blockNo1f||false;
+      var bpos=[];
+      if(ins.customEnabled&&ins.customPositions&&ins.customPositions.length){
+        // カスタムポジション使用
+        bpos=ins.customPositions.filter(function(f){return f>=1&&f<=nFret;});
+      } else {
+        // 自動生成パターン
+        var basePattern=blockNo1f?[3,5,7,9]:[1,3,5,7,9];
+        basePattern.forEach(function(f){if(f<=nFret)bpos.push(f);});
+        var octaveBase=[12,15,17,19,21,24];
+        var octave=0;
+        while(true){
+          var added=false;
+          octaveBase.forEach(function(f){var ff=f+octave*12;if(ff>9&&ff<=nFret){bpos.push(ff);added=true;}});
+          if(!added||octave>5) break;
+          octave++;
+        }
+      }
+      // ソートして重複除去
+      bpos=bpos.filter(function(v,i,a){return a.indexOf(v)===i;}).sort(function(a,b){return a-b;});
+
+      var fStart=bpos[0]||1, fEnd=bpos[bpos.length-1]||24;
+      function coefAt(fn,cS,cE){
+        if(fEnd===fStart) return cS;
+        return cS+(cE-cS)*(fn-fStart)/(fEnd-fStart);
+      }
+      bpos.forEach(function(fn){
+        if(fn<1||fn>nFret) return;
+        var tc=fretTc(fn);
+        // フレット間隔: センターライン上でのfn-1〜fn間の距離
+        var cIdx=(nStr-1)/2;
+        var pCenterA=Sp(cIdx,FR(fn-1)), pCenterB=Sp(cIdx,FR(fn));
+        var fretSpacing=Math.sqrt((pCenterB.x-pCenterA.x)**2+(pCenterB.y-pCenterA.y)**2);
+        // 幅: フレットラインの長さ（幅辺の方向に沿った長さ）
+        var ep_fn1=fretEdgePts(fn-1), ep_fn2=fretEdgePts(fn);
+        var l1=Math.sqrt((ep_fn1.ixN.x-ep_fn1.ix1.x)**2+(ep_fn1.ixN.y-ep_fn1.ix1.y)**2);
+        var l2=Math.sqrt((ep_fn2.ixN.x-ep_fn2.ix1.x)**2+(ep_fn2.ixN.y-ep_fn2.ix1.y)**2);
+        var spanLen=(l1+l2)/2||1;
+        var hCoef=coefAt(fn,ins.hCoefStart,ins.hCoefEnd);
+        var wCoef=coefAt(fn,ins.wCoefStart,ins.wCoefEnd);
+        var bh=fretSpacing*hCoef;
+        var bw=spanLen*wCoef;
+        var maxR=bh/2;
+        var r3=Math.min(ins.radius||0,maxR);
+        // 中心点（raw coords）
+        var p0=Sp(0,tc), pN=Sp(nStr-1,tc);
+        var pMidRaw={x:(p0.x+pN.x)/2,y:(p0.y+pN.y)/2};
+        // 幅辺方向: フレット平均角度（マルチスケール）または弦方向（シングル）
+        var ux3,uy3;
+        if(isMultiScale){
+          var fd=fretAvgDir(fn); ux3=fd.x; uy3=fd.y;
+        } else {
+          var sv={x:pN.x-p0.x,y:pN.y-p0.y};
+          var sl=Math.sqrt(sv.x*sv.x+sv.y*sv.y)||1;
+          ux3=sv.x/sl; uy3=sv.y/sl;
+        }
+        // 高さ辺方向: 常にX軸平行（水平）= raw coordsで(1,0)
+        var lx3=1, ly3=0;
+        var hw3=bw/2, hl3=bh/2;
+
+        // カーブドマルチスケール: 曲線フレット参照、cornerR=0固定
+        if(g.curved && isMultiScale){
+          var ep_a=fretEdgePts(fn-1);
+          var iMidA=(ep_a.iMin+ep_a.iMax)/2, halfW=(ep_a.iMax-ep_a.iMin)*wCoef/2;
+          var iS_c=iMidA-halfW, iE_c=iMidA+halfW;
+          var margin=(1-hCoef)/2*fretSpacing;
+          var ptsA=getMathPts(function(i){return Sp(i,FR(fn-1));},true,null,iS_c,iE_c);
+          var ptsB=getMathPts(function(i){return Sp(i,FR(fn));},true,null,iS_c,iE_c);
+          var ptsAoff=ptsA.map(function(p){return mp({x:p.x+margin,y:p.y});});
+          var ptsBoff=ptsB.map(function(p){return mp({x:p.x-margin,y:p.y});});
+          var pathC='M'+ptsAoff[0].x.toFixed(1)+','+ptsAoff[0].y.toFixed(1);
+          for(var pi=1;pi<ptsAoff.length;pi++) pathC+=' L'+ptsAoff[pi].x.toFixed(1)+','+ptsAoff[pi].y.toFixed(1);
+          pathC+=' L'+ptsBoff[ptsBoff.length-1].x.toFixed(1)+','+ptsBoff[ptsBoff.length-1].y.toFixed(1);
+          for(var pi=ptsBoff.length-2;pi>=0;pi--) pathC+=' L'+ptsBoff[pi].x.toFixed(1)+','+ptsBoff[pi].y.toFixed(1);
+          pathC+='Z';
+          o+='<path d="'+pathC+'" fill="'+inlayCol+'" fill-opacity="0.8" stroke="'+inlayStr+'" stroke-width="0.8"/>';
+          return;
+        }
+
+        // 4コーナー（raw coords）- 平行四辺形
+        var corners3=[
+          {x:pMidRaw.x-ux3*hw3-lx3*hl3,y:pMidRaw.y-uy3*hw3-ly3*hl3},
+          {x:pMidRaw.x+ux3*hw3-lx3*hl3,y:pMidRaw.y+uy3*hw3-ly3*hl3},
+          {x:pMidRaw.x+ux3*hw3+lx3*hl3,y:pMidRaw.y+uy3*hw3+ly3*hl3},
+          {x:pMidRaw.x-ux3*hw3+lx3*hl3,y:pMidRaw.y-uy3*hw3+ly3*hl3}
+        ];
+        var cPx=corners3.map(function(c){return mp(c);});
+
+        if(r3<=0){
+          var pts3=cPx.map(function(p){return p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
+          o+='<polygon points="'+pts3+'" fill="'+inlayCol+'" fill-opacity="0.8" stroke="'+inlayStr+'" stroke-width="0.8"/>';
+        } else {
+          // 角丸: px座標のコーナー間の辺方向から直接計算
+          var rPx3=r3*SC;
+          var n3=cPx.length;
+          var d3='';
+          for(var ci=0;ci<n3;ci++){
+            var cCur=cPx[ci];
+            var cPrev=cPx[(ci+n3-1)%n3];
+            var cNext=cPx[(ci+1)%n3];
+            // 入ってくる辺方向（prev→cur）
+            var ix=cCur.x-cPrev.x,iy=cCur.y-cPrev.y,il=Math.sqrt(ix*ix+iy*iy)||1;
+            ix/=il;iy/=il;
+            // 出る辺方向（cur→next）
+            var ox=cNext.x-cCur.x,oy=cNext.y-cCur.y,ol=Math.sqrt(ox*ox+oy*oy)||1;
+            ox/=ol;oy/=ol;
+            var rS={x:cCur.x-ix*rPx3,y:cCur.y-iy*rPx3};
+            var rE={x:cCur.x+ox*rPx3,y:cCur.y+oy*rPx3};
+            if(ci===0) d3='M'+rS.x.toFixed(1)+','+rS.y.toFixed(1);
+            else        d3+=' L'+rS.x.toFixed(1)+','+rS.y.toFixed(1);
+            d3+=' Q'+cCur.x.toFixed(1)+','+cCur.y.toFixed(1)+' '+rE.x.toFixed(1)+','+rE.y.toFixed(1);
+          }
+          d3+='Z';
+          o+='<path d="'+d3+'" fill="'+inlayCol+'" fill-opacity="0.8" stroke="'+inlayStr+'" stroke-width="0.8"/>';
+        }
+      });
+    }
   }
 
   svg.innerHTML=o;
@@ -2809,8 +3854,31 @@ function run(){
   var legDir=document.querySelector('[data-i18n="legend-dir"]');
   if(legDir) legDir.innerHTML = i18n(lefty ? 'legend-dir-lefty' : 'legend-dir-righty');
 
+  // update inlay UI (nFret変更でper-fret欄を再生成)
+  if(_inlaySettings&&_inlaySettings.enabled) updateInlayUI();
+
+  // R-End UI更新
+  updateEndShapeUI();
+
+  // curved+multiの時はblock corner radius をグレーアウト
+  (function(){
+    var rWrap=document.getElementById('inlay-radius-wrap');
+    var rNote=document.getElementById('inlay-radius-curved-note');
+    if(!rWrap) return;
+    var isCurvedMulti=g.curved&&Math.abs(g.s1-g.sN)>1e-4;
+    rWrap.style.opacity=isCurvedMulti?'0.35':'1';
+    rWrap.style.pointerEvents=isCurvedMulti?'none':'';
+    if(rNote) rNote.style.display=isCurvedMulti?'':'none';
+  })();
+
   // update tension calculator
   syncTensionUI();
+
+  // update seed display
+  if(!_isUpdating){
+    var sd=document.getElementById('seed-display');
+    if(sd) sd.value=encodeSeed();
+  }
 }
 
 // ── event listeners ──
@@ -3539,7 +4607,7 @@ function updateTensionRows() {
     html += '<tr>';
     html += '<td style="color:var(--text3);font-weight:600;">' + si + '</td>';
     html += '<td class="ro-val" id="t-sc-' + i + '" style="text-align:center;white-space:nowrap;">—</td>';
-    html += '<td><div class="num-wrap"><input type="text" value="' + s.note + '" oninput="updateStringSetting(' + i + ', \'note\', this.value)" spellcheck="false"><div class="num-btns"><button class="num-btn" onclick="shiftNote(' + i + ',1)">▲</button><button class="num-btn" onclick="shiftNote(' + i + ',-1)">▼</button></div></div></td>';
+    html += '<td><div class="num-wrap"><input type="text" id="t-note-' + i + '" value="' + s.note + '" oninput="updateStringSetting(' + i + ', \'note\', this.value)" spellcheck="false"><div class="num-btns"><button class="num-btn" onclick="shiftNote(' + i + ',1)">▲</button><button class="num-btn" onclick="shiftNote(' + i + ',-1)">▼</button></div></div></td>';
     html += '<td><div class="num-wrap"><select id="t-gauge-' + i + '" onchange="updateGaugeWithType(this.value, ' + i + ')">';
     GAUGE_LIST.forEach(g => {
       // ゲージが一致、かつタイプが一致（またはそのゲージに今のタイプがない場合のフォールバック）を selected にする
@@ -3769,9 +4837,16 @@ function runTensionCalc() {
     if (!s) { results.push(null); continue; }
     var sc_mm = _state.sc(i);
     var sc_in = sc_mm / I2M;
+    // Extended Fretsがある場合: スケール長のみ伸ばす（Noteはユーザー設定のまま）
+    var ef_t = (_state.extFrets && _state.extFrets[i]) || 0;
+    if(ef_t > 0){
+      var edo_t = getEDO();
+      sc_mm = sc_mm * Math.pow(2, ef_t / edo_t);
+      sc_in = sc_mm / I2M;
+    }
     var elSc = document.getElementById('t-sc-' + i);
     if (elSc) elSc.textContent = sc_in.toFixed(2);
-    
+
     var res = calcTensionInternal(s.gauge, s.type, s.note, sc_in);
     results.push(res);
     if (res && res.kg > localMaxKgf) localMaxKgf = res.kg;
@@ -4062,7 +5137,7 @@ function syncTensionUI() {
 
 </script>
 
-<div id="ver">v098-nut-frontlayer</div>
+<div id="ver">v148-inlay-always-visible</div>
 <a href="https://www.gtinstruments.xyz/" class="home-link" data-i18n="back-home">← Back to homepage</a>
 </body>
 </html>

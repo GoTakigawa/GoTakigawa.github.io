@@ -15,5 +15,8 @@
     "calculator"
   ],
   "author": "Go Takigawa Instruments",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "jsdom": "^29.0.2"
+  }
 }
