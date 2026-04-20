@@ -3,25 +3,110 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CASES - GTI / Luthier</title>
+  <title>Fretboard Cases - GTI / Luthier</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../style.css">
+  <style>
+    .product-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 100px;
+    }
+
+    .case-hero {
+      text-align: center;
+      padding: 100px 0 60px;
+    }
+    
+    .case-hero h1 {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+
+    .case-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-top: 60px;
+    }
+
+    .case-item {
+      background: #080808;
+      border: 1px solid var(--border-color);
+      padding: 40px;
+      text-align: center;
+      transition: border-color 0.3s ease;
+    }
+    
+    .case-item:hover {
+      border-color: var(--accent-color);
+    }
+
+    .case-image {
+      width: 100%;
+      height: auto;
+      margin-bottom: 30px;
+      border-radius: 4px;
+    }
+
+    .case-name {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+    
+    .case-desc {
+      color: #888;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    @media (max-width: 768px) {
+      .case-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
+
   <header>
     <a href="../index.html" class="logo">GTI</a>
   </header>
-  <main>
-    <div style="text-align:center; padding: 100px 20px;">
-      <h1 style="font-family: 'Libre Baskerville', serif; margin-bottom: 20px;">CASES</h1>
-      <p>Coming soon...</p>
-      <a href="../index.html" style="display:inline-block; margin-top:30px; color:#6f00ff; text-decoration:none;">&larr; Back to Home</a>
+
+  <main class="product-container">
+    <div class="case-header" style="text-align: center; padding-top: 100px;">
+      <span style="color: var(--accent-color); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;">Accessories</span>
+      <h1 style="font-family: 'Libre Baskerville', serif; font-size: 3.5rem; margin: 10px 0 20px;">Fretboard Cases</h1>
+      <p style="color: #666; max-width: 600px; margin: 0 auto;">ルシアーが設計する、マルチスケールの美学を落とし込んだデバイスアクセサリー。</p>
+    </div>
+
+    <div class="case-grid">
+      <!-- Item 1 -->
+      <div class="case-item">
+        <img src="../assets/images/gallery/placeholder.png" alt="iPhone Case" class="case-image">
+        <h3 class="case-name">Standard Series</h3>
+        <p class="case-desc">
+          25.5-27.0インチのマルチスケール・フレットを正確に再現したグラフィックモデル。
+        </p>
+      </div>
+
+      <!-- Item 2 -->
+      <div class="case-item">
+        <img src="../assets/images/gallery/placeholder.png" alt="Android Case" class="case-image">
+        <h3 class="case-name">Custom Series</h3>
+        <p class="case-desc">
+          お持ちのギターの実機仕様に合わせたカスタムデザインも承ります。
+        </p>
+      </div>
     </div>
   </main>
+
   <footer>
     <p>Copyright &copy; 2026 GTI.</p>
   </footer>
+
 </body>
 </html>

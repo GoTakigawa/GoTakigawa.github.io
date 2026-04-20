@@ -3,25 +3,446 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GALLERY - GTI / Luthier</title>
+  <title>Guitars & Basses Gallery - GTI / Luthier</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../style.css">
+  <style>
+    /* Gallery Specific Styles */
+    .gallery-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 40px;
+    }
+    
+    .gallery-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .gallery-header h1 {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    
+    /* Filter Controls */
+    .filter-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+    
+    .filter-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 8px 16px;
+      font-family: 'Roboto Condensed', sans-serif;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-radius: 4px;
+    }
+    
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+      color: #fff;
+    }
+    
+    /* Grid Layout */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    
+    .gallery-item {
+      position: relative;
+      background: #111;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .gallery-item:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent-color);
+      box-shadow: 0 10px 30px rgba(111, 0, 255, 0.2);
+    }
+    
+    .gallery-item-img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.3s ease;
+    }
+    
+    .gallery-item:hover .gallery-item-img {
+      opacity: 0.7;
+    }
+    
+    .gallery-item-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 20px;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    
+    .gallery-item:hover .gallery-item-info {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .item-title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.2rem;
+      margin-bottom: 5px;
+    }
+    
+    .item-series {
+      font-size: 0.7rem;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 5px;
+    }
+    
+    .item-specs {
+      font-size: 0.8rem;
+      color: #bbb;
+    }
+
+    /* Filtering animation */
+    .gallery-item.hide {
+      display: none;
+    }
+    
+    /* Modal / Lightbox */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .modal.show {
+      display: flex;
+      opacity: 1;
+    }
+    
+    .modal-content {
+      max-width: 900px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    
+    .modal-img {
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 0 40px rgba(111,0,255,0.15);
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: -40px;
+      right: 0;
+      color: #fff;
+      font-size: 2rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+    
+    .modal-close:hover {
+      color: var(--accent-color);
+    }
+    
+    .modal-caption {
+      margin-top: 20px;
+      text-align: center;
+    }
+    
+    .modal-title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+    }
+    
+    .modal-specs {
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
+
   <header>
     <a href="../index.html" class="logo">GTI</a>
   </header>
-  <main>
-    <div style="text-align:center; padding: 100px 20px;">
-      <h1 style="font-family: 'Libre Baskerville', serif; margin-bottom: 20px;">GALLERY</h1>
-      <p>Coming soon...</p>
-      <a href="../index.html" style="display:inline-block; margin-top:30px; color:#6f00ff; text-decoration:none;">&larr; Back to Home</a>
+
+  <main class="gallery-container">
+    <div class="gallery-header">
+      <h1>Guitars / Basses</h1>
+      <p style="color: #aaa;">Explore our past creations and custom built instruments.</p>
+    </div>
+    
+    <div class="filter-controls" id="filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="guitar">Guitars</button>
+      <button class="filter-btn" data-filter="bass">Basses</button>
+      <button class="filter-btn" data-filter="treadline">TREAD-LINE Series</button>
+      <button class="filter-btn" data-filter="drake">Drake</button>
+      <button class="filter-btn" data-filter="nekro">Nekro</button>
+      <button class="filter-btn" data-filter="mortezzo">Mortezzo</button>
+      <button class="filter-btn" data-filter="rlyeh">R'lyeh</button>
+    </div>
+
+    <div class="gallery-grid" id="gallery">
+      <!-- Item 1 (#046 Mortezza-7) -->
+      <div class="gallery-item" data-category="guitar mortezza" 
+           data-images="../assets/images/gallery/mortezza7_046/01.jpg,../assets/images/gallery/mortezza7_046/02.jpg,../assets/images/gallery/mortezza7_046/03.jpg,../assets/images/gallery/mortezza7_046/04.jpg,../assets/images/gallery/mortezza7_046/05.jpg,../assets/images/gallery/mortezza7_046/06.jpg,../assets/images/gallery/mortezza7_046/07.jpg,../assets/images/gallery/mortezza7_046/08.jpg,../assets/images/gallery/mortezza7_046/09.jpg,../assets/images/gallery/mortezza7_046/10.jpg,../assets/images/gallery/mortezza7_046/11.jpg,../assets/images/gallery/mortezza7_046/12.jpg,../assets/images/gallery/mortezza7_046/13.jpg,../assets/images/gallery/mortezza7_046/14.jpg,../assets/images/gallery/mortezza7_046/15.jpg"
+           onclick="openModal(this)">
+        <img src="../assets/images/gallery/mortezza7_046/01.jpg" alt="Mortezza-7 #046" class="gallery-item-img">
+        <div class="gallery-item-info">
+          <div class="item-title">#046 Mortezza-7</div>
+          <div class="item-specs">7-String Multiscale / Black Satin</div>
+        </div>
+      </div>
+
+      <!-- Item 2 (Example Bass) -->
+      <div class="gallery-item" data-category="bass drake" onclick="openModal(this)">
+        <img src="../assets/images/gallery/g2.png" alt="Drake-5" class="gallery-item-img">
+        <div class="gallery-item-info">
+          <div class="item-title">Drake-5</div>
+          <div class="item-specs">5-String Bass / Wenge Neck</div>
+        </div>
+      </div>
+
+      <!-- Item 3 (Example TREAD-LINE R'lyeh) -->
+      <div class="gallery-item" data-category="guitar rlyeh treadline" onclick="openModal(this)">
+        <img src="../assets/images/gallery/g1.png" alt="R'lyeh-7" class="gallery-item-img">
+        <div class="gallery-item-info">
+          <div class="item-series">TREAD-LINE</div>
+          <div class="item-title">R'lyeh-7</div>
+          <div class="item-specs">7-String Headless / Burl Top</div>
+        </div>
+      </div>
+
+      <!-- Item 4 (Example Nekro) -->
+      <div class="gallery-item" data-category="guitar nekro" onclick="openModal(this)">
+        <img src="../assets/images/gallery/g1.png" alt="Nekro-8" class="gallery-item-img">
+        <div class="gallery-item-info">
+          <div class="item-title">Nekro-8</div>
+          <div class="item-specs">8-String / Macassar Ebony Fretboard</div>
+        </div>
+      </div>
+
+      <!-- Item 5 (Example Booggah) -->
+      <div class="gallery-item" data-category="bass booggah" onclick="openModal(this)">
+        <img src="../assets/images/gallery/g2.png" alt="Booggah-4" class="gallery-item-img">
+        <div class="gallery-item-info">
+          <div class="item-title">Booggah-4</div>
+          <div class="item-specs">4-String Bass / Bolt-on</div>
+        </div>
+      </div>
+      
+      <!-- Item 6 (Example Leggiero) -->
+      <div class="gallery-item" data-category="guitar leggiero treadline" onclick="openModal(this)">
+        <img src="../assets/images/gallery/g1.png" alt="Leggiero-6" class="gallery-item-img">
+        <div class="gallery-item-info">
+          <div class="item-series">TREAD-LINE</div>
+          <div class="item-title">Leggiero-6</div>
+          <div class="item-specs">6-String Modern Carve / Walnut</div>
+        </div>
+      </div>
     </div>
   </main>
+
   <footer>
     <p>Copyright &copy; 2026 GTI.</p>
   </footer>
+
+  <!-- Modal elements -->
+  <div class="modal" id="modal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <div class="modal-img-container">
+        <img src="" alt="" class="modal-img" id="modal-img">
+        <div class="modal-nav">
+          <button class="nav-btn prev" id="modal-prev">&lt;</button>
+          <button class="nav-btn next" id="modal-next">&gt;</button>
+        </div>
+      </div>
+      <div class="modal-caption">
+        <div class="item-series" id="modal-series"></div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-specs" id="modal-specs"></div>
+        <div class="modal-counter" id="modal-counter"></div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .modal-img-container {
+      position: relative;
+      width: 100%;
+      text-align: center;
+    }
+    .modal-nav {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      transform: translateY(-50%);
+      padding: 0 10px;
+      pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      border: 1px solid #444;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: all 0.3s;
+    }
+    .nav-btn:hover {
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+    .modal-counter {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: #666;
+    }
+  </style>
+
+  <script>
+    // Filtering Logic (Existing)
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const galleryItems = document.querySelectorAll('.gallery-item');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filterValue = btn.getAttribute('data-filter');
+        galleryItems.forEach(item => {
+          if (filterValue === 'all') {
+            item.classList.remove('hide');
+          } else {
+            if (item.getAttribute('data-category').includes(filterValue)) {
+              item.classList.remove('hide');
+            } else {
+              item.classList.add('hide');
+            }
+          }
+        });
+      });
+    });
+
+    // Multi-Image Modal Logic
+    const modal = document.getElementById('modal');
+    const modalImg = document.getElementById('modal-img');
+    const modalTitle = document.getElementById('modal-title');
+    const modalSpecs = document.getElementById('modal-specs');
+    const modalSeries = document.getElementById('modal-series');
+    const modalCounter = document.getElementById('modal-counter');
+    const modalPrev = document.getElementById('modal-prev');
+    const modalNext = document.getElementById('modal-next');
+
+    let currentImages = [];
+    let currentIdx = 0;
+
+    function openModal(element) {
+      const title = element.querySelector('.item-title').innerText;
+      const specs = element.querySelector('.item-specs').innerText;
+      const seriesEl = element.querySelector('.item-series');
+      
+      // Check for multi-image data attribute
+      const imagesAttr = element.getAttribute('data-images');
+      if (imagesAttr) {
+        currentImages = imagesAttr.split(',');
+      } else {
+        currentImages = [element.querySelector('.gallery-item-img').src];
+      }
+      
+      currentIdx = 0;
+      updateModalContent(title, specs, seriesEl ? seriesEl.innerText : '');
+      
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function updateModalContent(title, specs, series) {
+      modalImg.src = currentImages[currentIdx];
+      modalTitle.innerText = title;
+      modalSpecs.innerText = specs;
+      modalSeries.innerText = series;
+      
+      if (currentImages.length > 1) {
+        modalCounter.innerText = `${currentIdx + 1} / ${currentImages.length}`;
+        modalPrev.style.display = 'block';
+        modalNext.style.display = 'block';
+      } else {
+        modalCounter.innerText = '';
+        modalPrev.style.display = 'none';
+        modalNext.style.display = 'none';
+      }
+    }
+
+    modalPrev.onclick = (e) => {
+      e.stopPropagation();
+      currentIdx = (currentIdx - 1 + currentImages.length) % currentImages.length;
+      updateModalContent(modalTitle.innerText, modalSpecs.innerText, modalSeries.innerText);
+    };
+
+    modalNext.onclick = (e) => {
+      e.stopPropagation();
+      currentIdx = (currentIdx + 1) % currentImages.length;
+      updateModalContent(modalTitle.innerText, modalSpecs.innerText, modalSeries.innerText);
+    };
+
+    function closeModal() {
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+    
+    document.addEventListener('keydown', (e) => {
+      if (!modal.classList.contains('show')) return;
+      if (e.key === 'Escape') closeModal();
+      if (e.key === 'ArrowLeft') modalPrev.click();
+      if (e.key === 'ArrowRight') modalNext.click();
+    });
+  </script>
 </body>
 </html>

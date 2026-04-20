@@ -3,25 +3,172 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CONTACT - GTI / Luthier</title>
+  <title>Contact - GTI / Luthier</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../style.css">
+  <style>
+    .contact-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px 100px;
+    }
+
+    .contact-header {
+      text-align: center;
+      padding: 100px 0 60px;
+    }
+    
+    .contact-header h1 {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+
+    .contact-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+
+    .info-item h3 {
+      font-family: 'Roboto Condensed', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-color);
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+    
+    .info-item p {
+      color: #fff;
+      font-size: 1.1rem;
+    }
+
+    /* Form Styles */
+    .contact-form {
+      background: #080808;
+      padding: 40px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      font-family: 'Roboto Condensed', sans-serif;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+      color: #888;
+    }
+
+    .form-control {
+      width: 100%;
+      background: #000;
+      border: 1px solid #222;
+      padding: 12px 15px;
+      color: #fff;
+      font-family: 'Roboto Condensed', sans-serif;
+      font-size: 1rem;
+      border-radius: 2px;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    textarea.form-control {
+      min-height: 150px;
+      resize: vertical;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--accent-color);
+      color: #fff;
+      border: none;
+      padding: 15px;
+      font-family: 'Roboto Condensed', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 20px;
+    }
+
+    .btn-submit:hover {
+      background: #8e33ff;
+    }
+
+    @media (max-width: 600px) {
+      .contact-header h1 { font-size: 2.2rem; }
+      .contact-info-grid { grid-template-columns: 1fr; }
+      .contact-form { padding: 25px; }
+    }
+  </style>
 </head>
 <body>
+
   <header>
     <a href="../index.html" class="logo">GTI</a>
   </header>
-  <main>
-    <div style="text-align:center; padding: 100px 20px;">
-      <h1 style="font-family: 'Libre Baskerville', serif; margin-bottom: 20px;">CONTACT</h1>
-      <p>Coming soon...</p>
-      <a href="../index.html" style="display:inline-block; margin-top:30px; color:#6f00ff; text-decoration:none;">&larr; Back to Home</a>
+
+  <main class="contact-container">
+    <div class="contact-header">
+      <h1>Contact</h1>
+      <p style="color: #666;">Get in touch for custom orders or inquiries.</p>
     </div>
+
+    <div class="contact-info-grid">
+      <div class="info-item">
+        <h3>Email</h3>
+        <p>info@gotakigawa.com</p>
+      </div>
+      <div class="info-item">
+        <h3>Location</h3>
+        <p>Aichi, Japan</p>
+      </div>
+    </div>
+
+    <form class="contact-form" onsubmit="event.preventDefault(); alert('お問い合わせを受け付けました（デモ）');">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" class="form-control" placeholder="Your Name" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" class="form-control" placeholder="Your Email Address" required>
+      </div>
+      <div class="form-group">
+        <label for="subject">Subject</label>
+        <select id="subject" class="form-control">
+          <option>Custom Build Inquiry</option>
+          <option>Repair / Modification</option>
+          <option>General Inquiry</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="message">Message</label>
+        <textarea id="message" class="form-control" placeholder="Write your message here..." required></textarea>
+      </div>
+      <button type="submit" class="btn-submit">Send Message</button>
+    </form>
   </main>
+
   <footer>
     <p>Copyright &copy; 2026 GTI.</p>
   </footer>
+
 </body>
 </html>

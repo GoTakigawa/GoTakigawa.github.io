@@ -8,10 +8,10 @@
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#000000;--bg2:#0a0a0a;--bg3:#111111;--bg4:#1a1a1a;
-  --border:#1f1f1f;--border2:#2a2a2a;
-  --text:#e8e8e8;--text2:#b0b0b0;--text3:#888;
-  --accent1:#8c4dff;--accent2:#38bdf8;--accent3:#86efac;
+  --bg:#1a1a1a;--bg2:#222;--bg3:#2a2a2a;--bg4:#333;
+  --border:#3a3a3a;--border2:#484848;
+  --text:#e8e8e8;--text2:#a0a0a0;--text3:#999;
+  --accent1:#a78bfa;--accent2:#38bdf8;--accent3:#86efac;
   --r:6px;--r2:10px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -752,6 +752,13 @@ button.primary:active{transform:scale(.98);}
                   <button id="inlay-dbl-double-btn" onclick="_inlaySettings.dblEnabled=true;updateInlayUI();run();" style="flex:1;padding:4px 0;font-size:11px;border:1px solid var(--border);border-left:none;border-radius:0 var(--r2) var(--r2) 0;background:var(--bg2);color:var(--text2);cursor:pointer;">Double</button>
                 </div>
               </div>
+              <div id="inlay-dbl-ctc-wrap" class="field">
+                <label style="font-size:11px;">C-to-C at 12f (mm)</label>
+                <div class="num-wrap" style="width:90px;">
+                  <input type="number" id="inlay-center-ctc" value="28.0" step="1" min="5" max="60" oninput="_inlaySettings.centerCtc=parseFloat(this.value)||28;run();">
+                  <div class="num-btns"><button class="num-btn" data-target="inlay-center-ctc" data-dir="up">▲</button><button class="num-btn" data-target="inlay-center-ctc" data-dir="dn">▼</button></div>
+                </div>
+              </div>
               <div id="inlay-dbl-per-fret"></div>
             </div>
 
@@ -1049,12 +1056,6 @@ function updateInlayUI(){
   var dbl2ndWrap=document.getElementById('inlay-offset-dbl-pos-wrap');
   if(dbl2ndWrap) dbl2ndWrap.style.display=(mode==='offset'&&dblEnabled)?'':'none';
 
-  // C-to-C更新
-  var el12 = document.getElementById('inlay-ctc-12');
-  var el24 = document.getElementById('inlay-ctc-24');
-  if(el12) el12.value = _inlaySettings.centerCtc12 || 12.0;
-  if(el24) el24.value = _inlaySettings.centerCtc24 || 12.0;
-
   // C-to-Cはcenterモード + dblEnabled=trueのみ
   var ctcWrap=document.getElementById('inlay-dbl-ctc-wrap');
   if(ctcWrap) ctcWrap.style.display=(mode==='center'&&dblEnabled)?'':'none';
@@ -1069,16 +1070,12 @@ function updateInlayUI(){
     var html='';
     DFRETS.forEach(function(f){
       var cfg=(_inlaySettings.dblFrets&&_inlaySettings.dblFrets[f]);
-      if(!cfg){
-        cfg={shape:'dot',diam:baseDiam,inner:4.0,outer:7.0,linked:true,ctc:12.0,ctcManual:false};
-        if(_inlaySettings.dblFrets)_inlaySettings.dblFrets[f]=cfg;
-      }
+      if(!cfg){cfg={shape:'dot',diam:baseDiam,inner:4.0,outer:7.0,linked:true};if(_inlaySettings.dblFrets)_inlaySettings.dblFrets[f]=cfg;}
       if(cfg.linked) cfg.diam=baseDiam;
       // Center Dotモードはshape=dot固定
       if(mode==='center') cfg.shape='dot';
       var isDot=(cfg.shape||'dot')==='dot';
       var d=cfg.diam||baseDiam;
-      var ctc=cfg.ctc||12.0;
       html+='<div style="margin-bottom:5px;padding:5px 7px;background:var(--bg2);border-radius:var(--r2);border:1px solid var(--border);">';
       // ヘッダー行: フレット番号 + single/double
       html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">';
@@ -1091,9 +1088,10 @@ function updateInlayUI(){
       }
       html+='</div>';
       // サイズ行
-      html+='<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">';
       if(isDot){
+        html+='<div style="display:flex;align-items:center;gap:5px;">';
         html+='<span style="font-size:10px;color:var(--text3);">\u00d8</span>';
+        // oninputでlinkedを解除: getElementById不要、this.form経由も不要、直接フラグだけ
         html+='<div class="num-wrap" style="width:72px;"><input type="number" id="inlay-dbl-diam-'+f+'" value="'+(d.toFixed(1))+'" step="0.5" min="1" max="20" oninput="_inlaySettings.dblFrets['+f+'].diam=parseFloat(this.value)||'+baseDiam+';_inlaySettings.dblFrets['+f+'].linked=false;updateInlayUI();run();">';
         html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-diam-'+f+'" data-dir="up">\u25b2</button><button class="num-btn" data-target="inlay-dbl-diam-'+f+'" data-dir="dn">\u25bc</button></div></div>';
         html+='<span style="font-size:10px;color:var(--text3);">mm</span>';
@@ -1101,7 +1099,9 @@ function updateInlayUI(){
         html+='<label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:10px;color:var(--text3);margin-left:3px;">';
         html+='<input type="checkbox" id="'+linkId+'"'+(cfg.linked?' checked':'')+' onchange="_inlaySettings.dblFrets['+f+'].linked=this.checked;if(this.checked){_inlaySettings.dblFrets['+f+'].diam='+baseDiam+';updateInlayUI();}run();" style="accent-color:var(--accent);width:11px;height:11px;">';
         html+=' link</label>';
+        html+='</div>';
       } else {
+        html+='<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">';
         html+='<span style="font-size:10px;color:var(--text3);">Out</span>';
         html+='<div class="num-wrap" style="width:68px;"><input type="number" id="inlay-dbl-outer-'+f+'" value="'+(cfg.outer||7.0).toFixed(1)+'" step="0.5" min="1" max="20" oninput="_inlaySettings.dblFrets['+f+'].outer=parseFloat(this.value)||7;run();">';
         html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-outer-'+f+'" data-dir="up">\u25b2</button><button class="num-btn" data-target="inlay-dbl-outer-'+f+'" data-dir="dn">\u25bc</button></div></div>';
@@ -1109,26 +1109,16 @@ function updateInlayUI(){
         html+='<div class="num-wrap" style="width:68px;"><input type="number" id="inlay-dbl-inner-'+f+'" value="'+(cfg.inner||4.0).toFixed(1)+'" step="0.5" min="1" max="20" oninput="_inlaySettings.dblFrets['+f+'].inner=parseFloat(this.value)||4;run();">';
         html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-inner-'+f+'" data-dir="up">▲</button><button class="num-btn" data-target="inlay-dbl-inner-'+f+'" data-dir="dn">▼</button></div></div>';
         html+='<span style="font-size:10px;color:var(--text3);">mm</span>';
+        if (mode === 'offset' && !dblEnabled) {
+          var offVal = cfg.offset || 0;
+          html+='<div style="flex-basis:100%;height:0;"></div>';
+          html+='<span style="font-size:10px;color:var(--text3);margin-left:4px;">Offset</span>';
+          html+='<div class="num-wrap" style="width:64px;"><input type="number" id="inlay-dbl-offset-'+f+'" value="'+offVal.toFixed(1)+'" step="0.5" min="-50" max="50" oninput="_inlaySettings.dblFrets['+f+'].offset=parseFloat(this.value)||0;run();">';
+          html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-offset-'+f+'" data-dir="up">▲</button><button class="num-btn" data-target="inlay-dbl-offset-'+f+'" data-dir="dn">▼</button></div></div>';
+          html+='<span style="font-size:10px;color:var(--text3);">mm</span>';
+        }
+        html+='</div>';
       }
-      
-      // C-to-C行 (Centerモードかつダブルドット時のみ有効)
-      if(dblEnabled && mode === 'center'){
-        html+='<div style="flex-basis:100%;height:4px;"></div>';
-        html+='<span style="font-size:10px;color:var(--text3);margin-left:2px;">C-to-C</span>';
-        html+='<div class="num-wrap" style="width:72px;"><input type="number" id="inlay-dbl-ctc-'+f+'" value="'+ctc.toFixed(1)+'" step="0.5" min="2" max="60" oninput="_inlaySettings.dblFrets['+f+'].ctc=parseFloat(this.value)||28; if('+f+'!==12)_inlaySettings.dblFrets['+f+'].ctcManual=true; run();">';
-        html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-ctc-'+f+'" data-dir="up">▲</button><button class="num-btn" data-target="inlay-dbl-ctc-'+f+'" data-dir="dn">▼</button></div></div>';
-        html+='<span style="font-size:10px;color:var(--text3);">mm</span>';
-      }
-      
-      if (mode === 'offset' && !dblEnabled) {
-        var offVal = cfg.offset || 0;
-        html+='<div style="flex-basis:100%;height:0;"></div>';
-        html+='<span style="font-size:10px;color:var(--text3);margin-left:4px;">Offset</span>';
-        html+='<div class="num-wrap" style="width:64px;"><input type="number" id="inlay-dbl-offset-'+f+'" value="'+offVal.toFixed(1)+'" step="0.5" min="-50" max="50" oninput="_inlaySettings.dblFrets['+f+'].offset=parseFloat(this.value)||0;run();">';
-        html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-offset-'+f+'" data-dir="up">▲</button><button class="num-btn" data-target="inlay-dbl-offset-'+f+'" data-dir="dn">▼</button></div></div>';
-        html+='<span style="font-size:10px;color:var(--text3);">mm</span>';
-      }
-      html+='</div>';
       html+='</div>';
     });
     perFretDiv.innerHTML=html;
@@ -1164,7 +1154,6 @@ document.addEventListener('input',function(e){
     run();
   }
 });
-
 var FR=function(n){return 1-Math.pow(2,-n/getEDO());};
 var _endShape='line';    // 'line' | 'r'
 var _endArcUnit='in';    // 'in' | 'mm'
@@ -1208,12 +1197,20 @@ var _inlaySettings = {
   mode: 'center',
   // Center/Offset共通
   centerDiam: 6.0,
-  // 各フレット個別設定
+  centerCtc: 28.0,
+  // ダブルドット設定
+  dblEnabled: true,
+  dblShape: 'dot',      // dblEnabled=falseのときのglobal shape
+  dblDiam: 6.0,
+  dblInner: 4.0,
+  dblOuter: 7.0,
+  dblLinked: true,      // true=上のDiameter(mm)とリンク中
+  // 各フレット個別設定（dblEnabled問わず使用）
   dblFrets: {
-    12: {shape:'dot', diam:6.0, inner:4.0, outer:7.0, linked:true, ctc:28.0, ctcManual:false},
-    24: {shape:'dot', diam:6.0, inner:4.0, outer:7.0, linked:true, ctc:28.0, ctcManual:false},
-    36: {shape:'dot', diam:6.0, inner:4.0, outer:7.0, linked:true, ctc:28.0, ctcManual:false},
-    48: {shape:'dot', diam:6.0, inner:4.0, outer:7.0, linked:true, ctc:28.0, ctcManual:false}
+    12: {shape:'dot', diam:6.0, inner:4.0, outer:7.0, linked:true},
+    24: {shape:'dot', diam:6.0, inner:4.0, outer:7.0, linked:true},
+    36: {shape:'dot', diam:6.0, inner:4.0, outer:7.0, linked:true},
+    48: {shape:'dot', diam:6.0, inner:4.0, outer:7.0, linked:true}
   },
   // Offset Dot
   offsetDiam: 5.0,
@@ -1537,9 +1534,7 @@ const TRANSLATIONS = {
     'lbl-dropped-txt': 'Dropped',
     'lbl-ba': 'Bridge Angle',
     'lbl-na': 'Nut Angle',
-    'lbl-sd': 'Scale Diff.',
-    'lbl-ctc-12': 'C-to-C 12f (mm)',
-    'lbl-ctc-24': 'C-to-C 24f (mm)'
+    'lbl-sd': 'Scale Diff.'
   },
   jp: {
     'logo': 'GTI / 指板ツール',
@@ -1591,8 +1586,6 @@ const TRANSLATIONS = {
     'lbl-ba': 'ブリッジ角度',
     'lbl-na': 'ナット角度',
     'lbl-sd': 'スケール差',
-    'lbl-ctc-12': 'C-to-C 12f (mm)',
-    'lbl-ctc-24': 'C-to-C 24f (mm)',
     'Righty': '右利き',
     'Lefty': '左利き',
     'lbl-nut-txt': 'ナット',
@@ -3483,12 +3476,104 @@ function run(){
     }
   }
 
+  // strings
+  for(var si2=0;si2<nStr;si2++){
+    var sa=sp(si2,0),sb=sp(si2,1);
+    o+='<line x1="'+sa.x.toFixed(1)+'" y1="'+sa.y.toFixed(1)+'" x2="'+sb.x.toFixed(1)+'" y2="'+sb.y.toFixed(1)+'" stroke="#6b7280" stroke-width="0.8"/>';
+  }
+
+  // centerline
+  o+='<line x1="'+mxf(x0).toFixed(1)+'" y1="'+myf(0).toFixed(1)+'" x2="'+mxf(x1).toFixed(1)+'" y2="'+myf(0).toFixed(1)+'" stroke="#2d3748" stroke-width="0.6" stroke-dasharray="4,3"/>';
+
+  // fret lines + numbers
+  var showNums=new Set([0,3,5,7,9,12,15,17,19,21,24,27,29,31,33,36,39,41,43,45,48]);
+  for(var fn2=0;fn2<=nFret;fn2++){
+    var ep2=fretEdgePts(fn2);
+    var fa=mp(ep2.ix1),fb=mp(ep2.ixN);
+    // 0フレットモード時: fn2=0はFRETとして描き、ナットラインは別途描画
+    var isNut=fn2===0 && !g.zeroFretOn;
+    var isZeroFret=fn2===0 && g.zeroFretOn;
+    if(g.curved){
+      var pts=getMathPts(function(i){return Sp(i,isNut?0:FR(fn2));}, true, null, ep2.iMin, ep2.iMax);
+      var pD = "";
+      for(var j=0; j<pts.length; j++){
+        var p = mp(pts[j]);
+        pD += (j===0?"M":"L") + p.x.toFixed(1) + "," + p.y.toFixed(1);
+      }
+    } else {
+      var pD='M'+fa.x.toFixed(1)+','+fa.y.toFixed(1)+' L'+fb.x.toFixed(1)+','+fb.y.toFixed(1);
+    }
+    var lineCol=isNut?'#d1d5db':isZeroFret?'#86efac':'#6b7280';
+    var lineW=isNut?2:isZeroFret?1.5:0.8;
+    o+='<path d="'+pD+'" stroke="'+lineCol+'" stroke-width="'+lineW+'" fill="none"/>';
+    if(showNums.has(fn2)){
+      var top2=fa.y<fb.y?fa:fb;
+      var labelTxt=fn2===0?(g.zeroFretOn?'0f':i18n('lbl-nut-txt')):fn2;
+      var labelCol=isNut?'#9ca3af':isZeroFret?'#86efac':'#4b5563';
+      if(lefty){
+        o+='<g transform="scale(-1,1) translate(-'+SW.toFixed(0)+',0)">';
+        o+='<text x="'+(SW-top2.x).toFixed(1)+'" y="'+(top2.y-6).toFixed(1)+'" text-anchor="middle" font-size="12" fill="'+labelCol+'" '+FF+'>'+labelTxt+'</text>';
+        o+='</g>';
+      } else {
+        o+='<text x="'+top2.x.toFixed(1)+'" y="'+(top2.y-6).toFixed(1)+'" text-anchor="middle" font-size="12" fill="'+labelCol+'" '+FF+'>'+labelTxt+'</text>';
+      }
+    }
+  }
+  // 0フレットモード時のナットラインはNUT_OHグループブロックで階段状に描画済み
+
+  // perpendicular line
+  var isMultiUI = document.getElementById('multiscale-toggle').checked;
+  if(isMultiUI && Math.abs(g.s1 - g.sN) > 1e-4){
+    var perpPts=[];
+    for(var pi=0;pi<nStr;pi++) perpPts.push(sp(pi,pd));
+    var pp='M'+perpPts[0].x.toFixed(1)+','+perpPts[0].y.toFixed(1);
+    for(var pj=1;pj<nStr;pj++) pp+=' L'+perpPts[pj].x.toFixed(1)+','+perpPts[pj].y.toFixed(1);
+    o+='<path d="'+pp+'" stroke="#a78bfa" stroke-width="1.8" fill="none"/>';
+    var ptop=perpPts.reduce(function(a,b){return a.y<b.y?a:b;});
+    if(lefty){
+      o+='<g transform="scale(-1,1) translate(-'+SW.toFixed(0)+',0)">';
+      o+='<text x="'+(SW-ptop.x).toFixed(1)+'" y="'+(ptop.y-25).toFixed(1)+'" text-anchor="middle" font-size="12" fill="#a78bfa" '+FF+'>'+pdToFret(pd)+'f</text>';
+      o+='</g>';
+    } else {
+      o+='<text x="'+ptop.x.toFixed(1)+'" y="'+(ptop.y-25).toFixed(1)+'" text-anchor="middle" font-size="12" fill="#a78bfa" '+FF+'>'+pdToFret(pd)+'f</text>';
+    }
+  }
+
+  // bridge line
+  var bpts=[];
+  for(var bi=0;bi<nStr;bi++) bpts.push(sp(bi,1));
+  var bd='M'+bpts[0].x.toFixed(1)+','+bpts[0].y.toFixed(1);
+  for(var bj=1;bj<nStr;bj++) bd+=' L'+bpts[bj].x.toFixed(1)+','+bpts[bj].y.toFixed(1);
+  o+='<path d="'+bd+'" stroke="#38bdf8" stroke-width="2" fill="none"/>';
+
+  if(lefty) o+='</g>';
+
+  // Bass / Treble labels outside flip group (always readable)
+  var loN=sp(nStr-1,0),hiN=sp(0,0);
+  if(lefty){
+    var btopp=bpts.reduce(function(a,b){return a.y<b.y?a:b;});
+    o+='<text x="'+(SW-btopp.x).toFixed(1)+'" y="'+(btopp.y-6).toFixed(1)+'" text-anchor="middle" font-size="12" fill="#38bdf8" '+FF+'>'+i18n('lbl-bridge-txt')+'</text>';
+  } else {
+    var btopp2=bpts.reduce(function(a,b){return a.y<b.y?a:b;});
+    o+='<text x="'+btopp2.x.toFixed(1)+'" y="'+(btopp2.y-6).toFixed(1)+'" text-anchor="middle" font-size="12" fill="#38bdf8" '+FF+'>'+i18n('lbl-bridge-txt')+'</text>';
+  }
+
+  // NUTライン（白太線）を最前面に描画
+  if(nutLines.length){
+    nutLines.forEach(function(entry){
+      var pd=typeof entry==='string'?entry:entry.pd;
+      var isSlot=entry&&entry.isNutSlot;
+      // 開放弦位置ライン: 白太線 / ナット弦溝ライン（0フレットモード時）: やや細い白線
+      o+='<path d="'+pd+'" stroke="#d1d5db" stroke-width="'+(isSlot?1.5:2)+'" fill="none"/>';
+    });
+  }
+
   // ── Inlay SVG ──
   if(_inlaySettings&&_inlaySettings.enabled){
     var ins=_inlaySettings;
     var mode=ins.mode||'center';
-    var inlayCol='#ffffff';
-    var inlayStr='#cccccc';
+    var inlayCol='#7dd3fc';
+    var inlayStr='#38bdf8';
 
     // ── ヘルパー ──
     function fretTc(fn){var t1=FR(fn-1),t2=FR(fn);return t1+(t2-t1)*0.5;}
@@ -3522,14 +3607,8 @@ function run(){
       var cfg=(ins.dblFrets&&ins.dblFrets[fn])||{shape:'dot',diam:ins.centerDiam||6};
       if((cfg.shape||'dot')==='ring'){
         var riPx=(cfg.inner||4)/2*SC, roPx=(cfg.outer||7)/2*SC;
-        // even-odd fill-ruleを使用して物理的な穴を作る（下のフレットを隠さないため）
-        var d = "M "+p.x.toFixed(1)+","+(p.y-roPx).toFixed(1)+
-                " a "+roPx.toFixed(1)+","+roPx.toFixed(1)+" 0 1,0 0,"+(roPx*2).toFixed(1)+
-                " a "+roPx.toFixed(1)+","+roPx.toFixed(1)+" 0 1,0 0,"+(-roPx*2).toFixed(1)+
-                " M "+p.x.toFixed(1)+","+(p.y-riPx).toFixed(1)+
-                " a "+riPx.toFixed(1)+","+riPx.toFixed(1)+" 0 1,0 0,"+(riPx*2).toFixed(1)+
-                " a "+riPx.toFixed(1)+","+riPx.toFixed(1)+" 0 1,0 0,"+(-riPx*2).toFixed(1);
-        o+='<path d="'+d+'" fill="'+inlayCol+'" fill-opacity="0.8" fill-rule="evenodd" stroke="'+inlayStr+'" stroke-width="0.5"/>';
+        o+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+roPx.toFixed(1)+'" fill="'+inlayCol+'" fill-opacity="0.8" stroke="'+inlayStr+'" stroke-width="0.8"/>';
+        o+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+riPx.toFixed(1)+'" fill="#222" fill-opacity="1" stroke="'+inlayStr+'" stroke-width="0.5"/>';
       } else {
         drawDot(p, (cfg.diam||6)/2);
       }
@@ -3561,64 +3640,14 @@ function run(){
             drawDot(pMid,r);
           }
         } else {
-          // ダブルドット: 曲線指板 & 12f/24f可変C-to-C対応
-          var tcFnPos = fn - 0.5;
-          var ratio = FR(tcFnPos);
-
-          // C-to-Cの動的補正・連動 (run内部なのでSpアクセス可能)
-          var d12 = ins.dblFrets[12] || {ctc:28.0};
-          var d24 = ins.dblFrets[24] || {ctc:28.0};
-          var d36 = ins.dblFrets[36] || {ctc:28.0};
-          var d48 = ins.dblFrets[48] || {ctc:28.0};
-
-          var w12 = Math.abs(Sp(nStr-1, FR(11.5)).y - Sp(0, FR(11.5)).y);
-
-          // 12fを基準とした自動追従ロジック（手動設定されていない場合）
-          if(!d24.ctcManual || !d36.ctcManual || !d48.ctcManual){
-            var boost = (Math.abs(g.s1-g.sN)>0.1) ? 1.15 : 1.0;
-            [24,36,48].forEach(function(fx){
-              var dfx = ins.dblFrets[fx];
-              if(dfx && !dfx.ctcManual){
-                var wfx = Math.abs(Sp(nStr-1, FR(fx-0.5)).y - Sp(0, FR(fx-0.5)).y);
-                dfx.ctc = parseFloat(((d12.ctc||28.0) * (wfx/w12) * boost).toFixed(1));
-              }
-            });
-          }
-
-          var currentCtc;
-          var wFn = Math.abs(Sp(nStr-1, ratio).y - Sp(0, ratio).y);
-          if (fn <= 12) {
-            // 12f未満はテーパー比率のみを考慮
-            currentCtc = (d12.ctc||28.0) * (wFn / w12);
-          } else if (fn <= 24) {
-            var t = (fn - 12) / 12;
-            currentCtc = (d12.ctc||28.0) + t * ((d24.ctc||28.0) - (d12.ctc||28.0));
-          } else if (fn <= 36) {
-            var t = (fn - 24) / 12;
-            currentCtc = (d24.ctc||28.0) + t * ((d36.ctc||28.0) - (d24.ctc||28.0));
-          } else {
-            var t = (fn - 36) / 12;
-            currentCtc = (d36.ctc||28.0) + t * ((d48.ctc||28.0) - (d36.ctc||28.0));
-          }
-
-          if(g.curved){
-            // 曲線に沿ってドットを配置
-            var pMidFull = Sp(cIdx, ratio);
-            var pNeighbor = Sp(cIdx + 0.1, ratio);
-            var dist01 = Math.sqrt(Math.pow(pNeighbor.x - pMidFull.x, 2) + Math.pow(pNeighbor.y - pMidFull.y, 2));
-            var di = (currentCtc / 2) / (dist01 * 10);
-            var pa = mp(Sp(cIdx + di, ratio));
-            var pb = mp(Sp(cIdx - di, ratio));
-            drawDblDot(pa, fn); drawDblDot(pb, fn);
-          } else {
-            // 直線的な計算
-            var spanFn = Math.abs(Sp(nStr-1, ratio).y - Sp(0, ratio).y) || 1;
-            var dir = fretAvgDir(fn);
-            var pMidRaw = Sp(cIdx, ratio);
-            var pa = mp({x: pMidRaw.x + dir.x * (currentCtc/2), y: pMidRaw.y + dir.y * (currentCtc/2)});
-            var pb = mp({x: pMidRaw.x - dir.x * (currentCtc/2), y: pMidRaw.y - dir.y * (currentCtc/2)});
-            drawDblDot(pa, fn); drawDblDot(pb, fn);
-          }
+          // ダブルドット: fretAvgDir方向にctcオフセット
+          var tcFnRef=FR(fn-1)+(FR(fn)-FR(fn-1))*0.5;
+          var spanFn=Math.abs(Sp(nStr-1,tcFnRef).y-Sp(0,tcFnRef).y)||1;
+          var ctc=ins.centerCtc*(spanFn/span12);
+          var dir=fretAvgDir(fn);
+          var pa=mp({x:pMidRaw.x+dir.x*(ctc/2),y:pMidRaw.y+dir.y*(ctc/2)});
+          var pb=mp({x:pMidRaw.x-dir.x*(ctc/2),y:pMidRaw.y-dir.y*(ctc/2)});
+          drawDblDot(pa,fn);drawDblDot(pb,fn);
         }
       }
     }
@@ -3818,99 +3847,6 @@ function run(){
       });
     }
   }
-
-  for(var si2=0;si2<nStr;si2++){
-    var sa=sp(si2,0),sb=sp(si2,1);
-    o+='<line x1="'+sa.x.toFixed(1)+'" y1="'+sa.y.toFixed(1)+'" x2="'+sb.x.toFixed(1)+'" y2="'+sb.y.toFixed(1)+'" stroke="#6b7280" stroke-width="0.8"/>';
-  }
-
-  // centerline
-  o+='<line x1="'+mxf(x0).toFixed(1)+'" y1="'+myf(0).toFixed(1)+'" x2="'+mxf(x1).toFixed(1)+'" y2="'+myf(0).toFixed(1)+'" stroke="#2d3748" stroke-width="0.6" stroke-dasharray="4,3"/>';
-
-  // fret lines + numbers
-  var showNums=new Set([0,3,5,7,9,12,15,17,19,21,24,27,29,31,33,36,39,41,43,45,48]);
-  for(var fn2=0;fn2<=nFret;fn2++){
-    var ep2=fretEdgePts(fn2);
-    var fa=mp(ep2.ix1),fb=mp(ep2.ixN);
-    // 0フレットモード時: fn2=0はFRETとして描き、ナットラインは別途描画
-    var isNut=fn2===0 && !g.zeroFretOn;
-    var isZeroFret=fn2===0 && g.zeroFretOn;
-    if(g.curved){
-      var pts=getMathPts(function(i){return Sp(i,isNut?0:FR(fn2));}, true, null, ep2.iMin, ep2.iMax);
-      var pD = "";
-      for(var j=0; j<pts.length; j++){
-        var p = mp(pts[j]);
-        pD += (j===0?"M":"L") + p.x.toFixed(1) + "," + p.y.toFixed(1);
-      }
-    } else {
-      var pD='M'+fa.x.toFixed(1)+','+fa.y.toFixed(1)+' L'+fb.x.toFixed(1)+','+fb.y.toFixed(1);
-    }
-    var lineCol=isNut?'#d1d5db':isZeroFret?'#86efac':'#6b7280';
-    var lineW=isNut?2:isZeroFret?1.5:0.8;
-    o+='<path d="'+pD+'" stroke="'+lineCol+'" stroke-width="'+lineW+'" fill="none"/>';
-    if(showNums.has(fn2)){
-      var top2=fa.y<fb.y?fa:fb;
-      var labelTxt=fn2===0?(g.zeroFretOn?'0f':i18n('lbl-nut-txt')):fn2;
-      var labelCol=isNut?'#9ca3af':isZeroFret?'#86efac':'#4b5563';
-      if(lefty){
-        o+='<g transform="scale(-1,1) translate(-'+SW.toFixed(0)+',0)">';
-        o+='<text x="'+(SW-top2.x).toFixed(1)+'" y="'+(top2.y-6).toFixed(1)+'" text-anchor="middle" font-size="12" fill="'+labelCol+'" '+FF+'>'+labelTxt+'</text>';
-        o+='</g>';
-      } else {
-        o+='<text x="'+top2.x.toFixed(1)+'" y="'+(top2.y-6).toFixed(1)+'" text-anchor="middle" font-size="12" fill="'+labelCol+'" '+FF+'>'+labelTxt+'</text>';
-      }
-    }
-  }
-  // 0フレットモード時のナットラインはNUT_OHグループブロックで階段状に描画済み
-
-  // perpendicular line
-  var isMultiUI = document.getElementById('multiscale-toggle').checked;
-  if(isMultiUI && Math.abs(g.s1 - g.sN) > 1e-4){
-    var perpPts=[];
-    for(var pi=0;pi<nStr;pi++) perpPts.push(sp(pi,pd));
-    var pp='M'+perpPts[0].x.toFixed(1)+','+perpPts[0].y.toFixed(1);
-    for(var pj=1;pj<nStr;pj++) pp+=' L'+perpPts[pj].x.toFixed(1)+','+perpPts[pj].y.toFixed(1);
-    o+='<path d="'+pp+'" stroke="#8c4dff" stroke-width="1.8" fill="none"/>';
-    var ptop=perpPts.reduce(function(a,b){return a.y<b.y?a:b;});
-    if(lefty){
-      o+='<g transform="scale(-1,1) translate(-'+SW.toFixed(0)+',0)">';
-      o+='<text x="'+(SW-ptop.x).toFixed(1)+'" y="'+(ptop.y-25).toFixed(1)+'" text-anchor="middle" font-size="12" fill="#8c4dff" '+FF+'>'+pdToFret(pd)+'f</text>';
-      o+='</g>';
-    } else {
-      o+='<text x="'+ptop.x.toFixed(1)+'" y="'+(ptop.y-25).toFixed(1)+'" text-anchor="middle" font-size="12" fill="#8c4dff" '+FF+'>'+pdToFret(pd)+'f</text>';
-    }
-  }
-
-  // bridge line
-  var bpts=[];
-  for(var bi=0;bi<nStr;bi++) bpts.push(sp(bi,1));
-  var bd='M'+bpts[0].x.toFixed(1)+','+bpts[0].y.toFixed(1);
-  for(var bj=1;bj<nStr;bj++) bd+=' L'+bpts[bj].x.toFixed(1)+','+bpts[bj].y.toFixed(1);
-  o+='<path d="'+bd+'" stroke="#38bdf8" stroke-width="2" fill="none"/>';
-
-  if(lefty) o+='</g>';
-
-  // Bass / Treble labels outside flip group (always readable)
-  var loN=sp(nStr-1,0),hiN=sp(0,0);
-  if(lefty){
-    var btopp=bpts.reduce(function(a,b){return a.y<b.y?a:b;});
-    o+='<text x="'+(SW-btopp.x).toFixed(1)+'" y="'+(btopp.y-6).toFixed(1)+'" text-anchor="middle" font-size="12" fill="#38bdf8" '+FF+'>'+i18n('lbl-bridge-txt')+'</text>';
-  } else {
-    var btopp2=bpts.reduce(function(a,b){return a.y<b.y?a:b;});
-    o+='<text x="'+btopp2.x.toFixed(1)+'" y="'+(btopp2.y-6).toFixed(1)+'" text-anchor="middle" font-size="12" fill="#38bdf8" '+FF+'>'+i18n('lbl-bridge-txt')+'</text>';
-  }
-
-  // NUTライン（白太線）を最前面に描画
-  if(nutLines.length){
-    nutLines.forEach(function(entry){
-      var pd=typeof entry==='string'?entry:entry.pd;
-      var isSlot=entry&&entry.isNutSlot;
-      // 開放弦位置ライン: 白太線 / ナット弦溝ライン（0フレットモード時）: やや細い白線
-      o+='<path d="'+pd+'" stroke="#d1d5db" stroke-width="'+(isSlot?1.5:2)+'" fill="none"/>';
-    });
-  }
-
-
 
   svg.innerHTML=o;
   
