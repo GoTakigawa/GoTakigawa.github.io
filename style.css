@@ -1,0 +1,105 @@
+@charset "UTF-8";
+
+/* 
+ * GTI / Luthier - Brand Portal Styles
+ * Primary colors: #000000 (bg), #ffffff (text), #6f00ff (accent)
+ */
+
+:root {
+  --bg-color: #000000;
+  --text-color: #ffffff;
+  --accent-color: #6f00ff;
+  --border-color: #333333;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Roboto Condensed', 'DIN', sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.logo {
+  font-family: 'Libre Baskerville', 'Baskerville', serif;
+  font-size: 2rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text-color);
+}
+
+/* Main Navigation */
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 0 20px 40px;
+}
+
+.menu {
+  list-style: none;
+  width: 100%;
+  max-width: 600px; /* PC display restraint */
+}
+
+.menu li {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.menu li:first-child {
+  border-top: 1px solid var(--border-color);
+}
+
+.menu a {
+  display: block;
+  padding: 18px 10px;
+  color: var(--text-color);
+  text-decoration: none;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  transition: color 0.2s ease, padding-left 0.2s ease;
+}
+
+.menu a:hover,
+.menu a:focus {
+  color: var(--accent-color);
+  padding-left: 20px;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 24px 20px;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  color: #888;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.5rem;
+  }
+  
+  .menu a {
+    font-size: 1rem;
+    padding: 15px 5px;
+  }
+}
