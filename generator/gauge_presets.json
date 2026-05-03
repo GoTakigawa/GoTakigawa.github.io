@@ -1,0 +1,1369 @@
+{
+  "version": "1.0",
+  "sets": [
+    {
+      "id": "DAD-EXL120",
+      "brand": "D'Addario",
+      "series": "EXL120",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.009,
+        0.011,
+        0.016,
+        0.024,
+        0.032,
+        0.042
+      ],
+      "label": "Super Light",
+      "notes": "9-42. Maximum flexibility, biting tone. Popular with shred/lead players."
+    },
+    {
+      "id": "DAD-EXL110",
+      "brand": "D'Addario",
+      "series": "EXL110",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046
+      ],
+      "label": "Regular Light",
+      "notes": "10-46. Best-selling D'Addario set. Ideal balance of tone and playability."
+    },
+    {
+      "id": "DAD-EXL115",
+      "brand": "D'Addario",
+      "series": "EXL115",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.011,
+        0.014,
+        0.018,
+        0.028,
+        0.038,
+        0.049
+      ],
+      "label": "Blues/Jazz Rock",
+      "notes": "11-49. Moderate flexibility, rich full tone. Blues and jazz rock players."
+    },
+    {
+      "id": "DAD-EXL140",
+      "brand": "D'Addario",
+      "series": "EXL140",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.03,
+        0.042,
+        0.052
+      ],
+      "label": "Light Top / Heavy Bottom",
+      "notes": "10-52. Hybrid set. Light top for bending, heavy bottom for rhythm."
+    },
+    {
+      "id": "DAD-EXL148",
+      "brand": "D'Addario",
+      "series": "EXL148",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.012,
+        0.016,
+        0.02,
+        0.034,
+        0.046,
+        0.06
+      ],
+      "label": "Extra Heavy",
+      "notes": "12-60. For extreme down-tuning."
+    },
+    {
+      "id": "DAD-NYXL0946",
+      "brand": "D'Addario",
+      "series": "NYXL",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.009,
+        0.011,
+        0.016,
+        0.026,
+        0.036,
+        0.046
+      ],
+      "label": "Super Light NYXL",
+      "notes": "9-46. High-carbon steel. Enhanced tuning stability and bend strength."
+    },
+    {
+      "id": "DAD-NYXL1046",
+      "brand": "D'Addario",
+      "series": "NYXL",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046
+      ],
+      "label": "Regular Light NYXL",
+      "notes": "10-46. Stronger, more stable than EXL. Studio and touring choice."
+    },
+    {
+      "id": "EB-2240",
+      "brand": "Ernie Ball",
+      "series": "Super Slinky",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.009,
+        0.011,
+        0.016,
+        0.024,
+        0.032,
+        0.042
+      ],
+      "label": "Super Slinky",
+      "notes": "9-42. Smooth, warm tone. Angus Young, Jimmy Page signature choice."
+    },
+    {
+      "id": "EB-2221",
+      "brand": "Ernie Ball",
+      "series": "Regular Slinky",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046
+      ],
+      "label": "Regular Slinky",
+      "notes": "10-46. Top-selling set worldwide. Eric Clapton, John Mayer, Steve Vai."
+    },
+    {
+      "id": "EB-2223",
+      "brand": "Ernie Ball",
+      "series": "Power Slinky",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.011,
+        0.014,
+        0.018,
+        0.028,
+        0.038,
+        0.048
+      ],
+      "label": "Power Slinky",
+      "notes": "11-48. Heavier feel and tone, ideal for rhythm work and lower tunings."
+    },
+    {
+      "id": "EB-2215",
+      "brand": "Ernie Ball",
+      "series": "Skinny Top Heavy Bottom",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.03,
+        0.042,
+        0.052
+      ],
+      "label": "Skinny Top Heavy Bottom",
+      "notes": "10-52. Hybrid. Light for lead, heavy for rhythm. Versatile drop-tune set."
+    },
+    {
+      "id": "EB-2210",
+      "brand": "Ernie Ball",
+      "series": "Beefy Slinky",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.011,
+        0.015,
+        0.022,
+        0.03,
+        0.042,
+        0.054
+      ],
+      "label": "Beefy Slinky",
+      "notes": "11-54. Heavy bottom for thick chords and aggressive tunings."
+    },
+    {
+      "id": "ELX-12052",
+      "brand": "Elixir",
+      "series": "Nanoweb",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046
+      ],
+      "label": "Light Nanoweb",
+      "notes": "10-46. Coated for long life. Bright tone, smooth feel."
+    },
+    {
+      "id": "ELX-12002",
+      "brand": "Elixir",
+      "series": "Nanoweb",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.009,
+        0.011,
+        0.016,
+        0.024,
+        0.032,
+        0.042
+      ],
+      "label": "Super Light Nanoweb",
+      "notes": "9-42. Coated. Maximum flexibility with Elixir tone longevity."
+    },
+    {
+      "id": "ELX-OW10",
+      "brand": "Elixir",
+      "series": "Optiweb",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046
+      ],
+      "label": "Light Optiweb",
+      "notes": "10-46. Natural uncoated feel with Elixir long tone life."
+    },
+    {
+      "id": "ELX-OW09",
+      "brand": "Elixir",
+      "series": "Optiweb",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.009,
+        0.011,
+        0.016,
+        0.024,
+        0.032,
+        0.042
+      ],
+      "label": "Super Light Optiweb",
+      "notes": "9-42. Crisp tone, natural feel, corrosion-resistant."
+    },
+    {
+      "id": "SIT-S946",
+      "brand": "SIT",
+      "series": "Power Wound",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.009,
+        0.011,
+        0.016,
+        0.026,
+        0.036,
+        0.046
+      ],
+      "label": "Rock N Roll",
+      "notes": "9-46. SIT flagship Stay-In-Tune set. Dan Auerbach, Richard Kruspe."
+    },
+    {
+      "id": "SIT-S1046",
+      "brand": "SIT",
+      "series": "Power Wound",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046
+      ],
+      "label": "Light",
+      "notes": "10-46. Balanced bright tone, consistent feel."
+    },
+    {
+      "id": "SIT-S1150",
+      "brand": "SIT",
+      "series": "Power Wound",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.011,
+        0.015,
+        0.02,
+        0.026,
+        0.036,
+        0.05
+      ],
+      "label": "Medium-Light",
+      "notes": "11-50. Includes optional wound 3rd. Versatile medium feel."
+    },
+    {
+      "id": "DUN-DEN1046",
+      "brand": "Dunlop",
+      "series": "Revolution",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046
+      ],
+      "label": "Revolution Light",
+      "notes": "10-46. Nickel-wound. Bright tone with Dunlop tension-wound design."
+    },
+    {
+      "id": "DUN-DHCN1048",
+      "brand": "Dunlop",
+      "series": "Heavy Core",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.028,
+        0.038,
+        0.048
+      ],
+      "label": "Heavy Core 10-48",
+      "notes": "10-48. Proprietary core-to-wrap for drop/down-tuning stability."
+    },
+    {
+      "id": "DUN-DHCN1150",
+      "brand": "Dunlop",
+      "series": "Heavy Core",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.011,
+        0.014,
+        0.018,
+        0.028,
+        0.038,
+        0.05
+      ],
+      "label": "Heavy Core 11-50",
+      "notes": "11-50. Full step down tuning feel with standard setup."
+    },
+    {
+      "id": "DUN-DHCN1254",
+      "brand": "Dunlop",
+      "series": "Heavy Core",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.012,
+        0.016,
+        0.02,
+        0.032,
+        0.042,
+        0.054
+      ],
+      "label": "Heavy Core 12-54",
+      "notes": "12-54. Drop B and C# tuning. Plain G string."
+    },
+    {
+      "id": "DR-MT10",
+      "brand": "DR",
+      "series": "Tite-Fit",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046
+      ],
+      "label": "Tite-Fit 10-46",
+      "notes": "10-46. Round core, nickel-plated. Warm, flexible all-around string."
+    },
+    {
+      "id": "DR-LTR9",
+      "brand": "DR",
+      "series": "Hi-Beam",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.009,
+        0.011,
+        0.016,
+        0.024,
+        0.032,
+        0.042
+      ],
+      "label": "Hi-Beam 9-42",
+      "notes": "9-42. Stainless, hex core. Bright and edged tone, long life."
+    },
+    {
+      "id": "DR-MTR10",
+      "brand": "DR",
+      "series": "Hi-Beam",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046
+      ],
+      "label": "Hi-Beam 10-46",
+      "notes": "10-46. Stainless. Brighter than Tite-Fit with more edge and sustain."
+    },
+    {
+      "id": "DR-PHR10",
+      "brand": "DR",
+      "series": "Pure Blues",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046
+      ],
+      "label": "Pure Blues 10-46",
+      "notes": "10-46. Pure nickel, round core. Warm vintage tone. Derek Trucks."
+    },
+    {
+      "id": "DR-DDT10",
+      "brand": "DR",
+      "series": "DDT",
+      "instrument": "guitar",
+      "strings": 6,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046
+      ],
+      "label": "DDT 10-46",
+      "notes": "10-46. Drop-down tuning optimized. Tight low end when detuned."
+    },
+    {
+      "id": "DAD-EXL110-7",
+      "brand": "D'Addario",
+      "series": "EXL110",
+      "instrument": "guitar",
+      "strings": 7,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046,
+        0.059
+      ],
+      "label": "Regular Light 7-string",
+      "notes": "10-59. Standard 7-string gauge."
+    },
+    {
+      "id": "EB-2621",
+      "brand": "Ernie Ball",
+      "series": "Regular Slinky 7",
+      "instrument": "guitar",
+      "strings": 7,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046,
+        0.056
+      ],
+      "label": "Regular Slinky 7-string",
+      "notes": "10-56. Standard 7-string Slinky."
+    },
+    {
+      "id": "EB-2620",
+      "brand": "Ernie Ball",
+      "series": "Super Slinky 7",
+      "instrument": "guitar",
+      "strings": 7,
+      "gauges": [
+        0.009,
+        0.011,
+        0.016,
+        0.024,
+        0.032,
+        0.042,
+        0.054
+      ],
+      "label": "Super Slinky 7-string",
+      "notes": "9-54. Lighter 7-string for increased playability."
+    },
+    {
+      "id": "EB-2615",
+      "brand": "Ernie Ball",
+      "series": "Skinny Top Heavy Bottom 7",
+      "instrument": "guitar",
+      "strings": 7,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.03,
+        0.042,
+        0.052,
+        0.062
+      ],
+      "label": "Skinny Top Heavy Bottom 7",
+      "notes": "10-62. Hybrid 7-string for drop tunings."
+    },
+    {
+      "id": "ELX-12057",
+      "brand": "Elixir",
+      "series": "Nanoweb 7",
+      "instrument": "guitar",
+      "strings": 7,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046,
+        0.056
+      ],
+      "label": "Light Nanoweb 7-string",
+      "notes": "10-56. Coated 7-string with long tone life."
+    },
+    {
+      "id": "DUN-HC7",
+      "brand": "Dunlop",
+      "series": "Heavy Core 7",
+      "instrument": "guitar",
+      "strings": 7,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.028,
+        0.038,
+        0.048,
+        0.06
+      ],
+      "label": "Heavy Core 7-string",
+      "notes": "10-60. Munky (KoRn) spec. Optimized for drop tunings."
+    },
+    {
+      "id": "DR-DDT7",
+      "brand": "DR",
+      "series": "DDT 7",
+      "instrument": "guitar",
+      "strings": 7,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046,
+        0.056
+      ],
+      "label": "DDT 7-string",
+      "notes": "10-56. Drop-down tuning for 7-string."
+    },
+    {
+      "id": "SIT-S71046",
+      "brand": "SIT",
+      "series": "Power Wound 7",
+      "instrument": "guitar",
+      "strings": 7,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046,
+        0.056
+      ],
+      "label": "Power Wound 7-string",
+      "notes": "10-56. SIT Stay-In-Tune technology for 7-string."
+    },
+    {
+      "id": "DAD-EXL110-8",
+      "brand": "D'Addario",
+      "series": "EXL110",
+      "instrument": "guitar",
+      "strings": 8,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046,
+        0.059,
+        0.074
+      ],
+      "label": "Regular Light 8-string",
+      "notes": "10-74. Standard 8-string gauge."
+    },
+    {
+      "id": "EB-2625",
+      "brand": "Ernie Ball",
+      "series": "Regular Slinky 8",
+      "instrument": "guitar",
+      "strings": 8,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046,
+        0.056,
+        0.07
+      ],
+      "label": "Regular Slinky 8-string",
+      "notes": "10-70. Standard 8-string Slinky."
+    },
+    {
+      "id": "ELX-12062",
+      "brand": "Elixir",
+      "series": "Nanoweb 8",
+      "instrument": "guitar",
+      "strings": 8,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.036,
+        0.046,
+        0.056,
+        0.074
+      ],
+      "label": "Light Nanoweb 8-string",
+      "notes": "10-74. Coated 8-string."
+    },
+    {
+      "id": "DUN-HC8",
+      "brand": "Dunlop",
+      "series": "Heavy Core 8",
+      "instrument": "guitar",
+      "strings": 8,
+      "gauges": [
+        0.01,
+        0.013,
+        0.017,
+        0.026,
+        0.038,
+        0.052,
+        0.064,
+        0.074
+      ],
+      "label": "Heavy Core 8-string",
+      "notes": "10-74. Drop tuning 8-string with Heavy Core technology."
+    },
+    {
+      "id": "EB-2628",
+      "brand": "Ernie Ball",
+      "series": "Regular Slinky 9",
+      "instrument": "guitar",
+      "strings": 9,
+      "gauges": [
+        0.009,
+        0.011,
+        0.016,
+        0.024,
+        0.034,
+        0.046,
+        0.064,
+        0.08,
+        0.105
+      ],
+      "label": "Regular Slinky 9-string",
+      "notes": "9-105. Standard 9-string Slinky. P02628."
+    },
+    {
+      "id": "DAD-EXL170",
+      "brand": "D'Addario",
+      "series": "EXL170",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.08,
+        0.1
+      ],
+      "label": "Regular Light",
+      "notes": "45-100. Best-selling bass set. Versatile for all styles."
+    },
+    {
+      "id": "DAD-EXL165",
+      "brand": "D'Addario",
+      "series": "EXL165",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105
+      ],
+      "label": "Reg Light Top / Med Bottom",
+      "notes": "45-105. Hybrid of EXL170 and EXL160. Bright top, powerful low end."
+    },
+    {
+      "id": "DAD-EXL160",
+      "brand": "D'Addario",
+      "series": "EXL160",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.05,
+        0.07,
+        0.085,
+        0.105
+      ],
+      "label": "Medium",
+      "notes": "50-105. Heavier feel, richer tone. More tension."
+    },
+    {
+      "id": "DAD-EXL190",
+      "brand": "D'Addario",
+      "series": "EXL190",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.04,
+        0.06,
+        0.08,
+        0.1
+      ],
+      "label": "Custom Light",
+      "notes": "40-100. Lighter gauge for comfortable playability."
+    },
+    {
+      "id": "EB-2832",
+      "brand": "Ernie Ball",
+      "series": "Regular Slinky Bass",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.05,
+        0.07,
+        0.085,
+        0.105
+      ],
+      "label": "Regular Slinky Bass",
+      "notes": "50-105. Nickel-plated. Bright, effervescent. Rock and metal staple."
+    },
+    {
+      "id": "EB-2831",
+      "brand": "Ernie Ball",
+      "series": "Super Slinky Bass",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.08,
+        0.1
+      ],
+      "label": "Super Slinky Bass",
+      "notes": "45-100. Lighter gauge for greater playability."
+    },
+    {
+      "id": "EB-2833",
+      "brand": "Ernie Ball",
+      "series": "Power Slinky Bass",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.055,
+        0.075,
+        0.09,
+        0.11
+      ],
+      "label": "Power Slinky Bass",
+      "notes": "55-110. Heavy gauge for aggressive playing and down tuning."
+    },
+    {
+      "id": "ELX-14052",
+      "brand": "Elixir",
+      "series": "Nanoweb Bass",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105
+      ],
+      "label": "Medium Nanoweb Bass",
+      "notes": "45-105. Coated bass strings. Long-lasting bright tone."
+    },
+    {
+      "id": "SIT-RS545",
+      "brand": "SIT",
+      "series": "Rock Brute",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105
+      ],
+      "label": "Rock Brute 45-105",
+      "notes": "45-105. Stainless roundwound. Bright, aggressive tone."
+    },
+    {
+      "id": "SIT-RS540",
+      "brand": "SIT",
+      "series": "Rock Brute",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.04,
+        0.06,
+        0.075,
+        0.095
+      ],
+      "label": "Rock Brute Light",
+      "notes": "40-95. Lighter stainless gauge. Playability with bright tone."
+    },
+    {
+      "id": "DUN-DBS45",
+      "brand": "Dunlop",
+      "series": "Super Bright Bass",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105
+      ],
+      "label": "Super Bright Nickel 45-105",
+      "notes": "45-105. Nickel-plated. Bright, balanced Dunlop tone."
+    },
+    {
+      "id": "DUN-DBSS45",
+      "brand": "Dunlop",
+      "series": "Super Bright Steel Bass",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105
+      ],
+      "label": "Super Bright Steel 45-105",
+      "notes": "45-105. Stainless steel. Maximum brightness and output."
+    },
+    {
+      "id": "DR-MR45",
+      "brand": "DR",
+      "series": "Hi-Beam Bass",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105
+      ],
+      "label": "Hi-Beam 45-105",
+      "notes": "45-105. Stainless, round core. Geddy Lee, Chris Squire, Joey DeMaio."
+    },
+    {
+      "id": "DR-MR40",
+      "brand": "DR",
+      "series": "Hi-Beam Bass",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.04,
+        0.06,
+        0.08,
+        0.1
+      ],
+      "label": "Hi-Beam 40-100",
+      "notes": "40-100. Lighter Hi-Beam for solo and melodic bass."
+    },
+    {
+      "id": "DR-PB45",
+      "brand": "DR",
+      "series": "Pure Blues Bass",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105
+      ],
+      "label": "Pure Blues Bass 45-105",
+      "notes": "45-105. Pure nickel, round core. Warm vintage tone. Victor Wooten."
+    },
+    {
+      "id": "DR-DDT45",
+      "brand": "DR",
+      "series": "DDT Bass",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105
+      ],
+      "label": "DDT Bass 45-105",
+      "notes": "45-105. Drop-down tuning. Tight low end for detuned bass."
+    },
+    {
+      "id": "KS-RMM",
+      "brand": "Ken Smith",
+      "series": "Rock Masters",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105
+      ],
+      "label": "Rock Masters Medium",
+      "notes": "45-105. Stainless roundwound. Super bright for all modern styles."
+    },
+    {
+      "id": "KS-RML",
+      "brand": "Ken Smith",
+      "series": "Rock Masters",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.04,
+        0.06,
+        0.08,
+        0.1
+      ],
+      "label": "Rock Masters Light",
+      "notes": "40-100. Lighter stainless gauge for playability and slap."
+    },
+    {
+      "id": "KS-BBM",
+      "brand": "Ken Smith",
+      "series": "Bass Burner",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105
+      ],
+      "label": "Bass Burner Medium",
+      "notes": "45-105. Nickel-plated. Bright nickel with less fret wear."
+    },
+    {
+      "id": "KS-CRM",
+      "brand": "Ken Smith",
+      "series": "Compressors",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.044,
+        0.062,
+        0.082,
+        0.105
+      ],
+      "label": "Compressors Medium",
+      "notes": "44-105. Alloy 52 rollerwound. Smooth feel, warm tone. P-bass favorite."
+    },
+    {
+      "id": "LB-760FS",
+      "brand": "La Bella",
+      "series": "Deep Talkin' Flat",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105
+      ],
+      "label": "760FS Standard Flatwound",
+      "notes": "45-105. Stainless flatwound. Classic smooth tone. James Jamerson."
+    },
+    {
+      "id": "LB-760FL",
+      "brand": "La Bella",
+      "series": "Deep Talkin' Flat",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.043,
+        0.06,
+        0.082,
+        0.104
+      ],
+      "label": "760FL Light Flatwound",
+      "notes": "43-104. Lighter flatwound for comfortable feel."
+    },
+    {
+      "id": "LB-HRS45",
+      "brand": "La Bella",
+      "series": "Hard Rockin Steel",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105
+      ],
+      "label": "Hard Rockin Steel 45-105",
+      "notes": "45-105. Stainless roundwound. Bright, aggressive modern tone."
+    },
+    {
+      "id": "RS-RS66LD",
+      "brand": "Rotosound",
+      "series": "Swing Bass 66",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.08,
+        0.105
+      ],
+      "label": "Swing Bass 66 Standard",
+      "notes": "45-105. Stainless roundwound since 1962. Jaco, Geddy Lee, JPJ, Billy Sheehan."
+    },
+    {
+      "id": "RS-RS66LN",
+      "brand": "Rotosound",
+      "series": "Swing Bass 66 Nickel",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.08,
+        0.105
+      ],
+      "label": "Swing Bass 66 Nickel",
+      "notes": "45-105. Nickel-plated. Warmer than stainless Swing Bass 66."
+    },
+    {
+      "id": "RS-RS66LE",
+      "brand": "Rotosound",
+      "series": "Swing Bass 66 Heavy",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.05,
+        0.075,
+        0.09,
+        0.11
+      ],
+      "label": "Swing Bass 66 Heavy",
+      "notes": "50-110. Heavier gauge for more tension and depth."
+    },
+    {
+      "id": "RC-RC4G",
+      "brand": "R Cocco",
+      "series": "Stainless",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105
+      ],
+      "label": "RC4G Stainless 45-105",
+      "notes": "45-105. Handmade Italian stainless. Balanced tension, brilliant tone."
+    },
+    {
+      "id": "RC-RC4GN",
+      "brand": "R Cocco",
+      "series": "Nickel",
+      "instrument": "bass",
+      "strings": 4,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105
+      ],
+      "label": "RC4G Nickel 45-105",
+      "notes": "45-105. Handmade nickel. Warmer character with precise winding."
+    },
+    {
+      "id": "DAD-EXL170-5",
+      "brand": "D'Addario",
+      "series": "EXL170",
+      "instrument": "bass",
+      "strings": 5,
+      "gauges": [
+        0.045,
+        0.065,
+        0.08,
+        0.1,
+        0.13
+      ],
+      "label": "Regular Light 5-string",
+      "notes": "45-130. Standard 5-string. Low B extends low range."
+    },
+    {
+      "id": "DAD-EXL165-5",
+      "brand": "D'Addario",
+      "series": "EXL165",
+      "instrument": "bass",
+      "strings": 5,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105,
+        0.135
+      ],
+      "label": "Reg Light Top / Med Bottom 5",
+      "notes": "45-135. 5-string hybrid. Combines EXL170 top and EXL160 bottom."
+    },
+    {
+      "id": "EB-2836",
+      "brand": "Ernie Ball",
+      "series": "Regular Slinky 5",
+      "instrument": "bass",
+      "strings": 5,
+      "gauges": [
+        0.045,
+        0.065,
+        0.08,
+        0.1,
+        0.13
+      ],
+      "label": "Regular Slinky 5-string",
+      "notes": "45-130. Standard 5-string nickel-plated."
+    },
+    {
+      "id": "ELX-14202",
+      "brand": "Elixir",
+      "series": "Nanoweb Bass 5",
+      "instrument": "bass",
+      "strings": 5,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105,
+        0.135
+      ],
+      "label": "Medium Nanoweb 5-string",
+      "notes": "45-135. Coated 5-string. Long tone life."
+    },
+    {
+      "id": "DR-MR545",
+      "brand": "DR",
+      "series": "Hi-Beam Bass 5",
+      "instrument": "bass",
+      "strings": 5,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105,
+        0.125
+      ],
+      "label": "Hi-Beam 5-string",
+      "notes": "45-125. Stainless round core 5-string. Studio quality brightness."
+    },
+    {
+      "id": "KS-RMM5",
+      "brand": "Ken Smith",
+      "series": "Rock Masters 5",
+      "instrument": "bass",
+      "strings": 5,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105,
+        0.13
+      ],
+      "label": "Rock Masters Medium 5",
+      "notes": "45-130. Stainless 5-string. Super bright tone."
+    },
+    {
+      "id": "LB-760FSB",
+      "brand": "La Bella",
+      "series": "Deep Talkin' Flat 5",
+      "instrument": "bass",
+      "strings": 5,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105,
+        0.128
+      ],
+      "label": "760FS Standard Flatwound 5",
+      "notes": "45-128. Stainless flatwound 5-string."
+    },
+    {
+      "id": "RS-RS775LD",
+      "brand": "Rotosound",
+      "series": "Swing Bass 66 5",
+      "instrument": "bass",
+      "strings": 5,
+      "gauges": [
+        0.04,
+        0.06,
+        0.08,
+        0.1,
+        0.125
+      ],
+      "label": "Swing Bass 66 5-string",
+      "notes": "40-125. Stainless 5-string. Extended low range."
+    },
+    {
+      "id": "RC-RC5A",
+      "brand": "R Cocco",
+      "series": "Stainless 5",
+      "instrument": "bass",
+      "strings": 5,
+      "gauges": [
+        0.04,
+        0.06,
+        0.08,
+        0.1,
+        0.12
+      ],
+      "label": "RC5A Stainless 40-120",
+      "notes": "40-120. Handmade Italian 5-string. Evenly matched tension."
+    },
+    {
+      "id": "RC-RC5C",
+      "brand": "R Cocco",
+      "series": "Stainless 5",
+      "instrument": "bass",
+      "strings": 5,
+      "gauges": [
+        0.045,
+        0.065,
+        0.085,
+        0.105,
+        0.125
+      ],
+      "label": "RC5C Stainless 45-125",
+      "notes": "45-125. Heavier 5-string. Controlled oscillation, low action."
+    },
+    {
+      "id": "DAD-EXL165-6",
+      "brand": "D'Addario",
+      "series": "EXL165",
+      "instrument": "bass",
+      "strings": 6,
+      "gauges": [
+        0.032,
+        0.045,
+        0.065,
+        0.085,
+        0.105,
+        0.135
+      ],
+      "label": "Reg Light Top / Med Bottom 6",
+      "notes": "32-135. Standard 6-string bass. C added high, B added low."
+    },
+    {
+      "id": "DAD-EXL170-6",
+      "brand": "D'Addario",
+      "series": "EXL170",
+      "instrument": "bass",
+      "strings": 6,
+      "gauges": [
+        0.032,
+        0.045,
+        0.065,
+        0.08,
+        0.1,
+        0.13
+      ],
+      "label": "Regular Light 6-string",
+      "notes": "32-130. Lighter 6-string for extended range playing."
+    },
+    {
+      "id": "KS-RMM6",
+      "brand": "Ken Smith",
+      "series": "Rock Masters 6",
+      "instrument": "bass",
+      "strings": 6,
+      "gauges": [
+        0.03,
+        0.045,
+        0.065,
+        0.085,
+        0.105,
+        0.13
+      ],
+      "label": "Rock Masters Medium 6",
+      "notes": "30-130. Stainless 6-string. Full bright tone across widest range."
+    },
+    {
+      "id": "RC-RC6A",
+      "brand": "R Cocco",
+      "series": "Stainless 6",
+      "instrument": "bass",
+      "strings": 6,
+      "gauges": [
+        0.03,
+        0.045,
+        0.065,
+        0.085,
+        0.105,
+        0.125
+      ],
+      "label": "RC6A Stainless 6-string",
+      "notes": "30-125. Handmade Italian 6-string stainless."
+    }
+  ]
+}

@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guitars & Basses Gallery - GTI / Luthier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+/* ── HAMBURGER MENU CSS ── */
+.gti-nav {
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px;
+  height:64px;
+  background:rgba(0,0,0,.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid #1e1d1b;
+  box-sizing: border-box;
+}
+.nav-logo { height:32px; mix-blend-mode:screen; }
+
+.ham-wrap { position:relative; width:52px; height:52px; z-index:300; }
+.ham-wrap::after { content:''; position:fixed; top:0; right:0; width:372px; height:100vh; pointer-events:none; }
+.ham-wrap:hover::after, .ham-wrap.active::after { pointer-events:all; }
+.ham { display:flex; flex-direction:column; justify-content:center; align-items:flex-end; gap:8px; width:52px; height:52px; cursor:pointer; background:none; border:none; padding:12px; }
+.ham span { display:block; width:100%; height:1px; background:#f0ede6; transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s; transform-origin:center; }
+.ham.open span:nth-child(1) { transform:translateY(8px) rotate(45deg); }
+.ham.open span:nth-child(2) { opacity:0; transform:scaleX(0); }
+.ham.open span:nth-child(3) { transform:translateY(-8px) rotate(-45deg); }
+
+.overlay { position:fixed; inset:0; z-index:240; background:rgba(0,0,0,.55); opacity:0; pointer-events:none; transition:opacity .4s; }
+.overlay.visible { opacity:1; pointer-events:all; }
+
+.drawer { position:fixed; top:0; right:0; width:320px; height:100vh; background:#0d0d0b; border-left:1px solid #1e1d1b; z-index:250; display:flex; flex-direction:column; justify-content:center; padding:80px 0; transform:translateX(100%); transition:transform .5s cubic-bezier(.16,1,.3,1); box-sizing: border-box; }
+.drawer.open { transform:translateX(0); }
+.drawer a { position:relative; display:flex; align-items:center; justify-content:space-between; padding:15px 40px; border-bottom:1px solid #1e1d1b; text-decoration:none; overflow:hidden; opacity:0; transform:translateX(16px); transition:background .25s,opacity .4s cubic-bezier(.16,1,.3,1),transform .4s cubic-bezier(.16,1,.3,1); }
+.drawer a:first-child { border-top:1px solid #1e1d1b; }
+.drawer a::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:#6b21d6; transform:scaleX(0); transform-origin:left; transition:transform .4s cubic-bezier(.16,1,.3,1); }
+.drawer a:hover { background:rgba(107,33,214,.07); }
+.drawer a:hover::after { transform:scaleX(1); }
+.drawer.open a { opacity:1; transform:translateX(0); }
+.drawer.open a:nth-child(1) { transition-delay:.04s; }
+.drawer.open a:nth-child(2) { transition-delay:.07s; }
+.drawer.open a:nth-child(3) { transition-delay:.10s; }
+.drawer.open a:nth-child(4) { transition-delay:.13s; }
+.drawer.open a:nth-child(5) { transition-delay:.16s; }
+.drawer.open a:nth-child(6) { transition-delay:.19s; }
+.drawer.open a:nth-child(7) { transition-delay:.22s; }
+.drawer.open a:nth-child(8) { transition-delay:.25s; }
+.drawer.open a:nth-child(9) { transition-delay:.28s; }
+.drawer.open a:nth-child(10) { transition-delay:.31s; }
+.drawer.open a:nth-child(11) { transition-delay:.34s; }
+.drawer.open a:nth-child(12) { transition-delay:.37s; }
+.drawer.open a:nth-child(13) { transition-delay:.40s; }
+.d-name { font-family:'Libre Baskerville',serif; font-size:1rem; color:rgba(240,237,230,.45); transition:color .25s; }
+.drawer a:hover .d-name { color:#f0ede6; }
+.d-arr { font-family:'Teko',sans-serif; font-size:.8rem; font-weight:300; color:#2e2d2a; opacity:0; transform:translateX(-6px); transition:color .25s,opacity .25s,transform .3s cubic-bezier(.16,1,.3,1); }
+.drawer a:hover .d-arr { opacity:1; transform:translateX(0); color:#6b21d6; }
+@media(max-width:900px){ .gti-nav{padding:14px 28px; height: 60px;} }
+@media(max-width:600px){ .gti-nav{padding:12px 20px; height: 56px;} .drawer{width:100%;} }
+
+    .header-center {
+      text-align: center;
+    }
+
+    .header-center h1 {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 5px;
+    }
+
+    .header-center p {
+      font-family: 'Roboto Condensed', sans-serif;
+      font-size: 0.75rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+
+    /* Gallery Layout */
+    .gallery-layout {
+      display: flex;
+      max-width: 100%;
+      margin: 0;
+      padding: 60px 40px;
+      gap: 60px;
+    }
+
+    .gallery-sidebar {
+      flex: 0 0 240px;
+      width: 240px;
+      position: sticky;
+      top: 140px;
+      height: fit-content;
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 150;
+    }
+
+    .gallery-sidebar.collapsed {
+      flex: 0 0 0;
+      width: 0;
+      padding: 60px 0;
+      margin-right: -60px; /* Adjust layout gap */
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Filter Toggle Button */
+    .filter-toggle {
+      position: fixed;
+      left: 0;
+      top: 140px;
+      background: #000;
+      border: 1px solid #1a1a1a;
+      border-left: none;
+      color: #fff; /* 白に変更 */
+      padding: 12px 8px;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-family: 'Teko', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      cursor: pointer;
+      z-index: 160;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .filter-toggle:hover {
+      background: #111;
+      color: #fff;
+    }
+
+    .gallery-sidebar.collapsed + .gallery-main {
+      margin-left: 40px;
+    }
+
+    .filter-section h3 {
+      font-family: 'Roboto Condensed', sans-serif;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: #fff;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #1a1a1a;
+      padding-bottom: 10px;
+    }
+    .filter-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #888;
+      padding: 10px 0;
+      font-family: 'Roboto Condensed', sans-serif;
+      font-size: 0.95rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .filter-btn::after {
+      content: '→';
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: all 0.3s ease;
+      font-size: 0.8rem;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      color: var(--accent-color);
+    }
+
+    .filter-btn.active::after {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Grid Layout - Responsive 2-5 Columns */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 40px;
+    }
+
+    @media (max-width: 2000px) {
+      .gallery-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    @media (max-width: 1600px) {
+      .gallery-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    
+    @media (max-width: 1100px) {
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .gallery-item {
+      position: relative;
+      background: #080808;
+      border: 1px solid #111;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    .gallery-item:hover {
+      border-color: #333;
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .gallery-item-img-wrap {
+      width: 100%;
+      aspect-ratio: 16 / 9; /* Fixed 16:9 aspect ratio */
+      overflow: hidden;
+      background: #111;
+    }
+
+    .gallery-item-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s ease;
+    }
+
+    .gallery-item:hover .gallery-item-img {
+      transform: scale(1.05);
+    }
+
+    .gallery-item-info {
+      padding: 25px;
+      background: #080808;
+      border-top: 1px solid #111;
+    }
+
+    .item-series {
+      font-size: 0.65rem;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-weight: 700;
+      margin-bottom: 8px;
+      min-height: 1.2em; /* Ensure height even if empty */
+    }
+
+    .item-title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.25rem;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+
+    .item-specs {
+      font-size: 0.85rem;
+      color: #666;
+      font-family: 'Roboto Condensed', sans-serif;
+      letter-spacing: 0.02em;
+    }
+
+    /* Modal / Lightbox */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.98);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content {
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .modal-img {
+      max-width: 100%;
+      max-height: 75vh;
+      object-fit: contain;
+      box-shadow: 0 30px 100px rgba(0,0,0,0.8);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: -60px;
+      right: 0;
+      color: #fff;
+      font-size: 2.5rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      transition: color 0.3s;
+    }
+
+    .modal-close:hover { color: var(--accent-color); }
+
+    .modal-caption {
+      margin-top: 30px;
+      text-align: center;
+      max-width: 600px;
+    }
+
+    .modal-title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .modal-specs {
+      color: #888;
+      font-size: 1rem;
+    }
+
+    @media (max-width: 1024px) {
+      .gallery-layout {
+        flex-direction: column;
+        padding: 40px 20px;
+      }
+      .gallery-sidebar {
+        flex: none;
+        width: 100%;
+        position: static;
+        margin-bottom: 40px;
+      }
+      .filter-controls {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .filter-btn::after { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+      .gallery-item-img-wrap {
+        height: 300px;
+      }
+    }
+
+    /* Filter: hide items that don't match */
+    .gallery-item.hide {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Overlay & Drawer (ハンバーガーメニュー) -->
+  <div class="overlay" id="overlay"></div>
+  <div class="drawer" id="drawer">
+  <a href="../index.html"><span class="d-name">Top</span><span class="d-arr">→</span></a>
+  <a href="../gallery/index.html"><span class="d-name">Gallery</span><span class="d-arr">→</span></a>
+  <a href="../models/guitar/index.html"><span class="d-name">Catalog</span><span class="d-arr">→</span></a>
+  <a href="../custom/index.html"><span class="d-name">Custom Order</span><span class="d-arr">→</span></a>
+  <a href="../pricing/index.html"><span class="d-name">Pricing</span><span class="d-arr">→</span></a>
+  <a href="../picks/krystal/index.html"><span class="d-name">Krystal Plectrum</span><span class="d-arr">→</span></a>
+  <a href="../picks/vortex/index.html"><span class="d-name">Vortex Plectrum</span><span class="d-arr">→</span></a>
+  <a href="../cases/index.html"><span class="d-name">Fretboard Cases</span><span class="d-arr">→</span></a>
+  <a href="../keyboards/index.html"><span class="d-name">Keyboards</span><span class="d-arr">→</span></a>
+  <a href="../pedal/index.html"><span class="d-name">Effects Pedals</span><span class="d-arr">→</span></a>
+  <a href="../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
+  <a href="../contact/index.html"><span class="d-name">Contact</span><span class="d-arr">→</span></a>
+  <a href="../generator/index.html"><span class="d-name">Generator</span><span class="d-arr">→</span></a>
+</div>
+
+<nav id="nav" class="gti-nav">
+  <a href="../index.html"><img src="../assets/images/logo.png" alt="GTI" class="nav-logo"></a>
+  <div class="ham-wrap" id="hamWrap">
+    <button class="ham" id="ham" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+  <main class="gallery-layout" style="padding-top: 64px;">
+    
+    <button class="filter-toggle" id="filterToggle" onclick="toggleSidebar()" style="transform: translateX(0);">FILTER</button>
+    <aside class="gallery-sidebar collapsed" id="sidebar">
+      <div class="filter-section">
+        <h3>Category</h3>
+        <div class="filter-controls" id="filters">
+          <button class="filter-btn active" data-filter="all">All Instruments</button>
+          <button class="filter-btn" data-filter="guitar">Guitars</button>
+          <button class="filter-btn" data-filter="bass">Basses</button>
+          <button class="filter-btn" data-filter="treadline">TREAD-LINE</button>
+          <button class="filter-btn" data-filter="headless">Headless</button>
+          <button class="filter-btn" data-filter="multiscale">Multiscale</button>
+          <button class="filter-btn" data-filter="curved-multiscale">Curved Multiscale</button>
+        </div>
+      </div>
+
+      <!-- Models filter section removed as requested, data tags kept for future use -->
+    </aside>
+
+    <div class="gallery-main">
+      <div class="page-title-sec" style="text-align:center; padding: 20px 0 60px;">
+        <h1 style="font-family: 'Libre Baskerville', serif; font-size: 2.5rem; margin-bottom: 10px;">Guitars / Basses</h1>
+        <p style="font-family: 'Roboto Condensed', sans-serif; font-size: 0.85rem; color: #6b21d6; text-transform: uppercase; letter-spacing: 0.1em;">Explore our past creations and custom built instruments.</p>
+      </div>
+      <div class="gallery-grid" id="gallery">
+      <!-- #047 AX-6 -->
+      <div class="gallery-item" data-category="guitar ax headless" 
+           data-folder="../assets/images/gallery/AX-6_047/"
+           data-images="01_thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg,13.jpg,14.jpg,15.jpg,16.jpg,17.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/AX-6_047/01_thumb.jpg" alt="AX-6 #047" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#047 AX-6</div>
+          <div class="item-specs">6-String Headless Guitar</div>
+        </div>
+      </div>
+
+      <!-- #046 Mortezza-7 -->
+      <div class="gallery-item" data-category="guitar mortezza multiscale" 
+           data-folder="../assets/images/gallery/Mortezza-7_046/"
+           data-images="01-thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg,13.jpg,14.jpg,15.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Mortezza-7_046/01-thumb.jpg" alt="Mortezza-7 #046" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#046 Mortezza-7</div>
+          <div class="item-specs">7-String Multiscale Guitar / Black Satin</div>
+        </div>
+      </div>
+
+      <!-- #045 R'lyeh-5 -->
+      <div class="gallery-item" data-category="bass rlyeh treadline headless" 
+           data-folder="../assets/images/gallery/Rlyeh-5_045/"
+           data-images="01-thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg,13.jpg,14.jpg,15.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Rlyeh-5_045/01-thumb.jpg" alt="R'lyeh-5 #045" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series">TREAD-LINE</div>
+          <div class="item-title">#045 R'lyeh-5</div>
+          <div class="item-specs">5-String Headless Bass</div>
+        </div>
+      </div>
+
+      <!-- #044 TREAD-LINE R'lyeh-5 -->
+      <div class="gallery-item" data-category="bass rlyeh treadline multiscale" 
+           data-folder="../assets/images/gallery/Rlyeh-5_044/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05-thumb.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg,13.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Rlyeh-5_044/05-thumb.jpg" alt="R'lyeh-5 #044" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series">TREAD-LINE</div>
+          <div class="item-title">#044 R'lyeh-5</div>
+          <div class="item-specs">5-String Multiscale Bass</div>
+        </div>
+      </div>
+
+      <!-- #043 TREAD-LINE L'ion-4 -->
+      <div class="gallery-item" data-category="bass lion treadline" 
+           data-folder="../assets/images/gallery/Lion-4_043/"
+           data-images="01-thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Lion-4_043/01-thumb.jpg" alt="L'ion-4 #043" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series">TREAD-LINE</div>
+          <div class="item-title">#043 L'ion-4</div>
+          <div class="item-specs">4-String Bass</div>
+        </div>
+      </div>
+
+      <!-- #042 Drake-6 -->
+      <div class="gallery-item" data-category="guitar drake" 
+           data-folder="../assets/images/gallery/Drake-6_042/"
+           data-images="01-thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Drake-6_042/01-thumb.jpg" alt="Drake-6 #042" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#042 Drake-6</div>
+          <div class="item-specs">6-String Guitar</div>
+        </div>
+      </div>
+
+      <!-- #041 TREAD-LINE R'lyeh-5 -->
+      <div class="gallery-item" data-category="bass rlyeh treadline" 
+           data-folder="../assets/images/gallery/Rlyeh-5_041/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05-thumb.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg,13.jpg,14.jpg,15.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Rlyeh-5_041/05-thumb.jpg" alt="R'lyeh-5 #041" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series">TREAD-LINE</div>
+          <div class="item-title">#041 R'lyeh-5</div>
+          <div class="item-specs">5-String Bass</div>
+        </div>
+      </div>
+
+      <!-- #040 Brocéliande-7 -->
+      <div class="gallery-item" data-category="guitar broceliande multiscale" 
+           data-folder="../assets/images/gallery/Broceliande-7_040/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08-thumb.jpg,09.jpg,10.jpg,11.jpg,12.jpg,13.jpg,14.jpg,15.jpg,16.jpg,17.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Broceliande-7_040/08-thumb.jpg" alt="Brocéliande-7 #040" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#040 Brocéliande-7</div>
+          <div class="item-specs">7-String Multiscale Guitar</div>
+        </div>
+      </div>
+
+      <!-- #039 Leggiero-6 -->
+      <div class="gallery-item" data-category="guitar leggiero treadline" 
+           data-folder="../assets/images/gallery/Leggiero-6_039/"
+           data-images="01.jpg,02-thumb.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Leggiero-6_039/02-thumb.jpg" alt="Leggiero-6 #039" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series">TREAD-LINE</div>
+          <div class="item-title">#039 Leggiero-6</div>
+          <div class="item-specs">6-String Guitar</div>
+        </div>
+      </div>
+
+      <!-- #038 Ayakashi-9 -->
+      <div class="gallery-item" data-category="guitar ayakashi headless curved-multiscale" 
+           data-folder="../assets/images/gallery/Ayakashi-9_038/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06-thumb.jpg,07.jpg,08.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Ayakashi-9_038/06-thumb.jpg" alt="Ayakashi-9 #038" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#038 Ayakashi-9</div>
+          <div class="item-specs">9-String Headless Curved Multiscale Guitar</div>
+        </div>
+      </div>
+
+      <!-- #037 Ayakashi-9 -->
+      <div class="gallery-item" data-category="guitar ayakashi headless curved-multiscale" 
+           data-folder="../assets/images/gallery/Ayakashi-9_037/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09-thumb.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Ayakashi-9_037/09-thumb.jpg" alt="Ayakashi-9 #037" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#037 Ayakashi-9</div>
+          <div class="item-specs">9-String Headless Curved Multiscale Guitar</div>
+        </div>
+      </div>
+
+      <!-- #036 Aegis-5 -->
+      <div class="gallery-item" data-category="bass aegis headless multiscale" 
+           data-folder="../assets/images/gallery/Aegis-5_036/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09-thumb.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Aegis-5_036/09-thumb.jpg" alt="Aegis-5 #036" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#036 Aegis-5</div>
+          <div class="item-specs">5-String Headless Multiscale Bass / Shop Ordered</div>
+        </div>
+      </div>
+
+      <!-- #035 Aegis-5 -->
+      <div class="gallery-item" data-category="bass aegis headless multiscale" 
+           data-folder="../assets/images/gallery/Aegis-5_035/"
+           data-images="01-thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Aegis-5_035/01-thumb.jpg" alt="Aegis-5 #035" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#035 Aegis-5</div>
+          <div class="item-specs">5-String Headless Multiscale Bass / Shop Ordered</div>
+        </div>
+      </div>
+
+      <!-- #034 Aegis-5 -->
+      <div class="gallery-item" data-category="bass aegis headless multiscale" 
+           data-folder="../assets/images/gallery/Aegis-5_034/"
+           data-images="01.jpg,02-thumb.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Aegis-5_034/02-thumb.jpg" alt="Aegis-5 #034" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#034 Aegis-5</div>
+          <div class="item-specs">5-String Headless Multiscale Bass / Shop Ordered</div>
+        </div>
+      </div>
+
+      <!-- #033 Jim-6 -->
+      <div class="gallery-item" data-category="guitar jim treadline" 
+           data-folder="../assets/images/gallery/Jim-6_033/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06-thumb.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Jim-6_033/06-thumb.jpg" alt="Jim-6 #033" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series">TREAD-LINE</div>
+          <div class="item-title">#033 Jim-6</div>
+          <div class="item-specs">6-String Guitar / Custom</div>
+        </div>
+      </div>
+
+      <!-- #032 Mortezzo-6 -->
+      <div class="gallery-item" data-category="bass mortezzo" 
+           data-folder="../assets/images/gallery/Mortezzo-6_032/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09-thumb.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Mortezzo-6_032/09-thumb.jpg" alt="Mortezzo-6 #032" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#032 Mortezzo-6</div>
+          <div class="item-specs">6-String Bass</div>
+        </div>
+      </div>
+
+      <!-- #031 L'ion-4 -->
+      <div class="gallery-item" data-category="bass lion treadline multiscale" 
+           data-folder="../assets/images/gallery/Lion-4_031/"
+           data-images="01.jpg,02.jpg,03-thumb.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg,13.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Lion-4_031/03-thumb.jpg" alt="L'ion-4 #031" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series">TREAD-LINE</div>
+          <div class="item-title">#031 L'ion-4</div>
+          <div class="item-specs">4-String Multiscale Bass</div>
+        </div>
+      </div>
+
+      <!-- #030 Ayakashi-9 -->
+      <div class="gallery-item" data-category="guitar ayakashi headless curved-multiscale" 
+           data-folder="../assets/images/gallery/Ayakashi-9_030/"
+           data-images="01-thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Ayakashi-9_030/01-thumb.jpg" alt="Ayakashi-9 #030" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#030 Ayakashi-9</div>
+          <div class="item-specs">9-String Headless Curved Multiscale Guitar</div>
+        </div>
+      </div>
+
+      <!-- #029 Booggah-6 -->
+      <div class="gallery-item" data-category="bass booggah" 
+           data-folder="../assets/images/gallery/Booggah-6_029/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12-thumb.jpg,13.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Booggah-6_029/12-thumb.jpg" alt="Booggah-6 #029" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#029 Booggah-6</div>
+          <div class="item-specs">6-String Bass / Shimamura Music</div>
+        </div>
+      </div>
+
+      <!-- #028 Leggiero-6 -->
+      <div class="gallery-item" data-category="guitar leggiero treadline" 
+           data-folder="../assets/images/gallery/Leggiero-6_028/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05-thumb.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Leggiero-6_028/05-thumb.jpg" alt="Leggiero-6 #028" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series">TREAD-LINE</div>
+          <div class="item-title">#028 Leggiero-6</div>
+          <div class="item-specs">6-String Guitar</div>
+        </div>
+      </div>
+
+      <!-- #027 Ayakashi-9 -->
+      <div class="gallery-item" data-category="guitar ayakashi headless curved-multiscale" 
+           data-folder="../assets/images/gallery/Ayakashi-9_027/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09-thumb.jpg,10.jpg,11.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Ayakashi-9_027/09-thumb.jpg" alt="Ayakashi-9 #027" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#027 Ayakashi-9</div>
+          <div class="item-specs">9-String Headless Curved Multiscale Guitar</div>
+        </div>
+      </div>
+
+      <!-- #026 Ayakashi-9 -->
+      <div class="gallery-item" data-category="guitar ayakashi headless curved-multiscale" 
+           data-folder="../assets/images/gallery/Ayakashi-9_026/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10-thumb.jpg,11.jpg,12.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Ayakashi-9_026/10-thumb.jpg" alt="Ayakashi-9 #026" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#026 Ayakashi-9</div>
+          <div class="item-specs">9-String Headless Curved Multiscale Guitar</div>
+        </div>
+      </div>
+
+      <!-- #025 Leggiero-6 -->
+      <div class="gallery-item" data-category="guitar leggiero treadline" 
+           data-folder="../assets/images/gallery/Leggiero-6_025/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11-thumb.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Leggiero-6_025/11-thumb.jpg" alt="Leggiero-6 #025" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series">TREAD-LINE</div>
+          <div class="item-title">#025 Leggiero-6</div>
+          <div class="item-specs">6-String Guitar</div>
+        </div>
+      </div>
+
+      <!-- #024 Jim-6 -->
+      <div class="gallery-item" data-category="guitar jim treadline" 
+           data-folder="../assets/images/gallery/Jim-6_024/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05-thumb.jpg,06.jpg,07.jpg,08.jpg,09.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Jim-6_024/05-thumb.jpg" alt="Jim-6 #024" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series">TREAD-LINE</div>
+          <div class="item-title">#024 Jim-6</div>
+          <div class="item-specs">6-String Guitar</div>
+        </div>
+      </div>
+
+      <!-- #023 R'lyeh-4 -->
+      <div class="gallery-item" data-category="bass rlyeh treadline multiscale" 
+           data-folder="../assets/images/gallery/Rlyeh-4_023/"
+           data-images="01.jpg,02.jpg,03.jpg,04-thumb.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Rlyeh-4_023/04-thumb.jpg" alt="R'lyeh-4 #023" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series">TREAD-LINE</div>
+          <div class="item-title">#023 R'lyeh-4</div>
+          <div class="item-specs">4-String Multiscale Bass</div>
+        </div>
+      </div>
+
+      <!-- #022 Nekro-8 -->
+      <div class="gallery-item" data-category="guitar nekro curved-multiscale" 
+           data-folder="../assets/images/gallery/Nekro-8_022/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10-thumb.jpg,11.jpg,12.jpg,13.jpg,14.jpg,15.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Nekro-8_022/10-thumb.jpg" alt="Nekro-8 #022" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#022 Nekro-8</div>
+          <div class="item-specs">8-String Curved Multiscale Guitar</div>
+        </div>
+      </div>
+
+      <!-- #021 Nekro-6 -->
+      <div class="gallery-item" data-category="guitar nekro" 
+           data-folder="../assets/images/gallery/Nekro-6_021/"
+           data-images="01.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07-thumb.jpg,08.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Nekro-6_021/07-thumb.jpg" alt="Nekro-6 #021" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#021 Nekro-6</div>
+          <div class="item-specs">6-String Guitar</div>
+        </div>
+      </div>
+
+      <!-- #020 R'lyeh-4 -->
+      <div class="gallery-item" data-category="bass rlyeh treadline multiscale" 
+           data-folder="../assets/images/gallery/Rlyeh-4_020/"
+           data-images="01.jpg,02-thumb.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg,13.jpg,14.jpg,15.jpg,16.jpg,17.jpg,18.jpg,19.jpg,20.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Rlyeh-4_020/02-thumb.jpg" alt="R'lyeh-4 #020" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series">TREAD-LINE</div>
+          <div class="item-title">#020 R'lyeh-4</div>
+          <div class="item-specs">4-String Multiscale Bass</div>
+        </div>
+      </div>
+
+      <!-- #019 Luc-mini-6 -->
+      <div class="gallery-item" data-category="guitar luc" 
+           data-folder="../assets/images/gallery/Luc-mini-6_019/"
+           data-images="01_thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg,13.jpg,14.jpg,15.jpg,16.jpg,17.jpg,18.jpg,19.jpg,20.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Luc-mini-6_019/01_thumb.jpg" alt="Luc-mini-6 #019" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#019 Luc-mini-6</div>
+          <div class="item-specs">6-String Mini Guitar</div>
+        </div>
+      </div>
+
+      <!-- #018 Luc-7 -->
+      <div class="gallery-item" data-category="guitar luc" 
+           data-folder="../assets/images/gallery/Luc-7_018/"
+           data-images="01_thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg,13.jpg,14.jpg,15.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Luc-7_018/01_thumb.jpg" alt="Luc-7 #018" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#018 Luc-7</div>
+          <div class="item-specs">7-String Guitar</div>
+        </div>
+      </div>
+
+      <!-- #017 Drake-7 -->
+      <div class="gallery-item" data-category="guitar drake" 
+           data-folder="../assets/images/gallery/Drake-7_017/"
+           data-images="01_thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Drake-7_017/01_thumb.jpg" alt="Drake-7 #017" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#017 Drake-7</div>
+          <div class="item-specs">7-String Guitar</div>
+        </div>
+      </div>
+
+      <!-- #016 Jake-7 -->
+      <div class="gallery-item" data-category="guitar jake multiscale" 
+           data-folder="../assets/images/gallery/Jake-7_016/"
+           data-images="01_thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Jake-7_016/01_thumb.jpg" alt="Jake-7 #016" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#016 Jake-7</div>
+          <div class="item-specs">7-String Multiscale Guitar</div>
+        </div>
+      </div>
+
+      <!-- #015 Luc-mini-7 -->
+      <div class="gallery-item" data-category="guitar luc multiscale" 
+           data-folder="../assets/images/gallery/Luc-mini-7_015/"
+           data-images="01_thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Luc-mini-7_015/01_thumb.jpg" alt="Luc-mini-7 #015" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#015 Luc-mini-7</div>
+          <div class="item-specs">7-String Multiscale Mini Guitar</div>
+        </div>
+      </div>
+
+      <!-- #014 Drake-7 -->
+      <div class="gallery-item" data-category="guitar drake" 
+           data-folder="../assets/images/gallery/Drake-7_014/"
+           data-images="01_thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Drake-7_014/01_thumb.jpg" alt="Drake-7 #014" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#014 Drake-7</div>
+          <div class="item-specs">7-String Guitar</div>
+        </div>
+      </div>
+
+      <!-- #013 Satan-8 -->
+      <div class="gallery-item" data-category="guitar satan curved-multiscale" 
+           data-folder="../assets/images/gallery/Satan-8_013/"
+           data-images="01.jpg,02.jpg,03.jpg,04-thumb.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg,13.jpg,14.jpg,15.jpg,16.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Satan-8_013/04-thumb.jpg" alt="Satan-8 #013" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#013 Satan-8</div>
+          <div class="item-specs">8-String Curved Multiscale Guitar</div>
+        </div>
+      </div>
+
+      <!-- #012 Booggah-6 -->
+      <div class="gallery-item" data-category="bass booggah" 
+           data-folder="../assets/images/gallery/Booggah-6_012/"
+           data-images="01_thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Booggah-6_012/01_thumb.jpg" alt="Booggah-6 #012" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#012 Booggah-6</div>
+          <div class="item-specs">6-String Bass</div>
+        </div>
+      </div>
+
+      <!-- #010 Nekro-7 -->
+      <div class="gallery-item" data-category="guitar nekro multiscale" 
+           data-folder="../assets/images/gallery/Nekro-7_010/"
+           data-images="01_thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Nekro-7_010/01_thumb.jpg" alt="Nekro-7 #010" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#010 Nekro-7</div>
+          <div class="item-specs">7-String Multiscale Guitar</div>
+        </div>
+      </div>
+
+      <!-- #009 Drake-6 -->
+      <div class="gallery-item" data-category="guitar drake" 
+           data-folder="../assets/images/gallery/Drake-6_009/"
+           data-images="01_thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Drake-6_009/01_thumb.jpg" alt="Drake-6 #009" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#009 Drake-6</div>
+          <div class="item-specs">6-String Guitar</div>
+        </div>
+      </div>
+
+      <!-- #007 Mic-4 -->
+      <div class="gallery-item" data-category="bass mic" 
+           data-folder="../assets/images/gallery/Mic-4_007/"
+           data-images="01_thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Mic-4_007/01_thumb.jpg" alt="Mic-4 #007" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#007 Mic-4</div>
+          <div class="item-specs">4-String Bass</div>
+        </div>
+      </div>
+
+      <!-- #006 Orochi-7 -->
+      <div class="gallery-item" data-category="guitar orochi multiscale" 
+           data-folder="../assets/images/gallery/Orochi-7_006/"
+           data-images="01_thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg,12.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Orochi-7_006/01_thumb.jpg" alt="Orochi-7 #006" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#006 Orochi-7</div>
+          <div class="item-specs">7-String Multiscale Guitar</div>
+        </div>
+      </div>
+
+      <!-- #005 Raven-6 Prototype -->
+      <div class="gallery-item" data-category="guitar raven" 
+           data-folder="../assets/images/gallery/Raven-6 prototype_005/"
+           data-images="01_thumb.jpg,02.jpg,03.jpg,04.jpg,05.jpg,06.jpg,07.jpg,08.jpg,09.jpg,10.jpg,11.jpg"
+           onclick="openModal(this)">
+        <div class="gallery-item-img-wrap"><img src="../assets/images/gallery/Raven-6 prototype_005/01_thumb.jpg" alt="Raven-6 #005" class="gallery-item-img"></div>
+        <div class="gallery-item-info">
+          <div class="item-series"></div>
+          <div class="item-title">#005 Raven-6</div>
+          <div class="item-specs">6-String Guitar / Prototype</div>
+        </div>
+      </div>
+    </div> <!-- .gallery-grid -->
+  </div> <!-- .gallery-main -->
+</main> <!-- .gallery-layout -->
+
+  <footer>
+    <p>Copyright &copy; 2026 GTI.</p>
+  </footer>
+
+  <!-- Modal elements -->
+  <div class="modal" id="modal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <div class="modal-img-container">
+        <img src="" alt="" class="modal-img" id="modal-img">
+        <div class="modal-nav">
+          <button class="nav-btn prev" id="modal-prev">&lt;</button>
+          <button class="nav-btn next" id="modal-next">&gt;</button>
+        </div>
+      </div>
+      <div class="modal-caption">
+        <div class="item-series" id="modal-series"></div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-specs" id="modal-specs"></div>
+        <div class="modal-counter" id="modal-counter"></div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .modal-img-container {
+      position: relative;
+      width: 100%;
+      text-align: center;
+    }
+    .modal-nav {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      transform: translateY(-50%);
+      padding: 0 10px;
+      pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      border: 1px solid #444;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: all 0.3s;
+    }
+    .nav-btn:hover {
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+    .modal-counter {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: #666;
+    }
+  </style>
+
+  <script>
+    // ── フィルタリングロジック ──────────────────────────────────
+    const categoryBtns = document.querySelectorAll('#filters .filter-btn');
+    const modelBtns    = document.querySelectorAll('#model-filters .filter-btn');
+    const galleryItems = document.querySelectorAll('.gallery-item');
+
+    let activeCategory = 'all';
+    let activeModel    = 'all';
+
+    function applyFilters() {
+      galleryItems.forEach(item => {
+        const cats = item.getAttribute('data-category') || '';
+        const matchCat   = activeCategory === 'all' || cats.split(' ').includes(activeCategory);
+        const matchModel = activeModel   === 'all' || cats.split(' ').includes(activeModel);
+        item.classList.toggle('hide', !(matchCat && matchModel));
+      });
+    }
+
+    categoryBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        categoryBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCategory = btn.getAttribute('data-filter');
+        applyFilters();
+      });
+    });
+
+    modelBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modelBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeModel = btn.getAttribute('data-filter');
+        applyFilters();
+      });
+    });
+
+    // ── サムネイル自動検出 ──────────────────────────────────────
+    function resolveThumbnails() {
+      galleryItems.forEach(item => {
+        const folder = item.getAttribute('data-folder');
+        const imagesAttr = item.getAttribute('data-images');
+        if (folder && imagesAttr) {
+          const images = imagesAttr.split(',');
+          const thumbFile = images.find(name => name.toLowerCase().includes('thumb'));
+          if (thumbFile) {
+            const mainImg = item.querySelector('.gallery-item-img');
+            if (mainImg) {
+              const fullPath = folder + thumbFile;
+              if (mainImg.getAttribute('src') !== fullPath) {
+                mainImg.src = fullPath;
+              }
+            }
+          }
+        }
+      });
+    }
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', resolveThumbnails);
+    } else {
+      resolveThumbnails();
+    }
+
+    // Multi-Image Modal Logic
+    const modal = document.getElementById('modal');
+    const modalImg = document.getElementById('modal-img');
+    const modalTitle = document.getElementById('modal-title');
+    const modalSpecs = document.getElementById('modal-specs');
+    const modalSeries = document.getElementById('modal-series');
+    const modalCounter = document.getElementById('modal-counter');
+    const modalPrev = document.getElementById('modal-prev');
+    const modalNext = document.getElementById('modal-next');
+
+    let currentImages = [];
+    let currentFolder = '';
+    let currentIdx = 0;
+
+    function openModal(element) {
+      const title = element.querySelector('.item-title').innerText;
+      const specs = element.querySelector('.item-specs').innerText;
+      const seriesEl = element.querySelector('.item-series');
+      
+      currentFolder = element.getAttribute('data-folder') || '';
+      const imagesAttr = element.getAttribute('data-images');
+      
+      if (imagesAttr) {
+        currentImages = imagesAttr.split(',');
+      } else {
+        const mainImg = element.querySelector('.gallery-item-img');
+        currentImages = [mainImg.src.replace(currentFolder, '')];
+      }
+      
+      currentIdx = 0;
+      updateModalContent(title, specs, seriesEl ? seriesEl.innerText : '');
+      
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function updateModalContent(title, specs, series) {
+      // Add timestamp to bust cache when files are renamed
+      modalImg.src = currentFolder + currentImages[currentIdx] + '?t=' + new Date().getTime();
+      modalTitle.innerText = title;
+      modalSpecs.innerText = specs;
+      modalSeries.innerText = series;
+      
+      if (currentImages.length > 1) {
+        modalCounter.innerText = `${currentIdx + 1} / ${currentImages.length}`;
+        modalPrev.style.display = 'block';
+        modalNext.style.display = 'block';
+      } else {
+        modalCounter.innerText = '';
+        modalPrev.style.display = 'none';
+        modalNext.style.display = 'none';
+      }
+    }
+
+    modalPrev.onclick = (e) => {
+      e.stopPropagation();
+      currentIdx = (currentIdx - 1 + currentImages.length) % currentImages.length;
+      updateModalContent(modalTitle.innerText, modalSpecs.innerText, modalSeries.innerText);
+    };
+
+    modalNext.onclick = (e) => {
+      e.stopPropagation();
+      currentIdx = (currentIdx + 1) % currentImages.length;
+      updateModalContent(modalTitle.innerText, modalSpecs.innerText, modalSeries.innerText);
+    };
+
+    function closeModal() {
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+    
+    document.addEventListener('keydown', (e) => {
+      if (!modal.classList.contains('show')) return;
+      if (e.key === 'Escape') closeModal();
+      if (e.key === 'ArrowLeft') modalPrev.click();
+      if (e.key === 'ArrowRight') modalNext.click();
+    });
+
+    // ── サイドバー開閉ロジック ────────────────────────────────────
+    const sidebar = document.getElementById('sidebar');
+    const filterToggle = document.getElementById('filterToggle');
+
+    function toggleSidebar() {
+      const isCollapsed = sidebar.classList.toggle('collapsed');
+      if (isCollapsed) {
+        filterToggle.style.transform = 'translateX(0)';
+      } else {
+        filterToggle.style.transform = 'translateX(240px)';
+      }
+    }
+    // 初期状態は閉じているので transform は 0
+    filterToggle.style.transform = 'translateX(0)';
+
+    // ── ハンバーガーメニュー ──────────────────────────────────────
+    const hamWrap = document.getElementById('hamWrap');
+    const ham     = document.getElementById('ham');
+    const drawer  = document.getElementById('drawer');
+    const overlay = document.getElementById('overlay');
+    let closeTimer = null;
+
+    function openDrawer() {
+      clearTimeout(closeTimer);
+      drawer.classList.add('open');
+      overlay.classList.add('visible');
+      ham.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeDrawer() {
+      closeTimer = setTimeout(() => {
+        drawer.classList.remove('open');
+        overlay.classList.remove('visible');
+        ham.classList.remove('open');
+        document.body.style.overflow = '';
+      }, 120);
+    }
+
+    hamWrap.addEventListener('mouseenter', openDrawer);
+    hamWrap.addEventListener('mouseleave', closeDrawer);
+    drawer.addEventListener('mouseenter', () => clearTimeout(closeTimer));
+    drawer.addEventListener('mouseleave', closeDrawer);
+    overlay.addEventListener('click', closeDrawer);
+  </script>
+</body>
+</html>

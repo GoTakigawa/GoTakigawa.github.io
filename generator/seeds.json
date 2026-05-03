@@ -1,0 +1,30 @@
+[
+  {
+    "id": 0,
+    "label": "27\" ~ 25.5\" Default",
+    "tag": "Guitar",
+    "ns": 7,
+    "seed": "GTI-ENQErceAAd9Y3I7Gueu1VSWOIgFMRrUTTaLZIjGn3HEbW0JXwVQO6z3VmIHd1vujzx66Mo7S0PBNMkSoDh1RFJSivxwPbYu.w0ktwqrwyp0Rmx9k1thxN"
+  },
+  {
+    "id": 1,
+    "label": "Guitar Std",
+    "tag": "Guitar",
+    "ns": 6,
+    "seed": "GTI-3g94BWlObBkNgLCguJ1fC4y7EJ7PBPRvrjPwvH12bYhkec50qQYjdihQ5qsam3Tfsafry2dwtMBNMkSoDh1RFJSivxwPbYu.w0ktwqrwyp0Rmx9k1t"
+  },
+  {
+    "id": 3,
+    "label": "Baritone Std",
+    "tag": "Baritone",
+    "ns": 8,
+    "seed": "GTI-crCCiuaRDcUQQLD7BckPCqNzB75SUMaR9oQErSztBHayV00ayzvP4VqdY9YzmMimpbKiRFzssdIADisUpd6WRkw5uYKz3No.w0itwmrwwp0Rmx9k1thxFf2d"
+  },
+  {
+    "id": 2,
+    "label": "Bass Std",
+    "tag": "Bass",
+    "ns": 4,
+    "seed": "GTI-ksCnJ00sYl0T4qNPbz8M7gzMXnjhwUc38hSDvBWjIP2Yxpt4Vmz44hPQSmVIFtjnU13pUNdiX9PfHwjwF39Adu5CnEtv0c61.lxrj23gyxe39"
+  }
+]

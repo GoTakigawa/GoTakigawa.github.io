@@ -1,0 +1,1566 @@
+{
+  "meta": {
+    "version": "2.0",
+    "description": "Unified tuning presets library for guitar and bass. Filter by instrument and string_count for UI display. Each preset has a section tag for category grouping, aliases for band-specific names, and notes for contextual info.",
+    "instruments": [
+      "guitar",
+      "bass"
+    ],
+    "sections": {
+      "STD": "Standard — uniform interval tunings. Transposing between these requires no re-learning of shapes.",
+      "DRP": "Drop — lowest string dropped one whole step below the standard interval. Enables one-finger power chords on bottom strings.",
+      "OPN": "Open — open strings form a chord. Common in slide and fingerstyle contexts. Guitar only.",
+      "MOD": "Modal / Irregular — non-standard interval patterns. Shapes do not transfer from standard.",
+      "D7G": "DADGAD 7str family — 7-string expansion of DADGAD modal logic. Shared lineage across djent/prog scene (FellSilent → TesseracT / Monuments / ERRA). Guitar only.",
+      "EXT": "Extended range reconfiguration — instrument reconfigured to cover a different range without adding strings (e.g. BEAD on 4-string bass). Bass only.",
+      "UNQ": "Unique — band-specific tunings that cannot be reduced to any standard/drop/modal category. Interval structure is non-transferable."
+    },
+    "guitar_string_counts": [
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "bass_string_counts": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fields": {
+      "id": "Unique preset identifier",
+      "instrument": "guitar or bass",
+      "section": "Category tag (STD / DRP / OPN / MOD / D7G / EXT / UNQ)",
+      "label": "Display name",
+      "string_count": "Number of strings",
+      "strings": "Array of note+octave from lowest (index 0) to highest",
+      "aliases": "Band/song-specific names for this tuning (may be empty)",
+      "notes": "Usage context, genre, notable bands/songs"
+    }
+  },
+  "presets": [
+    {
+      "id": "STD-E6",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "E Standard",
+      "string_count": 6,
+      "strings": [
+        "E2",
+        "A2",
+        "D3",
+        "G3",
+        "B3",
+        "E4"
+      ],
+      "aliases": [],
+      "notes": "Universal baseline. Most guitar pedagogy and tablature assumes this tuning."
+    },
+    {
+      "id": "STD-Eb6",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "Eb Standard",
+      "string_count": 6,
+      "strings": [
+        "Eb2",
+        "Ab2",
+        "Db3",
+        "Gb3",
+        "Bb3",
+        "Eb4"
+      ],
+      "aliases": [],
+      "notes": "Half step down. SRV, Van Halen, Guns N' Roses. Slightly looser feel."
+    },
+    {
+      "id": "STD-D6",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "D Standard",
+      "string_count": 6,
+      "strings": [
+        "D2",
+        "G2",
+        "C3",
+        "F3",
+        "A3",
+        "D4"
+      ],
+      "aliases": [],
+      "notes": "Full step down. Common in heavy rock and metal. Shapes identical to E Standard."
+    },
+    {
+      "id": "STD-C6",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "C Standard",
+      "string_count": 6,
+      "strings": [
+        "C2",
+        "F2",
+        "Bb2",
+        "Eb3",
+        "G3",
+        "C4"
+      ],
+      "aliases": [],
+      "notes": "Two steps down. Very dark, requires heavier strings. Popular in doom/sludge."
+    },
+    {
+      "id": "STD-B6",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "B Standard",
+      "string_count": 6,
+      "strings": [
+        "B1",
+        "E2",
+        "A2",
+        "D3",
+        "F#3",
+        "B3"
+      ],
+      "aliases": [],
+      "notes": "Two and a half steps down. Approaches 7-string range on a 6-string."
+    },
+    {
+      "id": "STD-A6",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "A Standard",
+      "string_count": 6,
+      "strings": [
+        "A1",
+        "D2",
+        "G2",
+        "C3",
+        "E3",
+        "A3"
+      ],
+      "aliases": [],
+      "notes": "Three and a half steps down. Extreme low end; typically requires baritone scale."
+    },
+    {
+      "id": "STD-B7",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "B Standard (7str)",
+      "string_count": 7,
+      "strings": [
+        "B1",
+        "E2",
+        "A2",
+        "D3",
+        "G3",
+        "B3",
+        "E4"
+      ],
+      "aliases": [],
+      "notes": "Factory standard for most 7-string guitars. Upper 6 strings identical to E Standard."
+    },
+    {
+      "id": "STD-Bb7",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "Bb Standard (7str)",
+      "string_count": 7,
+      "strings": [
+        "Bb1",
+        "Eb2",
+        "Ab2",
+        "Db3",
+        "Gb3",
+        "Bb3",
+        "Eb4"
+      ],
+      "aliases": [
+        "Meshuggah 7str main"
+      ],
+      "notes": "Half step below B Standard 7str. Meshuggah's primary tuning before switching to 8-string."
+    },
+    {
+      "id": "STD-A7",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "A Standard (7str)",
+      "string_count": 7,
+      "strings": [
+        "A1",
+        "D2",
+        "G2",
+        "C3",
+        "F3",
+        "A3",
+        "D4"
+      ],
+      "aliases": [],
+      "notes": "Full step below B Standard 7str. Common in progressive metal."
+    },
+    {
+      "id": "STD-Ab7",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "Ab Standard (7str)",
+      "string_count": 7,
+      "strings": [
+        "Ab1",
+        "Db2",
+        "Gb2",
+        "B2",
+        "Eb3",
+        "Ab3",
+        "Db4"
+      ],
+      "aliases": [],
+      "notes": "One and a half steps below B Standard 7str."
+    },
+    {
+      "id": "STD-F#8",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "F# Standard (8str)",
+      "string_count": 8,
+      "strings": [
+        "F#1",
+        "B1",
+        "E2",
+        "A2",
+        "D3",
+        "G3",
+        "B3",
+        "E4"
+      ],
+      "aliases": [
+        "Periphery 8str main"
+      ],
+      "notes": "Factory standard for most 8-string guitars. Upper 7 strings = B Standard 7str. Periphery, Animals as Leaders."
+    },
+    {
+      "id": "STD-F8",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "F Standard (8str)",
+      "string_count": 8,
+      "strings": [
+        "F1",
+        "Bb1",
+        "Eb2",
+        "Ab2",
+        "Db3",
+        "Gb3",
+        "Bb3",
+        "Eb4"
+      ],
+      "aliases": [
+        "Meshuggah 8str main"
+      ],
+      "notes": "Half step below F# Standard 8str. Meshuggah's primary 8-string tuning. Upper 7 strings = Bb Standard 7str."
+    },
+    {
+      "id": "STD-C#9",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "C# Standard (9str)",
+      "string_count": 9,
+      "strings": [
+        "C#1",
+        "F#1",
+        "B1",
+        "E2",
+        "A2",
+        "D3",
+        "G3",
+        "B3",
+        "E4"
+      ],
+      "aliases": [],
+      "notes": "Standard 9-string tuning. Upper 6 strings = E Standard. Used by Tosin Abasi ('Private Visions of the World'), Stephen Carpenter (Deftones 'Ohms'), After the Burial."
+    },
+    {
+      "id": "STD-G#10",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "G# Standard (10str)",
+      "string_count": 10,
+      "strings": [
+        "G#0",
+        "C#1",
+        "F#1",
+        "B1",
+        "E2",
+        "A2",
+        "D3",
+        "G3",
+        "B3",
+        "E4"
+      ],
+      "aliases": [],
+      "notes": "Standard 10-string tuning by fourths extension. Upper 9 strings = C# Standard 9str."
+    },
+    {
+      "id": "STD-YPS10",
+      "instrument": "guitar",
+      "section": "STD",
+      "label": "Yepes Tuning (10str)",
+      "string_count": 10,
+      "strings": [
+        "Gb0",
+        "Ab0",
+        "Bb0",
+        "C1",
+        "E2",
+        "A2",
+        "D3",
+        "G3",
+        "B3",
+        "E4"
+      ],
+      "aliases": [],
+      "notes": "Narciso Yepes' classical 10-string tuning. Upper 6 = E Standard. Lower 4 (Gb/Ab/Bb/C) designed to provide sympathetic resonance for all 12 chromatic pitches. Non-standard re-entrant lower strings."
+    },
+    {
+      "id": "DRP-D6",
+      "instrument": "guitar",
+      "section": "DRP",
+      "label": "Drop D",
+      "string_count": 6,
+      "strings": [
+        "D2",
+        "A2",
+        "D3",
+        "G3",
+        "B3",
+        "E4"
+      ],
+      "aliases": [],
+      "notes": "Most common alternate tuning. Low E dropped to D, enabling one-finger power chords. Nirvana, Foo Fighters, Tool."
+    },
+    {
+      "id": "DRP-DD6",
+      "instrument": "guitar",
+      "section": "DRP",
+      "label": "Double Drop D",
+      "string_count": 6,
+      "strings": [
+        "D2",
+        "A2",
+        "D3",
+        "G3",
+        "B3",
+        "D4"
+      ],
+      "aliases": [],
+      "notes": "Both E strings dropped to D. Neil Young 'Cinnamon Girl'. Fingerpicking-oriented."
+    },
+    {
+      "id": "DRP-C6",
+      "instrument": "guitar",
+      "section": "DRP",
+      "label": "Drop C",
+      "string_count": 6,
+      "strings": [
+        "C2",
+        "G2",
+        "C3",
+        "F3",
+        "A3",
+        "D4"
+      ],
+      "aliases": [
+        "Periphery Drop C"
+      ],
+      "notes": "D Standard with low string dropped to C. System of a Down, Periphery (main 6str tuning), Bullet for My Valentine."
+    },
+    {
+      "id": "DRP-B6",
+      "instrument": "guitar",
+      "section": "DRP",
+      "label": "Drop B",
+      "string_count": 6,
+      "strings": [
+        "B1",
+        "F#2",
+        "B2",
+        "E3",
+        "G#3",
+        "C#4"
+      ],
+      "aliases": [],
+      "notes": "C Standard with low string dropped to B. Slipknot 'Duality', Tool, Disturbed."
+    },
+    {
+      "id": "DRP-A6",
+      "instrument": "guitar",
+      "section": "DRP",
+      "label": "Drop A",
+      "string_count": 6,
+      "strings": [
+        "A1",
+        "E2",
+        "A2",
+        "D3",
+        "F#3",
+        "B3"
+      ],
+      "aliases": [],
+      "notes": "B Standard with low string dropped to A. Animals as Leaders, Mastodon (Remission era), Periphery."
+    },
+    {
+      "id": "DRP-A7",
+      "instrument": "guitar",
+      "section": "DRP",
+      "label": "Drop A (7str)",
+      "string_count": 7,
+      "strings": [
+        "A1",
+        "E2",
+        "A2",
+        "D3",
+        "G3",
+        "B3",
+        "E4"
+      ],
+      "aliases": [],
+      "notes": "B Standard 7str with low string dropped to A. Standard heavy 7-string tuning."
+    },
+    {
+      "id": "DRP-G7",
+      "instrument": "guitar",
+      "section": "DRP",
+      "label": "Drop G (7str)",
+      "string_count": 7,
+      "strings": [
+        "G1",
+        "D2",
+        "G2",
+        "C3",
+        "F3",
+        "A3",
+        "D4"
+      ],
+      "aliases": [
+        "Modern Metal Drop G"
+      ],
+      "notes": "Lowest string dropped to G1. Common in modern heavy and progressive metal. Derived from D Standard with G1 on the bottom."
+    },
+    {
+      "id": "DRP-G#7",
+      "instrument": "guitar",
+      "section": "DRP",
+      "label": "Drop G# (7str)",
+      "string_count": 7,
+      "strings": [
+        "G#1",
+        "D#2",
+        "G#2",
+        "C#3",
+        "F#3",
+        "A#3",
+        "D#4"
+      ],
+      "aliases": [
+        "ERRA Drop G# main"
+      ],
+      "notes": "Ab Standard 7str with low string dropped. ERRA primary live tuning. Trivium, After the Burial, Periphery."
+    },
+    {
+      "id": "DRP-F#7",
+      "instrument": "guitar",
+      "section": "DRP",
+      "label": "Drop F# (7str)",
+      "string_count": 7,
+      "strings": [
+        "F#1",
+        "C#2",
+        "F#2",
+        "B2",
+        "E3",
+        "G#3",
+        "C#4"
+      ],
+      "aliases": [
+        "ERRA Drop F# (Erra album)",
+        "Monuments I The Destroyer"
+      ],
+      "notes": "One and a half steps below Drop A 7str. ERRA self-titled album, Monuments 'I, The Destroyer', Deftones, Rivers of Nihil."
+    },
+    {
+      "id": "DRP-F7",
+      "instrument": "guitar",
+      "section": "DRP",
+      "label": "Drop F (7str)",
+      "string_count": 7,
+      "strings": [
+        "F1",
+        "C2",
+        "F2",
+        "Bb2",
+        "Eb3",
+        "G3",
+        "C4"
+      ],
+      "aliases": [],
+      "notes": "Two steps below Drop A 7str. Northlane, Vildhjarta, extreme low tuning territory."
+    },
+    {
+      "id": "DRP-E7",
+      "instrument": "guitar",
+      "section": "DRP",
+      "label": "Drop E (7str)",
+      "string_count": 7,
+      "strings": [
+        "E1",
+        "B1",
+        "E2",
+        "A2",
+        "D3",
+        "G3",
+        "B3"
+      ],
+      "aliases": [],
+      "notes": "Two and a half steps below Drop A 7str. Oceano, Currents, ERRA (recent singles), Invent Animate."
+    },
+    {
+      "id": "DRP-E8",
+      "instrument": "guitar",
+      "section": "DRP",
+      "label": "Drop E (8str)",
+      "string_count": 8,
+      "strings": [
+        "E1",
+        "B1",
+        "E2",
+        "A2",
+        "D3",
+        "G3",
+        "B3",
+        "E4"
+      ],
+      "aliases": [
+        "Animals as Leaders main"
+      ],
+      "notes": "F# Standard 8str with low string dropped to E. Tosin Abasi / Animals as Leaders primary tuning. Upper 6 strings = E Standard."
+    },
+    {
+      "id": "DRP-B9",
+      "instrument": "guitar",
+      "section": "DRP",
+      "label": "Drop B (9str)",
+      "string_count": 9,
+      "strings": [
+        "B0",
+        "F#1",
+        "B1",
+        "E2",
+        "A2",
+        "D3",
+        "G3",
+        "B3",
+        "E4"
+      ],
+      "aliases": [],
+      "notes": "C# Standard 9str with low string dropped to B. Used in djent/progressive metal context."
+    },
+    {
+      "id": "DRP-A9",
+      "instrument": "guitar",
+      "section": "DRP",
+      "label": "Drop A (9str)",
+      "string_count": 9,
+      "strings": [
+        "A0",
+        "E1",
+        "A1",
+        "E2",
+        "A2",
+        "D3",
+        "G3",
+        "B3",
+        "E4"
+      ],
+      "aliases": [],
+      "notes": "C# Standard 9str with low string dropped to A. Extreme sub-guitar range. Heavy single-note riff focus."
+    },
+    {
+      "id": "OPN-D",
+      "instrument": "guitar",
+      "section": "OPN",
+      "label": "Open D",
+      "string_count": 6,
+      "strings": [
+        "D2",
+        "A2",
+        "D3",
+        "F#3",
+        "A3",
+        "D4"
+      ],
+      "aliases": [],
+      "notes": "Open strings form D major chord. Slide guitar, Joni Mitchell 'Big Yellow Taxi', Nick Drake."
+    },
+    {
+      "id": "OPN-E",
+      "instrument": "guitar",
+      "section": "OPN",
+      "label": "Open E",
+      "string_count": 6,
+      "strings": [
+        "E2",
+        "B2",
+        "E3",
+        "G#3",
+        "B3",
+        "E4"
+      ],
+      "aliases": [],
+      "notes": "Open D raised one whole step. Derek Trucks, Duane Allman. Higher tension — caution on acoustic."
+    },
+    {
+      "id": "OPN-G",
+      "instrument": "guitar",
+      "section": "OPN",
+      "label": "Open G",
+      "string_count": 6,
+      "strings": [
+        "D2",
+        "G2",
+        "D3",
+        "G3",
+        "B3",
+        "D4"
+      ],
+      "aliases": [],
+      "notes": "Open strings form G major chord. Keith Richards, Jimmy Page, Robert Johnson."
+    },
+    {
+      "id": "OPN-C",
+      "instrument": "guitar",
+      "section": "OPN",
+      "label": "Open C",
+      "string_count": 6,
+      "strings": [
+        "C2",
+        "G2",
+        "C3",
+        "G3",
+        "C4",
+        "E4"
+      ],
+      "aliases": [],
+      "notes": "Open strings form C major chord. Led Zeppelin 'Friends', Soundgarden 'A Thousand Days Before'."
+    },
+    {
+      "id": "OPN-Cadd9",
+      "instrument": "guitar",
+      "section": "OPN",
+      "label": "Open Cadd9",
+      "string_count": 6,
+      "strings": [
+        "C2",
+        "G2",
+        "C3",
+        "E3",
+        "G3",
+        "D4"
+      ],
+      "aliases": [
+        "Periphery Scarlet tuning"
+      ],
+      "notes": "Open C variant with added 9th. Periphery 'Scarlet'. Warm, extended chord voicings on open strings."
+    },
+    {
+      "id": "OPN-Cmadd9",
+      "instrument": "guitar",
+      "section": "OPN",
+      "label": "Open Cm(add9)",
+      "string_count": 6,
+      "strings": [
+        "C2",
+        "G2",
+        "C3",
+        "Eb3",
+        "G3",
+        "D4"
+      ],
+      "aliases": [],
+      "notes": "Minor version of Open Cadd9. Periphery / Haunted Shores (Mark Holcomb). 3rd string flattened by half step."
+    },
+    {
+      "id": "MOD-DADGAD",
+      "instrument": "guitar",
+      "section": "MOD",
+      "label": "DADGAD",
+      "string_count": 6,
+      "strings": [
+        "D2",
+        "A2",
+        "D3",
+        "G3",
+        "A3",
+        "D4"
+      ],
+      "aliases": [
+        "Celtic tuning"
+      ],
+      "notes": "Open strings form Dsus4. Celtic folk origin. Led Zeppelin 'Kashmir', TTNG, John Browne (Monuments) used as compositional base."
+    },
+    {
+      "id": "MOD-NST",
+      "instrument": "guitar",
+      "section": "MOD",
+      "label": "New Standard Tuning",
+      "string_count": 6,
+      "strings": [
+        "C2",
+        "G2",
+        "D3",
+        "A3",
+        "E4",
+        "G4"
+      ],
+      "aliases": [
+        "Robert Fripp tuning"
+      ],
+      "notes": "All fifths except top interval. Developed by Robert Fripp (King Crimson). Wider range, unfamiliar shapes."
+    },
+    {
+      "id": "MOD-4TH",
+      "instrument": "guitar",
+      "section": "MOD",
+      "label": "All Fourths",
+      "string_count": 6,
+      "strings": [
+        "E2",
+        "A2",
+        "D3",
+        "G3",
+        "C4",
+        "F4"
+      ],
+      "aliases": [],
+      "notes": "Removes the major-third anomaly between G and B. Symmetrical scale patterns. Experimental / jazz context."
+    },
+    {
+      "id": "MOD-YVT",
+      "instrument": "guitar",
+      "section": "MOD",
+      "label": "Yvette Tuning",
+      "string_count": 6,
+      "strings": [
+        "D2",
+        "A2",
+        "D3",
+        "F#3",
+        "A3",
+        "E4"
+      ],
+      "aliases": [
+        "Dadd9 tuning"
+      ],
+      "notes": "Open D with high string raised one whole step. Covet (Yvette Young) 'Nautilus', TTNG 'Panda'. Chord tapping-friendly."
+    },
+    {
+      "id": "MOD-MRF",
+      "instrument": "guitar",
+      "section": "MOD",
+      "label": "Math Rock F",
+      "string_count": 6,
+      "strings": [
+        "F2",
+        "A2",
+        "C3",
+        "G3",
+        "C4",
+        "E4"
+      ],
+      "aliases": [],
+      "notes": "Irregular interval sequence. Used by TTNG and adjacent math rock artists. Non-standard chord geometry."
+    },
+    {
+      "id": "D7G-Bb",
+      "instrument": "guitar",
+      "section": "D7G",
+      "label": "DADGAD 7str — Bb",
+      "string_count": 7,
+      "strings": [
+        "Bb1",
+        "F2",
+        "Bb2",
+        "Eb3",
+        "F3",
+        "Bb3",
+        "Eb4"
+      ],
+      "aliases": [
+        "TesseracT Main",
+        "Monuments Main",
+        "Leviathan Tuning",
+        "FellSilent Tuning"
+      ],
+      "notes": "7-string expansion of DADGAD modal logic, rooted at Bb. Shared lineage: FellSilent → TesseracT / Monuments / ERRA. Upper 6 strings build a suspended/modal chord cluster rather than standard intervals."
+    },
+    {
+      "id": "D7G-Ab",
+      "instrument": "guitar",
+      "section": "D7G",
+      "label": "DADGAD 7str — Ab",
+      "string_count": 7,
+      "strings": [
+        "Ab1",
+        "F2",
+        "Bb2",
+        "Eb3",
+        "F3",
+        "Bb3",
+        "Eb4"
+      ],
+      "aliases": [
+        "Atlas Tuning",
+        "TesseracT Drop Ab"
+      ],
+      "notes": "D7G-Bb with low string dropped one whole step. Monuments 'Atlas', TesseracT 'Oblique' / 'Sleeper Awakes'. Only the lowest string differs from D7G-Bb."
+    },
+    {
+      "id": "D7G-A",
+      "instrument": "guitar",
+      "section": "D7G",
+      "label": "DADGAD 7str — A",
+      "string_count": 7,
+      "strings": [
+        "A1",
+        "E2",
+        "A2",
+        "D3",
+        "E3",
+        "A3",
+        "D4"
+      ],
+      "aliases": [
+        "TesseracT Drop A (early)"
+      ],
+      "notes": "Earlier TesseracT tuning. DADGAD-family structure a minor second above D7G-Bb."
+    },
+    {
+      "id": "UNQ-LUN",
+      "instrument": "guitar",
+      "section": "UNQ",
+      "label": "Lune Tuning",
+      "string_count": 6,
+      "strings": [
+        "A1",
+        "G2",
+        "C3",
+        "F3",
+        "A3",
+        "D4"
+      ],
+      "aliases": [],
+      "notes": "Periphery 'Lune'. 5-6 string interval is a major 2nd (non-standard). Simulates 7-string drop A range on a 6-string. Misha Mansoor conceived during vacation with only a 6-string available."
+    },
+    {
+      "id": "UNQ-FLT",
+      "instrument": "guitar",
+      "section": "UNQ",
+      "label": "Flatline Tuning",
+      "string_count": 7,
+      "strings": [
+        "Ab1",
+        "Eb2",
+        "Ab2",
+        "Db3",
+        "Gb3",
+        "Bb3",
+        "Eb4"
+      ],
+      "aliases": [],
+      "notes": "Periphery 'Flatline' (Periphery III). Retained as unique due to established name. All strings tuned half step below Drop A 7str."
+    },
+    {
+      "id": "UNQ-TSN",
+      "instrument": "guitar",
+      "section": "UNQ",
+      "label": "Tosin Tuning",
+      "string_count": 7,
+      "strings": [
+        "Bb1",
+        "Db2",
+        "Ab2",
+        "Db3",
+        "Gb3",
+        "Bb3",
+        "Eb4"
+      ],
+      "aliases": [],
+      "notes": "Tosin Abasi origin. 6-7 string interval is a minor 3rd — non-standard. Periphery used on 'Racecar'. Dissonant low-end character."
+    },
+    {
+      "id": "UNQ-MDF#",
+      "instrument": "guitar",
+      "section": "UNQ",
+      "label": "Monuments Drop F#",
+      "string_count": 7,
+      "strings": [
+        "F#1",
+        "D#2",
+        "G#2",
+        "C#3",
+        "D#3",
+        "G#3",
+        "C#4"
+      ],
+      "aliases": [],
+      "notes": "Monuments-specific. Upper 5 strings are in D# standard, incompatible with standard Drop F# (DRP-F#7). 3rd-4th string interval is a major 2nd."
+    },
+    {
+      "id": "UNQ-ERRA",
+      "instrument": "guitar",
+      "section": "UNQ",
+      "label": "ERRA Drift Main",
+      "string_count": 7,
+      "strings": [
+        "Ab1",
+        "Eb2",
+        "Ab2",
+        "Db3",
+        "F3",
+        "Bb3",
+        "Eb4"
+      ],
+      "aliases": [],
+      "notes": "ERRA 'Drift' album (2016). 'Luminesce', 'Irreversible', 'Drift', 'Continuum'. 3-4 string interval is a major 3rd — diverges from standard Drop G# 7str."
+    },
+    {
+      "id": "UNQ-AAL",
+      "instrument": "guitar",
+      "section": "UNQ",
+      "label": "AAL Woven Web",
+      "string_count": 8,
+      "strings": [
+        "D1",
+        "B1",
+        "D2",
+        "A2",
+        "D3",
+        "G3",
+        "B3",
+        "E4"
+      ],
+      "aliases": [],
+      "notes": "Animals as Leaders 'The Woven Web'. Strings 8, 6, 4 all tuned to D across three octaves. Non-linear interval structure."
+    },
+    {
+      "id": "UNQ-MSG",
+      "instrument": "guitar",
+      "section": "UNQ",
+      "label": "Meshuggah Spasm",
+      "string_count": 8,
+      "strings": [
+        "Bb0",
+        "Bb1",
+        "Eb2",
+        "Ab2",
+        "Db3",
+        "Gb3",
+        "Bb3",
+        "Eb4"
+      ],
+      "aliases": [],
+      "notes": "Meshuggah 'Spasm'. 8th string dropped to Bb0 — one octave below the 7th string. Extreme sub-bass. Unique even within Meshuggah's catalog."
+    },
+    {
+      "id": "STD-E4",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "E Standard (4str)",
+      "string_count": 4,
+      "strings": [
+        "E1",
+        "A1",
+        "D2",
+        "G2"
+      ],
+      "aliases": [],
+      "notes": "Universal baseline for 4-string bass. Matches lowest 4 strings of guitar one octave lower. Used across all genres."
+    },
+    {
+      "id": "STD-Eb4",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "Eb Standard (4str)",
+      "string_count": 4,
+      "strings": [
+        "Eb1",
+        "Ab1",
+        "Db2",
+        "Gb2"
+      ],
+      "aliases": [],
+      "notes": "Half step down. Follows guitarist's Eb tuning. SRV-era, grunge, classic rock context."
+    },
+    {
+      "id": "STD-D4",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "D Standard (4str)",
+      "string_count": 4,
+      "strings": [
+        "D1",
+        "G1",
+        "C2",
+        "F2"
+      ],
+      "aliases": [],
+      "notes": "Full step down. Matches D Standard guitar. Heavy rock, metal context."
+    },
+    {
+      "id": "STD-C4",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "C Standard (4str)",
+      "string_count": 4,
+      "strings": [
+        "C1",
+        "F1",
+        "Bb1",
+        "Eb2"
+      ],
+      "aliases": [],
+      "notes": "Two steps down. Doom, sludge, extreme metal. Anthony Jackson used C Standard on sessions with Chaka Khan."
+    },
+    {
+      "id": "STD-B4",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "B Standard (4str)",
+      "string_count": 4,
+      "strings": [
+        "B0",
+        "E1",
+        "A1",
+        "D2"
+      ],
+      "aliases": [],
+      "notes": "Two and a half steps down. Approaches 5-string territory. Requires heavy gauge strings."
+    },
+    {
+      "id": "STD-Bb4",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "Bb Standard (4str)",
+      "string_count": 4,
+      "strings": [
+        "Bb0",
+        "Eb1",
+        "Ab1",
+        "Db2"
+      ],
+      "aliases": [
+        "Meshuggah bass early era"
+      ],
+      "notes": "Meshuggah's bass tuning on early albums (pre-Nothing), tracking with 7-string Bb Standard guitars."
+    },
+    {
+      "id": "STD-F4",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "F Standard (4str)",
+      "string_count": 4,
+      "strings": [
+        "F1",
+        "Bb1",
+        "Eb2",
+        "Ab2"
+      ],
+      "aliases": [
+        "Meshuggah bass Nothing onwards"
+      ],
+      "notes": "Meshuggah bass from 'Nothing' onwards. Tuned up a half step from EADG to sit in the same octave as the 8-string guitars. Dick Lövgren primary tuning."
+    },
+    {
+      "id": "STD-B5",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "B Standard (5str)",
+      "string_count": 5,
+      "strings": [
+        "B0",
+        "E1",
+        "A1",
+        "D2",
+        "G2"
+      ],
+      "aliases": [],
+      "notes": "Factory standard for most 5-string basses. Adds low B below 4-string standard. Metal, jazz, gospel, funk."
+    },
+    {
+      "id": "STD-Bb5",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "Bb Standard (5str)",
+      "string_count": 5,
+      "strings": [
+        "Bb0",
+        "Eb1",
+        "Ab1",
+        "Db2",
+        "Gb2"
+      ],
+      "aliases": [
+        "Meshuggah 5str transition tuning"
+      ],
+      "notes": "Meshuggah transition tuning. Dick Lövgren used Bb-F-Bb-Eb-Ab to cover both old and new material simultaneously (see UNQ-MSG5)."
+    },
+    {
+      "id": "STD-A5",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "A Standard (5str)",
+      "string_count": 5,
+      "strings": [
+        "A0",
+        "D1",
+        "G1",
+        "C2",
+        "F2"
+      ],
+      "aliases": [],
+      "notes": "One step below B Standard 5str. Extreme low tuning for djent/metal context."
+    },
+    {
+      "id": "STD-HC5",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "High C (5str)",
+      "string_count": 5,
+      "strings": [
+        "E1",
+        "A1",
+        "D2",
+        "G2",
+        "C3"
+      ],
+      "aliases": [
+        "Tenor 5str",
+        "Fender Bass V style"
+      ],
+      "notes": "Adds high C instead of low B. Steve Swallow, jazz soloists. Original Fender Bass V (1965) used this layout."
+    },
+    {
+      "id": "STD-B6",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "B Standard (6str)",
+      "string_count": 6,
+      "strings": [
+        "B0",
+        "E1",
+        "A1",
+        "D2",
+        "G2",
+        "C3"
+      ],
+      "aliases": [],
+      "notes": "Standard 6-string bass. Adds low B and high C to 4-string standard. Jazz fusion, progressive rock, solo bass. Anthony Jackson's 'contrabass guitar' concept."
+    },
+    {
+      "id": "STD-B6b",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "Baritone 6str (BEADGB)",
+      "string_count": 6,
+      "strings": [
+        "B0",
+        "E1",
+        "A1",
+        "D2",
+        "G2",
+        "B2"
+      ],
+      "aliases": [],
+      "notes": "6-string bass with high B instead of high C. Closer to guitar territory on upper strings."
+    },
+    {
+      "id": "STD-F#7b",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "F# Standard (7str bass)",
+      "string_count": 7,
+      "strings": [
+        "F#0",
+        "B0",
+        "E1",
+        "A1",
+        "D2",
+        "G2",
+        "C3"
+      ],
+      "aliases": [
+        "Warwick Jeroen Paul Thesseling"
+      ],
+      "notes": "Most common 7-string bass tuning. Low F# added below 6-string standard. Michael Tobias / Garry Goodman original. Warwick custom fretless 7str for Jeroen Paul Thesseling uses this layout."
+    },
+    {
+      "id": "STD-B7b",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "B Standard (7str bass)",
+      "string_count": 7,
+      "strings": [
+        "B0",
+        "E1",
+        "A1",
+        "D2",
+        "G2",
+        "C3",
+        "F3"
+      ],
+      "aliases": [
+        "Conklin Bill Dickens GT7"
+      ],
+      "notes": "6-string standard with high F added. Garry Goodman / Bill Dickens (Conklin GT7). High-register solo and tapping focus."
+    },
+    {
+      "id": "STD-F#8b",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "F# Standard (8str bass)",
+      "string_count": 8,
+      "strings": [
+        "F#0",
+        "B0",
+        "E1",
+        "A1",
+        "D2",
+        "G2",
+        "C3",
+        "F3"
+      ],
+      "aliases": [],
+      "notes": "Standard 8-string bass tuning. F# added low to 7str (BEADGCF). Most common 8-string ERB layout."
+    },
+    {
+      "id": "STD-F#9b",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "F# Standard (9str bass)",
+      "string_count": 9,
+      "strings": [
+        "F#0",
+        "B0",
+        "E1",
+        "A1",
+        "D2",
+        "G2",
+        "C3",
+        "F3",
+        "Bb3"
+      ],
+      "aliases": [],
+      "notes": "Standard 9-string bass. Bb added high to 8str standard. Bill 'Buddha' Dickens — Bill Conklin built the first 9-string bass for him in 1995."
+    },
+    {
+      "id": "STD-C#10b-lo",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "C# Standard (10str bass — low ext.)",
+      "string_count": 10,
+      "strings": [
+        "C#0",
+        "F#0",
+        "B0",
+        "E1",
+        "A1",
+        "D2",
+        "G2",
+        "C3",
+        "F3",
+        "Bb3"
+      ],
+      "aliases": [],
+      "notes": "10-string bass with C# added low below 9str. Garry Goodman's Adler 12-string bass and similar extreme ERBs use this foundation."
+    },
+    {
+      "id": "STD-F#10b-hi",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "F# Standard (10str bass — high ext.)",
+      "string_count": 10,
+      "strings": [
+        "F#0",
+        "B0",
+        "E1",
+        "A1",
+        "D2",
+        "G2",
+        "C3",
+        "F3",
+        "Bb3",
+        "Eb4"
+      ],
+      "aliases": [],
+      "notes": "10-string bass with Eb added high above 9str. Alternative to low-extension 10str layout."
+    },
+    {
+      "id": "STD-C#11b",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "C# Standard (11str bass)",
+      "string_count": 11,
+      "strings": [
+        "C#0",
+        "F#0",
+        "B0",
+        "E1",
+        "A1",
+        "D2",
+        "G2",
+        "C3",
+        "F3",
+        "Bb3",
+        "Eb4"
+      ],
+      "aliases": [],
+      "notes": "11-string bass by adding Eb high to 10str low-ext layout. Extreme ERB territory. Primarily custom luthier builds."
+    },
+    {
+      "id": "STD-C#12b",
+      "instrument": "bass",
+      "section": "STD",
+      "label": "C# Standard (12str bass)",
+      "string_count": 12,
+      "strings": [
+        "C#0",
+        "F#0",
+        "B0",
+        "E1",
+        "A1",
+        "D2",
+        "G2",
+        "C3",
+        "F3",
+        "Bb3",
+        "Eb4",
+        "Ab4"
+      ],
+      "aliases": [],
+      "notes": "12-string bass. Garry Goodman's Adler 12-string with 36 frets spans 8 octaves — equivalent range to a grand piano. Extreme custom instrument."
+    },
+    {
+      "id": "DRP-D4",
+      "instrument": "bass",
+      "section": "DRP",
+      "label": "Drop D (4str)",
+      "string_count": 4,
+      "strings": [
+        "D1",
+        "A1",
+        "D2",
+        "G2"
+      ],
+      "aliases": [],
+      "notes": "Most common alternate bass tuning. Low E dropped to D. Matches Drop D guitar. Rock, metal, grunge."
+    },
+    {
+      "id": "DRP-C4",
+      "instrument": "bass",
+      "section": "DRP",
+      "label": "Drop C (4str)",
+      "string_count": 4,
+      "strings": [
+        "C1",
+        "G1",
+        "C2",
+        "F2"
+      ],
+      "aliases": [],
+      "notes": "D Standard with low string dropped to C. Matches Drop C guitar. Heavy metal, metalcore context."
+    },
+    {
+      "id": "DRP-B4",
+      "instrument": "bass",
+      "section": "DRP",
+      "label": "Drop B (4str)",
+      "string_count": 4,
+      "strings": [
+        "B0",
+        "F#1",
+        "B1",
+        "E2"
+      ],
+      "aliases": [],
+      "notes": "C Standard with low string dropped to B. Extreme low territory on 4-string. Matches Drop B guitar."
+    },
+    {
+      "id": "DRP-A4",
+      "instrument": "bass",
+      "section": "DRP",
+      "label": "Drop A (4str)",
+      "string_count": 4,
+      "strings": [
+        "A0",
+        "E1",
+        "A1",
+        "D2"
+      ],
+      "aliases": [],
+      "notes": "B Standard with low string dropped to A. Sub-bass range. Matches Drop A guitar. Djent/deathcore context."
+    },
+    {
+      "id": "DRP-Bb4",
+      "instrument": "bass",
+      "section": "DRP",
+      "label": "Drop Bb (4str)",
+      "string_count": 4,
+      "strings": [
+        "Bb0",
+        "Eb1",
+        "Ab1",
+        "Db2"
+      ],
+      "aliases": [
+        "Meshuggah Bleed tuning"
+      ],
+      "notes": "Meshuggah: Dick Lövgren uses this 4-string configuration for specific songs like 'Bleed' (obZen)."
+    },
+    {
+      "id": "DRP-A5",
+      "instrument": "bass",
+      "section": "DRP",
+      "label": "Drop A (5str)",
+      "string_count": 5,
+      "strings": [
+        "A0",
+        "E1",
+        "A1",
+        "D2",
+        "G2"
+      ],
+      "aliases": [],
+      "notes": "B Standard 5str with low string dropped to A. Extended low range for heavy 5-string context."
+    },
+    {
+      "id": "DRP-G5",
+      "instrument": "bass",
+      "section": "DRP",
+      "label": "Drop G (5str)",
+      "string_count": 5,
+      "strings": [
+        "G0",
+        "D1",
+        "G1",
+        "C2",
+        "F2"
+      ],
+      "aliases": [],
+      "notes": "A Standard 5str with low string dropped. Extreme sub-bass. Deathcore / extreme metal context."
+    },
+    {
+      "id": "EXT-BEAD",
+      "instrument": "bass",
+      "section": "EXT",
+      "label": "BEAD (4str)",
+      "string_count": 4,
+      "strings": [
+        "B0",
+        "E1",
+        "A1",
+        "D2"
+      ],
+      "aliases": [
+        "5str low register on 4str"
+      ],
+      "notes": "4-string tuned to lowest 4 strings of a 5-string. Drops the G string in favor of low B. Ross Valory (Journey) used this early on. For players who need low B without moving to 5-string."
+    },
+    {
+      "id": "EXT-EADC",
+      "instrument": "bass",
+      "section": "EXT",
+      "label": "EADC (4str)",
+      "string_count": 4,
+      "strings": [
+        "E1",
+        "A1",
+        "D2",
+        "C3"
+      ],
+      "aliases": [
+        "Low C 4str"
+      ],
+      "notes": "Standard E with high G replaced by high C. Extends upper register. Niche solo/melodic context."
+    },
+    {
+      "id": "MOD-5TH4",
+      "instrument": "bass",
+      "section": "MOD",
+      "label": "Fifths (4str)",
+      "string_count": 4,
+      "strings": [
+        "C1",
+        "G1",
+        "D2",
+        "A2"
+      ],
+      "aliases": [
+        "Cello tuning",
+        "CGDA"
+      ],
+      "notes": "All-fifths tuning like cello. Wider range than fourths. Richer overtones. Used by some jazz and classical-crossover bassists."
+    },
+    {
+      "id": "MOD-TNR4",
+      "instrument": "bass",
+      "section": "MOD",
+      "label": "Tenor Bass (4str)",
+      "string_count": 4,
+      "strings": [
+        "A1",
+        "D2",
+        "G2",
+        "C3"
+      ],
+      "aliases": [
+        "ADGC",
+        "Stanley Clarke tuning"
+      ],
+      "notes": "Standard tuning raised one perfect fourth. Guitar-like register. Stanley Clarke, Victor Wooten, Stu Hamm for solo melodic playing."
+    },
+    {
+      "id": "MOD-PIC4",
+      "instrument": "bass",
+      "section": "MOD",
+      "label": "Piccolo Bass (4str)",
+      "string_count": 4,
+      "strings": [
+        "E2",
+        "A2",
+        "D3",
+        "G3"
+      ],
+      "aliases": [],
+      "notes": "Standard tuning up one octave using thin strings. Same pitches as bottom 4 strings of guitar. Carl Thompson built first piccolo bass for Stanley Clarke. Les Claypool uses one with 29 frets."
+    },
+    {
+      "id": "UNQ-MSG5",
+      "instrument": "bass",
+      "section": "UNQ",
+      "label": "Meshuggah 5str (transition)",
+      "string_count": 5,
+      "strings": [
+        "Bb0",
+        "F1",
+        "Bb1",
+        "Eb2",
+        "Ab2"
+      ],
+      "aliases": [],
+      "notes": "Dick Lövgren's touring 5-string tuning. Allows simultaneous coverage of old Bb Standard (strings 2-5) and Nothing-era F Standard (low Bb) material. Non-standard 1-2 string interval (P5 instead of P4)."
+    }
+  ]
+}

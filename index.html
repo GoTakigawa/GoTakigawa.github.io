@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GTI / Advanced Luthierie & Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Teko:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a08;
+  --text:#f0ede6;
+  --muted:#6b6960;
+  --dim:#2e2d2a;
+  --border:#1e1d1b;
+  --purple:#6b21d6;
+  --purple-hi:#9b5ef5;
+  --purple-bg:rgba(107,33,214,.07);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Teko',sans-serif;overflow-x:hidden}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px;
+  height:64px;
+  background:rgba(0,0,0,.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  transition:none;
+}
+nav.scrolled{
+  background:rgba(0,0,0,.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{height:32px;mix-blend-mode:screen}
+
+/* ── HAMBURGER — square, equal lines ── */
+.ham-wrap{
+  position:relative;
+  width:52px;height:52px;
+  z-index:300;
+}
+/* invisible hover bridge to keep drawer open */
+.ham-wrap::after{
+  content:'';
+  position:fixed;
+  top:0;right:0;
+  width:372px;
+  height:100vh;
+  pointer-events:none;
+}
+.ham-wrap:hover::after,
+.ham-wrap.active::after{
+  pointer-events:all;
+}
+.ham{
+  display:flex;flex-direction:column;justify-content:center;
+  align-items:flex-end;
+  gap:8px;
+  width:52px;height:52px;
+  cursor:pointer;
+  background:none;border:none;padding:12px;
+}
+.ham span{
+  display:block;
+  width:100%; /* all equal */
+  height:1px;
+  background:var(--text);
+  transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s;
+  transform-origin:center;
+}
+/* open state — × */
+.ham.open span:nth-child(1){transform:translateY(8px) rotate(45deg)}
+.ham.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.ham.open span:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
+
+/* ── DRAWER ── */
+.overlay{
+  position:fixed;inset:0;z-index:240;
+  background:rgba(0,0,0,.55);
+  opacity:0;pointer-events:none;transition:opacity .4s;
+}
+.overlay.visible{opacity:1;pointer-events:all}
+
+.drawer{
+  position:fixed;top:0;right:0;
+  width:320px;height:100vh;
+  background:#0d0d0b;
+  border-left:1px solid var(--border);
+  z-index:250;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:80px 0;
+  transform:translateX(100%);
+  transition:transform .5s cubic-bezier(.16,1,.3,1);
+}
+.drawer.open{transform:translateX(0)}
+
+.drawer a{
+  position:relative;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:15px 40px;
+  border-bottom:1px solid var(--border);
+  text-decoration:none;overflow:hidden;
+  opacity:0;transform:translateX(16px);
+  transition:background .25s,opacity .4s cubic-bezier(.16,1,.3,1),transform .4s cubic-bezier(.16,1,.3,1);
+}
+.drawer a:first-child{border-top:1px solid var(--border)}
+.drawer a::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:var(--purple);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .4s cubic-bezier(.16,1,.3,1);
+}
+.drawer a:hover{background:var(--purple-bg)}
+.drawer a:hover::after{transform:scaleX(1)}
+
+.drawer.open a{opacity:1;transform:translateX(0)}
+.drawer.open a:nth-child(1){transition-delay:.04s}
+.drawer.open a:nth-child(2){transition-delay:.07s}
+.drawer.open a:nth-child(3){transition-delay:.10s}
+.drawer.open a:nth-child(4){transition-delay:.13s}
+.drawer.open a:nth-child(5){transition-delay:.16s}
+.drawer.open a:nth-child(6){transition-delay:.19s}
+.drawer.open a:nth-child(7){transition-delay:.22s}
+.drawer.open a:nth-child(8){transition-delay:.25s}
+.drawer.open a:nth-child(9){transition-delay:.28s}
+.drawer.open a:nth-child(10){transition-delay:.31s}
+.drawer.open a:nth-child(11){transition-delay:.34s}
+.drawer.open a:nth-child(12){transition-delay:.37s}
+.drawer.open a:nth-child(13){transition-delay:.40s}
+
+.d-name{
+  font-family:'Libre Baskerville',serif;font-size:1rem;
+  color:rgba(240,237,230,.45);transition:color .25s;
+}
+.drawer a:hover .d-name{color:var(--text)}
+.d-arr{
+  font-family:'Teko',sans-serif;font-size:.8rem;font-weight:300;
+  color:var(--dim);opacity:0;transform:translateX(-6px);
+  transition:color .25s,opacity .25s,transform .3s cubic-bezier(.16,1,.3,1);
+}
+.drawer a:hover .d-arr{opacity:1;transform:translateX(0);color:var(--purple)}
+
+/* ── HERO ── */
+.hero{
+  position:relative;width:100%;height:100vh;
+  overflow:hidden;
+}
+.hero-img{
+  position:absolute;inset:0;
+  background:url('assets/images/hero.jpg') center top / contain no-repeat;
+  background-color:var(--bg);
+}
+
+.hero-fade{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 40% 35% at 0% 100%, rgba(10,10,8,.95) 0%, transparent 100%);
+}
+.hero-vignette{
+  position:absolute;inset:0;
+  box-shadow:inset 0 0 120px rgba(0,0,0,.45);
+  pointer-events:none;
+}
+.hero-rule-top{
+  position:absolute;top:80px;left:48px;right:48px;
+  height:1px;background:rgba(240,237,230,.06);z-index:5;
+}
+.hero-rule-bot{
+  position:absolute;bottom:96px;left:48px;right:48px;
+  height:1px;background:rgba(240,237,230,.06);z-index:5;
+}
+
+.hero-body{
+  position:absolute;z-index:10;
+  left:0;right:0;
+  padding:0 clamp(20px,4vw,48px) 0;
+  /* bottom set by JS */
+}
+.hero-left{max-width:580px}
+
+.hero-eyebrow{
+  display:flex;align-items:center;gap:16px;
+  font-family:'Teko',sans-serif;font-size:clamp(.6rem,.9vw,.75rem);font-weight:300;
+  letter-spacing:.28em;text-transform:uppercase;
+  color:var(--purple-hi);margin-bottom:20px;
+  opacity:0;animation:up .7s cubic-bezier(.16,1,.3,1) .3s forwards;
+}
+.eyebrow-tick{width:28px;height:1px;background:var(--purple-hi)}
+
+.hero-title-block{
+  opacity:0;animation:up .9s cubic-bezier(.16,1,.3,1) .4s forwards;
+}
+/* Big text block — all in one element, no inter-block gaps */
+.hero-big-text{
+  font-family:'Libre Baskerville',serif;font-weight:700;
+  font-size:clamp(2.4rem,6vw,5.2rem);
+  letter-spacing:-.02em;
+  line-height:1;
+  text-shadow:0 4px 40px rgba(0,0,0,.6);
+  margin:0;
+}
+.hero-big-text .t-em{
+  font-weight:400;font-style:italic;
+  font-size:.68em;line-height:1;
+  color:rgba(240,237,230,.75);
+}
+.hero-big-text{
+  display:flex;align-items:flex-end;gap:20px;
+  line-height:1;
+}
+.hero-big-text-lines{
+  flex-shrink:0;
+}
+.line-instruments{
+  display:block;
+  font-family:'Libre Baskerville',serif;
+  font-weight:400;font-style:italic;
+  font-size:clamp(1.6rem,4vw,3.5rem);
+  letter-spacing:-.01em;line-height:1;
+  color:rgba(240,237,230,.75);
+  margin:0;
+}
+.line-beyond-convention{
+  display:block;
+  font-family:'Libre Baskerville',serif;font-weight:700;
+  font-size:clamp(2.4rem,6vw,5.2rem);
+  letter-spacing:-.02em;line-height:1;
+  text-shadow:0 4px 40px rgba(0,0,0,.6);
+  margin:0;
+  white-space:nowrap;
+}
+/* desc: sits to the right, aligned to bottom of Beyond */
+.hero-desc-wrap{
+  flex-shrink:0;
+  padding-bottom:.08em;
+  opacity:0;animation:up .8s cubic-bezier(.16,1,.3,1) .75s forwards;
+}
+.hero-desc-wrap{
+  padding-bottom:.1em;
+  flex-shrink:0;
+  width:clamp(160px,18vw,260px);
+}
+.hero-desc{
+  font-family:'Teko',sans-serif;font-size:clamp(.7rem,1vw,.85rem);font-weight:300;
+  letter-spacing:.08em;line-height:1.75;
+  color:rgba(240,237,230,.45);
+  border-left:1px solid var(--purple);
+  padding-left:12px;
+  white-space:nowrap;
+}
+.hero-desc .cyber-tag{
+  display:block;
+  font-family:'Teko',sans-serif;
+  font-size:clamp(.65rem,.85vw,.78rem);
+  letter-spacing:.24em;text-transform:uppercase;
+  color:var(--purple-hi);
+  margin-bottom:6px;
+}
+
+
+.cta-group{
+  display:flex;align-items:center;gap:24px;
+  opacity:0;animation:up .7s cubic-bezier(.16,1,.3,1) .9s forwards;
+}
+.cta-primary{
+  display:inline-block;
+  font-family:'Teko',sans-serif;font-size:clamp(.7rem,1vw,.85rem);font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:var(--text);border:1px solid var(--purple);
+  padding:clamp(8px,1.2vh,11px) clamp(18px,2vw,28px);text-decoration:none;
+  transition:background .25s,color .25s;
+}
+.cta-primary:hover{background:var(--purple);color:#fff}
+.cta-secondary{
+  font-family:'Teko',sans-serif;font-size:.75rem;font-weight:300;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(240,237,230,.35);text-decoration:none;
+  border-bottom:1px solid transparent;padding-bottom:2px;
+  transition:color .25s,border-color .25s;
+}
+.cta-secondary:hover{color:var(--text);border-color:rgba(240,237,230,.3)}
+
+/* ── FOOTER ── */
+footer{
+  display:flex;align-items:center;justify-content:center;
+  padding:20px 48px;border-top:1px solid var(--border);
+}
+.foot-copy{
+  font-family:'Teko',sans-serif;font-size:.75rem;font-weight:400;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+}
+
+@keyframes up{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@media(max-width:900px){
+  nav{padding:20px 28px}
+  nav.scrolled{padding:14px 28px}
+  footer{padding:18px 28px}
+  .hero-rule-top,.hero-rule-bot{left:28px;right:28px}
+}
+@media(max-width:600px){
+  nav{padding:18px 20px}
+  nav.scrolled{padding:12px 20px}
+  .hero-body{padding:0 20px 48px}
+  .drawer{width:100%}
+  footer{padding:14px 20px}
+}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <a href="index.html"><span class="d-name">Top</span><span class="d-arr">→</span></a>
+  <a href="gallery/index.html"><span class="d-name">Gallery</span><span class="d-arr">→</span></a>
+  <a href="models/guitar/index.html"><span class="d-name">Catalog</span><span class="d-arr">→</span></a>
+  <a href="custom/index.html"><span class="d-name">Custom Order</span><span class="d-arr">→</span></a>
+  <a href="pricing/index.html"><span class="d-name">Pricing</span><span class="d-arr">→</span></a>
+  <a href="picks/krystal/index.html"><span class="d-name">Krystal Plectrum</span><span class="d-arr">→</span></a>
+  <a href="picks/vortex/index.html"><span class="d-name">Vortex Plectrum</span><span class="d-arr">→</span></a>
+  <a href="cases/index.html"><span class="d-name">Fretboard Cases</span><span class="d-arr">→</span></a>
+  <a href="keyboards/index.html"><span class="d-name">Keyboards</span><span class="d-arr">→</span></a>
+  <a href="pedal/index.html"><span class="d-name">Effects Pedals</span><span class="d-arr">→</span></a>
+  <a href="about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
+  <a href="contact/index.html"><span class="d-name">Contact</span><span class="d-arr">→</span></a>
+  <a href="generator/index.html"><span class="d-name">Generator</span><span class="d-arr">→</span></a>
+</div>
+
+<nav id="nav">
+  <a href="index.html"><img src="assets/images/logo.png" alt="GTI" class="nav-logo"></a>
+  <div class="ham-wrap" id="hamWrap">
+    <button class="ham" id="ham" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-img" id="heroImg"></div>
+  <div class="hero-fade"></div>
+  <div class="hero-vignette"></div>
+  <div class="hero-rule-top"></div>
+  <div class="hero-rule-bot"></div>
+
+  <div class="hero-body">
+    <div class="hero-left">
+      <div class="hero-title-block">
+        <div class="hero-eyebrow">
+          <span class="eyebrow-tick"></span>
+          Advanced Luthierie &amp; Design
+        </div>
+        <div class="hero-big-text">
+          <div class="hero-big-text-lines">
+            <span class="line-instruments">Instruments</span>
+            <span class="line-beyond-convention">Beyond<br>Convention</span>
+          </div>
+          <div class="hero-desc-wrap">
+            <p class="hero-desc">
+              <span class="cyber-tag">// Est. 2019</span>
+              One-off custom guitars &amp; basses.<br>
+              Multiscale. Headless. Extended range.<br>
+              Built from Tokyo.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="cta-group">
+        <a href="models/guitar/index.html" class="cta-primary">View Models</a>
+        <a href="custom/index.html" class="cta-secondary">Custom Order</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="foot-copy">© 2026 Go Takigawa Instruments. All Rights Reserved.</span>
+</footer>
+
+<script>
+// nav shrink
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>{
+  nav.classList.toggle('scrolled',window.scrollY>40);
+},{passive:true});
+
+// parallax
+const heroImg=document.getElementById('heroImg');
+window.addEventListener('scroll',()=>{
+  heroImg.style.transform=`scale(1.06) translateY(${window.scrollY*.25}px)`;
+},{passive:true});
+
+const hamWrap=document.getElementById('hamWrap');
+const ham=document.getElementById('ham');
+const drawer=document.getElementById('drawer');
+const overlay=document.getElementById('overlay');
+let closeTimer=null;
+
+function openDrawer(){
+  clearTimeout(closeTimer);
+  drawer.classList.add('open');
+  overlay.classList.add('visible');
+  ham.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeDrawer(){
+  closeTimer=setTimeout(()=>{
+    drawer.classList.remove('open');
+    overlay.classList.remove('visible');
+    ham.classList.remove('open');
+    document.body.style.overflow='';
+  },120); // small delay so moving mouse to drawer doesn't flicker
+}
+
+hamWrap.addEventListener('mouseenter', openDrawer);
+hamWrap.addEventListener('mouseleave', closeDrawer);
+drawer.addEventListener('mouseenter', ()=>clearTimeout(closeTimer));
+drawer.addEventListener('mouseleave', closeDrawer);
+overlay.addEventListener('click', closeDrawer);
+
+// pin Convention bottom to image bottom edge
+const IMG_RATIO = 1600 / 899;
+const heroBody = document.querySelector('.hero-body');
+const bigText  = document.querySelector('.hero-big-text');
+const ctaGroup = document.querySelector('.cta-group');
+
+function alignHero() {
+  heroBody.style.bottom = '';
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const imgBottom = Math.min(vw / IMG_RATIO, vh); // px from top of viewport
+
+  // Distance from bottom of hero-body to bottom of hero-big-text
+  // = ctaGroup height + gap between bigText and ctaGroup
+  const bodyH   = heroBody.offsetHeight;
+  const bigTextBottom = bigText.offsetTop + bigText.offsetHeight;
+  const belowBigText  = bodyH - bigTextBottom; // px below Convention
+
+  // We want: heroBody.top + bigTextBottom = imgBottom
+  // heroBody.top = vh - heroBody.bottom (absolute bottom from viewport bottom = vh - top - bodyH)
+  // Simpler: bottom = vh - imgBottom - belowBigText
+  const bottom = vh - imgBottom - belowBigText;
+  heroBody.style.bottom = Math.max(bottom, 0) + 'px';
+}
+
+alignHero();
+window.addEventListener('resize', alignHero, {passive:true});
+</script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bass Models - GTI / Luthier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../style.css">
+  <style>
+    .models-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+    }
+    
+    .page-title-sec {
+      text-align: center;
+      padding: 80px 0;
+    }
+    
+    .page-title-sec h1 {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .series-label {
+      display: inline-block;
+      color: var(--accent-color);
+      font-family: 'Roboto Condensed', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+    }
+
+    .catalog-section {
+      margin-bottom: 120px;
+    }
+    
+    .catalog-section-title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.8rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 20px;
+      margin-bottom: 60px;
+    }
+
+    .model-item {
+      display: flex;
+      align-items: center;
+      gap: 60px;
+      margin-bottom: 100px;
+    }
+    
+    .model-item:nth-child(even) {
+      flex-direction: row-reverse;
+    }
+    
+    .model-visual {
+      flex: 1.2;
+    }
+
+    .model-image-main {
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      border: 1px solid #222;
+    }
+
+    .model-content {
+      flex: 1;
+    }
+    
+    .model-name {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 2.8rem;
+      margin-bottom: 15px;
+      line-height: 1.1;
+    }
+    
+    .model-specs-short {
+      font-family: 'Roboto Condensed', sans-serif;
+      font-size: 1.1rem;
+      color: var(--accent-color);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 30px;
+      display: block;
+    }
+    
+    .model-description {
+      color: #aaa;
+      line-height: 1.8;
+      font-size: 1.05rem;
+      margin-bottom: 40px;
+    }
+
+    .btn-view-gallery {
+      display: inline-block;
+      padding: 12px 30px;
+      border: 1px solid var(--text-color);
+      color: var(--text-color);
+      text-decoration: none;
+      font-family: 'Roboto Condensed', sans-serif;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-view-gallery:hover {
+      background: var(--text-color);
+      color: #000;
+    }
+
+    @media (max-width: 900px) {
+      .page-title-sec h1 { font-size: 2.5rem; }
+      .model-item, .model-item:nth-child(even) {
+        flex-direction: column;
+        gap: 30px;
+      }
+    }
+  </style>
+
+<style>
+/* ── HAMBURGER MENU CSS ── */
+.gti-nav {
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px;
+  height:64px;
+  background:rgba(10,10,8,.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid #1e1d1b;
+  box-sizing: border-box;
+}
+.nav-logo { height:32px; mix-blend-mode:screen; }
+
+.ham-wrap { position:relative; width:52px; height:52px; z-index:300; }
+.ham-wrap::after { content:''; position:fixed; top:0; right:0; width:372px; height:100vh; pointer-events:none; }
+.ham-wrap:hover::after, .ham-wrap.active::after { pointer-events:all; }
+.ham { display:flex; flex-direction:column; justify-content:center; align-items:flex-end; gap:8px; width:52px; height:52px; cursor:pointer; background:none; border:none; padding:12px; }
+.ham span { display:block; width:100%; height:1px; background:#f0ede6; transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s; transform-origin:center; }
+.ham.open span:nth-child(1) { transform:translateY(8px) rotate(45deg); }
+.ham.open span:nth-child(2) { opacity:0; transform:scaleX(0); }
+.ham.open span:nth-child(3) { transform:translateY(-8px) rotate(-45deg); }
+
+.overlay { position:fixed; inset:0; z-index:240; background:rgba(0,0,0,.55); opacity:0; pointer-events:none; transition:opacity .4s; }
+.overlay.visible { opacity:1; pointer-events:all; }
+
+.drawer { position:fixed; top:0; right:0; width:320px; height:100vh; background:#0d0d0b; border-left:1px solid #1e1d1b; z-index:250; display:flex; flex-direction:column; justify-content:center; padding:80px 0; transform:translateX(100%); transition:transform .5s cubic-bezier(.16,1,.3,1); box-sizing: border-box; }
+.drawer.open { transform:translateX(0); }
+.drawer a { position:relative; display:flex; align-items:center; justify-content:space-between; padding:15px 40px; border-bottom:1px solid #1e1d1b; text-decoration:none; overflow:hidden; opacity:0; transform:translateX(16px); transition:background .25s,opacity .4s cubic-bezier(.16,1,.3,1),transform .4s cubic-bezier(.16,1,.3,1); }
+.drawer a:first-child { border-top:1px solid #1e1d1b; }
+.drawer a::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:#6b21d6; transform:scaleX(0); transform-origin:left; transition:transform .4s cubic-bezier(.16,1,.3,1); }
+.drawer a:hover { background:rgba(107,33,214,.07); }
+.drawer a:hover::after { transform:scaleX(1); }
+.drawer.open a { opacity:1; transform:translateX(0); }
+.drawer.open a:nth-child(1) { transition-delay:.04s; }
+.drawer.open a:nth-child(2) { transition-delay:.07s; }
+.drawer.open a:nth-child(3) { transition-delay:.10s; }
+.drawer.open a:nth-child(4) { transition-delay:.13s; }
+.drawer.open a:nth-child(5) { transition-delay:.16s; }
+.drawer.open a:nth-child(6) { transition-delay:.19s; }
+.drawer.open a:nth-child(7) { transition-delay:.22s; }
+.drawer.open a:nth-child(8) { transition-delay:.25s; }
+.drawer.open a:nth-child(9) { transition-delay:.28s; }
+.drawer.open a:nth-child(10) { transition-delay:.31s; }
+.drawer.open a:nth-child(11) { transition-delay:.34s; }
+.drawer.open a:nth-child(12) { transition-delay:.37s; }
+.drawer.open a:nth-child(13) { transition-delay:.40s; }
+.d-name { font-family:'Libre Baskerville',serif; font-size:1rem; color:rgba(240,237,230,.45); transition:color .25s; }
+.drawer a:hover .d-name { color:#f0ede6; }
+.d-arr { font-family:'Teko',sans-serif; font-size:.8rem; font-weight:300; color:#2e2d2a; opacity:0; transform:translateX(-6px); transition:color .25s,opacity .25s,transform .3s cubic-bezier(.16,1,.3,1); }
+.drawer a:hover .d-arr { opacity:1; transform:translateX(0); color:#6b21d6; }
+@media(max-width:900px){ .gti-nav{padding:14px 28px; height: 60px;} }
+@media(max-width:600px){ .gti-nav{padding:12px 20px; height: 56px;} .drawer{width:100%;} }
+</style>
+</head>
+<body>
+
+<!-- ── HAMBURGER MENU ── -->
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <a href="../../index.html"><span class="d-name">Top</span><span class="d-arr">→</span></a>
+  <a href="../../gallery/index.html"><span class="d-name">Gallery</span><span class="d-arr">→</span></a>
+  <a href="../../models/guitar/index.html"><span class="d-name">Catalog</span><span class="d-arr">→</span></a>
+  <a href="../../custom/index.html"><span class="d-name">Custom Order</span><span class="d-arr">→</span></a>
+  <a href="../../pricing/index.html"><span class="d-name">Pricing</span><span class="d-arr">→</span></a>
+  <a href="../../picks/krystal/index.html"><span class="d-name">Krystal Plectrum</span><span class="d-arr">→</span></a>
+  <a href="../../picks/vortex/index.html"><span class="d-name">Vortex Plectrum</span><span class="d-arr">→</span></a>
+  <a href="../../cases/index.html"><span class="d-name">Fretboard Cases</span><span class="d-arr">→</span></a>
+  <a href="../../keyboards/index.html"><span class="d-name">Keyboards</span><span class="d-arr">→</span></a>
+  <a href="../../pedal/index.html"><span class="d-name">Effects Pedals</span><span class="d-arr">→</span></a>
+  <a href="../../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
+  <a href="../../contact/index.html"><span class="d-name">Contact</span><span class="d-arr">→</span></a>
+  <a href="../../generator/index.html"><span class="d-name">Generator</span><span class="d-arr">→</span></a>
+</div>
+
+<nav id="nav" class="gti-nav">
+  <a href="../../index.html"><img src="../../assets/images/logo.png" alt="GTI" class="nav-logo"></a>
+  <div class="ham-wrap" id="hamWrap">
+    <button class="ham" id="ham" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+
+
+
+  <main class="models-container">
+    <div class="page-title-sec">
+      <div class="series-label">Standard & Custom</div>
+      <h1>Bass Models</h1>
+      <p style="color: #666;">Deep tones, ergonomic designs.</p>
+    </div>
+
+    <section class="catalog-section">
+      <h2 class="catalog-section-title">Standard Models</h2>
+
+      <!-- Booggah -->
+      <div class="model-item" id="booggah">
+        <div class="model-visual">
+          <img src="../../assets/images/gallery/g2.png" alt="Booggah shape" class="model-image-main">
+        </div>
+        <div class="model-content">
+          <h3 class="model-name">Booggah</h3>
+          <span class="model-specs-short">4 / 5 / 6 Strings Bass</span>
+          <p class="model-description">
+            Booggahは、伝統的な低音の太さと現代的な取り回しの良さを凝縮したベースモデルです。
+            ボルトオン構造によるパンチのあるアタックと、独自のボディバランスが長時間のプレイを支えます。
+          </p>
+          <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
+        </div>
+      </div>
+
+      <!-- Drake (Bass ver) -->
+      <div class="model-item" id="drake-bass">
+        <div class="model-visual">
+          <img src="../../assets/images/gallery/g2.png" alt="Drake Bass" class="model-image-main">
+        </div>
+        <div class="model-content">
+          <h3 class="model-name">Drake (Bass)</h3>
+          <span class="model-specs-short">4 / 5 / 6 Strings Multiscale</span>
+          <p class="model-description">
+            ギターモデルのDrakeをベース用に最適化したシェイプ。
+            鋭いカッタウェイはそのままに、マルチスケールでのテンションバランスを考慮したボディ厚と内部構造を採用しています。
+          </p>
+          <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Copyright &copy; 2026 GTI.</p>
+  </footer>
+
+
+<script>
+// ── HAMBURGER MENU JS ──
+(function(){
+  const hamWrap=document.getElementById('hamWrap');
+  const ham=document.getElementById('ham');
+  const drawer=document.getElementById('drawer');
+  const overlay=document.getElementById('overlay');
+  if(!hamWrap || !ham || !drawer || !overlay) return;
+  let closeTimer=null;
+  function openDrawer(){
+    clearTimeout(closeTimer);
+    drawer.classList.add('open');
+    overlay.classList.add('visible');
+    ham.classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function closeDrawer(){
+    closeTimer=setTimeout(()=>{
+      drawer.classList.remove('open');
+      overlay.classList.remove('visible');
+      ham.classList.remove('open');
+      document.body.style.overflow='';
+    },120);
+  }
+  hamWrap.addEventListener('mouseenter', openDrawer);
+  hamWrap.addEventListener('mouseleave', closeDrawer);
+  drawer.addEventListener('mouseenter', ()=>clearTimeout(closeTimer));
+  drawer.addEventListener('mouseleave', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing — GTI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Roboto Condensed', sans-serif;
+      line-height: 1.6;
+    }
+
+    header {
+      padding: 32px 40px;
+      border-bottom: 1px solid #222;
+    }
+
+    .logo {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.4rem;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: 0.1em;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 40px 100px;
+    }
+
+    h1 {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+    }
+
+    .page-sub {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 60px;
+    }
+
+    .notice {
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 50px;
+    }
+
+    /* Section */
+    .sec {
+      margin-bottom: 56px;
+    }
+
+    .sec h2 {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-bottom: 1px solid #222;
+      padding-bottom: 10px;
+      margin-bottom: 0;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    tr {
+      border-bottom: 1px solid #111;
+    }
+
+    tr:last-child { border-bottom: none; }
+
+    td {
+      padding: 12px 0;
+      font-size: 0.95rem;
+      vertical-align: middle;
+    }
+
+    .td-price {
+      text-align: right;
+      white-space: nowrap;
+      padding-left: 20px;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .td-sub {
+      display: block;
+      color: #555;
+      font-size: 0.8rem;
+      margin-top: 2px;
+    }
+
+    /* Color list */
+    .color-block {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border: 1px solid #1a1a1a;
+      font-size: 0.85rem;
+      color: #666;
+      line-height: 1.8;
+    }
+
+    .color-block strong { color: #999; }
+
+    .color-note {
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: #444;
+    }
+
+    /* Info blocks */
+    .info-blocks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 4px;
+    }
+
+    .info-block {
+      border: 1px solid #1a1a1a;
+      padding: 18px 20px;
+    }
+
+    .info-block h4 {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .info-block p {
+      font-size: 0.85rem;
+      color: #888;
+      line-height: 1.75;
+    }
+
+    .info-block p + p { margin-top: 8px; }
+
+    /* Contact */
+    .contact-line {
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .contact-line a { color: #aaa; text-decoration: none; }
+    .contact-line a:hover { color: #fff; }
+
+    footer {
+      border-top: 1px solid #111;
+      text-align: center;
+      padding: 28px 20px;
+      font-size: 0.75rem;
+      color: #333;
+      letter-spacing: 0.05em;
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 24px 20px; }
+      .container { padding: 40px 20px 80px; }
+      .info-blocks { grid-template-columns: 1fr; }
+      h1 { font-size: 1.8rem; }
+    }
+  </style>
+
+<style>
+/* ── HAMBURGER MENU CSS ── */
+.gti-nav {
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px;
+  height:64px;
+  background:rgba(10,10,8,.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid #1e1d1b;
+  box-sizing: border-box;
+}
+.nav-logo { height:32px; mix-blend-mode:screen; }
+
+.ham-wrap { position:relative; width:52px; height:52px; z-index:300; }
+.ham-wrap::after { content:''; position:fixed; top:0; right:0; width:372px; height:100vh; pointer-events:none; }
+.ham-wrap:hover::after, .ham-wrap.active::after { pointer-events:all; }
+.ham { display:flex; flex-direction:column; justify-content:center; align-items:flex-end; gap:8px; width:52px; height:52px; cursor:pointer; background:none; border:none; padding:12px; }
+.ham span { display:block; width:100%; height:1px; background:#f0ede6; transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s; transform-origin:center; }
+.ham.open span:nth-child(1) { transform:translateY(8px) rotate(45deg); }
+.ham.open span:nth-child(2) { opacity:0; transform:scaleX(0); }
+.ham.open span:nth-child(3) { transform:translateY(-8px) rotate(-45deg); }
+
+.overlay { position:fixed; inset:0; z-index:240; background:rgba(0,0,0,.55); opacity:0; pointer-events:none; transition:opacity .4s; }
+.overlay.visible { opacity:1; pointer-events:all; }
+
+.drawer { position:fixed; top:0; right:0; width:320px; height:100vh; background:#0d0d0b; border-left:1px solid #1e1d1b; z-index:250; display:flex; flex-direction:column; justify-content:center; padding:80px 0; transform:translateX(100%); transition:transform .5s cubic-bezier(.16,1,.3,1); box-sizing: border-box; }
+.drawer.open { transform:translateX(0); }
+.drawer a { position:relative; display:flex; align-items:center; justify-content:space-between; padding:15px 40px; border-bottom:1px solid #1e1d1b; text-decoration:none; overflow:hidden; opacity:0; transform:translateX(16px); transition:background .25s,opacity .4s cubic-bezier(.16,1,.3,1),transform .4s cubic-bezier(.16,1,.3,1); }
+.drawer a:first-child { border-top:1px solid #1e1d1b; }
+.drawer a::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:#6b21d6; transform:scaleX(0); transform-origin:left; transition:transform .4s cubic-bezier(.16,1,.3,1); }
+.drawer a:hover { background:rgba(107,33,214,.07); }
+.drawer a:hover::after { transform:scaleX(1); }
+.drawer.open a { opacity:1; transform:translateX(0); }
+.drawer.open a:nth-child(1) { transition-delay:.04s; }
+.drawer.open a:nth-child(2) { transition-delay:.07s; }
+.drawer.open a:nth-child(3) { transition-delay:.10s; }
+.drawer.open a:nth-child(4) { transition-delay:.13s; }
+.drawer.open a:nth-child(5) { transition-delay:.16s; }
+.drawer.open a:nth-child(6) { transition-delay:.19s; }
+.drawer.open a:nth-child(7) { transition-delay:.22s; }
+.drawer.open a:nth-child(8) { transition-delay:.25s; }
+.drawer.open a:nth-child(9) { transition-delay:.28s; }
+.drawer.open a:nth-child(10) { transition-delay:.31s; }
+.drawer.open a:nth-child(11) { transition-delay:.34s; }
+.drawer.open a:nth-child(12) { transition-delay:.37s; }
+.drawer.open a:nth-child(13) { transition-delay:.40s; }
+.d-name { font-family:'Libre Baskerville',serif; font-size:1rem; color:rgba(240,237,230,.45); transition:color .25s; }
+.drawer a:hover .d-name { color:#f0ede6; }
+.d-arr { font-family:'Teko',sans-serif; font-size:.8rem; font-weight:300; color:#2e2d2a; opacity:0; transform:translateX(-6px); transition:color .25s,opacity .25s,transform .3s cubic-bezier(.16,1,.3,1); }
+.drawer a:hover .d-arr { opacity:1; transform:translateX(0); color:#6b21d6; }
+@media(max-width:900px){ .gti-nav{padding:14px 28px; height: 60px;} }
+@media(max-width:600px){ .gti-nav{padding:12px 20px; height: 56px;} .drawer{width:100%;} }
+</style>
+</head>
+<body>
+
+<!-- ── HAMBURGER MENU ── -->
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <a href="../index.html"><span class="d-name">Top</span><span class="d-arr">→</span></a>
+  <a href="../gallery/index.html"><span class="d-name">Gallery</span><span class="d-arr">→</span></a>
+  <a href="../models/guitar/index.html"><span class="d-name">Catalog</span><span class="d-arr">→</span></a>
+  <a href="../custom/index.html"><span class="d-name">Custom Order</span><span class="d-arr">→</span></a>
+  <a href="../pricing/index.html"><span class="d-name">Pricing</span><span class="d-arr">→</span></a>
+  <a href="../picks/krystal/index.html"><span class="d-name">Krystal Plectrum</span><span class="d-arr">→</span></a>
+  <a href="../picks/vortex/index.html"><span class="d-name">Vortex Plectrum</span><span class="d-arr">→</span></a>
+  <a href="../cases/index.html"><span class="d-name">Fretboard Cases</span><span class="d-arr">→</span></a>
+  <a href="../keyboards/index.html"><span class="d-name">Keyboards</span><span class="d-arr">→</span></a>
+  <a href="../pedal/index.html"><span class="d-name">Effects Pedals</span><span class="d-arr">→</span></a>
+  <a href="../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
+  <a href="../contact/index.html"><span class="d-name">Contact</span><span class="d-arr">→</span></a>
+  <a href="../generator/index.html"><span class="d-name">Generator</span><span class="d-arr">→</span></a>
+</div>
+
+<nav id="nav" class="gti-nav">
+  <a href="../index.html"><img src="../assets/images/logo.png" alt="GTI" class="nav-logo"></a>
+  <div class="ham-wrap" id="hamWrap">
+    <button class="ham" id="ham" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+
+  
+
+  <div class="container">
+
+    <h1>Pricing</h1>
+    <p class="page-sub">Guitar Custom &amp; Repair</p>
+    <p class="notice">価格は税込み表示　別途部品代が加算されます。</p>
+
+    <!-- Refinish -->
+    <section class="sec">
+      <h2>Refinish</h2>
+      <table>
+        <tr><td>Bolt-on Body — 塗装はがし</td><td class="td-price">¥35,000 ~</td></tr>
+        <tr><td>Bolt-on Body — ラッカー塗装</td><td class="td-price">¥60,000 ~</td></tr>
+        <tr><td>Bolt-on Body — ウレタン塗装</td><td class="td-price">¥45,000 ~</td></tr>
+        <tr><td>Bolt-on Neck — 塗装はがし</td><td class="td-price">¥15,000 ~</td></tr>
+        <tr><td>Bolt-on Neck — ラッカー塗装</td><td class="td-price">¥30,000 ~</td></tr>
+        <tr><td>Bolt-on Neck — ウレタン塗装</td><td class="td-price">¥20,000 ~</td></tr>
+        <tr><td>Bolt-on Neck — マッチングヘッド追加</td><td class="td-price">+ ¥10,000 ~</td></tr>
+        <tr><td>Neck-through / Set Neck — 塗装はがし</td><td class="td-price">¥45,000 ~</td></tr>
+        <tr><td>Neck-through / Set Neck — ラッカー塗装</td><td class="td-price">¥90,000 ~</td></tr>
+        <tr><td>Neck-through / Set Neck — ウレタン塗装</td><td class="td-price">¥65,000 ~</td></tr>
+      </table>
+      <div class="color-block">
+        <strong>Lacquer</strong> — シースルー / バースト / ソリッド<br>
+        <strong>Urethane</strong> — シースルー / バースト / ソリッド / メタリック / キャンディ / ラメ / カメレオン
+        <p class="color-note">※ カラーにより追加料金が発生する場合があります。</p>
+      </div>
+    </section>
+
+    <!-- Fret Work -->
+    <section class="sec">
+      <h2>Fret Work</h2>
+      <table>
+        <tr><td>フレット交換 — バインディングあり</td><td class="td-price">¥50,000 ~</td></tr>
+        <tr><td>フレット交換 — バインディングなし</td><td class="td-price">¥40,000 ~</td></tr>
+        <tr><td>フレットレス加工</td><td class="td-price">¥40,000 ~</td></tr>
+        <tr><td>フレットレス加工 + エポキシコーティング</td><td class="td-price">¥50,000 ~</td></tr>
+      </table>
+    </section>
+
+    <!-- Setup -->
+    <section class="sec">
+      <h2>Setup &amp; Adjustment</h2>
+      <table>
+        <tr><td>フレットすり合わせ</td><td class="td-price">¥20,000 ~</td></tr>
+        <tr><td>全体調整（ロッド、ブリッジ）</td><td class="td-price">¥15,000 ~</td></tr>
+      </table>
+    </section>
+
+    <!-- Nut -->
+    <section class="sec">
+      <h2>Nut Replacement</h2>
+      <table>
+        <tr><td>フェンダータイプ</td><td class="td-price">¥10,000 ~</td></tr>
+        <tr><td>ギブソンタイプ</td><td class="td-price">¥15,000 ~</td></tr>
+      </table>
+    </section>
+
+    <!-- Pickguard -->
+    <section class="sec">
+      <h2>Pickguard Fabrication</h2>
+      <table>
+        <tr><td>ピックガード材</td><td class="td-price">¥15,000 ~</td></tr>
+        <tr><td>アクリル材</td><td class="td-price">¥17,000 ~</td></tr>
+        <tr><td>カーボン</td><td class="td-price">¥28,000 ~</td></tr>
+        <tr><td>ブラス・アルミ</td><td class="td-price">¥32,000 ~</td></tr>
+      </table>
+    </section>
+
+    <!-- Electronics -->
+    <section class="sec">
+      <h2>Electronics / Wiring</h2>
+      <table>
+        <tr><td>サーキット交換</td><td class="td-price">¥10,000 ~</td></tr>
+        <tr><td>ノイズ処理（導電塗料）</td><td class="td-price">¥8,000 ~</td></tr>
+        <tr><td>ノイズ処理（銅箔テープ）</td><td class="td-price">¥12,000 ~</td></tr>
+        <tr><td>トグルスイッチ追加</td><td class="td-price">¥5,000 ~</td></tr>
+        <tr>
+          <td>アクティブプリアンプ追加<span class="td-sub">Bass</span></td>
+          <td class="td-price">¥20,000 ~</td>
+        </tr>
+      </table>
+    </section>
+
+    <!-- Woodwork -->
+    <section class="sec">
+      <h2>Woodwork</h2>
+      <table>
+        <tr><td>ボディザグリ追加（一箇所）</td><td class="td-price">¥5,000 ~</td></tr>
+      </table>
+    </section>
+
+    <!-- Other -->
+    <section class="sec">
+      <h2>Other</h2>
+      <table>
+        <tr><td>フィンガーランプ製作</td><td class="td-price">¥15,000 ~</td></tr>
+        <tr><td>指板スキャロップ化</td><td class="td-price">¥35,000 ~</td></tr>
+      </table>
+      <p class="contact-line">上記以外のカスタムもお気軽にご相談ください。　<a href="mailto:gotakigawa@gmail.com">gotakigawa@gmail.com</a></p>
+    </section>
+
+    <!-- Order & Payment -->
+    <section class="sec">
+      <h2>Order &amp; Payment</h2>
+      <div class="info-blocks">
+        <div class="info-block">
+          <h4>楽器のお預かりについて</h4>
+          <p>当工房に直接お持ち込み、もしくは宅配便（ハードケース）にてお願いいたします。送料はお客様ご負担（元払い）となります。施工後の返送時もお客様ご負担（着払い）にて手配させていただきます。</p>
+          <p>工房お持ち込み・発送の際には、新品の替え弦の同封をお願いいたします。施工内容により弦交換をさせていただく場合があります。</p>
+        </div>
+        <div class="info-block">
+          <h4>施工代金のお支払いについて</h4>
+          <p>施工代金のお支払いは、基本お見積り確定時（施工前）となります。施工中に内容変更・イレギュラーが発生した場合は、加工前に内容確認・追加お見積りをご提案させていただきます。</p>
+          <p>お支払方法は、銀行振込もしくは現金にてお願いいたします。</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>Copyright &copy; 2026 GTI.</p>
+  </footer>
+
+
+<script>
+// ── HAMBURGER MENU JS ──
+(function(){
+  const hamWrap=document.getElementById('hamWrap');
+  const ham=document.getElementById('ham');
+  const drawer=document.getElementById('drawer');
+  const overlay=document.getElementById('overlay');
+  if(!hamWrap || !ham || !drawer || !overlay) return;
+  let closeTimer=null;
+  function openDrawer(){
+    clearTimeout(closeTimer);
+    drawer.classList.add('open');
+    overlay.classList.add('visible');
+    ham.classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function closeDrawer(){
+    closeTimer=setTimeout(()=>{
+      drawer.classList.remove('open');
+      overlay.classList.remove('visible');
+      ham.classList.remove('open');
+      document.body.style.overflow='';
+    },120);
+  }
+  hamWrap.addEventListener('mouseenter', openDrawer);
+  hamWrap.addEventListener('mouseleave', closeDrawer);
+  drawer.addEventListener('mouseenter', ()=>clearTimeout(closeTimer));
+  drawer.addEventListener('mouseleave', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+})();
+</script>
+
+</body>
+</html>
