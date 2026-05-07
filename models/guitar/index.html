@@ -178,6 +178,15 @@
       }
       .model-name { font-size: 2rem; }
     }
+    @media (max-width: 600px) {
+      .models-container { padding: 0 16px 60px; }
+      .page-title-sec { padding: 60px 0 40px; }
+      .page-title-sec h1 { font-size: 2.2rem; }
+      .model-name { font-size: 1.8rem; }
+      .model-detail-grid { grid-template-columns: repeat(2, 1fr); }
+      .treadline-sec { margin-left: -16px; margin-right: -16px; padding: 60px 16px; }
+      .catalog-section-title { font-size: 1.5rem; margin-bottom: 40px; }
+    }
   </style>
 
 <style>
@@ -197,7 +206,7 @@
 .ham-wrap { position:relative; width:52px; height:52px; z-index:300; }
 .ham-wrap::after { content:''; position:fixed; top:0; right:0; width:372px; height:100vh; pointer-events:none; }
 .ham-wrap:hover::after, .ham-wrap.active::after { pointer-events:all; }
-.ham { display:flex; flex-direction:column; justify-content:center; align-items:flex-end; gap:8px; width:52px; height:52px; cursor:pointer; background:none; border:none; padding:12px; }
+.ham { display:flex; flex-direction:column; justify-content:center; align-items:flex-end; gap:8px; width:52px; height:52px; cursor:pointer; background:none; border:none; padding:12px; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
 .ham span { display:block; width:100%; height:1px; background:#f0ede6; transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s; transform-origin:center; }
 .ham.open span:nth-child(1) { transform:translateY(8px) rotate(45deg); }
 .ham.open span:nth-child(2) { opacity:0; transform:scaleX(0); }
@@ -206,7 +215,7 @@
 .overlay { position:fixed; inset:0; z-index:240; background:rgba(0,0,0,.55); opacity:0; pointer-events:none; transition:opacity .4s; }
 .overlay.visible { opacity:1; pointer-events:all; }
 
-.drawer { position:fixed; top:0; right:0; width:320px; height:100vh; background:#0d0d0b; border-left:1px solid #1e1d1b; z-index:250; display:flex; flex-direction:column; justify-content:center; padding:80px 0; transform:translateX(100%); transition:transform .5s cubic-bezier(.16,1,.3,1); box-sizing: border-box; }
+.drawer { position:fixed; top:0; right:0; width:320px; height:100vh; background:#0d0d0b; border-left:1px solid #1e1d1b; z-index:250; display:flex; flex-direction:column; justify-content:center; padding:80px 0; transform:translateX(100%); transition:transform .5s cubic-bezier(.16,1,.3,1); box-sizing: border-box; overflow-y:auto; }
 .drawer.open { transform:translateX(0); }
 .drawer a { position:relative; display:flex; align-items:center; justify-content:space-between; padding:15px 40px; border-bottom:1px solid #1e1d1b; text-decoration:none; overflow:hidden; opacity:0; transform:translateX(16px); transition:background .25s,opacity .4s cubic-bezier(.16,1,.3,1),transform .4s cubic-bezier(.16,1,.3,1); }
 .drawer a:first-child { border-top:1px solid #1e1d1b; }
@@ -231,8 +240,12 @@
 .drawer a:hover .d-name { color:#f0ede6; }
 .d-arr { font-family:'Teko',sans-serif; font-size:.8rem; font-weight:300; color:#2e2d2a; opacity:0; transform:translateX(-6px); transition:color .25s,opacity .25s,transform .3s cubic-bezier(.16,1,.3,1); }
 .drawer a:hover .d-arr { opacity:1; transform:translateX(0); color:#6b21d6; }
-@media(max-width:900px){ .gti-nav{padding:14px 28px; height: 60px;} }
-@media(max-width:600px){ .gti-nav{padding:12px 20px; height: 56px;} .drawer{width:100%;} }
+@media(max-width:900px){ .gti-nav{padding:0 28px; height:60px;} }
+@media(max-width:600px){ .gti-nav{padding:0 16px; height:56px;} .drawer{width:100%;} }
+@media(hover:none){
+  /* タッチデバイスではhoverブリッジ不要 */
+  .ham-wrap::after{display:none;}
+}
 </style>
 </head>
 <body>
@@ -396,6 +409,7 @@
   const overlay=document.getElementById('overlay');
   if(!hamWrap || !ham || !drawer || !overlay) return;
   let closeTimer=null;
+  let isTouch=false;
   function openDrawer(){
     clearTimeout(closeTimer);
     drawer.classList.add('open');
@@ -404,6 +418,7 @@
     document.body.style.overflow='hidden';
   }
   function closeDrawer(){
+    clearTimeout(closeTimer);
     closeTimer=setTimeout(()=>{
       drawer.classList.remove('open');
       overlay.classList.remove('visible');
@@ -411,11 +426,23 @@
       document.body.style.overflow='';
     },120);
   }
-  hamWrap.addEventListener('mouseenter', openDrawer);
-  hamWrap.addEventListener('mouseleave', closeDrawer);
-  drawer.addEventListener('mouseenter', ()=>clearTimeout(closeTimer));
-  drawer.addEventListener('mouseleave', closeDrawer);
+  function toggleDrawer(){
+    drawer.classList.contains('open') ? closeDrawer() : openDrawer();
+  }
+  // Touch: tap to toggle
+  ham.addEventListener('touchstart',function(e){
+    isTouch=true;
+    e.preventDefault();
+    toggleDrawer();
+  },{passive:false});
+  // Mouse: hover (desktop only)
+  hamWrap.addEventListener('mouseenter',function(){ if(!isTouch) openDrawer(); });
+  hamWrap.addEventListener('mouseleave',function(){ if(!isTouch) closeDrawer(); });
+  drawer.addEventListener('mouseenter',function(){ if(!isTouch) clearTimeout(closeTimer); });
+  drawer.addEventListener('mouseleave',function(){ if(!isTouch) closeDrawer(); });
   overlay.addEventListener('click', closeDrawer);
+  overlay.addEventListener('touchstart',function(e){ e.preventDefault(); closeDrawer(); },{passive:false});
+  window.addEventListener('mousemove',function(){ isTouch=false; },{passive:true});
 })();
 </script>
 
