@@ -59,8 +59,12 @@
       margin-bottom: 100px;
     }
     
-    .model-item:nth-child(even) {
-      flex-direction: row-reverse;
+    /* Model Item - Uniform Left Alignment */
+    .model-item {
+      display: flex;
+      align-items: center;
+      gap: 60px;
+      margin-bottom: 100px;
     }
     
     .model-visual {
@@ -121,8 +125,38 @@
       margin-bottom: 15px;
     }
 
+    .model-specs-detailed {
+      margin-top: 30px;
+      font-size: 0.9rem;
+      border-top: 1px solid #1a1a1a;
+      padding-top: 20px;
+    }
+    .model-specs-detailed h4 {
+      font-family: 'Roboto Condensed', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 15px;
+      color: #fff;
+    }
+    .model-specs-detailed ul {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 30px;
+    }
+    .model-specs-detailed li {
+      color: #777;
+      border-bottom: 1px solid #111;
+      padding-bottom: 4px;
+    }
+    @media (max-width: 600px) {
+      .model-specs-detailed ul { grid-template-columns: 1fr; }
+    }
+
     .btn-view-gallery {
       display: inline-block;
+      margin-top: 30px;
       padding: 12px 30px;
       border: 1px solid var(--text-color);
       color: var(--text-color);
@@ -240,8 +274,8 @@
 .drawer a:hover .d-name { color:#f0ede6; }
 .d-arr { font-family:'Teko',sans-serif; font-size:.8rem; font-weight:300; color:#2e2d2a; opacity:0; transform:translateX(-6px); transition:color .25s,opacity .25s,transform .3s cubic-bezier(.16,1,.3,1); }
 .drawer a:hover .d-arr { opacity:1; transform:translateX(0); color:#6b21d6; }
-@media(max-width:900px){ .gti-nav{padding:0 28px; height:60px;} }
-@media(max-width:600px){ .gti-nav{padding:0 16px; height:56px;} .drawer{width:100%;} }
+@media(max-width:900px){ .gti-nav{padding:14px 28px; height:60px;} }
+@media(max-width:600px){ .gti-nav{padding:12px 16px; height:56px;} .drawer{width:100%;} }
 @media(hover:none){
   /* タッチデバイスではhoverブリッジ不要 */
   .ham-wrap::after{display:none;}
@@ -255,7 +289,8 @@
 <div class="drawer" id="drawer">
   <a href="../../index.html"><span class="d-name">Top</span><span class="d-arr">→</span></a>
   <a href="../../gallery/index.html"><span class="d-name">Gallery</span><span class="d-arr">→</span></a>
-  <a href="../../models/guitar/index.html"><span class="d-name">Catalog</span><span class="d-arr">→</span></a>
+  <a href="../../models/guitar/index.html"><span class="d-name">Guitar Models</span><span class="d-arr">→</span></a>
+  <a href="../../models/bass/index.html"><span class="d-name">Bass Models</span><span class="d-arr">→</span></a>
   <a href="../../custom/index.html"><span class="d-name">Custom Order</span><span class="d-arr">→</span></a>
   <a href="../../pricing/index.html"><span class="d-name">Pricing</span><span class="d-arr">→</span></a>
   <a href="../../picks/krystal/index.html"><span class="d-name">Krystal Plectrum</span><span class="d-arr">→</span></a>
@@ -291,25 +326,31 @@
     <section class="catalog-section">
       <h2 class="catalog-section-title">Standard Models</h2>
 
-      <!-- Mortezza (Real Data Integrated) -->
+      <!-- Mortezza -->
       <div class="model-item" id="mortezza">
         <div class="model-visual">
-          <img src="../../assets/images/gallery/mortezza7_046/01.jpg" alt="Mortezza-7 #046" class="model-image-main">
+          <img src="../../assets/images/models/Mortezzo.png" alt="Mortezza" class="model-image-main">
         </div>
         <div class="model-content">
-          <div class="featured-badge">Featured: #046 Mortezza-7</div>
           <h3 class="model-name">Mortezza</h3>
-          <span class="model-specs-short">6 / 7 / 8 Strings Multiscale</span>
+          <span class="model-specs-short">Flagship / Ergonomic Single-Cut</span>
           <p class="model-description">
-            Mortezzaは、洗練されたボディーラインと圧倒的な演奏性を両立したフラッグシップモデルの一つです。
+            GTIのフラッグシップモデル、Mortezza。<br>
             特にサイドの美しいカーブと深く彫り込まれたトップシェイプは、体にフィットするエルゴノミクスに基づいています。
-            #046のように、7弦マルチスケール構成でもタイトな低音と豊かな倍音を提供します。
+            7弦マルチスケール構成においてもタイトな低音と豊かな倍音を提供し、演奏性と芸術性を高い次元で融合させたモデルです。
           </p>
-          <div class="model-detail-grid">
-            <img src="../../assets/images/gallery/mortezza7_046/06.jpg" alt="Neck Detail">
-            <img src="../../assets/images/gallery/mortezza7_046/07.jpg" alt="Headstock Detail">
-            <img src="../../assets/images/gallery/mortezza7_046/09.jpg" alt="Body Back">
-            <img src="../../assets/images/gallery/mortezza7_046/10.jpg" alt="Neck Heel">
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：6 / 7 / 8</li>
+              <li>スケール長：25.5" ~ 27.5" (Multiscale)</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：38~42mm</li>
+              <li>ピックアップ構成：HH</li>
+              <li>参考価格：￥450,000 ~</li>
+            </ul>
           </div>
           <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
         </div>
@@ -318,15 +359,30 @@
       <!-- Drake -->
       <div class="model-item" id="drake">
         <div class="model-visual">
-          <img src="../../assets/images/gallery/g1.png" alt="Drake shape" class="model-image-main">
+          <img src="../../assets/images/models/Drake.png" alt="Drake" class="model-image-main">
         </div>
         <div class="model-content">
           <h3 class="model-name">Drake</h3>
-          <span class="model-specs-short">6 / 7 / 8 Strings</span>
+          <span class="model-specs-short">Modern Metal Standard / Double Cutaway</span>
           <p class="model-description">
-            鋭くもエレガントなカッタウェイが特徴のDrake。
-            テクニカルなプレイを追求するギタリストのために、ハイフレットのアクセスを極限まで高めています。
+            モダンメタルシーンではすでに一つのスタイルとして確立されているBMタイプのシェイプ。<br>
+            シンプルなダブルカッタウェイ、薄いボディ、リバースヘッド、ノントレモロの組み合わせは、ある種の最もスタンダードなスタイルだ。
           </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：6 (~9)</li>
+              <li>スケール長：25.5" (~30")</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：32~37mm</li>
+              <li>ピックアップ構成：HH</li>
+              <li>コントロール：1Vol, 3way トグル</li>
+              <li>ブリッジ：ノントレモロ</li>
+              <li>参考価格：￥350,000 ~</li>
+            </ul>
+          </div>
           <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
         </div>
       </div>
@@ -334,63 +390,280 @@
       <!-- Nekro -->
       <div class="model-item" id="nekro">
         <div class="model-visual">
-          <img src="../../assets/images/gallery/g1.png" alt="Nekro shape" class="model-image-main">
+          <img src="../../assets/images/models/Nekro.png" alt="Nekro" class="model-image-main">
         </div>
         <div class="model-content">
           <h3 class="model-name">Nekro</h3>
-          <span class="model-specs-short">6 / 7 / 8 Strings</span>
+          <span class="model-specs-short">Aggressive Silhouette / High-Playability</span>
           <p class="model-description">
-            アグレッシブなルックスと伝統的な美学を融合させたNekro。
-            ソリッドな鳴りと重厚なサステインを重視した設計で、モダンメタルからエクストリームなジャンルまで対応します。
+            かの有名なF社のSwingerから着想された攻撃的なシルエットのシェイプ。<br>
+            この特徴的なボディシェイプにより、座奏時には左右腿どちらで構えても安定し、深いカッタウェイによりハイポジションの演奏性も良好。大きくカットされたベベルドも、鋭い印象を強化しつつ身体へ馴染みやすいようデザインされている。立奏時も取り回しがよく、攻撃的なインパクトとは裏腹に ” 弾きやすさ ” が際立つモデル。
           </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：6 (~8)</li>
+              <li>スケール長：25.5" (~28")</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：40~45mm</li>
+              <li>ピックアップ構成：HH</li>
+              <li>コントロール：1Vol, 3way トグル</li>
+              <li>ブリッジ：ノントレモロ（トレモロ可）</li>
+              <li>参考価格：￥400,000 ~</li>
+            </ul>
+          </div>
           <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
         </div>
       </div>
 
-      <!-- Other standard models listed briefly or same card style -->
-      <!-- Ayakashi, Satan, Luc, Mortezzo... -->
-
-    </section>
-
-    <!-- TREAD-LINE Section -->
-    <section class="treadline-sec">
-      <div style="text-align: center; margin-bottom: 60px;">
-        <div class="series-label">Advanced Series</div>
-        <h2 style="font-family: 'Libre Baskerville', serif; font-size: 3rem; margin-top: 10px;">TREAD-LINE</h2>
-        <p style="color: #888; max-width: 600px; margin: 20px auto;">
-          極限の機能性とミニマリズムを追求したTREAD-LINEシリーズ。<br>
-          ヘッドレス構造と独自のトーンバランスが、新しい次元の演奏体験を提供します。
-        </p>
-      </div>
-
-      <div class="model-item" id="rlyeh">
+      <!-- Satan -->
+      <div class="model-item" id="satan">
         <div class="model-visual">
-          <img src="../../assets/images/gallery/g1.png" alt="R'lyeh shape" class="model-image-main">
+          <img src="../../assets/images/models/Satan.png" alt="Satan" class="model-image-main">
         </div>
         <div class="model-content">
-          <h3 class="model-name">R'lyeh</h3>
-          <span class="model-specs-short">Headless Multiscale</span>
+          <h3 class="model-name">Satan</h3>
+          <span class="model-specs-short">The Ultimate Beast / 8-Strings Only</span>
           <p class="model-description">
-            異次元の美学を持つR'lyeh。複雑な造形とヘッドレスの携帯性が融合しました。
+            「０をいかに " 極悪 " で刻むか」のみを考えた。<br>
+            それはもはや 楽器 というよりは " 魔物 " に近いものかもしれない。
           </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：8</li>
+              <li>スケール長：25.5"~30"</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：45mm</li>
+              <li>ピックアップ構成：H</li>
+              <li>コントロール：None</li>
+              <li>ブリッジ：ノントレモロ</li>
+              <li>参考価格：ASK</li>
+            </ul>
+          </div>
+          <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
+        </div>
+      </div>
+
+      <!-- Booggah -->
+      <div class="model-item" id="booggah">
+        <div class="model-visual">
+          <img src="../../assets/images/models/Booggah.png" alt="Booggah" class="model-image-main">
+        </div>
+        <div class="model-content">
+          <h3 class="model-name">Booggah</h3>
+          <span class="model-specs-short">Traditional Double-Cut / Standard</span>
+          <p class="model-description">
+            Booggahは、伝統的な意匠と現代的な取り回しの良さを凝縮したモデルです。<br>
+            パンチのあるアタックと独自のボディバランスが、あらゆるプレイスタイルを支えます。
+          </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：6 (~8)</li>
+              <li>スケール長：25.5"</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：38~42mm</li>
+              <li>ピックアップ構成：HH / JJ</li>
+              <li>参考価格：￥320,000 ~</li>
+            </ul>
+          </div>
+          <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
+        </div>
+      </div>
+
+      <!-- Raven -->
+      <div class="model-item" id="raven">
+        <div class="model-visual">
+          <img src="../../assets/images/models/Raven.png" alt="Raven" class="model-image-main">
+        </div>
+        <div class="model-content">
+          <h3 class="model-name">Raven</h3>
+          <span class="model-specs-short">Single-Cut / Modern Bevelled Shape</span>
+          <p class="model-description">
+            シングルカット、ベベルドカットシェイプを採用し、演奏性と安定性を高めたシェイプ。<br>
+            モダンシェイプながらボディ厚を40~45mmに設定しボディ側に重心を持たせることで、芯のあるサウンドを目指したモデルとなっている。
+          </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：6 (~7)</li>
+              <li>スケール長：25.5" (~27")</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：40~45mm</li>
+              <li>ピックアップ構成：HH</li>
+              <li>コントロール：1Vol, 3way �          <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
+        </div>
+      </div>
+
+      <div class="model-item" id="leggiero">
+ class="model-name">R'lyeh</h3>
+          <span class="model-specs-short">Headless Single-Cut / TREAD-LINE</span>
+          <p class="model-description">
+            深海を想起させる異形かつ優美なシルエットを持つR'lyeh。<br>
+            ヘッドレス構造と人間工学に基づいた独自のシングルカットデザインにより、多弦構成でも驚異的なプレイアビリティを誇ります。
+          </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：6 / 7 / 8</li>
+              <li>スケール長：25.5" ~ 28" (Multiscale)</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：40~45mm</li>
+              <li>ピックアップ構成：HH</li>
+              <li>参考価格：￥500,000 ~</li>
+            </ul>
+          </div>
+          <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
+        </div>
+      </div>
+
+      <div class="model-item" id="booggah">
+        <div class="model-visual">
+          <img src="../../assets/images/models/Booggah.png" alt="Booggah" class="model-image-main">
+        </div>
+        <div class="model-content">
+          <h3 class="model-name">Booggah</h3>
+          <span class="model-specs-short">Traditional Double-Cut / Standard</span>
+          <p class="model-description">
+            Booggahは、伝統的な意匠と現代的な取り回しの良さを凝縮したモデルです。<br>
+            パンチのあるアタックと独自のボディバランスが、あらゆるプレイスタイルを支えます。
+          </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：6 (~8)</li>
+              <li>スケール長：25.5"</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：38~42mm</li>
+              <li>ピックアップ構成：HH / JJ</li>
+              <li>参考価格：￥320,000 ~</li>
+            </ul>
+          </div>
           <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
         </div>
       </div>
 
       <div class="model-item" id="leggiero">
         <div class="model-visual">
-          <img src="../../assets/images/gallery/g1.png" alt="Leggiero shape" class="model-image-main">
+          <img src="../../assets/images/models/Leggiero.png" alt="Leggiero" class="model-image-main">
         </div>
         <div class="model-content">
           <h3 class="model-name">Leggiero</h3>
-          <span class="model-specs-short">Lightweight Headless</span>
+          <span class="model-specs-short">Compact TL Shape / TREAD-LINE</span>
           <p class="model-description">
-            その名の通り「軽快」なLeggiero。コンパクトなボディながら、驚くほどダイナミックな鳴りを誇ります。
+            伝統的なシェイプから着想を得たシリーズ " TREAD-LINE "。<br>
+            TLタイプをベースとし、より身体になじむようにボディデザインされたシェイプ。一般的なTLシェイプのボディより一回り小さいシルエット、トップ/バックともに大きくカットアウトされた形状が特徴的。
           </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：6</li>
+              <li>スケール長：25.5"</li>
+              <li>フレット数：22</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：40~45mm</li>
+              <li>ピックアップ構成：TL SS</li>
+              <li>コントロール：1Vol, 1Tone, 3way レバー</li>
+              <li>ブリッジ：ノントレモロ（トレモロ可）</li>
+              <li>参考価格：￥320,000 ~</li>
+            </ul>
+          </div>
+          <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
+        </div>
+      </div>
+
+      <div class="model-item" id="devil">
+        <div class="model-visual">
+          <img src="../../assets/images/models/Devil.png" alt="Devil" class="model-image-main">
+        </div>
+        <div class="model-content">
+          <h3 class="model-name">Devil</h3>
+          <span class="model-specs-short">Compact Headless / Satan-based Design</span>
+          <p class="model-description">
+            Satanシェイプのデザインをベースとして、６～７弦でのシンプルかつ扱いやすいバランスを目指したシェイプ。<br>
+            攻撃的な印象はそのままに、小ぶりなシルエットとなっている。
+          </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：6 (~7)</li>
+              <li>スケール長：25.5"~27"</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：37~42mm</li>
+              <li>ピックアップ構成：HH</li>
+              <li>コントロール：1Vol, 3way トグル</li>
+              <li>ブリッジ：ノントレモロ</li>
+              <li>参考価格：￥450,000 ~</li>
+            </ul>
+          </div>
+          <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
+        </div>
+      </div>
+
+      <div class="model-item" id="ayakashi">
+        <div class="model-visual">
+          <img src="../../assets/images/models/Ayakashi.png" alt="Ayakashi" class="model-image-main">
+        </div>
+        <div class="model-content">
+          <h3 class="model-name">Ayakashi</h3>
+          <span class="model-specs-short">Extreme Headless / Baritone & 9-Strings Optimized</span>
+          <p class="model-description">
+            Nekroシェイプをベースとして、多弦ヘッドレスへと最適化を図ったシェイプ。<br>
+            通常ピッキングはもちろん、タッピング奏法も強く意識したあらゆる演奏姿勢にフィットするモデル。バリトンスケール、９弦でのバランスを軸としているため、８～９弦での安定性は随一。
+          </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：9 (7~9)</li>
+              <li>スケール長：25.5"~28"</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm) (~ Flat)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：40~45mm</li>
+              <li>ピックアップ構成：HH</li>
+              <li>コントロール：1Vol, 1Tone, 5way レバー</li>
+              <li>ブリッジ：ノントレモロ</li>
+              <li>参考価格：￥500,000 ~</li>
+            </ul>
+          </div>
           <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
         </div>
       </div>
       
+    </section>
+
+    <!-- Order Info -->
+    <section style="margin-top: 100px; padding: 60px; background: rgba(107,33,214,0.05); border: 1px solid rgba(107,33,214,0.1); border-radius: 4px;">
+      <h2 style="font-family: 'Libre Baskerville', serif; font-size: 2rem; margin-bottom: 30px; text-align: center;">Custom Order</h2>
+      <div style="color: #aaa; line-height: 1.8; max-width: 800px; margin: 0 auto;">
+        <p style="margin-bottom: 20px;">当工房は、基本的にすべて１本ずつオーダーメイドするかたちで製作を承っております。</p>
+        <p style="margin-bottom: 20px;">上記の基本スペックはあくまで参考程度であり、多弦/少弦、スケールの変更、２５フレット以上の多フレット化、構成する木材やパーツ、塗装、インレイなど、すべての仕様についてカスタマイズをご相談可能です。</p>
+        <p style="font-size: 0.85rem; color: #666; margin-bottom: 40px;">
+          ※特にご指定がない場合、当工房の標準仕様にて製作させていただきます。<br>
+          ※物理的に厳しい/デザインの大幅な破綻/パーツの供給など様々な要因により、100%ご意向に沿うことは出来かねます。
+        </p>
+        <div style="text-align: center; border-top: 1px solid #222; padding-top: 40px;">
+          <p style="margin-bottom: 10px; font-family: 'Roboto Condensed', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-color);">Contact for Inquiry</p>
+          <a href="mailto:gotakigawa@gmail.com" style="color: #fff; font-size: 1.5rem; text-decoration: none; font-family: 'Libre Baskerville', serif;">gotakigawa@gmail.com</a>
+          <p style="margin-top: 10px; color: #555;">GTI代表 滝川 豪</p>
+        </div>
+      </div>
     </section>
 
   </main>

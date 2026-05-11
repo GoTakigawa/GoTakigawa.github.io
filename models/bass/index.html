@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -57,10 +57,6 @@
       margin-bottom: 100px;
     }
     
-    .model-item:nth-child(even) {
-      flex-direction: row-reverse;
-    }
-    
     .model-visual {
       flex: 1.2;
     }
@@ -101,6 +97,32 @@
       margin-bottom: 40px;
     }
 
+    .model-specs-detailed {
+      margin-top: 30px;
+      font-size: 0.9rem;
+      border-top: 1px solid #1a1a1a;
+      padding-top: 20px;
+    }
+    .model-specs-detailed h4 {
+      font-family: 'Roboto Condensed', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 15px;
+      color: #fff;
+    }
+    .model-specs-detailed ul {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 30px;
+    }
+    .model-specs-detailed li {
+      color: #777;
+      border-bottom: 1px solid #111;
+      padding-bottom: 4px;
+    }
+
     .btn-view-gallery {
       display: inline-block;
       padding: 12px 30px;
@@ -125,6 +147,8 @@
         flex-direction: column;
         gap: 30px;
       }
+      .model-name { font-size: 2rem; }
+      .model-specs-detailed ul { grid-template-columns: 1fr; }
     }
   </style>
 
@@ -179,8 +203,8 @@
 .drawer a:hover .d-name { color:#f0ede6; }
 .d-arr { font-family:'Teko',sans-serif; font-size:.8rem; font-weight:300; color:#2e2d2a; opacity:0; transform:translateX(-6px); transition:color .25s,opacity .25s,transform .3s cubic-bezier(.16,1,.3,1); }
 .drawer a:hover .d-arr { opacity:1; transform:translateX(0); color:#6b21d6; }
-@media(max-width:900px){ .gti-nav{padding:0 28px; height:60px;} }
-@media(max-width:600px){ .gti-nav{padding:0 16px; height:56px;} .drawer{width:100%;} }
+@media(max-width:900px){ .gti-nav{padding:14px 28px; height:60px;} }
+@media(max-width:600px){ .gti-nav{padding:12px 16px; height:56px;} .drawer{width:100%;} }
 @media(hover:none){
   /* タッチデバイスではhoverブリッジ不要 */
   .ham-wrap::after{display:none;}
@@ -232,15 +256,28 @@
       <!-- Booggah -->
       <div class="model-item" id="booggah">
         <div class="model-visual">
-          <img src="../../assets/images/gallery/g2.png" alt="Booggah shape" class="model-image-main">
+          <img src="../../assets/images/models/Booggah.png" alt="Booggah shape" class="model-image-main">
         </div>
         <div class="model-content">
           <h3 class="model-name">Booggah</h3>
           <span class="model-specs-short">4 / 5 / 6 Strings Bass</span>
           <p class="model-description">
-            Booggahは、伝統的な低音の太さと現代的な取り回しの良さを凝縮したベースモデルです。
+            Booggahは、伝統的な低音の太さと現代的な取り回しの良さを凝縮したベースモデルです。<br>
             ボルトオン構造によるパンチのあるアタックと、独自のボディバランスが長時間のプレイを支えます。
           </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：4 / 5 / 6</li>
+              <li>スケール長：34"</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：38~42mm</li>
+              <li>ピックアップ構成：HH / JJ</li>
+              <li>参考価格：￥320,000 ~</li>
+            </ul>
+          </div>
           <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
         </div>
       </div>
@@ -248,19 +285,204 @@
       <!-- Drake (Bass ver) -->
       <div class="model-item" id="drake-bass">
         <div class="model-visual">
-          <img src="../../assets/images/gallery/g2.png" alt="Drake Bass" class="model-image-main">
+          <img src="../../assets/images/models/Drake.png" alt="Drake Bass" class="model-image-main">
         </div>
         <div class="model-content">
           <h3 class="model-name">Drake (Bass)</h3>
           <span class="model-specs-short">4 / 5 / 6 Strings Multiscale</span>
           <p class="model-description">
-            ギターモデルのDrakeをベース用に最適化したシェイプ。
-            鋭いカッタウェイはそのままに、マルチスケールでのテンションバランスを考慮したボディ厚と内部構造を採用しています。
+            ギターモデルのDrakeをベース用に最適化したシェイプ。<br>
+            モダンメタルシーンで確立されたBMタイプの意匠を継承し、マルチスケールでのテンションバランスを考慮したボディ厚と内部構造を採用しています。
           </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：4 / 5 / 6</li>
+              <li>スケール長：34" ~ 37" (Multiscale)</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：38~42mm</li>
+              <li>ピックアップ構成：HH / JJ</li>
+              <li>ブリッジ：独立ブリッジ</li>
+              <li>参考価格：￥380,000 ~</li>
+            </ul>
+          </div>
           <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
         </div>
       </div>
 
+    </section>
+
+    <!-- TREAD-LINE Section -->
+    <section class="catalog-section" style="background: #080808; margin: 0 -20px; padding: 100px 20px; border-top: 1px solid #111;">
+      <div style="text-align: center; margin-bottom: 60px;">
+        <div class="series-label">Advanced Series</div>
+        <h2 style="font-family: 'Libre Baskerville', serif; font-size: 3rem; margin-top: 10px;">TREAD-LINE Bass</h2>
+        <p style="color: #888; max-width: 600px; margin: 20px auto;">
+          極限の機能性とミニマリズムを追求したTREAD-LINEベースシリーズ。
+        </p>
+      </div>
+
+      <div class="model-item" id="leggiero-bass">
+        <div class="model-visual">
+          <img src="../../assets/images/models/Leggiero.png" alt="Leggiero Bass" class="model-image-main">
+        </div>
+        <div class="model-content">
+          <h3 class="model-name">Leggiero</h3>
+          <span class="model-specs-short">Lightweight Headless Bass / TREAD-LINE</span>
+          <p class="model-description">
+            伝統的なTLシェイプから着想を得たシリーズ " TREAD-LINE " のベース版。<br>
+            驚異的な軽さとバランスを誇り、ヘッドレス構造により長時間のステージでもストレスのない演奏を可能にします。
+          </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：4 / 5</li>
+              <li>スケール長：30" ~ 34"</li>
+              <li>フレット数：22</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：40~45mm</li>
+              <li>ピックアップ構成：PJ / JJ</li>
+              <li>ブリッジ：ヘッドレス・システム</li>
+              <li>参考価格：￥350,000 ~</li>
+            </ul>
+          </div>
+          <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
+        </div>
+      </div>
+
+      <div class="model-item" id="devil-bass">
+        <div class="model-visual">
+          <img src="../../assets/images/models/Devil.png" alt="Devil Bass" class="model-image-main">
+        </div>
+        <div class="model-content">
+          <h3 class="model-name">Devil</h3>
+          <span class="model-specs-short">Compact Headless Bass</span>
+          <p class="model-description">
+            Satanシェイプのデザインをベースとした、アグレッシブかつ小ぶりなシルエットのヘッドレスベース。<br>
+            ダウンチューニング時でもタイトで明瞭なサウンドを提供し、モダンなアンサンブルに埋もれない輪郭を生み出します。
+          </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：4 / 5</li>
+              <li>スケール長：32" ~ 35"</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：38~42mm</li>
+              <li>ピックアップ構成：HH / JJ</li>
+              <li>参考価格：￥480,000 ~</li>
+            </ul>
+          </div>
+          <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
+        </div>
+      </div>
+
+      <div class="model-item" id="ayakashi-bass">
+        <div class="model-visual">
+          <img src="../../assets/images/models/Ayakashi.png" alt="Ayakashi Bass" class="model-image-main">
+        </div>
+        <div class="model-content">
+          <h3 class="model-name">Ayakashi</h3>
+          <span class="model-specs-short">Extreme Headless Multiscale Bass</span>
+          <p class="model-description">
+            Nekroシェイプをベースに、多弦ヘッドレスベースへと最適化を図った唯一無二のシルエット。<br>
+            多弦ベースの可能性を広げるエルゴノミックな設計と、圧倒的な低音の安定性を誇ります。
+          </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：5 / 6</li>
+              <li>スケール長：34" ~ 37" (Multiscale)</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：40~45mm</li>
+              <li>ピックアップ構成：HH</li>
+              <li>参考価格：￥550,000 ~</li>
+            </ul>
+          </div>
+          <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
+        </div>
+      </div>
+
+      <div class="model-item" id="rlyeh-bass">
+        <div class="model-visual">
+          <img src="../../assets/images/models/Rlyeh.png" alt="Rlyeh Bass" class="model-image-main">
+        </div>
+        <div class="model-content">
+          <h3 class="model-name">R'lyeh</h3>
+          <span class="model-specs-short">Headless Single-Cut Bass / TREAD-LINE</span>
+          <p class="model-description">
+            深海を想起させる異形かつ優美なシルエットを持つR'lyeh。<br>
+            ヘッドレス構造と人間工学に基づいた独自のシングルカットデザインにより、多弦構成でも驚異的なプレイアビリティを誇ります。
+          </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：4 / 5</li>
+              <li>スケール長：34" ~ 37" (Multiscale)</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：40~45mm</li>
+              <li>ピックアップ構成：HH</li>
+              <li>参考価格：￥550,000 ~</li>
+            </ul>
+          </div>
+          <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
+        </div>
+      </div>
+
+      <div class="model-item" id="lion-bass">
+        <div class="model-visual">
+          <img src="../../assets/images/models/Lion.png" alt="Lion Bass" class="model-image-main">
+        </div>
+        <div class="model-content">
+          <h3 class="model-name">L'ion</h3>
+          <span class="model-specs-short">Compact Headless Bass / TREAD-LINE</span>
+          <p class="model-description">
+            百獣の王の如き力強さと俊敏さを兼ね備えたL'ion。<br>
+            極限までコンパクトに削ぎ落とされたボディは、ステージ上での自由な動きを約束し、タイトでパンチのあるボトムエンドをアウトプットします。
+          </p>
+          <div class="model-specs-detailed">
+            <h4>Basic Specs</h4>
+            <ul>
+              <li>弦数：4 / 5</li>
+              <li>スケール長：34"</li>
+              <li>フレット数：24</li>
+              <li>指板R：20" (508mm)</li>
+              <li>ネックジョイント：ボルトオン</li>
+              <li>ボディ厚：38~42mm</li>
+              <li>ピックアップ構成：HH</li>
+              <li>参考価格：￥450,000 ~</li>
+            </ul>
+          </div>
+          <a href="../../gallery/index.html" class="btn-view-gallery">View Gallery</a>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Order Info -->
+    <section style="margin-top: 100px; padding: 60px; background: rgba(107,33,214,0.05); border: 1px solid rgba(107,33,214,0.1); border-radius: 4px;">
+      <h2 style="font-family: 'Libre Baskerville', serif; font-size: 2rem; margin-bottom: 30px; text-align: center;">Custom Order</h2>
+      <div style="color: #aaa; line-height: 1.8; max-width: 800px; margin: 0 auto;">
+        <p style="margin-bottom: 20px;">当工房は、基本的にすべて１本ずつオーダーメイドするかたちで製作を承っております。</p>
+        <p style="margin-bottom: 20px;">上記の基本スペックはあくまで参考程度であり、多弦/少弦、スケールの変更、２５フレット以上の多フレット化、構成する木材やパーツ、塗装、インレイなど、すべての仕様についてカスタマイズをご相談可能です。</p>
+        <p style="font-size: 0.85rem; color: #666; margin-bottom: 40px;">
+          ※特にご指定がない場合、当工房の標準仕様にて製作させていただきます。<br>
+          ※物理的に厳しい/デザインの大幅な破綻/パーツの供給など様々な要因により、100%ご意向に沿うことは出来かねます。
+        </p>
+        <div style="text-align: center; border-top: 1px solid #222; padding-top: 40px;">
+          <p style="margin-bottom: 10px; font-family: 'Roboto Condensed', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-color);">Contact for Inquiry</p>
+          <a href="mailto:gotakigawa@gmail.com" style="color: #fff; font-size: 1.5rem; text-decoration: none; font-family: 'Libre Baskerville', serif;">gotakigawa@gmail.com</a>
+          <p style="margin-top: 10px; color: #555;">GTI代表 滝川 豪</p>
+        </div>
+      </div>
     </section>
 
   </main>
