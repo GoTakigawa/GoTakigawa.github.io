@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vortex - Guitar Plectrum - GTI / Luthier</title>
+<title>Vortex - Guitar Plectrum - GTI / Luthier</title>
+<meta name="robots" content="noindex, nofollow">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DIN+Condensed&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../style.css">
   <style>
     .product-container {
@@ -29,7 +30,7 @@
     .product-image {
       width: 100%;
       height: auto;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border);
       border-radius: 8px;
     }
 
@@ -38,7 +39,7 @@
     }
 
     .product-tag {
-      color: var(--accent-color);
+      color: var(--accent);
       font-weight: 700;
       letter-spacing: 0.2em;
       text-transform: uppercase;
@@ -89,6 +90,12 @@
       .product-hero { flex-direction: column; text-align: center; }
       .product-name { font-size: 2.5rem; }
     }
+    .product-gallery { max-width: 1200px; margin: 0 auto; padding: 0 40px 100px; }
+    .gallery-heading { font-family: 'Libre Baskerville', serif; font-size: 1.65rem; margin-bottom: 24px; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .gallery-grid img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background: #151513; }
+    @media (max-width: 900px) { .product-gallery { padding: 0 24px 72px; } .gallery-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } }
+    @media (max-width: 540px) { .product-gallery { padding: 0 16px 56px; } .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   </style>
 
 <style>
@@ -156,18 +163,14 @@
 <div class="overlay" id="overlay"></div>
 <div class="drawer" id="drawer">
   <a href="../../index.html"><span class="d-name">Top</span><span class="d-arr">→</span></a>
+  <a href="../../pricing/index.html"><span class="d-name">ギターカスタム / リペア料金表</span><span class="d-arr">→</span></a>
   <a href="../../gallery/index.html"><span class="d-name">Gallery</span><span class="d-arr">→</span></a>
-  <a href="../../models/guitar/index.html"><span class="d-name">Catalog</span><span class="d-arr">→</span></a>
-  <a href="../../custom/index.html"><span class="d-name">Custom Order</span><span class="d-arr">→</span></a>
-  <a href="../../pricing/index.html"><span class="d-name">Pricing</span><span class="d-arr">→</span></a>
-  <a href="../../picks/krystal/index.html"><span class="d-name">Krystal Plectrum</span><span class="d-arr">→</span></a>
-  <a href="../../picks/vortex/index.html"><span class="d-name">Vortex Plectrum</span><span class="d-arr">→</span></a>
-  <a href="../../cases/index.html"><span class="d-name">Fretboard Cases</span><span class="d-arr">→</span></a>
-  <a href="../../keyboards/index.html"><span class="d-name">Keyboards</span><span class="d-arr">→</span></a>
-  <a href="../../pedal/index.html"><span class="d-name">Effects Pedals</span><span class="d-arr">→</span></a>
-  <a href="../../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
+  <a href="../../concept/index.html"><span class="d-name">CG Concept</span><span class="d-arr">→</span></a>
+  <a href="../../ax/index.html"><span class="d-name">AX</span><span class="d-arr">→</span></a>
+  <a href="../../pedal/index.html"><span class="d-name">Exhaust / Bass Distortion</span><span class="d-arr">→</span></a>
   <a href="../../contact/index.html"><span class="d-name">Contact</span><span class="d-arr">→</span></a>
   <a href="../../generator/index.html"><span class="d-name">Generator</span><span class="d-arr">→</span></a>
+  <a href="../../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
 </div>
 
 <nav id="nav" class="gti-nav">
@@ -185,7 +188,7 @@
   <main class="product-container">
     <div class="product-hero">
       <div class="product-visual">
-        <img src="../../assets/images/gallery/placeholder.png" alt="Vortex Pick" class="product-image">
+        <img src="../../assets/images/picks/vortex-hero.jpg" alt="Vortex guitar plectrum" class="product-image">
       </div>
       <div class="product-info">
         <span class="product-tag">Performance Plectrum</span>
@@ -207,14 +210,35 @@
         <a href="../../contact/index.html" class="btn-submit" style="text-align: center; text-decoration: none; display: block;">Inquiry</a>
       </div>
     </div>
+    <section class="product-gallery" aria-labelledby="gallery-title">
+      <h2 class="gallery-heading" id="gallery-title">Vortex Gallery</h2>
+      <div class="gallery-grid" id="plectrum-gallery"></div>
+    </section>
   </main>
 
   <footer>
     <p>Copyright &copy; 2026 GTI.</p>
+    <p><a href="../../legal/index.html" style="color:#666;font-size:.75rem;text-decoration:none;">特定商取引法に基づく表記</a></p>
   </footer>
 
 
 <script>
+// ── PRODUCT GALLERY ──
+(function(){
+  const gallery = document.getElementById('plectrum-gallery');
+  if (!gallery) return;
+  const fragment = document.createDocumentFragment();
+  for (let index = 1; index <= 9; index += 1) {
+    const image = document.createElement('img');
+    image.src = `../../assets/images/picks/vortex/vortex-${String(index).padStart(2, '0')}.jpg`;
+    image.alt = `Vortex plectrum ${index}`;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    fragment.appendChild(image);
+  }
+  gallery.appendChild(fragment);
+})();
+
 // ── HAMBURGER MENU JS ──
 (function(){
   const hamWrap=document.getElementById('hamWrap');

@@ -371,18 +371,14 @@ button.primary:active{transform:scale(.98);}
 <div class="overlay" id="overlay"></div>
 <div class="drawer" id="drawer">
   <a href="../index.html"><span class="d-name">Top</span><span class="d-arr">→</span></a>
+  <a href="../pricing/index.html"><span class="d-name">ギターカスタム / リペア料金表</span><span class="d-arr">→</span></a>
   <a href="../gallery/index.html"><span class="d-name">Gallery</span><span class="d-arr">→</span></a>
-  <a href="../models/guitar/index.html"><span class="d-name">Catalog</span><span class="d-arr">→</span></a>
-  <a href="../custom/index.html"><span class="d-name">Custom Order</span><span class="d-arr">→</span></a>
-  <a href="../pricing/index.html"><span class="d-name">Pricing</span><span class="d-arr">→</span></a>
-  <a href="../picks/krystal/index.html"><span class="d-name">Krystal Plectrum</span><span class="d-arr">→</span></a>
-  <a href="../picks/vortex/index.html"><span class="d-name">Vortex Plectrum</span><span class="d-arr">→</span></a>
-  <a href="../cases/index.html"><span class="d-name">Fretboard Cases</span><span class="d-arr">→</span></a>
-  <a href="../keyboards/index.html"><span class="d-name">Keyboards</span><span class="d-arr">→</span></a>
-  <a href="../pedal/index.html"><span class="d-name">Effects Pedals</span><span class="d-arr">→</span></a>
-  <a href="../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
+  <a href="../concept/index.html"><span class="d-name">CG Concept</span><span class="d-arr">→</span></a>
+  <a href="../ax/index.html"><span class="d-name">AX</span><span class="d-arr">→</span></a>
+  <a href="../pedal/index.html"><span class="d-name">Exhaust / Bass Distortion</span><span class="d-arr">→</span></a>
   <a href="../contact/index.html"><span class="d-name">Contact</span><span class="d-arr">→</span></a>
   <a href="../generator/index.html"><span class="d-name">Generator</span><span class="d-arr">→</span></a>
+  <a href="../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
 </div>
 
 <nav id="nav" class="gti-nav">
@@ -3368,7 +3364,15 @@ function buildDXF(g,lefty){
     function dCircle(p,r){var d=toDXF(g,p.x,p.y,lefty);L.push('0\nCIRCLE\n8\nINLAY\n10\n'+d.x.toFixed(6)+'\n20\n'+d.z.toFixed(6)+'\n30\n0.000000\n40\n'+r.toFixed(6));}
     function dLine4(corners){for(var k=0;k<4;k++){var a=toDXF(g,corners[k].x,corners[k].y,lefty),b=toDXF(g,corners[(k+1)%4].x,corners[(k+1)%4].y,lefty);L.push(dxfLine(a.x,a.z,b.x,b.z,'INLAY'));}}
     function midPt(iA,iB,tc){var pA=Sp(iA,tc),pB=Sp(iB,tc);return{x:(pA.x+pB.x)/2,y:(pA.y+pB.y)/2};}
-    function ctcAt(fn){var tc12=FRl(11)+(FRl(12)-FRl(11))*0.5,tc_fn=FRl(fn-1)+(FRl(fn)-FRl(fn-1))*0.5;var w12=Math.abs(Sp(nStr-1,tc12).y-Sp(0,tc12).y),wFn=Math.abs(Sp(nStr-1,tc_fn).y-Sp(0,tc_fn).y);return ins.centerCtc*(w12>0?wFn/w12:1);}
+    function fretDirDXFc(f){var ep=fretEdgePts(f);var dx=ep.ixN.x-ep.ix1.x,dy=ep.ixN.y-ep.ix1.y;var l=Math.sqrt(dx*dx+dy*dy)||1;return{x:dx/l,y:dy/l};}
+    function drawDblDotDXFCenter(p,fNum){
+      var cfg=(ins.dblFrets&&ins.dblFrets[fNum])||{shape:'dot',diam:ins.centerDiam||6};
+      if((cfg.shape||'dot')==='ring'){
+        dCircle(p,(cfg.outer||7)/2); dCircle(p,(cfg.inner||4)/2);
+      } else {
+        dCircle(p,(cfg.diam||ins.centerDiam||6)/2);
+      }
+    }
 
     if(mode==='center'){
       var DSET2=new Set([12,24,36,48]);
@@ -3379,20 +3383,55 @@ function buildDXF(g,lefty){
         SSET=new Set(_cp.filter(function(f){return !DSET2.has(f);}));
       }
       var r=ins.centerDiam/2;
+      var dblEnabledC=ins.dblEnabled!==false;
+      // 12/24/36/48のC-to-C自動追従（プレビュー描画と同じロジックに合わせる。
+      // 旧: ins.centerCtc を参照していたが、このプロパティは現行の設定オブジェクトに
+      // 存在せず undefined のままだったため、DXF書き出し時のみ座標が NaN になっていた）
+      var w12dxf = Math.abs(Sp(nStr-1, fretTcL(12)).y - Sp(0, fretTcL(12)).y) || 1;
+      var d12dxf = ins.dblFrets[12] || {ctc:28.0};
+      var d24dxf = ins.dblFrets[24] || {ctc:28.0};
+      var d36dxf = ins.dblFrets[36] || {ctc:28.0};
+      var d48dxf = ins.dblFrets[48] || {ctc:28.0};
+      if(!d24dxf.ctcManual || !d36dxf.ctcManual || !d48dxf.ctcManual){
+        var boostDxf = (Math.abs(g.s1-g.sN)>0.1) ? 1.15 : 1.0;
+        [24,36,48].forEach(function(fx){
+          var dfx = ins.dblFrets[fx];
+          if(dfx && !dfx.ctcManual){
+            var wfx = Math.abs(Sp(nStr-1, fretTcL(fx)).y - Sp(0, fretTcL(fx)).y);
+            dfx.ctc = parseFloat(((d12dxf.ctc||28.0) * (wfx/w12dxf) * boostDxf).toFixed(1));
+          }
+        });
+      }
+      function ctcAt(fn){
+        var wFn = Math.abs(Sp(nStr-1, fretTcL(fn)).y - Sp(0, fretTcL(fn)).y);
+        if(fn<=12){
+          return (d12dxf.ctc||28.0) * (wFn/w12dxf);
+        } else if(fn<=24){
+          var t=(fn-12)/12; return (d12dxf.ctc||28.0) + t*((d24dxf.ctc||28.0)-(d12dxf.ctc||28.0));
+        } else if(fn<=36){
+          var t=(fn-24)/12; return (d24dxf.ctc||28.0) + t*((d36dxf.ctc||28.0)-(d24dxf.ctc||28.0));
+        } else {
+          var t=(fn-36)/12; return (d36dxf.ctc||28.0) + t*((d48dxf.ctc||28.0)-(d36dxf.ctc||28.0));
+        }
+      }
       for(var fn=1;fn<=nFret;fn++){
         if(!SSET.has(fn)&&!DSET2.has(fn)) continue;
         var tc=fretTcL(fn);
         var pC=midPt(0,nStr-1,tc);
-        if(SSET.has(fn)){dCircle(pC,r);}
-        else{
+        if(SSET.has(fn)){
+          dCircle(pC,r);
+        } else if(!dblEnabledC){
+          drawDblDotDXFCenter(pC,fn);
+        } else {
           var ctc=ctcAt(fn);
-          function fretDirDXFc(f){var ep=fretEdgePts(f);var dx=ep.ixN.x-ep.ix1.x,dy=ep.ixN.y-ep.ix1.y;var l=Math.sqrt(dx*dx+dy*dy)||1;return{x:dx/l,y:dy/l};}
           var d0c=fretDirDXFc(fn-1),d1c=fretDirDXFc(fn);
           var adx=(d0c.x+d1c.x)/2,ady=(d0c.y+d1c.y)/2,adl=Math.sqrt(adx*adx+ady*ady)||1;
           var dir={x:adx/adl,y:ady/adl};
           var pC2={x:(Sp(0,tc).x+Sp(nStr-1,tc).x)/2,y:(Sp(0,tc).y+Sp(nStr-1,tc).y)/2};
-          dCircle({x:pC2.x+dir.x*ctc/2,y:pC2.y+dir.y*ctc/2},r);
-          dCircle({x:pC2.x-dir.x*ctc/2,y:pC2.y-dir.y*ctc/2},r);
+          var pA={x:pC2.x+dir.x*ctc/2,y:pC2.y+dir.y*ctc/2};
+          var pB={x:pC2.x-dir.x*ctc/2,y:pC2.y-dir.y*ctc/2};
+          drawDblDotDXFCenter(pA,fn);
+          drawDblDotDXFCenter(pB,fn);
         }
       }
     } else if(mode==='offset'){

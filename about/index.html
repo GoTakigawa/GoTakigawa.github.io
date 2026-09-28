@@ -6,7 +6,7 @@
   <title>About - Go Takigawa - GTI / Luthier</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DIN+Condensed&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../style.css">
   <style>
     .about-container {
@@ -27,10 +27,10 @@
     }
     
     .luthier-name {
-      font-family: 'Roboto Condensed', sans-serif;
+      font-family: 'DIN Condensed', sans-serif;
       text-transform: uppercase;
       letter-spacing: 0.4em;
-      color: var(--accent-color);
+      color: var(--accent);
       font-weight: 700;
       font-size: 1.1rem;
     }
@@ -56,7 +56,7 @@
     .profile-img {
       width: 100%;
       height: auto;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border);
       filter: grayscale(1);
       transition: filter 0.5s ease;
     }
@@ -67,6 +67,23 @@
 
     .profile-text {
       flex: 1.5;
+    }
+
+    .profile-text h2 {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+    }
+
+    .profile-caption {
+      display: block;
+      margin-top: 12px;
+      font-family: 'DIN Condensed', sans-serif;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      color: #888;
+      text-align: center;
     }
 
     .philosophy-sec {
@@ -87,7 +104,7 @@
       display: block;
       width: 40px;
       height: 2px;
-      background: var(--accent-color);
+      background: var(--accent);
       margin: 20px auto 0;
     }
 
@@ -189,18 +206,14 @@
 <div class="overlay" id="overlay"></div>
 <div class="drawer" id="drawer">
   <a href="../index.html"><span class="d-name">Top</span><span class="d-arr">→</span></a>
+  <a href="../pricing/index.html"><span class="d-name">ギターカスタム / リペア料金表</span><span class="d-arr">→</span></a>
   <a href="../gallery/index.html"><span class="d-name">Gallery</span><span class="d-arr">→</span></a>
-  <a href="../models/guitar/index.html"><span class="d-name">Catalog</span><span class="d-arr">→</span></a>
-  <a href="../custom/index.html"><span class="d-name">Custom Order</span><span class="d-arr">→</span></a>
-  <a href="../pricing/index.html"><span class="d-name">Pricing</span><span class="d-arr">→</span></a>
-  <a href="../picks/krystal/index.html"><span class="d-name">Krystal Plectrum</span><span class="d-arr">→</span></a>
-  <a href="../picks/vortex/index.html"><span class="d-name">Vortex Plectrum</span><span class="d-arr">→</span></a>
-  <a href="../cases/index.html"><span class="d-name">Fretboard Cases</span><span class="d-arr">→</span></a>
-  <a href="../keyboards/index.html"><span class="d-name">Keyboards</span><span class="d-arr">→</span></a>
-  <a href="../pedal/index.html"><span class="d-name">Effects Pedals</span><span class="d-arr">→</span></a>
-  <a href="../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
+  <a href="../concept/index.html"><span class="d-name">CG Concept</span><span class="d-arr">→</span></a>
+  <a href="../ax/index.html"><span class="d-name">AX</span><span class="d-arr">→</span></a>
+  <a href="../pedal/index.html"><span class="d-name">Exhaust / Bass Distortion</span><span class="d-arr">→</span></a>
   <a href="../contact/index.html"><span class="d-name">Contact</span><span class="d-arr">→</span></a>
   <a href="../generator/index.html"><span class="d-name">Generator</span><span class="d-arr">→</span></a>
+  <a href="../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
 </div>
 
 <nav id="nav" class="gti-nav">
@@ -217,7 +230,7 @@
 
   <main class="about-container" style="padding-top: 64px;">
     <div class="about-hero">
-      <div class="luthier-name">Luthier & Designer</div>
+      <div class="luthier-name">GTI Factory head / Luthier / Designer</div>
       <h1>Go Takigawa</h1>
     </div>
 
@@ -225,36 +238,28 @@
       
       <section class="profile-sec">
         <div class="profile-img-wrap">
-          <img src="../assets/images/gallery/placeholder.png" alt="Go Takigawa" class="profile-img">
+          <img src="../assets/images/about/go-takigawa.jpg" alt="Go Takigawa" class="profile-img">
+          <span class="profile-caption">with GTI #001</span>
         </div>
         <div class="profile-text">
+          <h2>GTIとは</h2>
           <p class="content-p">
-            Go Takigawa Instruments（GTI）は、愛知県を拠点に活動する独立系ギター・ルシアー、Go Takigawaによるパーソナルな工房です。
-            先進的な人間工学（エルゴノミクス）と、マルチスケール技術を基盤とし、現代のテクニカルなプレイヤーに寄り添うハイエンド・インストゥルメントを製作しています。
-          </p>
-          <p class="content-p">
-            デザインと機能、そして音響特性の完璧な融合を追求し、一本一本の楽器に独自の魂を宿します。
+            Go Takigawa Instrumentsの頭文字をとったカスタムギター工房＂GTI＂。<br>
+            東京都にてエレクトリックギター／エレクトリックベースを代表・滝川豪がデザイン・製作している個人メーカー。<br>
+            良い音を出すツールとして、最高な気分になれるアイテムとして、格好良く魅せるファッションとして<br>
+            ——この全てを満たす、心強いパートナーとなるような１本を目指し、妥協なく、自由に。<br><br>
+            GTIはその答えを、１本ずつ形にしています。
           </p>
         </div>
       </section>
 
-      <section class="philosophy-sec">
-        <h2>Philosophy</h2>
-        <p class="content-p">
-          「形は機能に従い、機能は音楽に従う」<br>
-          私の楽器製作における信念は、複雑な造形美を持ちながらも、それが奏者にとって「弾いていることを忘れさせるほど自然」であることです。
-        </p>
-        <p class="content-p">
-          マルチスケール、ヘッドレス、そして独自のボディシェイプ。これらはすべて、より深い音楽表現を可能にするための「道具」としての進化の形です。
-        </p>
-        <div class="signature">Go Takigawa</div>
-      </section>
 
     </div>
   </main>
 
   <footer>
     <p>Copyright &copy; 2026 GTI.</p>
+    <p><a href="../legal/index.html" style="color:#666;font-size:.75rem;text-decoration:none;">特定商取引法に基づく表記</a></p>
   </footer>
 
 

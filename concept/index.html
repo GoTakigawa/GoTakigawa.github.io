@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CONCEPT - GTI / Luthier</title>
+  <title>CG CONCEPT - GTI / Luthier</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DIN+Condensed&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../style.css">
 
 <style>
@@ -66,6 +66,206 @@
   /* タッチデバイスではhoverブリッジ不要 */
   .ham-wrap::after{display:none;}
 }
+
+/* ── CG CONCEPT GALLERY ── */
+.cg-main { max-width: 1400px; margin: 0 auto; padding: 60px 40px 100px; box-sizing: border-box; }
+.cg-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+}
+@media (max-width: 1100px) { .cg-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .cg-grid { grid-template-columns: 1fr; padding: 0 4px; } }
+
+.cg-item {
+  position: relative;
+  background: #080808;
+  border: 1px solid #111;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.cg-item:hover {
+  border-color: #333;
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+.cg-item-img-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #000;
+  cursor: pointer;
+}
+.cg-item-img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.6s ease;
+}
+.cg-item:hover .cg-item-img { transform: scale(1.05); }
+
+/* 複数枚CG画像のスライド表示 */
+.cg-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.cg-slide.active { opacity: 1; z-index: 1; }
+.cg-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(240,237,230,0.25);
+  color: #f0ede6;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.25s ease, background 0.25s ease;
+  z-index: 3;
+  font-family: 'DIN Condensed', sans-serif;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0;
+}
+.cg-item-img-wrap:hover .cg-nav-btn { opacity: 1; }
+.cg-nav-btn:hover { background: rgba(107,33,214,0.85); border-color: rgba(107,33,214,0.85); }
+.cg-nav-prev { left: 10px; }
+.cg-nav-next { right: 10px; }
+.cg-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 0; right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  z-index: 3;
+}
+.cg-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(240,237,230,0.35);
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.cg-dot.active { background: #f0ede6; transform: scale(1.3); }
+
+/* 画像がまだ無いプレースホルダー枠（実画像が入ったら .cg-item-img-wrap の中身をimgタグに差し替えるだけでOK） */
+.cg-item-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px;
+  color: #3a3a3a;
+  background: repeating-linear-gradient(135deg, #0d0d0d, #0d0d0d 10px, #111 10px, #111 20px);
+}
+.cg-item-placeholder svg { width: 32px; height: 32px; opacity: 0.5; }
+.cg-item-placeholder span {
+  font-family: 'DIN Condensed', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #555;
+}
+
+.cg-item-info { padding: 22px 25px; background: #080808; border-top: 1px solid #111; }
+.cg-item-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  color: #fff;
+}
+.cg-item-desc {
+  font-size: 0.85rem;
+  color: #666;
+  font-family: 'DIN Condensed', sans-serif;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+}
+
+/* ── Lightbox Modal ── */
+.cg-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.98);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.cg-modal.show { display: flex; opacity: 1; }
+.cg-modal-content {
+  max-width: 1800px;
+  width: 100%;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.cg-modal-img-container {
+  position: relative;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  text-align: center;
+}
+.cg-modal-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  box-shadow: 0 30px 100px rgba(0,0,0,0.8);
+}
+.cg-modal-nav {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  transform: translateY(-50%);
+  padding: 0 10px;
+  pointer-events: none;
+}
+.cg-modal-nav-btn {
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  border: 1px solid #444;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.3s;
+  font-family: 'DIN Condensed', sans-serif;
+  font-size: 1.2rem;
+}
+.cg-modal-nav-btn:hover { background: #6b21d6; border-color: #6b21d6; }
+.cg-modal-close {
+  position: absolute;
+  top: -60px;
+  right: 0;
+  color: #fff;
+  font-size: 2.5rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: color 0.3s;
+}
+.cg-modal-close:hover { color: #6b21d6; }
+.cg-modal-caption { margin-top: 30px; text-align: center; max-width: 600px; }
+.cg-modal-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: #fff;
+}
+.cg-modal-counter { margin-top: 10px; font-size: 0.8rem; color: #666; }
 </style>
 </head>
 <body>
@@ -74,18 +274,14 @@
 <div class="overlay" id="overlay"></div>
 <div class="drawer" id="drawer">
   <a href="../index.html"><span class="d-name">Top</span><span class="d-arr">→</span></a>
+  <a href="../pricing/index.html"><span class="d-name">ギターカスタム / リペア料金表</span><span class="d-arr">→</span></a>
   <a href="../gallery/index.html"><span class="d-name">Gallery</span><span class="d-arr">→</span></a>
-  <a href="../models/guitar/index.html"><span class="d-name">Catalog</span><span class="d-arr">→</span></a>
-  <a href="../custom/index.html"><span class="d-name">Custom Order</span><span class="d-arr">→</span></a>
-  <a href="../pricing/index.html"><span class="d-name">Pricing</span><span class="d-arr">→</span></a>
-  <a href="../picks/krystal/index.html"><span class="d-name">Krystal Plectrum</span><span class="d-arr">→</span></a>
-  <a href="../picks/vortex/index.html"><span class="d-name">Vortex Plectrum</span><span class="d-arr">→</span></a>
-  <a href="../cases/index.html"><span class="d-name">Fretboard Cases</span><span class="d-arr">→</span></a>
-  <a href="../keyboards/index.html"><span class="d-name">Keyboards</span><span class="d-arr">→</span></a>
-  <a href="../pedal/index.html"><span class="d-name">Effects Pedals</span><span class="d-arr">→</span></a>
-  <a href="../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
+  <a href="../concept/index.html"><span class="d-name">CG Concept</span><span class="d-arr">→</span></a>
+  <a href="../ax/index.html"><span class="d-name">AX</span><span class="d-arr">→</span></a>
+  <a href="../pedal/index.html"><span class="d-name">Exhaust / Bass Distortion</span><span class="d-arr">→</span></a>
   <a href="../contact/index.html"><span class="d-name">Contact</span><span class="d-arr">→</span></a>
   <a href="../generator/index.html"><span class="d-name">Generator</span><span class="d-arr">→</span></a>
+  <a href="../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
 </div>
 
 <nav id="nav" class="gti-nav">
@@ -97,17 +293,44 @@
   </div>
 </nav>
 
-  
   <main style="padding-top: 64px;">
-    <div style="text-align:center; padding: 100px 20px;">
-      <h1 style="font-family: 'Libre Baskerville', serif; margin-bottom: 20px;">CONCEPT</h1>
-      <p>Coming soon...</p>
-      <a href="../index.html" style="display:inline-block; margin-top:30px; color:#6f00ff; text-decoration:none;">&larr; Back to Home</a>
+    <div class="page-title-sec" style="text-align:center; padding: 60px 20px 20px;">
+      <h1 style="font-family: 'Libre Baskerville', serif; font-size: 2.5rem; margin-bottom: 10px;">CG Concept</h1>
+      <p style="font-family: 'DIN Condensed', sans-serif; font-size: 0.85rem; color: #6b21d6; text-transform: uppercase; letter-spacing: 0.1em;">Digital concept renders and design studies, ahead of the physical build.</p>
+    </div>
+
+    <div class="cg-main">
+      <!--
+        ▼ CGレンダー画像を追加する時は、下の <script> 内の CG_MODELS 配列に
+        { title: "モデル名", images: ["../assets/images/concept/xxx.jpg", ...] }
+        の形で1件追加するだけでOKです（グリッドはJSで自動生成されます）。
+        画像を複数枚指定すると、カード内で矢印/ドットによるスライド表示になります。
+      -->
+      <div class="cg-grid" id="cgGrid"></div>
     </div>
   </main>
   <footer>
     <p>Copyright &copy; 2026 GTI.</p>
+    <p><a href="../legal/index.html" style="color:#666;font-size:.75rem;text-decoration:none;">特定商取引法に基づく表記</a></p>
   </footer>
+
+  <!-- Lightbox Modal -->
+  <div class="cg-modal" id="cgModal">
+    <div class="cg-modal-content">
+      <button class="cg-modal-close" id="cgModalClose" type="button" aria-label="Close">&times;</button>
+      <div class="cg-modal-img-container">
+        <img src="" alt="" class="cg-modal-img" id="cgModalImg">
+        <div class="cg-modal-nav">
+          <button class="cg-modal-nav-btn" id="cgModalPrev" type="button" aria-label="Previous image">&lt;</button>
+          <button class="cg-modal-nav-btn" id="cgModalNext" type="button" aria-label="Next image">&gt;</button>
+        </div>
+      </div>
+      <div class="cg-modal-caption">
+        <div class="cg-modal-title" id="cgModalTitle"></div>
+        <div class="cg-modal-counter" id="cgModalCounter"></div>
+      </div>
+    </div>
+  </div>
 
 <script>
 // ── HAMBURGER MENU JS ──
@@ -152,6 +375,164 @@
   overlay.addEventListener('click', closeDrawer);
   overlay.addEventListener('touchstart',function(e){ e.preventDefault(); closeDrawer(); },{passive:false});
   window.addEventListener('mousemove',function(){ isTouch=false; },{passive:true});
+})();
+
+// ── CG CONCEPT GRID ──
+(function(){
+  var CG_MODELS = [
+    { title: "Drake-6 Headless", images: ["../assets/images/concept/20-drake-6-headless-1.png"] },
+    { title: "Drake-7 Archtop", images: ["../assets/images/concept/21-drake-7-archtop-1.jpg","../assets/images/concept/21-drake-7-archtop-2.jpg"] },
+    { title: "Apocalypse-6", images: ["../assets/images/concept/01-apocalypse-6-2.jpg","../assets/images/concept/01-apocalypse-6-1.jpg","../assets/images/concept/01-apocalypse-6-3.jpg","../assets/images/concept/01-apocalypse-6-4.jpg","../assets/images/concept/01-apocalypse-6-5.jpg","../assets/images/concept/01-apocalypse-6-6.jpg"] },
+    { title: "TREAD-LINE — R'lyeh-4 Neck-Thru", images: ["../assets/images/concept/02-tread-line-rlyeh-4-neck-thru-1.jpg","../assets/images/concept/02-tread-line-rlyeh-4-neck-thru-2.jpg","../assets/images/concept/02-tread-line-rlyeh-4-neck-thru-3.jpg","../assets/images/concept/02-tread-line-rlyeh-4-neck-thru-4.jpg","../assets/images/concept/02-tread-line-rlyeh-4-neck-thru-5.jpg","../assets/images/concept/02-tread-line-rlyeh-4-neck-thru-6.jpg","../assets/images/concept/02-tread-line-rlyeh-4-neck-thru-7.jpg","../assets/images/concept/02-tread-line-rlyeh-4-neck-thru-8.jpg"] },
+    { title: "TREAD-LINE — Leggiero-6 (Version F)", images: ["../assets/images/concept/03-tread-line-leggiero-6-version-f-1.jpg"] },
+    { title: "TREAD-LINE — L'ion-6 Custom", images: ["../assets/images/concept/04-tread-line-lion-6-custom-1.jpg","../assets/images/concept/04-tread-line-lion-6-custom-2.jpg","../assets/images/concept/04-tread-line-lion-6-custom-3.jpg","../assets/images/concept/04-tread-line-lion-6-custom-4.jpg"] },
+    { title: "TREAD-LINE — L'ion-4 Custom", images: ["../assets/images/concept/05-tread-line-lion-4-custom-1.jpg","../assets/images/concept/05-tread-line-lion-4-custom-2.jpg","../assets/images/concept/05-tread-line-lion-4-custom-3.jpg"] },
+    { title: "TREAD-LINE — L'ion-5", images: ["../assets/images/concept/06-tread-line-lion-5-1.jpg","../assets/images/concept/06-tread-line-lion-5-2.jpg","../assets/images/concept/06-tread-line-lion-5-3.jpg","../assets/images/concept/06-tread-line-lion-5-4.jpg","../assets/images/concept/06-tread-line-lion-5-5.jpg"] },
+    { title: "TREAD-LINE — R'lyeh-4", images: ["../assets/images/concept/07-tread-line-rlyeh-4-1.jpg","../assets/images/concept/07-tread-line-rlyeh-4-2.jpg"] },
+    { title: "TREAD-LINE — Leggiero-6", images: ["../assets/images/concept/08-tread-line-leggiero-6-1.jpg","../assets/images/concept/08-tread-line-leggiero-6-2.jpg","../assets/images/concept/08-tread-line-leggiero-6-3.jpg","../assets/images/concept/08-tread-line-leggiero-6-4.jpg","../assets/images/concept/08-tread-line-leggiero-6-5.jpg","../assets/images/concept/08-tread-line-leggiero-6-6.jpg","../assets/images/concept/08-tread-line-leggiero-6-7.jpg","../assets/images/concept/08-tread-line-leggiero-6-8.jpg"] },
+    { title: "Devil-7", images: ["../assets/images/concept/09-devil-7-1.jpg","../assets/images/concept/09-devil-7-2.jpg","../assets/images/concept/09-devil-7-3.jpg","../assets/images/concept/09-devil-7-4.jpg","../assets/images/concept/09-devil-7-5.jpg"] },
+    { title: "Mortezzo-6", images: ["../assets/images/concept/10-mortezzo-6-1.jpg","../assets/images/concept/10-mortezzo-6-2.jpg"] },
+    { title: "Nekro-8 Headless (Goth)", images: ["../assets/images/concept/11-nekro-8-headless-goth-1.jpg"] },
+    { title: "Nekro-9 Headless", images: ["../assets/images/concept/12-nekro-9-headless-1.jpg"] },
+    { title: "Devil-9 (Curved Multi-Scale)", images: ["../assets/images/concept/13-devil-9-curved-multi-scale-1.jpg"] },
+    { title: "Nekro-8 (Curved Multi-Scale Custom)", images: ["../assets/images/concept/14-nekro-8-curved-multi-scale-custom-1.jpg"] },
+    { title: "Mortezzo-6 (Alt)", images: ["../assets/images/concept/15-mortezzo-6-2-1.jpg"] },
+    { title: "R'lyeh-5 Custom", images: ["../assets/images/concept/16-rlyeh-5-custom-1.jpg"] },
+    { title: "TREAD-LINE — Shape JM", images: ["../assets/images/concept/17-tread-line-shape-jm-1.jpg","../assets/images/concept/17-tread-line-shape-jm-2.jpg","../assets/images/concept/17-tread-line-shape-jm-3.jpg","../assets/images/concept/17-tread-line-shape-jm-4.jpg"] },
+    { title: "TREAD-LINE — Shape T", images: ["../assets/images/concept/18-tread-line-shape-t-1.jpg"] },
+    { title: "Raven-6", images: ["../assets/images/concept/19-raven-6-1.jpg"] },
+  ];
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  // ── ライトボックス(拡大表示) ──
+  var cgModal = document.getElementById('cgModal');
+  var cgModalImg = document.getElementById('cgModalImg');
+  var cgModalTitle = document.getElementById('cgModalTitle');
+  var cgModalCounter = document.getElementById('cgModalCounter');
+  var cgModalPrev = document.getElementById('cgModalPrev');
+  var cgModalNext = document.getElementById('cgModalNext');
+  var cgModalClose = document.getElementById('cgModalClose');
+  var cgCurrentImages = [];
+  var cgCurrentTitle = '';
+  var cgCurrentIdx = 0;
+
+  function cgUpdateModal(){
+    cgModalImg.src = cgCurrentImages[cgCurrentIdx];
+    cgModalImg.alt = cgCurrentTitle;
+    cgModalTitle.textContent = cgCurrentTitle;
+    if(cgCurrentImages.length > 1){
+      cgModalCounter.textContent = (cgCurrentIdx + 1) + ' / ' + cgCurrentImages.length;
+      cgModalPrev.style.display = 'block';
+      cgModalNext.style.display = 'block';
+    } else {
+      cgModalCounter.textContent = '';
+      cgModalPrev.style.display = 'none';
+      cgModalNext.style.display = 'none';
+    }
+  }
+
+  function cgOpenModal(images, title, startIdx){
+    if(!cgModal) return;
+    cgCurrentImages = images;
+    cgCurrentTitle = title;
+    cgCurrentIdx = startIdx || 0;
+    cgUpdateModal();
+    cgModal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cgCloseModal(){
+    if(!cgModal) return;
+    cgModal.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  if(cgModalPrev) cgModalPrev.addEventListener('click', function(e){
+    e.stopPropagation();
+    cgCurrentIdx = (cgCurrentIdx - 1 + cgCurrentImages.length) % cgCurrentImages.length;
+    cgUpdateModal();
+  });
+  if(cgModalNext) cgModalNext.addEventListener('click', function(e){
+    e.stopPropagation();
+    cgCurrentIdx = (cgCurrentIdx + 1) % cgCurrentImages.length;
+    cgUpdateModal();
+  });
+  if(cgModalClose) cgModalClose.addEventListener('click', cgCloseModal);
+  if(cgModal) cgModal.addEventListener('click', function(e){
+    if(e.target === cgModal) cgCloseModal();
+  });
+  document.addEventListener('keydown', function(e){
+    if(!cgModal || !cgModal.classList.contains('show')) return;
+    if(e.key === 'Escape') cgCloseModal();
+    if(e.key === 'ArrowLeft' && cgModalPrev) cgModalPrev.click();
+    if(e.key === 'ArrowRight' && cgModalNext) cgModalNext.click();
+  });
+
+  function renderGrid(){
+    var grid = document.getElementById('cgGrid');
+    if(!grid) return;
+    var html = CG_MODELS.map(function(m, mi){
+      var slides = m.images.map(function(src, i){
+        return '<div class="cg-slide' + (i===0 ? ' active' : '') + '" data-idx="' + i + '">' +
+                 '<img class="cg-item-img" src="' + src + '" alt="' + escapeHtml(m.title) + '" loading="lazy">' +
+               '</div>';
+      }).join('');
+      var nav = '';
+      if(m.images.length > 1){
+        nav += '<button class="cg-nav-btn cg-nav-prev" type="button" aria-label="Previous image">‹</button>';
+        nav += '<button class="cg-nav-btn cg-nav-next" type="button" aria-label="Next image">›</button>';
+        nav += '<div class="cg-dots">' + m.images.map(function(_, i){
+          return '<span class="cg-dot' + (i===0 ? ' active' : '') + '" data-idx="' + i + '"></span>';
+        }).join('') + '</div>';
+      }
+      var desc = m.images.length > 1 ? (m.images.length + ' views') : 'CG concept render';
+      return '<div class="cg-item" data-model="' + mi + '">' +
+               '<div class="cg-item-img-wrap">' + slides + nav + '</div>' +
+               '<div class="cg-item-info">' +
+                 '<div class="cg-item-title">' + escapeHtml(m.title) + '</div>' +
+                 '<div class="cg-item-desc">' + desc + '</div>' +
+               '</div>' +
+             '</div>';
+    }).join('');
+    grid.innerHTML = html;
+
+    // スライダーのイベント配線 + クリックで拡大表示
+    var items = grid.querySelectorAll('.cg-item');
+    items.forEach(function(item){
+      var mi = parseInt(item.getAttribute('data-model'), 10);
+      var model = CG_MODELS[mi];
+      var slides = item.querySelectorAll('.cg-slide');
+      var dots = item.querySelectorAll('.cg-dot');
+      var idx = 0;
+      function show(n){
+        idx = (n + slides.length) % slides.length;
+        slides.forEach(function(s, i){ s.classList.toggle('active', i === idx); });
+        dots.forEach(function(d, i){ d.classList.toggle('active', i === idx); });
+      }
+      if(slides.length > 1){
+        var prevBtn = item.querySelector('.cg-nav-prev');
+        var nextBtn = item.querySelector('.cg-nav-next');
+        if(prevBtn) prevBtn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); show(idx - 1); });
+        if(nextBtn) nextBtn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); show(idx + 1); });
+        dots.forEach(function(d, i){
+          d.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); show(i); });
+        });
+      }
+      var imgWrap = item.querySelector('.cg-item-img-wrap');
+      if(imgWrap && model){
+        imgWrap.addEventListener('click', function(){
+          cgOpenModal(model.images, model.title, idx);
+        });
+      }
+    });
+  }
+
+  renderGrid();
 })();
 </script>
 

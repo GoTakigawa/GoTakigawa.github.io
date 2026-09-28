@@ -6,7 +6,7 @@
   <title>AX - GTI / Luthier</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Roboto+Condensed:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../style.css">
 
 <style>
@@ -39,8 +39,8 @@
 .drawer.open { transform:translateX(0); }
 .drawer a { position:relative; display:flex; align-items:center; justify-content:space-between; padding:15px 40px; border-bottom:1px solid #1e1d1b; text-decoration:none; overflow:hidden; opacity:0; transform:translateX(16px); transition:background .25s,opacity .4s cubic-bezier(.16,1,.3,1),transform .4s cubic-bezier(.16,1,.3,1); }
 .drawer a:first-child { border-top:1px solid #1e1d1b; }
-.drawer a::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:#6b21d6; transform:scaleX(0); transform-origin:left; transition:transform .4s cubic-bezier(.16,1,.3,1); }
-.drawer a:hover { background:rgba(107,33,214,.07); }
+.drawer a::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:#e6342b; transform:scaleX(0); transform-origin:left; transition:transform .4s cubic-bezier(.16,1,.3,1); }
+.drawer a:hover { background:rgba(230,52,43,.07); }
 .drawer a:hover::after { transform:scaleX(1); }
 .drawer.open a { opacity:1; transform:translateX(0); }
 .drawer.open a:nth-child(1) { transition-delay:.04s; }
@@ -59,12 +59,171 @@
 .d-name { font-family:'Libre Baskerville',serif; font-size:1rem; color:rgba(240,237,230,.45); transition:color .25s; }
 .drawer a:hover .d-name { color:#f0ede6; }
 .d-arr { font-family:'Teko',sans-serif; font-size:.8rem; font-weight:300; color:#2e2d2a; opacity:0; transform:translateX(-6px); transition:color .25s,opacity .25s,transform .3s cubic-bezier(.16,1,.3,1); }
-.drawer a:hover .d-arr { opacity:1; transform:translateX(0); color:#6b21d6; }
+.drawer a:hover .d-arr { opacity:1; transform:translateX(0); color:#e6342b; }
 @media(max-width:900px){ .gti-nav{padding:0 28px; height:60px;} }
 @media(max-width:600px){ .gti-nav{padding:0 16px; height:56px;} .drawer{width:100%;} }
 @media(hover:none){
   /* タッチデバイスではhoverブリッジ不要 */
   .ham-wrap::after{display:none;}
+}
+
+/* ── AX PRODUCT PAGE ── */
+body { background: #000; }
+.product-container { max-width: none; margin: 0; padding: 0 0 120px; }
+
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s cubic-bezier(.16,.84,.44,1), transform .8s cubic-bezier(.16,.84,.44,1); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+.ax-title { text-align: center; padding: 130px 20px 40px; }
+.ax-kicker {
+  position: relative;
+  display: inline-block;
+  color: #e6342b;
+  font-family: 'Roboto Condensed', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+}
+.ax-kicker::after {
+  content: '';
+  position: absolute; bottom: 0; left: 50%;
+  width: 40px; height: 2px;
+  background: #e6342b;
+  transform: translateX(-50%);
+}
+.ax-title h1 {
+  font-family: 'Libre Baskerville', serif;
+  font-size: clamp(2.6rem, 6vw, 4rem);
+  letter-spacing: 0.02em;
+}
+
+/* ロゴ画像は一旦非表示 */
+.ax-logo-wrap { display: none; justify-content: center; padding: 10px 20px 50px; }
+.ax-hero-frame { position: relative; width: 90%; max-width: 1280px; }
+.ax-logo-img { width: 100%; max-width: 100%; height: auto; display: block; }
+
+/* ── EXHAUST-STYLE FULL-WIDTH BANDS ── */
+.ax-band { border-top: 1px solid #111; background: #000; }
+.ax-band-images { padding: 70px 40px; }
+.ax-band-info { padding: 100px 40px; }
+.ax-band-videos { padding: 100px 40px 120px; }
+
+.ax-photo-showcase { max-width: 1300px; margin: 0 auto; }
+.ax-photo-main {
+  position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden;
+  background: #000; cursor: pointer; margin-bottom: 10px;
+  box-shadow: 0 40px 90px rgba(0,0,0,.7), 0 0 0 1px rgba(230,52,43,.12);
+  transition: box-shadow .3s;
+}
+.ax-photo-main:hover { box-shadow: 0 40px 90px rgba(0,0,0,.75), 0 0 0 1px rgba(230,52,43,.3); }
+.ax-photo-main img { width: 100%; height: 100%; object-fit: contain; display: block; transition: transform .6s cubic-bezier(.16,.84,.44,1); }
+.ax-photo-main:hover img { transform: scale(1.025); }
+
+.ax-photo-strip {
+  display: flex; gap: 2px; overflow-x: auto; background: #000; padding: 20px 2px;
+  scrollbar-width: none; -ms-overflow-style: none;
+  scroll-snap-type: x proximity;
+  perspective: 900px;
+}
+.ax-photo-strip::-webkit-scrollbar { display: none; }
+.ax-strip-thumb {
+  position: relative; flex: 0 0 auto; width: 120px; aspect-ratio: 16 / 9; overflow: hidden;
+  background: #000; cursor: pointer; opacity: .5;
+  scroll-snap-align: center;
+  transition: opacity .25s, transform .4s cubic-bezier(.16,.84,.44,1);
+  will-change: transform;
+}
+.ax-strip-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s cubic-bezier(.16,.84,.44,1); }
+.ax-strip-thumb::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+  background: #e6342b;
+  box-shadow: 0 0 10px rgba(230,52,43,.7);
+  transform: scaleX(0); transform-origin: center;
+  transition: transform .3s cubic-bezier(.16,.84,.44,1);
+}
+.ax-strip-thumb:hover { opacity: .85; }
+.ax-strip-thumb:hover img { transform: scale(1.08); }
+.ax-strip-thumb.active { opacity: 1; }
+.ax-strip-thumb.active::after { transform: scaleX(1); }
+.ax-strip-thumb.is-logo { display: flex; align-items: center; justify-content: center; }
+.ax-strip-thumb.is-logo img { width: 68%; height: auto; object-fit: contain; display: block; }
+
+/* ── PHOTO LIGHTBOX ── */
+.ax-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: #000;
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+.ax-modal.show { display: flex; }
+.ax-modal-content { max-width: 1200px; width: 100%; display: flex; flex-direction: column; align-items: center; position: relative; }
+.ax-modal-img-container { position: relative; width: 100%; text-align: center; }
+.ax-modal-img { max-width: 100%; max-height: 78vh; object-fit: contain; box-shadow: 0 30px 100px rgba(0,0,0,.8); }
+.ax-modal-close { position: absolute; top: -60px; right: 0; color: #fff; font-size: 2.5rem; cursor: pointer; background: none; border: none; transition: color .3s; }
+.ax-modal-close:hover { color: #e6342b; }
+.ax-modal-nav { position: absolute; top: 50%; width: 100%; display: flex; justify-content: space-between; transform: translateY(-50%); padding: 0 10px; pointer-events: none; }
+.ax-nav-btn { background: rgba(0,0,0,0.5); color: #fff; border: 1px solid #444; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; pointer-events: auto; transition: all .3s; font-size: 1rem; }
+.ax-nav-btn:hover { background: #e6342b; border-color: #e6342b; }
+.ax-modal-counter { margin-top: 20px; font-size: .8rem; color: #666; letter-spacing: .05em; display: none; }
+
+.ax-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 70px; max-width: 1300px; margin: 0 auto; }
+
+.ax-section-head {
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #e6342b;
+  margin-bottom: 20px;
+}
+
+.spec-list { list-style: none; }
+.spec-list li {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: baseline; gap: 20px;
+  transition: border-color .25s;
+}
+.spec-list li:hover { border-color: #e6342b; }
+.spec-label { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: .05em; flex-shrink: 0; }
+.spec-list li span:last-child {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.88rem;
+  text-align: right;
+  color: #f0ede6;
+}
+
+.ax-description { color: #ccc; }
+.ax-description span { display: block; line-height: 1.9; font-size: 1.05rem; margin-bottom: 6px; }
+.ax-description .ax-punch {
+  margin-top: 16px;
+  font-family: 'Libre Baskerville', serif;
+  font-size: 1.3rem;
+  color: #f0ede6;
+  line-height: 1.6;
+}
+
+.ax-video-head { font-family: 'Libre Baskerville', serif; font-size: clamp(1.8rem, 3vw, 2.4rem); text-align: center; margin-bottom: 48px; max-width: 1300px; margin-left: auto; margin-right: auto; }
+.ax-video-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #111; max-width: 1300px; margin: 0 auto; }
+.ax-video-wrap { position: relative; width: 100%; padding-top: 56.25%; background: #000; overflow: hidden; }
+.ax-video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+@media (max-width: 800px) {
+  .ax-two-col { grid-template-columns: 1fr; gap: 40px; }
+  .ax-photo-strip { perspective: 600px; }
+  .ax-strip-thumb { width: 84px; }
+  .ax-video-grid { grid-template-columns: 1fr; }
+  .ax-title h1 { font-size: 2.2rem; }
+  .ax-band-images { padding: 50px 20px; }
+  .ax-band-info { padding: 60px 20px; }
+  .ax-band-videos { padding: 60px 20px 80px; }
 }
 </style>
 </head>
@@ -74,18 +233,14 @@
 <div class="overlay" id="overlay"></div>
 <div class="drawer" id="drawer">
   <a href="../index.html"><span class="d-name">Top</span><span class="d-arr">→</span></a>
+  <a href="../pricing/index.html"><span class="d-name">ギターカスタム / リペア料金表</span><span class="d-arr">→</span></a>
   <a href="../gallery/index.html"><span class="d-name">Gallery</span><span class="d-arr">→</span></a>
-  <a href="../models/guitar/index.html"><span class="d-name">Catalog</span><span class="d-arr">→</span></a>
-  <a href="../custom/index.html"><span class="d-name">Custom Order</span><span class="d-arr">→</span></a>
-  <a href="../pricing/index.html"><span class="d-name">Pricing</span><span class="d-arr">→</span></a>
-  <a href="../picks/krystal/index.html"><span class="d-name">Krystal Plectrum</span><span class="d-arr">→</span></a>
-  <a href="../picks/vortex/index.html"><span class="d-name">Vortex Plectrum</span><span class="d-arr">→</span></a>
-  <a href="../cases/index.html"><span class="d-name">Fretboard Cases</span><span class="d-arr">→</span></a>
-  <a href="../keyboards/index.html"><span class="d-name">Keyboards</span><span class="d-arr">→</span></a>
-  <a href="../pedal/index.html"><span class="d-name">Effects Pedals</span><span class="d-arr">→</span></a>
-  <a href="../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
+  <a href="../concept/index.html"><span class="d-name">CG Concept</span><span class="d-arr">→</span></a>
+  <a href="../ax/index.html"><span class="d-name">AX</span><span class="d-arr">→</span></a>
+  <a href="../pedal/index.html"><span class="d-name">Exhaust / Bass Distortion</span><span class="d-arr">→</span></a>
   <a href="../contact/index.html"><span class="d-name">Contact</span><span class="d-arr">→</span></a>
   <a href="../generator/index.html"><span class="d-name">Generator</span><span class="d-arr">→</span></a>
+  <a href="../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
 </div>
 
 <nav id="nav" class="gti-nav">
@@ -97,19 +252,109 @@
   </div>
 </nav>
 
-  
-  <main style="padding-top: 64px;">
-    <div style="text-align:center; padding: 100px 20px;">
-      <h1 style="font-family: 'Libre Baskerville', serif; margin-bottom: 20px;">AX</h1>
-      <p>Coming soon...</p>
-      <a href="../index.html" style="display:inline-block; margin-top:30px; color:#6f00ff; text-decoration:none;">&larr; Back to Home</a>
+
+  <main class="product-container">
+    <div class="ax-title reveal">
+      <span class="ax-kicker">Signature Model</span>
+      <h1>AX-6</h1>
     </div>
+
+    <div class="ax-logo-wrap reveal">
+      <div class="ax-hero-frame">
+        <img src="https://cdn.amebaowndme.com/madrid-prd/madrid-web/images/sites/629021/7bdc0541ac7f1d9755e58e6a49c71d9f_9cefad693784fe110838a5e9ac2e7856.png?width=840" alt="AXIOM" class="ax-logo-img">
+      </div>
+    </div>
+
+    <section class="ax-band ax-band-images">
+    <div class="ax-photo-showcase reveal">
+      <div class="ax-photo-main" id="axPhotoMain" onclick="openAxMainInModal()">
+        <img src="../assets/images/ax/16.jpg" alt="AX-6" id="axMainImg">
+      </div>
+      <div class="ax-photo-strip" id="axPhotoStrip">
+        <div class="ax-strip-thumb active" data-idx="0" onclick="setAxMain(0)"><img src="../assets/images/ax/16.jpg" alt="AX-6" loading="lazy"></div>
+        <div class="ax-strip-thumb" data-idx="1" onclick="setAxMain(1)"><img src="../assets/images/ax/15.jpg" alt="AX-6" loading="lazy"></div>
+        <div class="ax-strip-thumb" data-idx="2" onclick="setAxMain(2)"><img src="../assets/images/ax/14.jpg" alt="AX-6" loading="lazy"></div>
+        <div class="ax-strip-thumb" data-idx="3" onclick="setAxMain(3)"><img src="../assets/images/ax/08.jpg" alt="AX-6" loading="lazy"></div>
+        <div class="ax-strip-thumb" data-idx="4" onclick="setAxMain(4)"><img src="../assets/images/ax/05.jpg" alt="AX-6" loading="lazy"></div>
+        <div class="ax-strip-thumb" data-idx="5" onclick="setAxMain(5)"><img src="../assets/images/ax/06.jpg" alt="AX-6" loading="lazy"></div>
+        <div class="ax-strip-thumb" data-idx="6" onclick="setAxMain(6)"><img src="../assets/images/ax/12.jpg" alt="AX-6" loading="lazy"></div>
+        <div class="ax-strip-thumb" data-idx="7" onclick="setAxMain(7)"><img src="../assets/images/ax/11.jpg" alt="AX-6" loading="lazy"></div>
+        <div class="ax-strip-thumb" data-idx="8" onclick="setAxMain(8)"><img src="../assets/images/ax/10.jpg" alt="AX-6" loading="lazy"></div>
+        <div class="ax-strip-thumb" data-idx="9" onclick="setAxMain(9)"><img src="../assets/images/ax/09.jpg" alt="AX-6" loading="lazy"></div>
+        <div class="ax-strip-thumb" data-idx="10" onclick="setAxMain(10)"><img src="../assets/images/ax/04.jpg" alt="AX-6" loading="lazy"></div>
+        <div class="ax-strip-thumb" data-idx="11" onclick="setAxMain(11)"><img src="../assets/images/ax/03.jpg" alt="AX-6" loading="lazy"></div>
+        <div class="ax-strip-thumb" data-idx="12" onclick="setAxMain(12)"><img src="../assets/images/ax/13.jpg" alt="AX-6" loading="lazy"></div>
+        <div class="ax-strip-thumb" data-idx="13" onclick="setAxMain(13)"><img src="../assets/images/ax/07.jpg" alt="AX-6" loading="lazy"></div>
+        <div class="ax-strip-thumb is-logo" data-idx="14" onclick="setAxMain(14)"><img src="https://cdn.amebaowndme.com/madrid-prd/madrid-web/images/sites/629021/7bdc0541ac7f1d9755e58e6a49c71d9f_9cefad693784fe110838a5e9ac2e7856.png?width=840" alt="AXIOM" loading="lazy"></div>
+      </div>
+    </div>
+    </section>
+
+    <section class="ax-band ax-band-info">
+    <div class="ax-two-col">
+      <div class="reveal">
+        <div class="ax-section-head">Specifications</div>
+        <ul class="spec-list">
+          <li><span class="spec-label">Body Material</span><span>Japanese zelkova（欅）</span></li>
+          <li><span class="spec-label">Neck Material</span><span>Wenge</span></li>
+          <li><span class="spec-label">Finger board Material</span><span>Ebony</span></li>
+          <li><span class="spec-label">Finger board radius</span><span>20 inch</span></li>
+          <li><span class="spec-label">Scale length</span><span>25.5 inch</span></li>
+          <li><span class="spec-label">Fret</span><span>Jescar stainless</span></li>
+          <li><span class="spec-label">Pickup</span><span>Fishman Fluence modern Humbucker</span></li>
+          <li><span class="spec-label">Bridge</span><span>Hipshot headless tremolo</span></li>
+          <li><span class="spec-label">Made-to-Order Price</span><span>¥500,000 (税抜)</span></li>
+        </ul>
+      </div>
+      <div class="reveal">
+        <div class="ax-section-head">Concept</div>
+        <p class="ax-description">
+          <span>MODEL NAME: AX</span>
+          <span>AXIOM共同開発</span>
+          <span>斧型シルエット採用機</span>
+          <span>プレイアビリティとモダンサウンドの完全両立を目指したモデル</span>
+          <span class="ax-punch">その答えからなる様相は、もはや武装である</span>
+        </p>
+      </div>
+    </div>
+    </section>
+
+    <section class="ax-band ax-band-videos">
+    <div class="ax-video-head reveal">Demo Video</div>
+    <div class="ax-video-grid reveal">
+      <div class="ax-video-wrap"><iframe src="https://www.youtube.com/embed/CWcA--1J3BA" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+      <div class="ax-video-wrap"><iframe src="https://www.youtube.com/embed/it8w91WtGJQ" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+    </div>
+    </section>
   </main>
   <footer>
     <p>Copyright &copy; 2026 GTI.</p>
+    <p><a href="../legal/index.html" style="color:#666;font-size:.75rem;text-decoration:none;">特定商取引法に基づく表記</a></p>
   </footer>
 
+  <div class="ax-modal" id="axModal" onclick="closeAxModal(event)">
+    <div class="ax-modal-content" onclick="event.stopPropagation()">
+      <button class="ax-modal-close" onclick="closeAxModal()">&times;</button>
+      <div class="ax-modal-img-container">
+        <img src="" alt="AX-6" class="ax-modal-img" id="axModalImg">
+        <div class="ax-modal-nav">
+          <button class="ax-nav-btn ax-nav-prev" id="axModalPrev">&lt;</button>
+          <button class="ax-nav-btn ax-nav-next" id="axModalNext">&gt;</button>
+        </div>
+      </div>
+      <div class="ax-modal-counter" id="axModalCounter"></div>
+    </div>
+  </div>
+
 <script>
+// ── SCROLL REVEAL ──
+(function(){
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, {threshold: 0.1});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+})();
+
 // ── HAMBURGER MENU JS ──
 (function(){
   const hamWrap=document.getElementById('hamWrap');
@@ -152,6 +397,98 @@
   overlay.addEventListener('click', closeDrawer);
   overlay.addEventListener('touchstart',function(e){ e.preventDefault(); closeDrawer(); },{passive:false});
   window.addEventListener('mousemove',function(){ isTouch=false; },{passive:true});
+})();
+
+// ── AX PHOTO GALLERY (main viewer + strip + lightbox) ──
+const axImages = [16, 15, 14, 8, 5, 6, 12, 11, 10, 9, 4, 3, 13, 7].map(function(n){ return '../assets/images/ax/' + String(n).padStart(2, '0') + '.jpg'; });
+axImages.push('https://cdn.amebaowndme.com/madrid-prd/madrid-web/images/sites/629021/7bdc0541ac7f1d9755e58e6a49c71d9f_9cefad693784fe110838a5e9ac2e7856.png?width=840');
+let axMainIndex = 0;
+
+window.setAxMain = function(idx){
+  axMainIndex = idx;
+  const mainImg = document.getElementById('axMainImg');
+  if (mainImg) mainImg.src = axImages[idx];
+  document.querySelectorAll('.ax-strip-thumb').forEach(function(el){
+    const isActive = Number(el.getAttribute('data-idx')) === idx;
+    el.classList.toggle('active', isActive);
+    if (isActive) el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  });
+};
+
+window.openAxMainInModal = function(){
+  openAxModal(axMainIndex);
+};
+
+// ── AX STRIP "BOOK" TILT (coverflow-style, follows horizontal scroll) ──
+(function(){
+  const stripEl = document.getElementById('axPhotoStrip');
+  if(!stripEl) return;
+  let ticking = false;
+
+  function updateTilt(){
+    const rect = stripEl.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    stripEl.querySelectorAll('.ax-strip-thumb').forEach(function(el){
+      if(el.classList.contains('is-logo')){
+        el.style.transform = 'none';
+        return;
+      }
+      const r = el.getBoundingClientRect();
+      const elCenter = r.left + r.width / 2;
+      const dist = rect.width ? (elCenter - centerX) / (rect.width / 2) : 0;
+      const clamped = Math.max(-1, Math.min(1, dist));
+      const rotate = clamped * -32;
+      const scale = 1 - Math.abs(clamped) * 0.14;
+      el.style.transform = 'rotateY(' + rotate + 'deg) scale(' + scale + ')';
+    });
+  }
+
+  stripEl.addEventListener('scroll', function(){
+    if(!ticking){
+      ticking = true;
+      requestAnimationFrame(function(){ updateTilt(); ticking = false; });
+    }
+  }, { passive: true });
+
+  window.addEventListener('resize', updateTilt);
+  updateTilt();
+})();
+
+(function(){
+  const modal = document.getElementById('axModal');
+  const modalImg = document.getElementById('axModalImg');
+  const modalCounter = document.getElementById('axModalCounter');
+  const modalPrev = document.getElementById('axModalPrev');
+  const modalNext = document.getElementById('axModalNext');
+  if(!modal || !modalImg || !modalPrev || !modalNext) return;
+  let idx = 0;
+
+  function updateAxModal(){
+    modalImg.src = axImages[idx];
+    modalCounter.innerText = (idx + 1) + ' / ' + axImages.length;
+  }
+
+  window.openAxModal = function(i){
+    idx = i;
+    updateAxModal();
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeAxModal = function(){
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+  };
+
+  modalPrev.onclick = function(e){ e.stopPropagation(); idx = (idx - 1 + axImages.length) % axImages.length; updateAxModal(); };
+  modalNext.onclick = function(e){ e.stopPropagation(); idx = (idx + 1) % axImages.length; updateAxModal(); };
+
+  document.addEventListener('keydown', function(e){
+    if(!modal.classList.contains('show')) return;
+    if(e.key === 'Escape') closeAxModal();
+    if(e.key === 'ArrowLeft') modalPrev.onclick(e);
+    if(e.key === 'ArrowRight') modalNext.onclick(e);
+  });
 })();
 </script>
 

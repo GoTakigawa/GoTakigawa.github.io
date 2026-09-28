@@ -4,9 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact - GTI / Luthier</title>
+  <meta name="description" content="Contact Go Takigawa Instruments for custom guitar, bass, and instrument-design inquiries.">
+  <link rel="canonical" href="https://www.gtinstruments.xyz/contact/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../style.css">
   <style>
     .contact-container {
@@ -34,10 +36,10 @@
     }
 
     .info-item h3 {
-      font-family: 'Roboto Condensed', sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--accent-color);
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--accent);
       font-size: 0.9rem;
       margin-bottom: 10px;
     }
@@ -51,7 +53,7 @@
     .contact-form {
       background: #080808;
       padding: 40px;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border);
       border-radius: 4px;
     }
 
@@ -61,10 +63,10 @@
 
     .form-group label {
       display: block;
-      font-family: 'Roboto Condensed', sans-serif;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 500;
       font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.03em;
       margin-bottom: 8px;
       color: #888;
     }
@@ -75,7 +77,7 @@
       border: 1px solid #222;
       padding: 12px 15px;
       color: #fff;
-      font-family: 'Roboto Condensed', sans-serif;
+      font-family: 'Noto Sans JP', sans-serif;
       font-size: 1rem;
       border-radius: 2px;
       transition: border-color 0.3s ease;
@@ -83,7 +85,7 @@
 
     .form-control:focus {
       outline: none;
-      border-color: var(--accent-color);
+      border-color: var(--accent);
     }
 
     textarea.form-control {
@@ -93,21 +95,26 @@
 
     .btn-submit {
       width: 100%;
-      background: var(--accent-color);
+      background: var(--accent);
       color: #fff;
       border: none;
       padding: 15px;
-      font-family: 'Roboto Condensed', sans-serif;
+      font-family: 'Noto Sans JP', sans-serif;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.05em;
       cursor: pointer;
       transition: background 0.3s ease;
       margin-top: 20px;
     }
 
     .btn-submit:hover {
-      background: #8e33ff;
+      background: var(--accent-warm);
+    }
+    .form-note {
+      margin-top: 16px;
+      color: #777;
+      font-size: 0.78rem;
+      line-height: 1.6;
     }
 
     @media (max-width: 600px) {
@@ -132,6 +139,11 @@
   box-sizing: border-box;
 }
 .nav-logo { height:32px; mix-blend-mode:screen; }
+.nav-right { display:flex; align-items:center; gap:16px; }
+.lang-toggle { display:flex; align-items:center; gap:2px; border:1px solid #333330; border-radius:3px; padding:3px; }
+.lang-btn { appearance:none; -webkit-appearance:none; background:transparent; border:none; color:#777; font-family:'Noto Sans JP', sans-serif; font-weight:500; letter-spacing:0.02em; font-size:0.78rem; padding:5px 11px; border-radius:2px; cursor:pointer; transition:background .25s, color .25s; }
+.lang-btn:hover { color:#f0ede6; }
+.lang-btn.active { background:var(--accent); color:#fff; cursor:default; }
 
 .ham-wrap { position:relative; width:52px; height:52px; z-index:300; }
 .ham-wrap::after { content:''; position:fixed; top:0; right:0; width:372px; height:100vh; pointer-events:none; }
@@ -184,26 +196,28 @@
 <div class="overlay" id="overlay"></div>
 <div class="drawer" id="drawer">
   <a href="../index.html"><span class="d-name">Top</span><span class="d-arr">→</span></a>
+  <a href="../pricing/index.html"><span class="d-name">ギターカスタム / リペア料金表</span><span class="d-arr">→</span></a>
   <a href="../gallery/index.html"><span class="d-name">Gallery</span><span class="d-arr">→</span></a>
-  <a href="../models/guitar/index.html"><span class="d-name">Catalog</span><span class="d-arr">→</span></a>
-  <a href="../custom/index.html"><span class="d-name">Custom Order</span><span class="d-arr">→</span></a>
-  <a href="../pricing/index.html"><span class="d-name">Pricing</span><span class="d-arr">→</span></a>
-  <a href="../picks/krystal/index.html"><span class="d-name">Krystal Plectrum</span><span class="d-arr">→</span></a>
-  <a href="../picks/vortex/index.html"><span class="d-name">Vortex Plectrum</span><span class="d-arr">→</span></a>
-  <a href="../cases/index.html"><span class="d-name">Fretboard Cases</span><span class="d-arr">→</span></a>
-  <a href="../keyboards/index.html"><span class="d-name">Keyboards</span><span class="d-arr">→</span></a>
-  <a href="../pedal/index.html"><span class="d-name">Effects Pedals</span><span class="d-arr">→</span></a>
-  <a href="../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
+  <a href="../concept/index.html"><span class="d-name">CG Concept</span><span class="d-arr">→</span></a>
+  <a href="../ax/index.html"><span class="d-name">AX</span><span class="d-arr">→</span></a>
+  <a href="../pedal/index.html"><span class="d-name">Exhaust / Bass Distortion</span><span class="d-arr">→</span></a>
   <a href="../contact/index.html"><span class="d-name">Contact</span><span class="d-arr">→</span></a>
   <a href="../generator/index.html"><span class="d-name">Generator</span><span class="d-arr">→</span></a>
+  <a href="../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
 </div>
 
 <nav id="nav" class="gti-nav">
   <a href="../index.html"><img src="../assets/images/logo.png" alt="GTI" class="nav-logo"></a>
-  <div class="ham-wrap" id="hamWrap">
-    <button class="ham" id="ham" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
+  <div class="nav-right">
+    <div class="lang-toggle" id="langToggle" role="group" aria-label="Language / 言語切替">
+      <button type="button" class="lang-btn" data-lang="ja">JA</button>
+      <button type="button" class="lang-btn" data-lang="en">EN</button>
+    </div>
+    <div class="ham-wrap" id="hamWrap">
+      <button class="ham" id="ham" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
 </nav>
 
@@ -212,53 +226,98 @@
 
   <main class="contact-container">
     <div class="contact-header">
-      <h1>Contact</h1>
-      <p style="color: #666;">Get in touch for custom orders or inquiries.</p>
+      <h1 data-ja="Contact" data-en="Contact">Contact</h1>
+      <p style="color: #666;" data-ja="カスタムオーダーやお問い合わせは、お気軽にご連絡ください。" data-en="Get in touch for custom orders or inquiries.">カスタムオーダーやお問い合わせは、お気軽にご連絡ください。</p>
     </div>
 
     <div class="contact-info-grid">
       <div class="info-item">
-        <h3>Email</h3>
-        <p>info@gotakigawa.com</p>
+        <h3 data-ja="メールアドレス" data-en="Email">メールアドレス</h3>
+        <p>gotakigawa@gmail.com</p>
       </div>
       <div class="info-item">
-        <h3>Location</h3>
-        <p>Aichi, Japan</p>
+        <h3 data-ja="所在地" data-en="Location">所在地</h3>
+        <p data-ja="東京都" data-en="Tokyo, Japan">東京都</p>
       </div>
     </div>
 
-    <form class="contact-form" onsubmit="event.preventDefault(); alert('お問い合わせを受け付けました（デモ）');">
+    <form class="contact-form" id="contact-form">
       <div class="form-group">
-        <label for="name">Name</label>
-        <input type="text" id="name" class="form-control" placeholder="Your Name" required>
+        <label for="name" data-ja="お名前" data-en="Name">お名前</label>
+        <input type="text" id="name" name="name" class="form-control" autocomplete="name" placeholder="お名前をご記入ください" data-ja-placeholder="お名前をご記入ください" data-en-placeholder="Your Name" required>
       </div>
       <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" class="form-control" placeholder="Your Email Address" required>
+        <label for="email" data-ja="メールアドレス" data-en="Email">メールアドレス</label>
+        <input type="email" id="email" name="email" class="form-control" autocomplete="email" placeholder="メールアドレスをご記入ください" data-ja-placeholder="メールアドレスをご記入ください" data-en-placeholder="Your Email Address" required>
       </div>
       <div class="form-group">
-        <label for="subject">Subject</label>
-        <select id="subject" class="form-control">
-          <option>Custom Build Inquiry</option>
-          <option>Repair / Modification</option>
-          <option>General Inquiry</option>
-          <option>Other</option>
+        <label for="subject" data-ja="件名" data-en="Subject">件名</label>
+        <select id="subject" name="subject" class="form-control">
+          <option data-ja="カスタムオーダーのご相談" data-en="Custom Build Inquiry">カスタムオーダーのご相談</option>
+          <option data-ja="修理・改造のご相談" data-en="Repair / Modification">修理・改造のご相談</option>
+          <option data-ja="一般のお問い合わせ" data-en="General Inquiry">一般のお問い合わせ</option>
+          <option data-ja="その他" data-en="Other">その他</option>
         </select>
       </div>
       <div class="form-group">
-        <label for="message">Message</label>
-        <textarea id="message" class="form-control" placeholder="Write your message here..." required></textarea>
+        <label for="message" data-ja="メッセージ内容" data-en="Message">メッセージ内容</label>
+        <textarea id="message" name="message" class="form-control" placeholder="お問い合わせ内容をご記入ください..." data-ja-placeholder="お問い合わせ内容をご記入ください..." data-en-placeholder="Write your message here..." required></textarea>
       </div>
-      <button type="submit" class="btn-submit">Send Message</button>
+      <button type="submit" class="btn-submit" data-ja="メールを作成する" data-en="Create Email">メールを作成する</button>
+      <p class="form-note" id="form-note" data-ja="送信ボタンを押すとお使いのメールアプリが開き、内容が自動入力されます。このサイトから直接送信されることはありません。" data-en="Your email app will open with your message prepared. Nothing is sent from this website automatically.">送信ボタンを押すとお使いのメールアプリが開き、内容が自動入力されます。このサイトから直接送信されることはありません。</p>
     </form>
   </main>
 
   <footer>
     <p>Copyright &copy; 2026 GTI.</p>
+    <p><a href="../legal/index.html" style="color:#666;font-size:.75rem;text-decoration:none;" data-ja="特定商取引法に基づく表記" data-en="Legal Notice">特定商取引法に基づく表記</a></p>
   </footer>
 
 
 <script>
+// ── CONTACT FORM ──
+(function(){
+  const form = document.getElementById('contact-form');
+  if (!form) return;
+  form.addEventListener('submit', function(event){
+    event.preventDefault();
+    const data = new FormData(form);
+    const subject = `[GTI website] ${data.get('subject') || 'Inquiry'}`;
+    const body = `Name: ${data.get('name') || ''}\nEmail: ${data.get('email') || ''}\n\n${data.get('message') || ''}`;
+    window.location.href = `mailto:gotakigawa@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  });
+})();
+
+// ── LANGUAGE TOGGLE (JA default / EN) ──
+(function(){
+  const STORAGE_KEY = 'gti-lang';
+  const langBtns = document.querySelectorAll('.lang-btn');
+  function applyLang(lang){
+    document.querySelectorAll('[data-ja][data-en]').forEach(function(el){
+      el.textContent = lang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ja');
+    });
+    document.querySelectorAll('[data-ja-placeholder][data-en-placeholder]').forEach(function(el){
+      el.setAttribute('placeholder', lang === 'en' ? el.getAttribute('data-en-placeholder') : el.getAttribute('data-ja-placeholder'));
+    });
+    document.documentElement.setAttribute('lang', lang);
+    langBtns.forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-lang') === lang);
+    });
+    try { localStorage.setItem(STORAGE_KEY, lang); } catch(e){}
+  }
+  let initialLang = 'ja';
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved === 'en' || saved === 'ja') initialLang = saved;
+  } catch(e){}
+  applyLang(initialLang);
+  langBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      applyLang(b.getAttribute('data-lang'));
+    });
+  });
+})();
+
 // ── HAMBURGER MENU JS ──
 (function(){
   const hamWrap=document.getElementById('hamWrap');

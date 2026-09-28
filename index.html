@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GTI / Advanced Luthierie & Design</title>
+<meta name="description" content="Go Takigawa Instruments — custom guitars, basses, and instruments beyond convention.">
+<meta property="og:title" content="GTI / Advanced Luthierie & Design">
+<meta property="og:description" content="Custom guitars, basses, and instruments beyond convention.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.gtinstruments.xyz/">
+<meta property="og:image" content="https://www.gtinstruments.xyz/assets/images/hero.jpg">
+<link rel="canonical" href="https://www.gtinstruments.xyz/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Teko:wght@300;400;500&display=swap" rel="stylesheet">
@@ -281,7 +288,7 @@ nav.scrolled{
 .cta-secondary:hover{color:var(--text);border-color:rgba(240,237,230,.3)}
 
 /* ── FOOTER ── */
-footer{
+  footer{
   display:flex;align-items:center;justify-content:center;
   padding:20px 48px;border-top:1px solid var(--border);
 }
@@ -289,6 +296,13 @@ footer{
   font-family:'Teko',sans-serif;font-size:.75rem;font-weight:400;
   letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
 }
+.archive-trigger{
+  width:14px;height:14px;margin-left:12px;
+  border:0;background:transparent;color:var(--text);
+  cursor:pointer;opacity:.08;font-size:12px;line-height:1;
+  transition:opacity .2s;
+}
+.archive-trigger:hover,.archive-trigger:focus-visible{opacity:.5}
 
 @keyframes up{
   from{opacity:0;transform:translateY(16px)}
@@ -344,19 +358,14 @@ footer{
 <div class="overlay" id="overlay"></div>
 <div class="drawer" id="drawer">
   <a href="index.html"><span class="d-name">Top</span><span class="d-arr">→</span></a>
+  <a href="pricing/index.html"><span class="d-name">ギターカスタム / リペア料金表</span><span class="d-arr">→</span></a>
   <a href="gallery/index.html"><span class="d-name">Gallery</span><span class="d-arr">→</span></a>
-  <a href="models/guitar/index.html"><span class="d-name">Guitar Models</span><span class="d-arr">→</span></a>
-  <a href="models/bass/index.html"><span class="d-name">Bass Models</span><span class="d-arr">→</span></a>
-  <a href="custom/index.html"><span class="d-name">Custom Order</span><span class="d-arr">→</span></a>
-  <a href="pricing/index.html"><span class="d-name">Pricing</span><span class="d-arr">→</span></a>
-  <a href="picks/krystal/index.html"><span class="d-name">Krystal Plectrum</span><span class="d-arr">→</span></a>
-  <a href="picks/vortex/index.html"><span class="d-name">Vortex Plectrum</span><span class="d-arr">→</span></a>
-  <a href="cases/index.html"><span class="d-name">Fretboard Cases</span><span class="d-arr">→</span></a>
-  <a href="keyboards/index.html"><span class="d-name">Keyboards</span><span class="d-arr">→</span></a>
-  <a href="pedal/index.html"><span class="d-name">Effects Pedals</span><span class="d-arr">→</span></a>
-  <a href="about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
+  <a href="concept/index.html"><span class="d-name">CG Concept</span><span class="d-arr">→</span></a>
+  <a href="ax/index.html"><span class="d-name">AX</span><span class="d-arr">→</span></a>
+  <a href="pedal/index.html"><span class="d-name">Exhaust / Bass Distortion</span><span class="d-arr">→</span></a>
   <a href="contact/index.html"><span class="d-name">Contact</span><span class="d-arr">→</span></a>
   <a href="generator/index.html"><span class="d-name">Generator</span><span class="d-arr">→</span></a>
+  <a href="about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
 </div>
 
 <nav id="nav">
@@ -397,21 +406,20 @@ footer{
           </div>
         </div>
       </div>
-      <div class="cta-group">
-        <a href="models/guitar/index.html" class="cta-primary">View Models</a>
-        <a href="custom/index.html" class="cta-secondary">Custom Order</a>
-      </div>
     </div>
   </div>
 </section>
 
 <footer>
   <span class="foot-copy">© 2026 Go Takigawa Instruments. All Rights Reserved.</span>
+  <a href="legal/index.html" class="foot-copy" style="text-decoration:none;margin-left:16px;">特定商取引法に基づく表記</a>
+  <button class="archive-trigger" id="archive-trigger" type="button" aria-label="Archive">◆</button>
 </footer>
 
 <script>
 // nav shrink
 const nav=document.getElementById('nav');
+document.getElementById('archive-trigger').addEventListener('click',()=>{ window.location.href='archive/'; });
 window.addEventListener('scroll',()=>{
   nav.classList.toggle('scrolled',window.scrollY>40);
 },{passive:true});
@@ -473,7 +481,6 @@ window.addEventListener('mousemove',()=>{ isTouch=false; },{passive:true,once:fa
 const IMG_RATIO = 1600 / 899;
 const heroBody = document.querySelector('.hero-body');
 const bigText  = document.querySelector('.hero-big-text');
-const ctaGroup = document.querySelector('.cta-group');
 
 function alignHero() {
   heroBody.style.bottom = '';

@@ -2,8 +2,8 @@
 
 /*
  * GTI — Advanced Luthierie & Design
- * Palette: #0a0a08 (bg), #f0ede6 (text), #c8b99a (warm gold), #1a1a16 (card)
- * Fonts: Cormorant Garamond (display), Bebas Neue (label), Space Mono (mono/nav)
+ * Palette: #0a0a08 (bg), #f0ede6 (text), #6b21d6 (purple accent), #1a1a16 (card)
+ * Fonts: Libre Baskerville (display), DIN Condensed (label/body)
  */
 
 :root {
@@ -13,8 +13,8 @@
   --text:        #f0ede6;
   --text-muted:  #6b6960;
   --text-dim:    #3a3935;
-  --accent:      #c8b99a;
-  --accent-warm: #a08060;
+  --accent:      #6b21d6;
+  --accent-warm: #4c1799;
   --border:      #252520;
   --border-mid:  #333330;
   --header-h:    72px;
@@ -25,12 +25,12 @@
   box-sizing: border-box;
 }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-y: scroll; scrollbar-gutter: stable; }
 
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: 'Space Mono', monospace;
+  font-family: 'DIN Condensed', sans-serif;
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
@@ -69,7 +69,7 @@ header {
   gap: 36px;
 }
 .header-nav a {
-  font-family: 'Space Mono', monospace;
+  font-family: 'DIN Condensed', sans-serif;
   font-size: 0.7rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -129,7 +129,7 @@ header {
   display: flex;
   align-items: center;
   gap: 16px;
-  font-family: 'Space Mono', monospace;
+  font-family: 'DIN Condensed', sans-serif;
   font-size: 0.68rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -170,7 +170,7 @@ header {
 }
 
 .hero-sub {
-  font-family: 'Space Mono', monospace;
+  font-family: 'DIN Condensed', sans-serif;
   font-size: 0.75rem;
   line-height: 1.8;
   color: var(--text-muted);
@@ -185,7 +185,7 @@ header {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  font-family: 'Space Mono', monospace;
+  font-family: 'DIN Condensed', sans-serif;
   font-size: 0.7rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -216,7 +216,7 @@ header {
 }
 .label-num {
   display: block;
-  font-family: 'Space Mono', monospace;
+  font-family: 'DIN Condensed', sans-serif;
   font-size: 0.65rem;
   letter-spacing: 0.2em;
   color: var(--text-muted);
@@ -242,7 +242,7 @@ header {
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  font-family: 'Space Mono', monospace;
+  font-family: 'DIN Condensed', sans-serif;
   font-size: 0.6rem;
   letter-spacing: 0.25em;
   text-transform: uppercase;
@@ -276,7 +276,7 @@ header {
   border-bottom: 1px solid var(--border);
 }
 .section-num {
-  font-family: 'Space Mono', monospace;
+  font-family: 'DIN Condensed', sans-serif;
   font-size: 0.65rem;
   color: var(--text-dim);
   letter-spacing: 0.15em;
@@ -345,7 +345,7 @@ header {
   margin-bottom: 8px;
 }
 .card-desc {
-  font-family: 'Space Mono', monospace;
+  font-family: 'DIN Condensed', sans-serif;
   font-size: 0.65rem;
   color: var(--text-muted);
   letter-spacing: 0.12em;
@@ -398,7 +398,7 @@ header {
 .link-list li a:hover .link-label { color: var(--accent); }
 
 .link-sub {
-  font-family: 'Space Mono', monospace;
+  font-family: 'DIN Condensed', sans-serif;
   font-size: 0.6rem;
   color: var(--text-dim);
   letter-spacing: 0.1em;
@@ -435,7 +435,7 @@ footer {
   filter: invert(1) brightness(0.3);
 }
 .footer-copy {
-  font-family: 'Space Mono', monospace;
+  font-family: 'DIN Condensed', sans-serif;
   font-size: 0.6rem;
   letter-spacing: 0.12em;
   color: var(--text-dim);

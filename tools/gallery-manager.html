@@ -1,0 +1,1306 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GTI Gallery Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DIN+Condensed&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a08; --bg2:#141410; --bg3:#1c1c17; --text:#f0ede6; --text2:#c9c5ba; --text3:#8a8678;
+    --border:#2c2b25; --border2:#403f37; --accent:#6b21d6; --accent-dark:#4c1799; --danger:#c0392b; --ok:#2e8b57;
+    --r:6px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'DIN Condensed', sans-serif; font-size:15px;
+    height:100vh; overflow:hidden; display:flex; flex-direction:column;
+  }
+  h1,h2,h3{ font-family:'Libre Baskerville', serif; font-weight:700; margin:0; }
+  header{
+    padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px;
+    background:var(--bg2); flex:0 0 auto;
+  }
+  header h1{ font-size:1.15rem; letter-spacing:.02em; }
+  header .sub{ color:var(--text3); font-size:.8rem; letter-spacing:.05em; text-transform:uppercase; }
+  header .spacer{ flex:1; }
+  button{
+    font-family:'DIN Condensed', sans-serif; font-size:.95rem; letter-spacing:.03em;
+    background:var(--bg3); color:var(--text); border:1px solid var(--border2); border-radius:var(--r);
+    padding:8px 16px; cursor:pointer; transition:background .15s, border-color .15s;
+  }
+  button:hover{ background:#26251f; border-color:var(--accent); }
+  button:disabled{ opacity:.4; cursor:not-allowed; }
+  button.primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  button.primary:hover{ background:var(--accent-dark); border-color:var(--accent-dark); }
+  button.danger{ background:transparent; border-color:var(--danger); color:#e77; }
+  button.danger:hover{ background:var(--danger); color:#fff; }
+  button.small{ padding:4px 10px; font-size:.82rem; }
+
+  #app{ flex:1; display:flex; min-height:0; }
+  #gate{
+    flex:1; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:18px; padding:40px;
+    text-align:center;
+  }
+  #gate p{ color:var(--text3); max-width:480px; line-height:1.7; font-size:.95rem; }
+  #gate .warn{ color:#e0a; }
+
+  #main{ flex:1; display:none; min-height:0; }
+  #main.active{ display:flex; }
+
+  #modelList{
+    width:300px; flex:0 0 auto; border-right:1px solid var(--border); background:var(--bg2);
+    display:flex; flex-direction:column; min-height:0;
+  }
+  #modelSearch{
+    margin:12px; padding:8px 10px; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--r);
+    color:var(--text); font-family:inherit; font-size:.95rem;
+  }
+  #modelItems{ flex:1; overflow-y:auto; padding:0 8px 12px; }
+  .model-row{
+    display:flex; align-items:center; gap:10px; padding:8px; border-radius:var(--r); cursor:pointer;
+    border:1px solid transparent; margin-bottom:4px;
+  }
+  .model-row:hover{ background:var(--bg3); }
+  .model-row.selected{ background:rgba(107,33,214,.18); border-color:var(--accent); }
+  .model-row img{ width:44px; height:32px; object-fit:cover; border-radius:3px; background:#000; flex:0 0 auto; }
+  .model-row .mid{ min-width:0; }
+  .model-row .mname{ font-size:.92rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .model-row .mfolder{ font-size:.72rem; color:var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  #editor{ flex:1; display:flex; flex-direction:column; min-height:0; }
+  #editorHeader{
+    padding:16px 24px; border-bottom:1px solid var(--border); display:flex; align-items:baseline; gap:14px; flex:0 0 auto;
+  }
+  #editorHeader h2{ font-size:1.3rem; }
+  #editorHeader .folder{ color:var(--text3); font-size:.85rem; }
+  #editorHeader .spacer{ flex:1; }
+  #editorBody{ flex:1; overflow-y:auto; padding:20px 24px; }
+  #editorEmpty{ flex:1; display:flex; align-items:center; justify-content:center; color:var(--text3); }
+
+  .hint{ color:var(--text3); font-size:.85rem; line-height:1.6; margin:0 0 16px; }
+  .hint b{ color:var(--text2); }
+
+  #grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:14px; margin-bottom:28px;
+  }
+  .tile{
+    position:relative; border:1px solid var(--border2); border-radius:var(--r); overflow:hidden;
+    background:var(--bg3); cursor:grab; user-select:none;
+  }
+  .tile.dragging{ opacity:.35; }
+  .tile.drop-before{ box-shadow:inset 3px 0 0 var(--accent); }
+  .tile.drop-after{ box-shadow:inset -3px 0 0 var(--accent); }
+  .tile img{ width:100%; aspect-ratio:4/3; object-fit:cover; display:block; background:#000; }
+  .tile .order{
+    position:absolute; top:6px; left:6px; background:rgba(0,0,0,.7); color:var(--text);
+    font-size:.78rem; padding:1px 7px; border-radius:10px; font-family:'DIN Condensed',sans-serif;
+  }
+  .tile .badge{
+    position:absolute; top:6px; left:6px; background:rgba(107,33,214,.85); color:#fff;
+    font-size:.68rem; padding:1px 7px; border-radius:10px; font-family:'DIN Condensed',sans-serif;
+    text-transform:uppercase; letter-spacing:.04em;
+  }
+  .tile .order + .badge{ top:26px; }
+  .tile .fname{
+    padding:5px 7px; font-size:.72rem; color:var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    border-top:1px solid var(--border);
+  }
+  .tile .imgWrap{ position:relative; }
+  .tile .starBtn{
+    position:absolute; top:4px; right:4px; width:26px; height:26px; border-radius:50%;
+    background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.25); font-size:14px; color:var(--text3);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; line-height:1;
+  }
+  .tile .starBtn.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .tile .starBtn:hover{ border-color:#ffd166; color:#ffd166; }
+  .tile .starBtn.active:hover{ color:#fff; }
+  .tile .trashBtn{
+    position:absolute; bottom:4px; right:4px; width:18px; height:18px; border-radius:50%;
+    background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.25); font-size:10px; color:#e77;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; line-height:1;
+  }
+  .tile .trashBtn:hover{ background:var(--danger); border-color:var(--danger); color:#fff; }
+
+  #tagSec, #metaSec{ border-bottom:1px solid var(--border); padding-bottom:18px; margin-bottom:22px; }
+  #tagSec h3, #metaSec h3{ font-size:.95rem; color:var(--text2); margin-bottom:8px; font-family:'DIN Condensed',sans-serif; text-transform:uppercase; letter-spacing:.06em; }
+  .metaRow{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .metaRow:last-child{ margin-bottom:0; }
+  .metaRow label{ font-size:.82rem; color:var(--text3); white-space:nowrap; width:110px; flex:0 0 auto; }
+  .metaRow input{
+    flex:1; padding:6px 10px; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--r);
+    color:var(--text); font-family:inherit; font-size:.88rem;
+  }
+  .tagGroup{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+  .tagDimLabel{ font-size:.68rem; color:var(--text3); text-transform:uppercase; letter-spacing:.06em; margin:0 0 4px; }
+  .tagBtn{
+    font-family:'DIN Condensed', sans-serif; font-size:.85rem; letter-spacing:.03em;
+    background:var(--bg3); color:var(--text2); border:1px solid var(--border2); border-radius:16px;
+    padding:6px 14px; cursor:pointer; transition:background .15s, border-color .15s, color .15s; user-select:none;
+  }
+  .tagBtn:hover{ border-color:var(--accent); }
+  .tagBtn.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .tagOtherRow{ display:flex; align-items:center; gap:10px; }
+  .tagOtherRow label{ font-size:.82rem; color:var(--text3); white-space:nowrap; }
+  .tagOtherRow input{
+    flex:1; padding:6px 10px; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--r);
+    color:var(--text); font-family:inherit; font-size:.88rem;
+  }
+
+  #unusedSec, #archiveSec{ border-top:1px solid var(--border); padding-top:18px; margin-top:4px; }
+  #unusedSec h3, #archiveSec h3{ font-size:.95rem; color:var(--text2); margin-bottom:8px; font-family:'DIN Condensed',sans-serif; text-transform:uppercase; letter-spacing:.06em;}
+  #unusedGrid, #archiveGrid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(120px,1fr)); gap:10px; }
+  .utile{ position:relative; border:1px dashed var(--border2); border-radius:var(--r); overflow:hidden; background:var(--bg3); }
+  .utile img{ width:100%; aspect-ratio:4/3; object-fit:cover; display:block; opacity:.75; }
+  .utile .fname{ padding:4px 6px; font-size:.68rem; color:var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .utile .brow{ display:flex; }
+  .utile button{ flex:1; border-radius:0; font-size:.78rem; padding:5px; }
+
+  #uploadRow{ border-top:1px solid var(--border); padding-top:18px; margin-top:4px; display:flex; align-items:center; gap:12px; }
+  #uploadRow h3{ font-size:.95rem; color:var(--text2); font-family:'DIN Condensed',sans-serif; text-transform:uppercase; letter-spacing:.06em; margin:0; }
+  #uploadRow .hint{ margin:0; flex:1; }
+
+  #saveBar{
+    flex:0 0 auto; padding:14px 24px; border-top:1px solid var(--border); background:var(--bg2);
+    display:flex; align-items:center; gap:14px;
+  }
+  #saveBar .status{ color:var(--text3); font-size:.85rem; flex:1; }
+  #saveBar .status.ok{ color:#8fd19e; }
+  #saveBar .status.err{ color:#e77; }
+
+  #confirmOverlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:50;
+  }
+  #confirmOverlay.active{ display:flex; }
+  #confirmBox{
+    background:var(--bg2); border:1px solid var(--border2); border-radius:8px; width:560px; max-width:92vw;
+    max-height:80vh; display:flex; flex-direction:column;
+  }
+  #confirmBox header{ padding:16px 20px; border-bottom:1px solid var(--border); background:transparent; }
+  #confirmBox .body{ padding:16px 20px; overflow-y:auto; font-size:.88rem; }
+  #confirmBox .secTitle{ color:var(--text2); font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; margin:14px 0 6px; }
+  #confirmBox .secTitle:first-child{ margin-top:0; }
+  #confirmBox .row{ display:flex; align-items:center; gap:8px; padding:4px 0; border-bottom:1px dashed var(--border); }
+  #confirmBox .row .old{ color:var(--text3); flex:1; }
+  #confirmBox .row .arrow{ color:var(--accent); }
+  #confirmBox .row .new{ flex:1; }
+  #confirmBox .row .thumbtag{ background:var(--accent); color:#fff; font-size:.68rem; padding:1px 6px; border-radius:8px; }
+  #confirmBox .row .archivetag{ background:var(--danger); color:#fff; font-size:.68rem; padding:1px 6px; border-radius:8px; }
+  #confirmBox .row .newtag{ background:var(--ok); color:#fff; font-size:.68rem; padding:1px 6px; border-radius:8px; }
+  #confirmBox footer{ padding:14px 20px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>GTI Gallery Manager</h1>
+  <span class="sub">画像順序 &amp; サムネイル編集ツール</span>
+  <span class="spacer"></span>
+  <span id="rootLabel" class="sub" style="text-transform:none;"></span>
+  <button id="btnReload" style="display:none;">再読み込み</button>
+</header>
+
+<div id="app">
+  <div id="gate">
+    <h2>サイトフォルダを選択してください</h2>
+    <p>
+      GTIサイトのルートフォルダ（<code>gallery/index.html</code> がある場所）を選んでください。<br>
+      このツールはブラウザ上で完結し、選んだフォルダの画像ファイルの並び替え・リネーム・アーカイブ移動と、<code>gallery/index.html</code> の該当箇所の書き換えのみを行います。外部への送信は一切ありません。
+    </p>
+    <p class="warn" id="gateWarn" style="display:none;"></p>
+    <button class="primary" id="btnQuickPick" style="display:none;"></button>
+    <button id="btnPick">サイトフォルダを選択</button>
+    <p class="hint" id="quickPickHint" style="display:none; margin-top:-8px;">前回選択したフォルダの記憶が見つかりました。ブラウザに残っている場合はワンクリックで開けます（見つからない場合は上のボタンで選び直してください）。</p>
+  </div>
+
+  <div id="main">
+    <div id="modelList">
+      <input type="text" id="modelSearch" placeholder="モデル名で検索…">
+      <div id="modelItems"></div>
+    </div>
+    <div id="editor">
+      <div id="editorEmpty">左のリストからモデルを選んでください</div>
+      <div id="editorInner" style="display:none; flex:1; display:flex; flex-direction:column; min-height:0;">
+        <div id="editorHeader">
+          <h2 id="editTitle"></h2>
+          <span class="folder" id="editFolder"></span>
+          <span class="spacer"></span>
+          <button id="btnDiscard" class="small">変更を破棄</button>
+        </div>
+        <div id="editorBody">
+          <p class="hint">
+            画像をドラッグして<b>並び順</b>を変更できます。★ボタンでその画像を<b>サムネイル</b>に設定します（★は1枚のみ）。
+            🗑ボタンでその画像を<b>アーカイブ</b>に移動します（ページには表示されなくなります。削除ではなく移動なので、後から戻せます）。
+            並び順とサムネイルはギャラリー詳細（拡大表示）の順番とカード表示に反映されます。
+          </p>
+          <div id="metaSec">
+            <h3>タイトル &amp; キャプション</h3>
+            <p class="hint" style="margin-bottom:10px;">ギャラリーカードに表示される名前と説明文です。</p>
+            <div class="metaRow">
+              <label for="titleInput">タイトル</label>
+              <input type="text" id="titleInput" placeholder="#051 Apocalypse-9">
+            </div>
+            <div class="metaRow">
+              <label for="specsInput">キャプション</label>
+              <input type="text" id="specsInput" placeholder="9-String Headless Fanned Fret Guitar">
+            </div>
+            <div class="metaRow" style="align-items:flex-start;">
+              <label style="padding-top:6px;">キャプション生成</label>
+              <div style="flex:1; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                <input type="number" id="capStrings" min="1" max="20" placeholder="弦数" style="width:64px; padding:6px 8px; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--r); color:var(--text); font-family:inherit; font-size:.88rem;">
+                <span class="hint" style="margin:0;">-String ／ Headless・Fret Shape・TypeはフィルタータグのType/Head/Fret Shapeから使用</span>
+              </div>
+            </div>
+            <div class="metaRow">
+              <span style="width:110px; flex:0 0 auto;"></span>
+              <div style="flex:1; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+                <input type="text" id="capSuffix" placeholder="追加テキスト（例: Art Collection）" style="flex:1; min-width:140px; padding:6px 10px; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--r); color:var(--text); font-family:inherit; font-size:.88rem;">
+                <button type="button" class="small" id="btnGenSpecs">生成して反映</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="tagSec">
+            <h3>フィルタータグ</h3>
+            <p class="hint" style="margin-bottom:10px;">HPギャラリーの絞り込みフィルターに反映されます。</p>
+            <div class="tagDimLabel">Type</div>
+            <div class="tagGroup" id="typeTagGroup"></div>
+            <div class="tagDimLabel">Line</div>
+            <div class="tagGroup" id="lineTagGroup"></div>
+            <div class="tagDimLabel">Head</div>
+            <div class="tagGroup" id="headTagGroup"></div>
+            <div class="tagDimLabel">Fret Shape</div>
+            <div class="tagGroup" id="fretTagGroup"></div>
+            <div class="tagDimLabel">Fretless / Fretted</div>
+            <div class="tagGroup" id="fretlessTagGroup"></div>
+            <div class="tagOtherRow">
+              <label for="otherTagsInput">その他のタグ</label>
+              <input type="text" id="otherTagsInput" placeholder="半角スペース区切り（モデル名タグなど）">
+            </div>
+          </div>
+
+          <div id="grid"></div>
+
+          <div id="uploadRow">
+            <h3>画像を追加</h3>
+            <p class="hint">新しい画像ファイルをこのモデルに追加できます（保存時にファイルが書き込まれます）。</p>
+            <input type="file" id="fileUpload" accept="image/*" multiple style="display:none;">
+            <button id="btnUpload" class="small">＋ ファイルを選択</button>
+          </div>
+
+          <div id="unusedSec">
+            <h3>フォルダ内の未使用ファイル</h3>
+            <p class="hint" style="margin-bottom:10px;">まだギャラリーに表示されていない画像です。「追加」を押すと末尾に追加されます。</p>
+            <div id="unusedGrid"></div>
+          </div>
+
+          <div id="archiveSec">
+            <h3>アーカイブ</h3>
+            <p class="hint" style="margin-bottom:10px;">ページには表示されていない、アーカイブ済みの画像です。「元に戻す」を押すと末尾に追加され、ページに再表示されます。</p>
+            <div id="archiveGrid"></div>
+          </div>
+        </div>
+        <div id="saveBar">
+          <span class="status" id="statusMsg"></span>
+          <button id="btnSave" class="primary">保存（ファイルを書き込み）</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="confirmOverlay">
+  <div id="confirmBox">
+    <header><h3 style="font-family:'DIN Condensed',sans-serif;">この内容でファイルを保存します</h3></header>
+    <div class="body" id="confirmBody"></div>
+    <footer>
+      <button id="btnConfirmCancel">キャンセル</button>
+      <button id="btnConfirmGo" class="primary">実行する</button>
+    </footer>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const GALLERY_PATH = ["assets","images","gallery"];
+  const TYPE_TAGS = [
+    { key: "guitar", label: "Guitar" },
+    { key: "bass", label: "Bass" },
+  ];
+  const HEAD_TAGS = [
+    { key: "headless", label: "Headless" },
+    { key: "headed", label: "Headed" },
+  ];
+  const LINE_TAGS = [
+    { key: "modern", label: "Modern" },
+    { key: "treadline", label: "TREAD-LINE" },
+  ];
+  const FRET_TAGS = [
+    { key: "parallel", label: "Parallel" },
+    { key: "multiscale", label: "Fanned Fret" },
+    { key: "curved-multiscale", label: "Curved Multiscale" },
+  ];
+  const FRETLESS_TAGS = [
+    { key: "fretless", label: "Fretless" },
+    { key: "fretted", label: "Fretted" },
+  ];
+  const state = {
+    rootHandle: null,
+    galleryHtml: "",
+    models: [],        // {folder, imagesAttr, images:[...], thumbFile, title, categoryAttr}
+    selected: null,     // folder name
+    working: null,      // {folder, images:[entry], thumbIndex, unused:[entry], archived:[entry], category, originalCategoryAttr}
+  };
+
+  // entry shape: { name, loc: 'root'|'archive'|'new', diskName, file, url, missing }
+
+  const $ = (sel) => document.querySelector(sel);
+  const gateEl = $("#gate");
+  const mainEl = $("#main");
+  const gateWarn = $("#gateWarn");
+
+  if (!("showDirectoryPicker" in window)) {
+    gateWarn.style.display = "block";
+    gateWarn.textContent = "お使いのブラウザはこの機能に対応していません。Google Chrome または Microsoft Edge（デスクトップ版）で開いてください。";
+    $("#btnPick").disabled = true;
+  }
+
+  function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+  function escapeHtml(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+  async function getSubdir(root, parts, create){
+    let h = root;
+    for (const p of parts) h = await h.getDirectoryHandle(p, { create: !!create });
+    return h;
+  }
+  async function getSubdirOrNull(root, parts){
+    try { return await getSubdir(root, parts, false); }
+    catch(e) { return null; }
+  }
+
+  async function readTextFile(dirHandle, name){
+    const fh = await dirHandle.getFileHandle(name);
+    const f = await fh.getFile();
+    return await f.text();
+  }
+  async function writeTextFile(dirHandle, name, text){
+    const fh = await dirHandle.getFileHandle(name, { create: true });
+    const w = await fh.createWritable();
+    await w.write(text);
+    await w.close();
+  }
+  async function writeBlobFile(dirHandle, name, blob){
+    const fh = await dirHandle.getFileHandle(name, { create: true });
+    const w = await fh.createWritable();
+    await w.write(blob);
+    await w.close();
+  }
+  async function removeIfExists(dirHandle, name){
+    try { await dirHandle.removeEntry(name); } catch(e) { /* ignore missing */ }
+  }
+  function extOf(name){
+    return (name.match(/\.[a-zA-Z0-9]+$/) || [".jpg"])[0].toLowerCase();
+  }
+  function uniqueNameIn(nameSet, name){
+    if (!nameSet.has(name)) return name;
+    const ext = extOf(name);
+    const base = name.slice(0, name.length - ext.length);
+    let i = 1;
+    let cand;
+    do { cand = `${base}_${i}${ext}`; i++; } while (nameSet.has(cand));
+    return cand;
+  }
+
+  // ---------- Filter tags (data-category) ----------
+  function parseCategoryTokens(str){
+    const tokens = (str || "").split(/\s+/).filter(Boolean);
+    const typeKeys = TYPE_TAGS.map(t => t.key);
+    const headKeys = HEAD_TAGS.map(t => t.key);
+    const lineKeys = LINE_TAGS.map(t => t.key);
+    const fretKeys = FRET_TAGS.map(t => t.key);
+    const fretlessKeys = FRETLESS_TAGS.map(t => t.key);
+    const type = tokens.find(t => typeKeys.includes(t)) || "";
+    const head = tokens.find(t => headKeys.includes(t)) || "";
+    const line = tokens.find(t => lineKeys.includes(t)) || "";
+    const fret = tokens.find(t => fretKeys.includes(t)) || "";
+    const fretless = tokens.find(t => fretlessKeys.includes(t)) || "";
+    const other = tokens.filter(t => t !== type && t !== head && t !== line && t !== fret && t !== fretless);
+    return { type, head, line, fret, fretless, other };
+  }
+  function buildCategoryString(category){
+    const typeKeys = TYPE_TAGS.map(t => t.key);
+    const headKeys = HEAD_TAGS.map(t => t.key);
+    const lineKeys = LINE_TAGS.map(t => t.key);
+    const fretKeys = FRET_TAGS.map(t => t.key);
+    const fretlessKeys = FRETLESS_TAGS.map(t => t.key);
+    const tokens = [];
+    if (category.type) tokens.push(category.type);
+    if (category.line) tokens.push(category.line);
+    if (category.head) tokens.push(category.head);
+    if (category.fret) tokens.push(category.fret);
+    if (category.fretless) tokens.push(category.fretless);
+    const seen = new Set(tokens);
+    (category.otherRaw || "").split(/\s+/).map(s => s.trim()).filter(Boolean).forEach(t => {
+      if (typeKeys.includes(t) || headKeys.includes(t) || lineKeys.includes(t) || fretKeys.includes(t) || fretlessKeys.includes(t)) return; // already represented by type/line/head/fret/fretless buttons
+      if (seen.has(t)) return;
+      seen.add(t);
+      tokens.push(t);
+    });
+    return tokens.join(" ");
+  }
+
+  // ---------- Caption builder (弦数・追加テキスト + Type/Head/Fret Shapeタグから合成) ----------
+  function parseSpecsForBuilder(specs){
+    const s = specs || "";
+    const stringsMatch = s.match(/^(\d+)-String/);
+    const strings = stringsMatch ? stringsMatch[1] : "";
+    const suffixMatch = s.match(/\/\s*(.+)$/);
+    const suffix = suffixMatch ? suffixMatch[1].trim() : "";
+    return { strings, suffix };
+  }
+  function composeSpecs(w){
+    const parts = [];
+    if (w.capStrings) parts.push(`${w.capStrings}-String`);
+    if (w.category.head === "headless") parts.push("Headless");
+    if (w.category.fret === "multiscale") parts.push("Fanned Fret");
+    else if (w.category.fret === "curved-multiscale") parts.push("Curved Multiscale");
+    parts.push(w.category.type === "bass" ? "Bass" : "Guitar");
+    let text = parts.join(" ");
+    if (w.capSuffix) text += " / " + w.capSuffix;
+    return text;
+  }
+
+  // ---------- Parse gallery/index.html ----------
+  function extractCategoryBefore(html, idx){
+    const anchor = 'data-category="';
+    const catIdx = html.lastIndexOf(anchor, idx);
+    if (catIdx === -1) return "";
+    const valStart = catIdx + anchor.length;
+    const valEnd = html.indexOf('"', valStart);
+    if (valEnd === -1) return "";
+    if (idx - valEnd > 500) return ""; // too far away, likely belongs to a different item
+    return html.slice(valStart, valEnd);
+  }
+
+  function parseModels(html){
+    const models = [];
+    const re = /data-folder="\.\.\/assets\/images\/gallery\/([^\/"]+)\/"\s*\n\s*data-images="([^"]+)"[\s\S]*?<div class="item-title">([^<]*)<\/div>\s*<div class="item-specs">([^<]*)<\/div>/g;
+    let m;
+    while ((m = re.exec(html)) !== null) {
+      const folder = m[1];
+      const imagesAttr = m[2];
+      const title = m[3].trim();
+      const specs = (m[4] || "").trim();
+      const images = imagesAttr.split(",").map(s => s.trim()).filter(Boolean);
+      let thumbFile = images.find(f => /thumb/i.test(f)) || images[0];
+      const categoryAttr = extractCategoryBefore(html, m.index);
+      models.push({ folder, imagesAttr, images, thumbFile, title, specs, categoryAttr });
+    }
+    return models;
+  }
+
+  function updateModelBlockInHtml(html, folder, newImagesAttr, newThumbFile, newCategoryStr, newTitle, newSpecs){
+    const anchor = `data-folder="../assets/images/gallery/${folder}/"`;
+
+    if (typeof newCategoryStr === "string") {
+      const idx0 = html.indexOf(anchor);
+      if (idx0 === -1) throw new Error("モデルの位置が見つかりません: " + folder);
+      const catAnchor = 'data-category="';
+      const catIdx = html.lastIndexOf(catAnchor, idx0);
+      const catBelongsToThisItem = catIdx !== -1 && (idx0 - catIdx) < 500;
+      if (catBelongsToThisItem) {
+        const valStart = catIdx + catAnchor.length;
+        const valEnd = html.indexOf('"', valStart);
+        if (valEnd === -1) throw new Error("data-category の終端が見つかりません: " + folder);
+        html = html.slice(0, valStart) + escapeHtml(newCategoryStr) + html.slice(valEnd);
+      } else {
+        // this item has no data-category attribute yet; add one right before data-folder
+        html = html.slice(0, idx0) + `data-category="${escapeHtml(newCategoryStr)}"\n     ` + html.slice(idx0);
+      }
+    }
+
+    const idx = html.indexOf(anchor);
+    if (idx === -1) throw new Error("モデルの位置が見つかりません: " + folder);
+    const winEnd = Math.min(html.length, idx + 1200);
+    const before = html.slice(0, idx);
+    let block = html.slice(idx, winEnd);
+    const after = html.slice(winEnd);
+
+    const imgAttrRe = /data-images="[^"]+"/;
+    if (!imgAttrRe.test(block)) throw new Error("data-images が見つかりません: " + folder);
+    block = block.replace(imgAttrRe, `data-images="${newImagesAttr}"`);
+
+    const srcRe = new RegExp(`src="\\.\\./assets/images/gallery/${escapeRegExp(folder)}/[^"]+"`);
+    if (!srcRe.test(block)) throw new Error("img src が見つかりません: " + folder);
+    block = block.replace(srcRe, `src="../assets/images/gallery/${folder}/${newThumbFile}"`);
+
+    if (typeof newTitle === "string") {
+      const titleRe = /<div class="item-title">[^<]*<\/div>/;
+      if (!titleRe.test(block)) throw new Error("item-title が見つかりません: " + folder);
+      block = block.replace(titleRe, `<div class="item-title">${escapeHtml(newTitle)}</div>`);
+    }
+
+    if (typeof newSpecs === "string") {
+      const specsRe = /<div class="item-specs">[^<]*<\/div>/;
+      if (!specsRe.test(block)) throw new Error("item-specs が見つかりません: " + folder);
+      block = block.replace(specsRe, `<div class="item-specs">${escapeHtml(newSpecs)}</div>`);
+    }
+
+    return before + block + after;
+  }
+
+  // ---------- UI: model list ----------
+  function renderModelList(filter){
+    const wrap = $("#modelItems");
+    wrap.innerHTML = "";
+    const f = (filter||"").trim().toLowerCase();
+    for (const model of state.models) {
+      if (f && !(model.folder.toLowerCase().includes(f) || model.title.toLowerCase().includes(f))) continue;
+      const row = document.createElement("div");
+      row.className = "model-row" + (state.selected === model.folder ? " selected" : "");
+      row.dataset.folder = model.folder;
+      const img = document.createElement("img");
+      row.appendChild(img);
+      const mid = document.createElement("div");
+      mid.className = "mid";
+      mid.innerHTML = `<div class="mname">${escapeHtml(model.title || model.folder)}</div><div class="mfolder">${escapeHtml(model.folder)}</div>`;
+      row.appendChild(mid);
+      row.addEventListener("click", () => selectModel(model.folder));
+      wrap.appendChild(row);
+
+      // lazy load thumb image
+      loadModelThumb(model, img);
+    }
+  }
+
+  async function loadModelThumb(model, imgEl){
+    try {
+      const dir = await getSubdir(state.rootHandle, [...GALLERY_PATH, model.folder]);
+      const fh = await dir.getFileHandle(model.thumbFile);
+      const file = await fh.getFile();
+      imgEl.src = URL.createObjectURL(file);
+    } catch(e) { /* ignore */ }
+  }
+
+  // ---------- UI: editor ----------
+  async function selectModel(folder){
+    state.selected = folder;
+    renderModelList($("#modelSearch").value);
+    const model = state.models.find(m => m.folder === folder);
+    if (!model) return;
+
+    $("#editorEmpty").style.display = "none";
+    $("#editorInner").style.display = "flex";
+    $("#editTitle").textContent = model.title || folder;
+    $("#editFolder").textContent = folder;
+    setStatus("", "");
+
+    const dir = await getSubdir(state.rootHandle, [...GALLERY_PATH, folder]);
+    const usedSet = new Set(model.images);
+    const images = [];
+    for (const name of model.images) {
+      try {
+        const fh = await dir.getFileHandle(name);
+        const file = await fh.getFile();
+        images.push({ name, loc: "root", diskName: name, url: URL.createObjectURL(file) });
+      } catch(e) {
+        images.push({ name, loc: "root", diskName: name, url: null, missing: true });
+      }
+    }
+    const unused = [];
+    for await (const [name, handle] of dir.entries()) {
+      if (handle.kind !== "file") continue;
+      if (usedSet.has(name)) continue;
+      if (!/\.(jpe?g|png|webp)$/i.test(name)) continue;
+      try {
+        const file = await handle.getFile();
+        unused.push({ name, loc: "root", diskName: name, url: URL.createObjectURL(file) });
+      } catch(e) {}
+    }
+
+    const archived = [];
+    const archiveDir = await getSubdirOrNull(dir, ["archive"]);
+    if (archiveDir) {
+      for await (const [name, handle] of archiveDir.entries()) {
+        if (handle.kind !== "file") continue;
+        if (!/\.(jpe?g|png|webp)$/i.test(name)) continue;
+        try {
+          const file = await handle.getFile();
+          archived.push({ name, loc: "archive", diskName: name, url: URL.createObjectURL(file) });
+        } catch(e) {}
+      }
+    }
+
+    let thumbIndex = images.findIndex(im => im.name === model.thumbFile);
+    if (thumbIndex === -1) thumbIndex = 0;
+
+    const parsedCat = parseCategoryTokens(model.categoryAttr);
+    const category = { type: parsedCat.type, head: parsedCat.head, line: parsedCat.line, fret: parsedCat.fret, fretless: parsedCat.fretless, otherRaw: parsedCat.other.join(" ") };
+
+    const capParsed = parseSpecsForBuilder(model.specs);
+
+    state.working = {
+      folder, images, thumbIndex, unused, archived, category,
+      originalCategoryAttr: model.categoryAttr || "",
+      title: model.title || "", specs: model.specs || "",
+      originalTitle: model.title || "", originalSpecs: model.specs || "",
+      capStrings: capParsed.strings, capSuffix: capParsed.suffix
+    };
+    renderEditor();
+  }
+
+  function renderTagSection(w){
+    const typeGroup = $("#typeTagGroup");
+    typeGroup.innerHTML = "";
+    TYPE_TAGS.forEach(t => {
+      const btn = document.createElement("div");
+      btn.className = "tagBtn" + (w.category.type === t.key ? " active" : "");
+      btn.textContent = t.label;
+      btn.title = "クリックで選択/解除（種別）";
+      btn.addEventListener("click", () => {
+        w.category.type = (w.category.type === t.key) ? "" : t.key;
+        renderEditor();
+      });
+      typeGroup.appendChild(btn);
+    });
+
+    const lineGroup = $("#lineTagGroup");
+    lineGroup.innerHTML = "";
+    LINE_TAGS.forEach(l => {
+      const btn = document.createElement("div");
+      btn.className = "tagBtn" + (w.category.line === l.key ? " active" : "");
+      btn.textContent = l.label;
+      btn.title = "クリックで選択/解除（Modern/TREAD-LINEは排他）";
+      btn.addEventListener("click", () => {
+        w.category.line = (w.category.line === l.key) ? "" : l.key;
+        renderEditor();
+      });
+      lineGroup.appendChild(btn);
+    });
+
+    const headGroup = $("#headTagGroup");
+    headGroup.innerHTML = "";
+    HEAD_TAGS.forEach(h => {
+      const btn = document.createElement("div");
+      btn.className = "tagBtn" + (w.category.head === h.key ? " active" : "");
+      btn.textContent = h.label;
+      btn.title = "クリックで選択/解除（Headed/Headlessは排他）";
+      btn.addEventListener("click", () => {
+        w.category.head = (w.category.head === h.key) ? "" : h.key;
+        renderEditor();
+      });
+      headGroup.appendChild(btn);
+    });
+
+    const fretGroup = $("#fretTagGroup");
+    fretGroup.innerHTML = "";
+    FRET_TAGS.forEach(f => {
+      const btn = document.createElement("div");
+      btn.className = "tagBtn" + (w.category.fret === f.key ? " active" : "");
+      btn.textContent = f.label;
+      btn.title = "クリックで選択/解除（Parallel/Fanned Fret/Curved Multiscaleは排他）";
+      btn.addEventListener("click", () => {
+        w.category.fret = (w.category.fret === f.key) ? "" : f.key;
+        renderEditor();
+      });
+      fretGroup.appendChild(btn);
+    });
+
+    const fretlessGroup = $("#fretlessTagGroup");
+    fretlessGroup.innerHTML = "";
+    FRETLESS_TAGS.forEach(fl => {
+      const btn = document.createElement("div");
+      btn.className = "tagBtn" + (w.category.fretless === fl.key ? " active" : "");
+      btn.textContent = fl.label;
+      btn.title = "クリックで選択/解除（Fretless/Frettedは排他）";
+      btn.addEventListener("click", () => {
+        w.category.fretless = (w.category.fretless === fl.key) ? "" : fl.key;
+        renderEditor();
+      });
+      fretlessGroup.appendChild(btn);
+    });
+
+    const otherInput = $("#otherTagsInput");
+    if (document.activeElement !== otherInput) otherInput.value = w.category.otherRaw;
+    otherInput.oninput = () => { w.category.otherRaw = otherInput.value; };
+  }
+
+  function renderMetaSection(w){
+    const titleInput = $("#titleInput");
+    if (document.activeElement !== titleInput) titleInput.value = w.title;
+    titleInput.oninput = () => { w.title = titleInput.value; };
+
+    const specsInput = $("#specsInput");
+    if (document.activeElement !== specsInput) specsInput.value = w.specs;
+    specsInput.oninput = () => { w.specs = specsInput.value; };
+
+    const capStringsInput = $("#capStrings");
+    if (document.activeElement !== capStringsInput) capStringsInput.value = w.capStrings || "";
+    capStringsInput.oninput = () => { w.capStrings = capStringsInput.value.trim(); };
+
+    const capSuffixInput = $("#capSuffix");
+    if (document.activeElement !== capSuffixInput) capSuffixInput.value = w.capSuffix || "";
+    capSuffixInput.oninput = () => { w.capSuffix = capSuffixInput.value; };
+
+    $("#btnGenSpecs").onclick = () => {
+      w.specs = composeSpecs(w);
+      renderEditor();
+    };
+  }
+
+  function renderEditor(){
+    const w = state.working;
+    if (!w) return;
+    renderMetaSection(w);
+    renderTagSection(w);
+    const grid = $("#grid");
+    grid.innerHTML = "";
+    w.images.forEach((im, i) => {
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.draggable = true;
+      tile.dataset.index = i;
+
+      const imgWrap = document.createElement("div");
+      imgWrap.className = "imgWrap";
+
+      const img = document.createElement("img");
+      img.src = im.url || "";
+      if (im.missing) { img.style.background = "#3a1414"; }
+      imgWrap.appendChild(img);
+
+      const order = document.createElement("div");
+      order.className = "order";
+      order.textContent = String(i+1).padStart(2,"0");
+      imgWrap.appendChild(order);
+
+      if (im.loc === "new") {
+        const badge = document.createElement("div");
+        badge.className = "badge";
+        badge.textContent = "新規";
+        imgWrap.appendChild(badge);
+      } else if (im.loc === "archive") {
+        const badge = document.createElement("div");
+        badge.className = "badge";
+        badge.textContent = "復元";
+        imgWrap.appendChild(badge);
+      }
+
+      const star = document.createElement("div");
+      star.className = "starBtn" + (i === w.thumbIndex ? " active" : "");
+      star.textContent = "★";
+      star.title = "この画像をサムネイルにする";
+      star.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        w.thumbIndex = i;
+        renderEditor();
+      });
+      imgWrap.appendChild(star);
+
+      const trash = document.createElement("div");
+      trash.className = "trashBtn";
+      trash.textContent = "🗑";
+      trash.title = "この画像をアーカイブに移動する";
+      trash.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        const [moved] = w.images.splice(i, 1);
+        w.archived.unshift(moved);
+        if (w.thumbIndex > i) w.thumbIndex--;
+        else if (w.thumbIndex === i) w.thumbIndex = w.images.length ? 0 : -1;
+        renderEditor();
+      });
+      imgWrap.appendChild(trash);
+
+      tile.appendChild(imgWrap);
+
+      const fname = document.createElement("div");
+      fname.className = "fname";
+      fname.textContent = im.missing ? (im.name + " (見つかりません)") : im.name;
+      tile.appendChild(fname);
+
+      tile.addEventListener("dragstart", (ev) => {
+        tile.classList.add("dragging");
+        ev.dataTransfer.setData("text/plain", String(i));
+        ev.dataTransfer.effectAllowed = "move";
+      });
+      tile.addEventListener("dragend", () => tile.classList.remove("dragging"));
+      tile.addEventListener("dragover", (ev) => {
+        ev.preventDefault();
+        const rect = tile.getBoundingClientRect();
+        const before = (ev.clientX - rect.left) < rect.width / 2;
+        tile.classList.toggle("drop-before", before);
+        tile.classList.toggle("drop-after", !before);
+      });
+      tile.addEventListener("dragleave", () => {
+        tile.classList.remove("drop-before", "drop-after");
+      });
+      tile.addEventListener("drop", (ev) => {
+        ev.preventDefault();
+        tile.classList.remove("drop-before", "drop-after");
+        const fromIdx = parseInt(ev.dataTransfer.getData("text/plain"), 10);
+        const rect = tile.getBoundingClientRect();
+        const before = (ev.clientX - rect.left) < rect.width / 2;
+        let toIdx = i + (before ? 0 : 1);
+        if (fromIdx === toIdx || fromIdx === toIdx - 1) return;
+        const wasThumb = w.thumbIndex >= 0 ? w.images[w.thumbIndex] : null;
+        const [moved] = w.images.splice(fromIdx, 1);
+        if (toIdx > fromIdx) toIdx -= 1;
+        w.images.splice(toIdx, 0, moved);
+        w.thumbIndex = wasThumb ? w.images.indexOf(wasThumb) : -1;
+        renderEditor();
+      });
+
+      grid.appendChild(tile);
+    });
+
+    const ugrid = $("#unusedGrid");
+    ugrid.innerHTML = "";
+    w.unused.forEach((im) => {
+      const t = document.createElement("div");
+      t.className = "utile";
+      const img = document.createElement("img");
+      img.src = im.url;
+      t.appendChild(img);
+      const fname = document.createElement("div");
+      fname.className = "fname";
+      fname.textContent = im.name;
+      t.appendChild(fname);
+      const brow = document.createElement("div");
+      brow.className = "brow";
+      const btn = document.createElement("button");
+      btn.className = "small";
+      btn.textContent = "＋ 追加";
+      btn.addEventListener("click", () => {
+        w.images.push(im);
+        w.unused = w.unused.filter(u => u !== im);
+        renderEditor();
+      });
+      brow.appendChild(btn);
+      const abtn = document.createElement("button");
+      abtn.className = "small";
+      abtn.textContent = "アーカイブへ";
+      abtn.addEventListener("click", () => {
+        w.archived.unshift(im);
+        w.unused = w.unused.filter(u => u !== im);
+        renderEditor();
+      });
+      brow.appendChild(abtn);
+      t.appendChild(brow);
+      ugrid.appendChild(t);
+    });
+    $("#unusedSec").style.display = w.unused.length ? "block" : "none";
+
+    const agrid = $("#archiveGrid");
+    agrid.innerHTML = "";
+    w.archived.forEach((im) => {
+      const t = document.createElement("div");
+      t.className = "utile";
+      const img = document.createElement("img");
+      img.src = im.url;
+      t.appendChild(img);
+      const fname = document.createElement("div");
+      fname.className = "fname";
+      fname.textContent = im.name;
+      t.appendChild(fname);
+      const btn = document.createElement("button");
+      btn.className = "small";
+      btn.textContent = "元に戻す（ページに表示）";
+      btn.addEventListener("click", () => {
+        w.images.push(im);
+        w.archived = w.archived.filter(u => u !== im);
+        if (w.thumbIndex === -1) w.thumbIndex = w.images.length - 1;
+        renderEditor();
+      });
+      t.appendChild(btn);
+      agrid.appendChild(t);
+    });
+  }
+
+  function setStatus(msg, cls){
+    const el = $("#statusMsg");
+    el.textContent = msg || "";
+    el.className = "status" + (cls ? " " + cls : "");
+  }
+
+  // ---------- File upload ----------
+  $("#btnUpload").addEventListener("click", () => {
+    if (!state.working) return;
+    $("#fileUpload").click();
+  });
+  $("#fileUpload").addEventListener("change", (ev) => {
+    const w = state.working;
+    if (!w) return;
+    const files = Array.from(ev.target.files || []);
+    for (const file of files) {
+      w.images.push({ name: file.name, loc: "new", file, url: URL.createObjectURL(file) });
+    }
+    ev.target.value = "";
+    renderEditor();
+  });
+
+  // ---------- Save flow ----------
+  function computePlan(){
+    const w = state.working;
+    const plan = [];
+    w.images.forEach((im, i) => {
+      const num = String(i+1).padStart(2,"0");
+      const isThumb = i === w.thumbIndex;
+      const ext = extOf(im.name);
+      const newName = isThumb ? `${num}-thumb${ext}` : `${num}${ext}`;
+      const currentName = im.loc === "root" ? im.diskName : null;
+      const needsWrite = !(im.loc === "root" && currentName === newName);
+      plan.push({ im, oldName: im.diskName || im.name, newName, isThumb, missing: !!im.missing, needsWrite });
+    });
+    return plan;
+  }
+
+  function computeArchivePlan(){
+    const w = state.working;
+    const claimed = new Set(w.archived.filter(im => im.loc === "archive").map(im => im.diskName));
+    const plan = [];
+    w.archived.forEach((im) => {
+      if (im.loc === "archive") return; // already sitting in archive/, nothing to do
+      const finalName = uniqueNameIn(claimed, im.diskName || im.name);
+      claimed.add(finalName);
+      plan.push({ im, oldName: im.diskName || im.name, newName: finalName });
+    });
+    return plan;
+  }
+
+  function showConfirm(plan, archivePlan, categoryChange, metaChange){
+    const body = $("#confirmBody");
+    body.innerHTML = "";
+
+    if (metaChange) {
+      const mt = document.createElement("div");
+      mt.className = "secTitle";
+      mt.textContent = "タイトル & キャプション";
+      body.appendChild(mt);
+      if (metaChange.title) {
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `
+          <span class="old">${escapeHtml(metaChange.title.oldStr || "(なし)")}</span>
+          <span class="arrow">→</span>
+          <span class="new">${escapeHtml(metaChange.title.newStr || "(なし)")}</span>
+        `;
+        body.appendChild(row);
+      }
+      if (metaChange.specs) {
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `
+          <span class="old">${escapeHtml(metaChange.specs.oldStr || "(なし)")}</span>
+          <span class="arrow">→</span>
+          <span class="new">${escapeHtml(metaChange.specs.newStr || "(なし)")}</span>
+        `;
+        body.appendChild(row);
+      }
+    }
+
+    if (categoryChange) {
+      const ct = document.createElement("div");
+      ct.className = "secTitle";
+      ct.textContent = "フィルタータグ";
+      body.appendChild(ct);
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `
+        <span class="old">${escapeHtml(categoryChange.oldStr || "(なし)")}</span>
+        <span class="arrow">→</span>
+        <span class="new">${escapeHtml(categoryChange.newStr || "(なし)")}</span>
+      `;
+      body.appendChild(row);
+    }
+
+    const activeTitle = document.createElement("div");
+    activeTitle.className = "secTitle";
+    activeTitle.textContent = "ページに表示される画像（並び順）";
+    body.appendChild(activeTitle);
+
+    let changedCount = 0;
+    plan.forEach(p => {
+      const row = document.createElement("div");
+      row.className = "row";
+      const changed = p.oldName !== p.newName || p.im.loc !== "root";
+      if (changed) changedCount++;
+      const tag = p.im.loc === "new" ? '<span class="newtag">新規</span>' : (p.im.loc === "archive" ? '<span class="newtag">復元</span>' : "");
+      row.innerHTML = `
+        <span class="old">${escapeHtml(p.oldName)}</span>
+        <span class="arrow">${changed ? "→" : "="}</span>
+        <span class="new">${escapeHtml(p.newName)} ${p.isThumb ? '<span class="thumbtag">THUMB</span>' : ''} ${tag}</span>
+      `;
+      body.appendChild(row);
+    });
+    if (changedCount === 0) {
+      const p = document.createElement("p");
+      p.className = "hint";
+      p.textContent = "ファイル名の変更はありません（順序・サムネイルとも現状のまま）。gallery/index.html の該当行のみ確認・保存します。";
+      body.appendChild(p);
+    }
+
+    if (archivePlan.length) {
+      const at = document.createElement("div");
+      at.className = "secTitle";
+      at.textContent = "アーカイブへ移動する画像（ページから非表示に）";
+      body.appendChild(at);
+      archivePlan.forEach(p => {
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `
+          <span class="old">${escapeHtml(p.oldName)}</span>
+          <span class="arrow">→</span>
+          <span class="new">archive/${escapeHtml(p.newName)} <span class="archivetag">ARCHIVE</span></span>
+        `;
+        body.appendChild(row);
+      });
+    }
+
+    $("#confirmOverlay").classList.add("active");
+  }
+  function hideConfirm(){ $("#confirmOverlay").classList.remove("active"); }
+
+  async function readFreshBytes(im, rootDir, archiveDir){
+    if (im.loc === "new") return im.file;
+    const srcDir = im.loc === "archive" ? archiveDir : rootDir;
+    const fh = await srcDir.getFileHandle(im.diskName);
+    const file = await fh.getFile();
+    return file;
+  }
+
+  async function doSave(){
+    const w = state.working;
+    if (!w) return;
+    if (w.images.some(im => im.missing)) {
+      setStatus("見つからない画像ファイルがあります。保存前に確認してください。", "err");
+      return;
+    }
+    if (w.thumbIndex < 0 && w.images.length) w.thumbIndex = 0;
+    const plan = computePlan();
+    const archivePlan = computeArchivePlan();
+    const newCategoryStr = buildCategoryString(w.category);
+    const categoryChanged = newCategoryStr !== (w.originalCategoryAttr || "");
+    const categoryChange = categoryChanged ? { oldStr: w.originalCategoryAttr || "", newStr: newCategoryStr } : null;
+
+    const newTitle = (w.title || "").trim();
+    const newSpecs = (w.specs || "").trim();
+    const titleChanged = newTitle !== (w.originalTitle || "");
+    const specsChanged = newSpecs !== (w.originalSpecs || "");
+    const metaChange = (titleChanged || specsChanged) ? {
+      title: titleChanged ? { oldStr: w.originalTitle || "", newStr: newTitle } : null,
+      specs: specsChanged ? { oldStr: w.originalSpecs || "", newStr: newSpecs } : null,
+    } : null;
+
+    showConfirm(plan, archivePlan, categoryChange, metaChange);
+
+    $("#btnConfirmGo").onclick = async () => {
+      hideConfirm();
+      setStatus("保存中…", "");
+      try {
+        const rootDir = await getSubdir(state.rootHandle, [...GALLERY_PATH, w.folder]);
+        const needsArchiveDir = archivePlan.length > 0 || w.archived.length > 0;
+        const archiveDir = needsArchiveDir
+          ? await getSubdir(state.rootHandle, [...GALLERY_PATH, w.folder, "archive"], true)
+          : await getSubdirOrNull(rootDir, ["archive"]);
+
+        const writeOps = []; // {targetDir, tempName, finalName, deleteFrom:{dir,name}|null}
+        let counter = 0;
+        const stamp = Date.now();
+
+        // active list writes
+        for (const p of plan) {
+          if (!p.needsWrite) continue;
+          const bytes = await readFreshBytes(p.im, rootDir, archiveDir);
+          const tempName = `__tmp_${counter++}_${stamp}__${p.newName}`;
+          const deleteFrom = p.im.loc === "root" ? { dir: rootDir, name: p.im.diskName }
+                            : p.im.loc === "archive" ? { dir: archiveDir, name: p.im.diskName }
+                            : null;
+          writeOps.push({ bytes, targetDir: rootDir, tempName, finalName: p.newName, deleteFrom });
+        }
+        // archive-bound writes
+        for (const p of archivePlan) {
+          const bytes = await readFreshBytes(p.im, rootDir, archiveDir);
+          const tempName = `__tmp_${counter++}_${stamp}__${p.newName}`;
+          const deleteFrom = p.im.loc === "root" ? { dir: rootDir, name: p.im.diskName } : null;
+          writeOps.push({ bytes, targetDir: archiveDir, tempName, finalName: p.newName, deleteFrom });
+        }
+
+        // Phase 1: write all under temp names
+        for (const op of writeOps) {
+          await writeBlobFile(op.targetDir, op.tempName, op.bytes);
+        }
+        // Phase 2: delete originals (now that new bytes are safely written elsewhere)
+        for (const op of writeOps) {
+          if (op.deleteFrom) await removeIfExists(op.deleteFrom.dir, op.deleteFrom.name);
+        }
+        // Phase 3: rename temp -> final
+        for (const op of writeOps) {
+          await renameFile(op.targetDir, op.tempName, op.finalName);
+        }
+
+        const newImagesAttr = plan.map(p => p.newName).join(",");
+        const thumbPlan = plan.find(p => p.isThumb);
+        const newThumbFile = thumbPlan ? thumbPlan.newName : plan[0].newName;
+
+        const galDir = await getSubdir(state.rootHandle, ["gallery"]);
+        let html = await readTextFile(galDir, "index.html");
+        html = updateModelBlockInHtml(html, w.folder, newImagesAttr, newThumbFile, newCategoryStr, newTitle, newSpecs);
+        await writeTextFile(galDir, "index.html", html);
+        state.galleryHtml = html;
+
+        // update in-memory model record
+        const model = state.models.find(m => m.folder === w.folder);
+        model.imagesAttr = newImagesAttr;
+        model.images = plan.map(p => p.newName);
+        model.thumbFile = newThumbFile;
+        model.categoryAttr = newCategoryStr;
+        model.title = newTitle;
+        model.specs = newSpecs;
+
+        // reload editor state from disk to reflect new filenames / archive contents
+        await selectModel(w.folder);
+        renderModelList($("#modelSearch").value);
+        setStatus("保存しました。", "ok");
+      } catch (e) {
+        console.error(e);
+        setStatus("エラー: " + e.message, "err");
+      }
+    };
+  }
+
+  async function renameFile(dirHandle, oldName, newName){
+    const oldHandle = await dirHandle.getFileHandle(oldName);
+    const file = await oldHandle.getFile();
+    const buf = await file.arrayBuffer();
+    const newHandle = await dirHandle.getFileHandle(newName, { create: true });
+    const writable = await newHandle.createWritable();
+    await writable.write(buf);
+    await writable.close();
+    await dirHandle.removeEntry(oldName);
+  }
+
+  // ---------- サイトフォルダの記憶（IndexedDBにディレクトリハンドルを保存し、次回から自動/ワンクリックで開く） ----------
+  const HANDLE_DB_NAME = "gti_gallery_manager";
+  const HANDLE_STORE = "handles";
+  const HANDLE_KEY = "rootDir";
+
+  function openHandleDB(){
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(HANDLE_DB_NAME, 1);
+      req.onupgradeneeded = () => { req.result.createObjectStore(HANDLE_STORE); };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function saveRootHandle(handle){
+    try {
+      const db = await openHandleDB();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(HANDLE_STORE, "readwrite");
+        tx.objectStore(HANDLE_STORE).put(handle, HANDLE_KEY);
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch(e) { /* 保存できなくても致命的ではないので無視 */ }
+  }
+  async function loadRootHandle(){
+    try {
+      const db = await openHandleDB();
+      return await new Promise((resolve, reject) => {
+        const tx = db.transaction(HANDLE_STORE, "readonly");
+        const req = tx.objectStore(HANDLE_STORE).get(HANDLE_KEY);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+      });
+    } catch(e) { return null; }
+  }
+
+  // ---------- Bootstrapping ----------
+  async function useRootHandle(handle){
+    try {
+      await getSubdir(handle, ["gallery"]);
+      await getSubdir(handle, GALLERY_PATH);
+    } catch(e) {
+      gateWarn.style.display = "block";
+      gateWarn.textContent = "選んだフォルダに gallery/ または assets/images/gallery/ が見つかりませんでした。サイトのルートフォルダを選び直してください。";
+      return false;
+    }
+
+    state.rootHandle = handle;
+    const galDir = await getSubdir(handle, ["gallery"]);
+    const html = await readTextFile(galDir, "index.html");
+    state.galleryHtml = html;
+    state.models = parseModels(html);
+
+    $("#rootLabel").textContent = "フォルダ: " + (handle.name || "");
+    $("#btnReload").style.display = "inline-block";
+
+    gateEl.style.display = "none";
+    mainEl.classList.add("active");
+    renderModelList("");
+
+    saveRootHandle(handle);
+    return true;
+  }
+
+  async function pickRoot(){
+    let handle;
+    try {
+      handle = await window.showDirectoryPicker();
+    } catch(e) { return; }
+    await useRootHandle(handle);
+  }
+
+  async function tryAutoOpen(){
+    if (!("indexedDB" in window)) return;
+    const handle = await loadRootHandle();
+    if (!handle) return;
+    try {
+      const already = await handle.queryPermission({ mode: "readwrite" });
+      if (already === "granted") {
+        await useRootHandle(handle);
+        return;
+      }
+      // 前回許可した記憶はあるが、ブラウザ再起動等で権限確認待ちの状態。
+      // フォルダ選択ダイアログを開かず、ワンクリックの確認ボタンだけで再度開けるようにする。
+      const btn = $("#btnQuickPick");
+      btn.textContent = "前回のフォルダを開く（" + (handle.name || "") + "）";
+      btn.style.display = "inline-block";
+      $("#quickPickHint").style.display = "block";
+      btn.onclick = async () => {
+        try {
+          const perm = await handle.requestPermission({ mode: "readwrite" });
+          if (perm !== "granted") return;
+          await useRootHandle(handle);
+        } catch(e) {
+          gateWarn.style.display = "block";
+          gateWarn.textContent = "前回のフォルダを開けませんでした。お手数ですが選び直してください。";
+        }
+      };
+    } catch(e) { /* ハンドルが無効（フォルダが移動/削除された等）なら通常の選択に任せる */ }
+  }
+  tryAutoOpen();
+
+  $("#btnPick").addEventListener("click", pickRoot);
+  $("#btnReload").addEventListener("click", async () => {
+    if (!state.rootHandle) return;
+    const galDir = await getSubdir(state.rootHandle, ["gallery"]);
+    state.galleryHtml = await readTextFile(galDir, "index.html");
+    state.models = parseModels(state.galleryHtml);
+    renderModelList($("#modelSearch").value);
+    if (state.selected) await selectModel(state.selected);
+  });
+  $("#modelSearch").addEventListener("input", (e) => renderModelList(e.target.value));
+  $("#btnSave").addEventListener("click", doSave);
+  $("#btnDiscard").addEventListener("click", () => { if (state.selected) selectModel(state.selected); setStatus("変更を破棄しました。", ""); });
+  $("#btnConfirmCancel").addEventListener("click", hideConfirm);
+
+})();
+</script>
+</body>
+</html>
