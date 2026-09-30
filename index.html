@@ -315,6 +315,35 @@ nav.scrolled{
   .hero-rule-top,.hero-rule-bot{left:28px;right:28px}
 }
 @media(max-width:700px){
+  /* PCでは画像いっぱいに文字が重なるレイアウトだが、
+     縦長のスマホ画面だと100vhの中で画像が小さく収まり
+     下に大きな余白ができてしまうため、画像を帯として
+     自然な高さで表示し、その下にテキストを通常フローで
+     配置する構成に切り替える(PCと近いサイズ感を維持) */
+  .hero{
+    height:auto;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+  }
+  .hero-img{
+    position:relative;
+    width:100%;
+    aspect-ratio:1600/899;
+    background-size:cover;
+    background-position:center 30%;
+  }
+  .hero-fade,.hero-vignette{display:none}
+  .hero-rule-top,.hero-rule-bot{display:none}
+  .hero-body{
+    position:static;
+    bottom:auto!important;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:24px;
+    padding:28px 20px 32px;
+  }
   .hero-desc-wrap{
     width:100%;
     max-width:none;
@@ -334,13 +363,6 @@ nav.scrolled{
   .cta-group{
     flex-wrap:wrap;
     gap:14px;
-  }
-  .hero-body{
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    gap:24px;
-    padding:0 20px 32px;
   }
 }
 @media(max-width:600px){
@@ -484,6 +506,7 @@ const bigText  = document.querySelector('.hero-big-text');
 
 function alignHero() {
   heroBody.style.bottom = '';
+  if (window.innerWidth <= 700) return; // mobile: static flow layout, no JS positioning needed
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const imgBottom = Math.min(vw / IMG_RATIO, vh); // px from top of viewport
