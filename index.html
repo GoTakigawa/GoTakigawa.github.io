@@ -316,30 +316,34 @@ nav.scrolled{
 }
 @media(max-width:700px){
   /* PCは「大きな写真の上に控えめな文字が乗る」構成。
-     スマホでも同じ見え方(写真が主役、文字はその上に
-     小さめに重なる)になるよう、hero自体の高さを画面の
-     6割程度に保ち、写真を全面に敷いた上でテキストを
-     下端に重ねる形にする(以前の「帯+下に大文字」構成
-     をやめ、PCと同じ重なりレイアウトへ寄せる) */
+     固定の縦長ボックスに cover で敷くと画像がズームされて
+     全体が見えなくなるため、hero自体を画像の縦横比に
+     合わせた高さ(=画像全体がそのまま収まる高さ)にし、
+     その下端にテキストを重ねる形にする */
   .hero{
-    height:62vh;
-    min-height:380px;
-    max-height:620px;
+    height:auto;
+    min-height:0;
+    max-height:none;
+    overflow:visible;
   }
   .hero-img{
+    position:relative;
+    width:100%;
+    aspect-ratio:1600/899;
     background-size:cover;
-    background-position:center 25%;
+    background-position:center top;
   }
+  .hero-fade,.hero-vignette{position:absolute;inset:0}
   .hero-rule-top,.hero-rule-bot{display:none}
   .hero-body{
     position:absolute;
-    bottom:28px!important;
+    bottom:14px!important;
     left:0;right:0;
     padding:0 20px;
   }
   .hero-left{max-width:100%}
   .hero-big-text{
-    gap:10px;
+    gap:8px;
   }
   .hero-desc-wrap{
     width:100%;
@@ -348,18 +352,19 @@ nav.scrolled{
   }
   .hero-desc{
     white-space:normal;
-    font-size:clamp(.6rem,2.6vw,.7rem);
-    line-height:1.55;
+    font-size:clamp(.55rem,2vw,.65rem);
+    line-height:1.4;
   }
   .line-beyond-convention{
     white-space:normal;
-    font-size:clamp(1.6rem,9vw,2.4rem);
+    font-size:clamp(1.3rem,7vw,2rem);
   }
   .line-instruments{
-    font-size:clamp(.9rem,4vw,1.2rem);
+    font-size:clamp(.75rem,3.2vw,1rem);
   }
   .hero-eyebrow{
-    margin-bottom:10px;
+    margin-bottom:8px;
+    font-size:.6rem;
   }
   .cta-group{
     flex-wrap:wrap;
