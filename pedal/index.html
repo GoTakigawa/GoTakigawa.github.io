@@ -395,6 +395,11 @@ footer p{color:rgba(240,237,230,.2);font-size:.8rem;letter-spacing:.1em;text-tra
   .s-hw h2{grid-column:1}
 }
 </style>
+<style>
+/* タッチ端末: メニューを開いている間はヘッダーをメニューより前面に出し、
+   「×」に変わったハンバーガーで閉じられるようにする */
+@media (hover:none){ body:has(#drawer.open) #nav{ z-index:260; } }
+</style>
 </head>
 <body>
 
