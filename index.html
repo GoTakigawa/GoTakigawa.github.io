@@ -343,22 +343,28 @@ nav.scrolled{
   .hero-fade,.hero-vignette,.hero-rule-top,.hero-rule-bot{display:none}
   .hero-body{
     position:static;
-    margin-top:-64px;
+    margin-top:-78px;
     padding:0 18px 24px;
   }
   .hero-left{max-width:100%}
+  /* PCと同じく「Beyond Convention」の右横に説明文を並べ、下端を揃える */
   .hero-big-text{
-    gap:8px;
+    flex-direction:row;
+    align-items:flex-end;
+    gap:12px;
   }
   .hero-desc-wrap{
-    width:100%;
+    width:auto;
+    min-width:0;
     max-width:none;
-    padding-bottom:0;
+    flex-shrink:1;
+    padding-bottom:.15em;
   }
   .hero-desc{
     white-space:normal;
-    font-size:clamp(.45rem,1.7vw,.55rem);
-    line-height:1.4;
+    font-size:clamp(.38rem,1.4vw,.46rem);
+    line-height:1.45;
+    padding-left:8px;
   }
   .line-beyond-convention{
     white-space:normal;
@@ -373,7 +379,7 @@ nav.scrolled{
     gap:8px;
   }
   .eyebrow-tick{width:18px}
-  .hero-desc .cyber-tag{font-size:.45rem}
+  .hero-desc .cyber-tag{font-size:.38rem;margin-bottom:3px}
   /* ヘッダーとフッターもスマホの画面幅に合わせて縮小 */
   nav{height:52px}
   .nav-logo{height:24px}
