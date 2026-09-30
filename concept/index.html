@@ -267,6 +267,11 @@
 }
 .cg-modal-counter { margin-top: 10px; font-size: 0.8rem; color: #666; }
 </style>
+<style>
+/* タッチ端末: メニューを開いている間はヘッダーをメニューより前面に出し、
+   「×」に変わったハンバーガーで閉じられるようにする */
+@media (hover:none){ body:has(#drawer.open) #nav{ z-index:260; } }
+</style>
 </head>
 <body>
 

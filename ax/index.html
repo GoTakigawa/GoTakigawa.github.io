@@ -226,6 +226,11 @@ body { background: #000; }
   .ax-band-videos { padding: 60px 20px 80px; }
 }
 </style>
+<style>
+/* タッチ端末: メニューを開いている間はヘッダーをメニューより前面に出し、
+   「×」に変わったハンバーガーで閉じられるようにする */
+@media (hover:none){ body:has(#drawer.open) #nav{ z-index:260; } }
+</style>
 </head>
 <body>
 

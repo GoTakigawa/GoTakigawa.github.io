@@ -189,6 +189,11 @@
   .ham-wrap::after{display:none;}
 }
 </style>
+<style>
+/* タッチ端末: メニューを開いている間はヘッダーをメニューより前面に出し、
+   「×」に変わったハンバーガーで閉じられるようにする */
+@media (hover:none){ body:has(#drawer.open) #nav{ z-index:260; } }
+</style>
 </head>
 <body>
 
