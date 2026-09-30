@@ -315,34 +315,31 @@ nav.scrolled{
   .hero-rule-top,.hero-rule-bot{left:28px;right:28px}
 }
 @media(max-width:700px){
-  /* PCでは画像いっぱいに文字が重なるレイアウトだが、
-     縦長のスマホ画面だと100vhの中で画像が小さく収まり
-     下に大きな余白ができてしまうため、画像を帯として
-     自然な高さで表示し、その下にテキストを通常フローで
-     配置する構成に切り替える(PCと近いサイズ感を維持) */
+  /* PCは「大きな写真の上に控えめな文字が乗る」構成。
+     スマホでも同じ見え方(写真が主役、文字はその上に
+     小さめに重なる)になるよう、hero自体の高さを画面の
+     6割程度に保ち、写真を全面に敷いた上でテキストを
+     下端に重ねる形にする(以前の「帯+下に大文字」構成
+     をやめ、PCと同じ重なりレイアウトへ寄せる) */
   .hero{
-    height:auto;
-    min-height:0;
-    display:flex;
-    flex-direction:column;
+    height:62vh;
+    min-height:380px;
+    max-height:620px;
   }
   .hero-img{
-    position:relative;
-    width:100%;
-    aspect-ratio:1600/899;
     background-size:cover;
-    background-position:center 30%;
+    background-position:center 25%;
   }
-  .hero-fade,.hero-vignette{display:none}
   .hero-rule-top,.hero-rule-bot{display:none}
   .hero-body{
-    position:static;
-    bottom:auto!important;
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    gap:24px;
-    padding:28px 20px 32px;
+    position:absolute;
+    bottom:28px!important;
+    left:0;right:0;
+    padding:0 20px;
+  }
+  .hero-left{max-width:100%}
+  .hero-big-text{
+    gap:10px;
   }
   .hero-desc-wrap{
     width:100%;
@@ -351,14 +348,18 @@ nav.scrolled{
   }
   .hero-desc{
     white-space:normal;
-    font-size:clamp(.65rem,.9vw,.8rem);
+    font-size:clamp(.6rem,2.6vw,.7rem);
+    line-height:1.55;
   }
   .line-beyond-convention{
     white-space:normal;
-    font-size:clamp(2rem,10vw,3.5rem);
+    font-size:clamp(1.6rem,9vw,2.4rem);
   }
   .line-instruments{
-    font-size:clamp(1.2rem,5vw,2rem);
+    font-size:clamp(.9rem,4vw,1.2rem);
+  }
+  .hero-eyebrow{
+    margin-bottom:10px;
   }
   .cta-group{
     flex-wrap:wrap;
