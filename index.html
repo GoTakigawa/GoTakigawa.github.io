@@ -164,6 +164,7 @@ nav.scrolled{
 }
 .hero-img{
   position:absolute;top:64px;left:0;right:0;bottom:0; /* 固定ヘッダー(64px)の下から画像を開始 */
+  transform-origin:50% 0; /* パララックス拡大時も上端を固定し、ヘッダー下に潜り込まないようにする */
   background:url('assets/images/hero.jpg') center top / contain no-repeat;
   background-color:var(--bg);
 }
@@ -325,7 +326,7 @@ nav.scrolled{
     min-height:0;
     max-height:none;
     overflow:visible;
-    margin-top:64px; /* 固定ヘッダー(nav)の高さ分だけ下げ、写真と重ならないようにする */
+    margin-top:52px; /* 固定ヘッダー(nav)の高さ分だけ下げ、写真と重ならないようにする */
   }
   .hero-img{
     position:relative;
@@ -342,8 +343,8 @@ nav.scrolled{
   .hero-fade,.hero-vignette,.hero-rule-top,.hero-rule-bot{display:none}
   .hero-body{
     position:static;
-    margin-top:-84px;
-    padding:0 20px 28px;
+    margin-top:-80px;
+    padding:0 18px 24px;
   }
   .hero-left{max-width:100%}
   .hero-big-text{
@@ -356,20 +357,27 @@ nav.scrolled{
   }
   .hero-desc{
     white-space:normal;
-    font-size:clamp(.55rem,2vw,.65rem);
+    font-size:clamp(.5rem,2vw,.6rem);
     line-height:1.4;
   }
   .line-beyond-convention{
     white-space:normal;
-    font-size:clamp(1.3rem,7vw,2rem);
+    font-size:clamp(1.1rem,5.6vw,1.6rem);
   }
   .line-instruments{
-    font-size:clamp(.75rem,3.2vw,1rem);
+    font-size:clamp(.7rem,3vw,.9rem);
   }
   .hero-eyebrow{
-    margin-bottom:8px;
-    font-size:.6rem;
+    margin-bottom:6px;
+    font-size:.5rem;
+    gap:10px;
   }
+  .eyebrow-tick{width:18px}
+  .hero-desc .cyber-tag{font-size:.5rem}
+  /* ヘッダーとフッターもスマホの画面幅に合わせて縮小 */
+  nav{height:52px}
+  .nav-logo{height:24px}
+  .foot-copy{font-size:.6rem}
   .cta-group{
     flex-wrap:wrap;
     gap:14px;
@@ -459,6 +467,7 @@ window.addEventListener('scroll',()=>{
 // parallax
 const heroImg=document.getElementById('heroImg');
 window.addEventListener('scroll',()=>{
+  if (window.innerWidth <= 700) { heroImg.style.transform=''; return; }
   heroImg.style.transform=`scale(1.06) translateY(${window.scrollY*.25}px)`;
 },{passive:true});
 
