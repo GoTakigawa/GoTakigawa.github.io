@@ -380,6 +380,41 @@
       .quick-nav { gap: 6px; margin-bottom: 40px; padding-bottom: 20px; }
       .quick-nav a { font-size: 0.7rem; padding: 7px 12px; }
     }
+
+    /* ── スマホ: 全体の文字を縮小し、塗装の表を横スクロールなしで収める ── */
+    @media (max-width: 600px) {
+      .logo { font-size: 1.1rem; }
+      h1 { font-size: 1.6rem; }
+      .page-sub { font-size: 0.8rem; margin-bottom: 40px; }
+      .notice { font-size: 0.75rem; }
+      .sec h2 { font-size: 1rem; padding-bottom: 8px; }
+      td { font-size: 0.82rem; padding: 9px 0; }
+      .td-price { font-size: 0.85rem; padding-left: 10px; }
+      .td-sub { font-size: 0.7rem; }
+
+      .price-matrix-wrap { overflow-x: visible; }
+      .price-matrix { min-width: 0; table-layout: fixed; }
+      .price-matrix th,
+      .price-matrix td { padding: 8px 3px; }
+      .price-matrix thead th { font-size: 0.6rem; letter-spacing: 0; }
+      .price-matrix thead th:first-child { width: 27%; }
+      .price-matrix tbody th { font-size: 0.72rem; white-space: normal; padding-left: 6px; line-height: 1.35; }
+      .price-matrix tbody td { font-size: 0.72rem; letter-spacing: 0; white-space: nowrap; }
+      .matrix-note { font-size: 0.75rem; }
+
+      .color-block { font-size: 0.78rem; padding: 12px 12px; }
+      .color-block strong.color-block-heading { font-size: 0.88rem; margin-bottom: 8px; }
+      .color-note { font-size: 0.7rem; }
+      .info-block { padding: 14px 14px; }
+      .info-block h4 { font-size: 0.7rem; }
+      .info-block p { font-size: 0.8rem; }
+      .contact-line { font-size: 0.8rem; }
+      .workshop-band-text { font-size: 0.75rem; }
+      .concern-card { padding: 12px 14px; }
+      .concern-title { font-size: 0.78rem; }
+      .cta-btn { font-size: 0.82rem; padding: 11px 20px; }
+      .quick-nav a { font-size: 0.65rem; padding: 6px 10px; }
+    }
   </style>
 
 <style>
