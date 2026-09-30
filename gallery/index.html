@@ -1482,6 +1482,30 @@
       height: 16px;
       flex-shrink: 0;
     }
+
+    /* ── スマホ: 文字・ボタンを画面幅に合わせて縮小 ── */
+    @media (max-width: 600px) {
+      /* 一覧カード */
+      .gallery-item-info { padding: 14px 16px; }
+      .gallery-item-info.has-shop { padding-right: 74px; }
+      .item-series { font-size: 0.55rem; margin-bottom: 4px; }
+      .item-title { font-size: 1rem; margin-bottom: 6px; }
+      .item-specs { font-size: 0.72rem; }
+      .gallery-shop-btn { right: 14px; bottom: 14px; padding: 4px 8px; font-size: 0.6rem; gap: 4px; }
+      .gallery-shop-btn svg { width: 10px; height: 10px; }
+
+      /* 拡大表示(モーダル) */
+      .modal { padding: 16px; }
+      .modal-close { top: -44px; font-size: 1.8rem; }
+      .modal-caption { margin-top: 16px; }
+      .modal-title { font-size: 1.1rem; margin-bottom: 6px; }
+      .modal-specs { font-size: 0.75rem; }
+      .modal-counter { font-size: 0.7rem; margin-top: 6px; }
+      .modal-nav { padding: 0 6px; }
+      .nav-btn { width: 30px; height: 30px; font-size: 0.75rem; }
+      .modal-shop-link { bottom: 8px; right: 8px; padding: 5px 9px; gap: 5px; font-size: 0.68rem; }
+      .modal-shop-link svg { width: 11px; height: 11px; }
+    }
   </style>
 
   <script>
