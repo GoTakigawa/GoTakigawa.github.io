@@ -333,13 +333,15 @@ nav.scrolled{
     background-size:cover;
     background-position:center top;
   }
-  .hero-fade,.hero-vignette{position:absolute;inset:0}
-  .hero-rule-top,.hero-rule-bot{display:none}
+  /* テキストが画像の高さに収まりきらない場合は下に
+     はみ出させる(切れて見えなくなるのを防ぐ)ため、
+     絶対配置ではなく通常フロー+負のマージンで
+     画像下端に重ねる */
+  .hero-fade,.hero-vignette,.hero-rule-top,.hero-rule-bot{display:none}
   .hero-body{
-    position:absolute;
-    bottom:14px!important;
-    left:0;right:0;
-    padding:0 20px;
+    position:static;
+    margin-top:-84px;
+    padding:0 20px 28px;
   }
   .hero-left{max-width:100%}
   .hero-big-text{
