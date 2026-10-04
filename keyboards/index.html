@@ -88,6 +88,12 @@
       .concept-grid { grid-template-columns: 1fr; }
       .keyboard-name { font-size: 2.5rem; }
     }
+    .product-gallery { max-width: 1200px; margin: 0 auto; padding: 0 40px 100px; }
+    .gallery-heading { font-family: 'Libre Baskerville', serif; font-size: 1.65rem; margin-bottom: 24px; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .gallery-grid img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background: #151513; }
+    @media (max-width: 900px) { .product-gallery { padding: 0 24px 72px; } .gallery-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } }
+    @media (max-width: 540px) { .product-gallery { padding: 0 16px 56px; } .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   </style>
 
 <style>
@@ -215,6 +221,10 @@
         </div>
       </div>
     </div>
+    <section class="product-gallery" aria-labelledby="gallery-title">
+      <h2 class="gallery-heading" id="gallery-title">Keyboards Gallery</h2>
+      <div class="gallery-grid" id="keyboard-gallery"></div>
+    </section>
   </main>
 
   <footer>
@@ -224,6 +234,139 @@
 
 
 <script>
+// ── KEYBOARD GALLERY ──
+(function(){
+  const gallery = document.getElementById('keyboard-gallery');
+  if (!gallery) return;
+  // 旧サイト（Ameba Ownd）の掲載順
+  const images = [
+    'df5c3462ace582d2e0aef4bf0cca1ebc_701e117dc5e95dd7cefba7da939ad3df',
+    'e3ec7ca8c70983c8f8edd8ac2f3e86c8_afb055042d6de8f238f937a43e2877dc',
+    'edcc9e3d4b4f063316b2eac5f8283fbe_0f4abc4682e5384d8ebd8b8954ce9947',
+    '5058aec7bfde4868eaa84a822b1d2346_ddf050af1f3114585188bd206a189b51',
+    'd3f3487b8e84568e439897d5ad87f730_257e44829fdcde04cd5c5efe329f4d1d',
+    '700151a3cfb1992a271322ef3d4931d3_54d90b707f97580feba2ddf57508f071',
+    '932df1336742d4f0c6a630c8893ddf2a_758d99b281bd61d6ff08880b2be88f9c',
+    '5a9a3ba964c652df4e4d94e685b4fdf3_ea572f29df20519809ff009e1709d591',
+    '959563e73d7dd291307705b356bd51b0_5ecbe6b95cc18f18cf07df0500122c2b',
+    'c35c77384c6dd02b777b7ff6bff6a074_ef48d624c9cd359ea513cfcabba3225e',
+    '531054a8a219ef22ba1cd4d30fbd1a84_594d44df8bb88891c54ec41a3d2ab89e',
+    '4e99607ff7f5782ce3f6ebe509e30276_632e8ae1c16a15a6041dd875c7d99b26',
+    'b5e713d1bd315b7499113585658a5127_32626769c96a040d08cebd0fb29f930a',
+    'dd162da62a2b2407c1cc2ff2bb77816f_dd980c15bc10e742093b9f09462cb366',
+    '6c229df4740c448d65b64528464fd0ac_d0b94822b35555695bc7b2dc84767df8',
+    '077ae3e25e97b76bbeddf9f930f797dc_1c6bc41a9626a22de88e9e04f100556d',
+    '1d7b07d24dd966b3566434ea84733f0e_dafc91ddba17f86e17d57cba14bd2596',
+    '1408e3fbffdd615fb47f3ebac2e6c35f_8cf9483691dd7561846a28b6996a5244',
+    '85248ca549500575d11700a3afe26e50_84b687fb5d845444aa036c155a3377f5',
+    'b4c7b56fe9669237fb0e76e48ea1a05b_2212299ec9e83c92b44fa6d49a869bf2',
+    '8d3fa2b8f333edf35602845691481a00_8fc4a63cb1fd5070b5608c58cc712c71',
+    '1928e63ddc732e336661563c93453633_3d5dde62d5617c639d4b8f926c9a4b23',
+    '561dab7aebce8823239cb89c068c719b_4ee3fd8dff406eca8b57feb3d2f814b8',
+    'c780a012dae3f4e7832b08e07f156fe8_a58a3a8e4fd38426e02baaba37a5125d',
+    'f960c95d49630ce618fc78bd132e0da5_d8331adb2fa7e7e0e5262f3e394cfbb4',
+    '58a782484fbba29e09c21a8604608ee4_1ee9e0ea2234bb4b6369ce4d36c8fdfb',
+    'f6364f0135d832b3948c51e66ed7d1cf_c43ea03f6ba8ad57904a2d668fac07cc',
+    '21809cb6c23e59f4916a5b5876411728_06b638a87ceb1f26ac441c857870ce54',
+    '3e022c98277730d893dc7fc4ba6bee2f_cf0dcbc19fc38212d3e9d5485b2a96d9',
+    '65f9fd85761ee555775acc426b2bbfe0_1b587edd3907fbb5686511fe14c86743',
+    '3fc0dc55cf93d53d4e48ec4d8d43fe3a_2f9c78b39feb98efd9bc52bcda4e3b13',
+    '3fa7d6508635fadcb99ddaf0636920f8_30abb7e44cf7a652d6f5d4ae8af4169f',
+    'f0805ec9e0cc61640ee100c317696962_6739eaf08864a282a2477411d1824076',
+    '592d44c7d508c970004e0c604f48427c_44df0cb629ae57e47dfcd8eb90b76c12',
+    '9949ccd645bc371d30c92fe7d9fa9bc9_f6ae3a6084891e9789048a7c7bba1128',
+    '072b4c799c5890ea27725c80b846974a_c1cc92da703f8164a499801610b9bf05',
+    '0fb8fa61d8c49f04adbb712bd23e6d4f_d01efb20653ebc97712f40f03d43c54f',
+    '82e89ef4837496aab980e7d94d811a01_5faef725ed6d422a269c20a7cdfc525a',
+    '63e6ec7f1c52e84663d1a57c6fd6460d_97bc159a16bdbfbf5aaeb303553e711c',
+    '595294359fb52e6d5e0b2d1c9b039a97_ac3cb66a77bb902640b1f54e5538e013',
+    '20c3f3f22a84d8c2a44e0818389d38c8_5836cfae0375222deeea0e2ec15fc569',
+    '34e8edd3cb6b2975534c2dc393f622be_3e3f4c21a8b0c4391c350b79cefa798c',
+    '6171039a1662904c86764be9511af448_09c465107ddc1010228533a02b52d5c6',
+    '31708fac19d79c812f4aedc5c3a450cf_815f211a096fc6f092748f87625fe631',
+    '242c1d52aca99f4e94b75933a9877b09_9daf73d4185550529495e7cfc15ef3c1',
+    'a079b45182e54b18842dcfc4c824bd17_87cbd2547466855dba67ca63d2e49ec8',
+    '4660dbb5056e36ebedd9e9caa04c8a34_21feed304d873b611ee7fa1d4f7d472a',
+    '74713afcb35ef632f5c4f39e82dde706_467c966f90c257dac5f252c9702866c4',
+    'e12b0072c114ed468fa95097cf25c395_4677fa7d99072955f6b8f7cc5ec7a094',
+    'c21e736a11379ed16984e1da8ec3fe88_6be6cb3b00b73bafe5d5304364b63221',
+    'ddc4bb104a6c4beac2a9ce0978d53dea_21955c85d34f2d8164a3e5037bb6a78c',
+    'afcb13e2983978afd9b68f3e67ca26da_d8b687a068b4a96cac124db3d3eb1e81',
+    'eca3645eb41052ce49b75bf222a004b4_13ef7ca26cfcb69e1790ae859a745609',
+    'ecced8707ae5e7ee5ac2cfbe36550b1f_6b2e978a850e85480e26b5641c71ff04',
+    '3efea9580b004351fc45e6ccac93d1bc_76b572fcb98985fcbcd237e3c9624ce2',
+    '0ae7db9184da9c5a641fe5e2d4a86b24_862371bd7147ecb9db2f1eebc88568bb',
+    '45dd9f1a6d4a546672e646412cdcb902_ddaab0c37b70af532bcd5197135b51a8',
+    'd8d3260be469b4a381348ec19076a6a8_39defbdccf7dec11d06c190d6fc90099',
+    '5d73e27095aea280748632cfa08a5bc1_64308c58d6d03fca7cdff66a67b70151',
+    'c3b109776d64d9003db40148e490e32c_e7c7fdba39b4aebbf7411b02df7913e4',
+    '639fbd6223ee4d3a0d88fa7f19404d0a_1ad795c87c6713a4ebc94f17258654e7',
+    'd85503314aebf5a665cf7287726d4d3e_bab607964f4be40631b81fbd7efe6e5d',
+    '8975cd71ba0276a96c6abdd7922de922_d12f976e740343f885bffb0b6fd956a3',
+    'd329a61c2449eae2c7cbee9dd20a2e69_a8e025e264dedba9b02e6130088a2869',
+    'f4577a369a31d6a926e44007e5ac918a_ee07b6ef3567ff9a0dcf86e3489ae1ef',
+    'a8ea4593dde3d0f774b91e105132c8b2_8776eb3196824c8db41a469bd9548256',
+    'feab187326472487031e2042559fb863_a77d96b4989d5883431af5736fc54cc9',
+    '979feb43ad421ac7582dd656bafdde39_b2184794b2d46b5d0cf7253fd61790ed',
+    'b590013878da2953f720a4785980e226_0fa69b977f1cf13f92eaf1fca753c7a5',
+    'c4e68b47d3baa739118d1c57ebed45c5_67afcf53fea3348a95cf74687d2aa450',
+    'a1405a4c317836cd906f03b819c4e5db_7fb75cc2c7f8591b998af1fcba667076',
+    'd8febb1aca3a29be9704d5e9d509ee29_9bd099f403df34aca61d669bc6aff287',
+    'b5aa81715b3c011f5d4c07c45add6665_429ba01e7c2ab2fb24192eccddd06df9',
+    '3a5f65b118bba775e08dc2f2e48b929f_81700392d1d2a5fa0e45efed79b32787',
+    'bf81e3cfd9b8cf33dce193aba6b1bd53_9f6eb89fca3e63e0a27a6db453d36b2a',
+    'c937c8572f0c18bfc95d64d06b444106_461c516b3e700e13567b2e19ccf65912',
+    '878065a6d26d185ba7b01d8ddcbb0e5e_403a864898e1793014ff8ffc99192f2e',
+    'bf18c6a9aa967fc0181c0961b7a602fc_1fe187e5812bf96b006ff06ac793d8bc',
+    '43342b61d38dc924203c5c82eaa1cc86_21f32a9173253f73568a5168f1a9d1ed',
+    'aec09ef8da01fec1155577dd6f346972_25ae343c1d1cb9e9f6f973ee6f05b02b',
+    '583f8b2eff8e429d3cff7fb567dd6b53_2a5d3898fd0c2beb3ae6be8c4c356870',
+    'b273370c2dce6d9e699e5a5158f7a65f_83ac8b673ed1e800e316aea16f8bc264',
+    'bf51383818e57bfa0a456868a67387a5_829d2ba9385f3d445c8e9290d78c7b2e',
+    'e38a618c763b9bbe8c780f03a10ca666_8fbf260d087d0f56c97ff42043a3acd5',
+    'e15992a0d67781c98ebba85cc67d492e_e5c23d12e0f83e1129cf07c5c4c73062',
+    '6222c7adb2ca607be96ba98b30f5d1de_ee28f017e502ba85eef238fe943eb442',
+    'd9f467b0dc0cbafd89b50e4b84cd9002_1a0bf82cf966a980f22f79580999794a',
+    '7c69a82a9e8c074ecae21f3d25a7a609_128bf5eeac61b85b6cb1fcda4e7f8b0c',
+    '37ec38fd8393aa7e957a8d0ddee4d0a1_366c36a19819c47fb45c1279eac3a9dc',
+    '924b047bcdcbc1f08439edd3e9afa624_8f698244772b1f97100c4f845cef6fae',
+    '952ca5878f05188504f3ae406ef04b8a_1892f0aa7346aecee911825f0de09e77',
+    '40e69c81f21ef2ac81de0ba1a9aade91_b33496b408a32feb55ea05f8ed3e9caa',
+    '1af51d5a730adb36052732952db4934c_1dfdab844228646a89f631928c3cdf84',
+    '549d4374ba5adfde68b1a5904dd1a5c7_3e23689e940ba02a9bd290e8a8a19d2e',
+    '054e42fe16705f158a06b7988d6561da_65fbf6157ed4bd049ab8e3c57800bfeb',
+    'd6cb996fb3cdede2925cdb658a05bb46_3413a29583ea4bced7628cc3289a83a8',
+    '2e7b84ab0fc88674744a406d60e4b203_fcebe77f813d182b8915b1e27653cb1d',
+    '6af9e6856748468397e40fef667a039f_2336fe013700d6004cd67c480aaa7a67',
+    '49008a49ef576af1adb895c82389e69b_ade26f080cdf9f1df2d51a77151c3cea',
+    '5c3ac29e768ed96a3423521a0b5a3aee_969f0886f82dea01cb05320a891e37b9',
+    'f49a6ac52e80767b4ee07a3d810cbe7a_d484ab65c29bcd309ff8529df7bf2536',
+    '1e9e845fbd740d0cd0f6f97af9857a02_6bc4d67c3819eb176c880088bb520cce',
+    '3d2c0766bfd80c04f08fa1b26981996c_b492337b728e99508ec8f47dc910df64',
+    'd27b4a27d18aa2e3b59558454c4384c6_34fa9467912da6be60a8b7dc49316e6e',
+    '179fea71d9504fe411eaac035803ea9f_10d0ad720d7579c50dc38a3c666fa4ba',
+    '66f4cca63bb6a062e3cac90350d8e4f4_3041cfd5a73551e9d8a49f09253f35e9',
+    'af42568602006c5e95b82eb4d31ba23e_0cb880f9bff4ba32bdc608281da16684',
+    '0763c1a91c40b065fae8a6f9eadb2c5b_34e0a7c5ae69fc57a4e9f394edb9be62',
+    'c83a74a974a23fa57a6d781a401e494f_722813d1d56df3fe15e1b267b58cbb36',
+    'b358b80c2e129df40e1cd8b4954b350f_4eb6a45516c29fd51c8a5192f85a10f0',
+    'bd78283606fcaff7859b85d3bfe8a3ad_b72adf0804fe822a8137391b8e320cb1',
+    'dd65763d63c2c4fe708dba6ebe9b6430_be0044fa454ccefd95f18665e2e3f796',
+    'a5c7a35fb210c772595fd71dc2a1c3b6_98d6a48021a2f63afd303c1a3d4efc8f',
+    'e0c6065c6f181a6b2143534b55ee71d9_28c27f207b4e17ceb77df26e3ff431c1',
+  ];
+  const fragment = document.createDocumentFragment();
+  images.forEach((name, i) => {
+    const image = document.createElement('img');
+    image.src = `../assets/images/keyboards/${name}.jpg`;
+    image.alt = `GTI mechanical keyboard ${i + 1}`;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    fragment.appendChild(image);
+  });
+  gallery.appendChild(fragment);
+})();
+
 // ── HAMBURGER MENU JS ──
 (function(){
   const hamWrap=document.getElementById('hamWrap');
