@@ -3535,14 +3535,19 @@ function buildDXF(g,lefty){
       // positions自動生成
       var blockNo1f=ins.blockNo1f||false;
       var bposd=[];
-      var basePatD=blockNo1f?[3,5,7,9]:[1,3,5,7,9];
-      basePatD.forEach(function(f){if(f<=nFret)bposd.push(f);});
-      var octBaseD=[12,15,17,19,21,24],octD=0;
-      while(true){
-        var addedD=false;
-        octBaseD.forEach(function(f){var ff=f+octD*12;if(ff>9&&ff<=nFret){bposd.push(ff);addedD=true;}});
-        if(!addedD||octD>5) break;
-        octD++;
+      if(ins.customEnabled&&ins.customPositions&&ins.customPositions.length){
+        // カスタムポジション使用（画面描画と同じ）
+        bposd=ins.customPositions.filter(function(f){return f>=1&&f<=nFret;});
+      } else {
+        var basePatD=blockNo1f?[3,5,7,9]:[1,3,5,7,9];
+        basePatD.forEach(function(f){if(f<=nFret)bposd.push(f);});
+        var octBaseD=[12,15,17,19,21,24],octD=0;
+        while(true){
+          var addedD=false;
+          octBaseD.forEach(function(f){var ff=f+octD*12;if(ff>9&&ff<=nFret){bposd.push(ff);addedD=true;}});
+          if(!addedD||octD>5) break;
+          octD++;
+        }
       }
       bposd=bposd.filter(function(v,i,a){return a.indexOf(v)===i;}).sort(function(a,b){return a-b;});
       var fS=bposd[0]||1,fE=bposd[bposd.length-1]||24;
@@ -3560,6 +3565,20 @@ function buildDXF(g,lefty){
         var spanLenD=(ll1+ll2)/2||1;
         var bh=fsp*coefAtL(fn,ins.hCoefStart,ins.hCoefEnd);
         var bw=spanLenD*coefAtL(fn,ins.wCoefStart,ins.wCoefEnd);
+        // カーブドマルチスケール: 画面描画と同じく曲線フレットに沿った形状
+        if(g.curved && isMultiDXF){
+          var hCoefD=coefAtL(fn,ins.hCoefStart,ins.hCoefEnd), wCoefD=coefAtL(fn,ins.wCoefStart,ins.wCoefEnd);
+          var iMidA=(ep1d.iMin+ep1d.iMax)/2, halfW=(ep1d.iMax-ep1d.iMin)*wCoefD/2;
+          var iS_c=iMidA-halfW, iE_c=iMidA+halfW;
+          var margin=(1-hCoefD)/2*fsp;
+          var ptsA=getMathPts(function(i){return Sp(i,FRl(fn-1));},true,null,iS_c,iE_c);
+          var ptsB=getMathPts(function(i){return Sp(i,FRl(fn));},true,null,iS_c,iE_c);
+          var poly=ptsA.map(function(p){return{x:p.x+margin,y:p.y};});
+          for(var pi=ptsB.length-1;pi>=0;pi--) poly.push({x:ptsB[pi].x-margin,y:ptsB[pi].y});
+          poly.push(poly[0]);
+          dMD(poly,'INLAY');
+          return;
+        }
         var p0b=Sp(0,tc),pNb=Sp(nStr-1,tc);
         var pMidB={x:(p0b.x+pNb.x)/2,y:(p0b.y+pNb.y)/2};
         // 幅辺方向
