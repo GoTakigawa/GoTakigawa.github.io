@@ -61,6 +61,17 @@
       font-family: 'Libre Baskerville', serif;
     }
 
+    .price-list { list-style: none; margin-bottom: 30px; }
+    .price-list li { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; }
+    .price-list .product-price { margin-bottom: 0; }
+    .price-shape { font-family: 'Libre Baskerville', serif; font-size: 1.2rem; }
+    .price-shape small { color: #777; font-size: 0.85rem; margin-left: 6px; }
+    .shop-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .btn-submit { background: var(--accent); color: #fff; padding: 15px; font-weight: 700; letter-spacing: 0.05em; transition: background 0.3s ease; }
+    .btn-submit:hover { background: var(--accent-warm); }
+    .btn-submit.btn-outline { background: transparent; border: 1px solid #333; color: #ccc; }
+    .btn-submit.btn-outline:hover { background: #151515; }
+
     .product-description {
       color: #aaa;
       line-height: 1.8;
@@ -88,7 +99,7 @@
 
     @media (max-width: 900px) {
       .product-hero { flex-direction: column; text-align: center; }
-      .spec-list li { justify-content: center; gap: 20px; }
+      .spec-list li, .price-list li { justify-content: center; gap: 20px; }
       .product-name { font-size: 2.5rem; }
     }
     .product-gallery { max-width: 1200px; margin: 0 auto; padding: 0 40px 100px; }
@@ -199,19 +210,27 @@
       <div class="product-info">
         <span class="product-tag">Luxury Plectrum</span>
         <h1 class="product-name">Krystal</h1>
-        <div class="product-price">¥3,800</div>
+        <ul class="price-list">
+          <li><span class="price-shape">JZ <small>5mm</small></span> <span class="product-price">¥2,000</span></li>
+          <li><span class="price-shape">TR <small>10mm</small></span> <span class="product-price">¥5,000</span></li>
+        </ul>
         <p class="product-description">
           透明度と驚異的な硬度を誇る特殊アクリル材から削り出された、GTIオリジナルのハイエンド・ピック。
           独自のハンド研磨により、弦を滑るようなスムーズなアタックと、クリスタルのような澄んだ高域を実現しました。
         </p>
         
         <ul class="spec-list">
-          <li><span class="spec-label">Material</span> <span>High-Grade Acrylic</span></li>
-          <li><span class="spec-label">Thickness</span> <span>3.0mm / 4.0mm</span></li>
-          <li><span class="spec-label">Edge</span> <span>Hand-Polished Bevel</span></li>
+          <li><span class="spec-label">Shape</span> <span>JZ / TR</span></li>
+          <li><span class="spec-label">Thickness</span> <span>JZ 5mm / TR 10mm</span></li>
+          <li><span class="spec-label">Material</span> <span>Acrylic (Machined)</span></li>
+          <li><span class="spec-label">Finish</span> <span>Handmade</span></li>
         </ul>
 
-        <a href="../../contact/index.html" class="btn-submit" style="text-align: center; text-decoration: none; display: block;">Inquiry</a>
+        <div class="shop-btns">
+          <a href="https://gti.base.shop/items/40836556" target="_blank" rel="noopener" class="btn-submit" style="text-align: center; text-decoration: none; display: block;">Shop JZ 5mm</a>
+          <a href="https://gti.base.shop/items/40836657" target="_blank" rel="noopener" class="btn-submit" style="text-align: center; text-decoration: none; display: block;">Shop TR 10mm</a>
+        </div>
+        <a href="../../contact/index.html" class="btn-submit btn-outline" style="text-align: center; text-decoration: none; display: block;">Inquiry</a>
       </div>
     </div>
     <section class="product-gallery" aria-labelledby="gallery-title">
