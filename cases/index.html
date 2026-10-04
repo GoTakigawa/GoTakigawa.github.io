@@ -69,6 +69,12 @@
     @media (max-width: 768px) {
       .case-grid { grid-template-columns: 1fr; }
     }
+    .product-gallery { max-width: 1200px; margin: 0 auto; padding: 60px 40px 100px; }
+    .gallery-heading { font-family: 'Libre Baskerville', serif; font-size: 1.65rem; margin-bottom: 24px; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .gallery-grid img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background: #151513; }
+    @media (max-width: 900px) { .product-gallery { padding: 48px 24px 72px; } .gallery-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } }
+    @media (max-width: 540px) { .product-gallery { padding: 40px 16px 56px; } .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   </style>
 
 <style>
@@ -170,25 +176,10 @@
       <p style="color: #666; max-width: 600px; margin: 0 auto;">ルシアーが設計する、マルチスケールの美学を落とし込んだデバイスアクセサリー。</p>
     </div>
 
-    <div class="case-grid">
-      <!-- Item 1 -->
-      <div class="case-item">
-        <img src="../assets/images/cases/iphone-fretboard-case.jpg" alt="GTI fretboard case for iPhone" class="case-image">
-        <h3 class="case-name">Standard Series</h3>
-        <p class="case-desc">
-          25.5-27.0インチのマルチスケール・フレットを正確に再現したグラフィックモデル。
-        </p>
-      </div>
-
-      <!-- Item 2 -->
-      <div class="case-item">
-        <img src="../assets/images/cases/android-fretboard-case.jpg" alt="GTI fretboard case for Android" class="case-image">
-        <h3 class="case-name">Custom Series</h3>
-        <p class="case-desc">
-          お持ちのギターの実機仕様に合わせたカスタムデザインも承ります。
-        </p>
-      </div>
-    </div>
+    <section class="product-gallery" aria-labelledby="gallery-title">
+      <h2 class="gallery-heading" id="gallery-title">Cases Gallery</h2>
+      <div class="gallery-grid" id="case-gallery"></div>
+    </section>
   </main>
 
   <footer>
@@ -198,6 +189,83 @@
 
 
 <script>
+// ── CASE GALLERY ──
+(function(){
+  const gallery = document.getElementById('case-gallery');
+  if (!gallery) return;
+  // 旧サイト（Ameba Ownd）の掲載順
+  const images = [
+    '96858d84f132751e9d7b62137623199b_edf58d460ce1cefc631e05a593e194ef',
+    'd73ed6b0820e25959b32d82f2f6d4a3f_f7d3d7968c04177f765c62f66265ff9d',
+    '292152aafa27361cb8089fe42c71db03_84be86121f6cd433b33a54f7e10e5e11',
+    '2ede31a4b1fa10ae0031d9601314a827_22bc11aa7a4e622cee9c41a9156d4c64',
+    '2976eb0f892fc45077670160dbfc996e_33ca509342f1271387145b1edeb0161f',
+    'bd36bccbce93ee9b8610e8539a818321_a0023f49351ce1c702ddf97191d54469',
+    'd226af6bb7b84e3edee9a3187c2f8f08_c1b0a131658ea463bb9a63dc13861dae',
+    '9526b8bc26627360441823f8efe1f2aa_05827aa1887f4984ec8c6aad3c77ff42',
+    '532cc275692b30ec454d2155992add31_103ed3404d338ac3b169547b554f7065',
+    '2e93c86b0eb733c6cffe01b5555d0d45_b9b53ddbe36a0042502ce9729c928c6f',
+    'fabbdf5816a1d4d86b25fc42833262a3_56b0d3f00e4db7061344b8f17f2a8921',
+    '8ec83a37571879912e230be3f1af770c_df85ddfd80da7c07a9b8d5fc22e94383',
+    'b9b3dc2fead9f65d0ef2b5c8a5876a49_bbfc7860917dcf70f752da81e8e1df0b',
+    '09c41069134cbbbf27a203b99b383b6e_d2e41cbb64c90d26b77e7a3c044c5762',
+    'ea8cc22c5ef20c9148e0d5fbc7090f21_19a4c1aa143df405dedca98edbf1731f',
+    '05439dc0702c938855052a6beb0be478_c8d4fe292a55ba3a2e80c57e164d80d4',
+    'c7e820ee05d1614e2ecbf11b281761f6_a1169f69a2f0e033f2dad58899e320af',
+    '04feaf436af8d003520b45ed8a772668_645f3a98d3858563d7be544dde330288',
+    'e8f5381dc1afaf2d99ed7156b7b7b516_6f29e69abc8034070454120cbd18b001',
+    '7cf4c638f7d8261e5e3222379708fe4e_45332577c530776b20828a058cf997d1',
+    'a2b314366c98949c607773d96dff1193_22b54427732bbe1f08de09f72fa4b736',
+    '7e0795f960ba228d888bfd404dc85906_0431feb362aebbc6e50b6163c5c7447a',
+    'b80ba2247ed095abe09863ff94c102a6_ead9409fe0bea9bed22874e21098f54c',
+    '5b62094b2184d7688ab64d9859f83b8e_fa855544428e604f912053e2428ca866',
+    '02de6b89aba4b6dc4d2a6d6ffda834a7_cefaa918b42f24fab946e6b2009db523',
+    '85ab36b7c9955acddba4a74b046535d4_93d3b80f79d6257d60dea69f04b7f805',
+    '18e70b41e2088e059332ee01f428d562_c1c63ca50159820085403b289a04bcde',
+    '1121d1304477a484277c941bcf3463f7_ad0f2c660aa8fea4049722605c1b8c90',
+    '996f113ba2639a96fdd94f2d8b200008_2a614022b650fcefe21a430e611cdfc2',
+    '80d21250d6354757db67d17ab3ad99d3_920069da408963e77f06d6f708d5f585',
+    '3db2e3ce4c5b4b38b33163eff0af7d81_fb393e69dd217d7ffb28c4a12b110dfc',
+    'ba966800cd8ac47ee71969cdaabad44b_76b99414703d2d40c21fba9b24f96dec',
+    'c85b81480066fa1099e743d299aa30ef_7af436fc0969072eafb95d5f15d24cd0',
+    '9e83da8f63b8710293931e77a27da9c4_271a1808af4b14615bca6388e45a2fe0',
+    '19bbb18d094595e14999da49f0d09edc_9eb1fbc1905e7792c72c5a7cf368b927',
+    'a08858da76ee06dcadb9b8ce135e11fd_77f8b5576369071ce9b2e86be6f8857e',
+    'd2d9e5cd255f96c547bfcfc49b8fe2ea_0fc5c0cb1672b142c1d78cd4baa7fe34',
+    '9babf96ce3f0e7ec8313e49e8614ce62_a462ad1270f1e97b54324c5299e348d6',
+    '59708613e17022e44d0c007c91cdbd35_a34cd7cbb8ccf81e1a53f0c918428333',
+    '675fc43d8326506a0e9872feadc94fdc_a197918e5d98f553d63e83535dffa008',
+    '0ef17534889fd78bd27af32f06e22498_26e9047f8c67fae90dbe8ad09df55d09',
+    '8438212f90c53fb7045d760c822fc508_d5b9094ab104cfa0d52a0df481a15983',
+    '62b7ab41fd34a4dda2db066aadfa8a56_3dcc686b3decfbcd63b6ec1578793b5d',
+    '88f5f98af7577f6ac91195f072b36530_5dfe1ccde878712d570b740e8625c915',
+    '70d640c66da09239d1eaa1eca2a97765_f3bfef8ca3748e197201d74b21ca5051',
+    '878db2a7859b90dadce3e4100964add4_f5619d6135999fb7bd8ab3e5ce18741e',
+    'f8e635fafd62d91e9e2652f295e56f79_41cb3421ecaca5d532b61daa2d783bd6',
+    '72e61df913cce6b24102ceac84585e71_562b350fe8ce5a9c28304c7326a63d40',
+    '55d4b7fd035af7280481b972f10bab51_06807598ee1374bfa61672a37f297738',
+    '957cdbfb5d5d796802c19fdda54f52f8_3d8200043d20241115999eee09d54b2d',
+    'ffd427ec37098894a58169e33f6b8886_424b2c8309cde1bfd756df30daa74173',
+    'ae4fd83f52d8b2f0888372551e763f1c_7c868ff8f951f93be99aafa6bc5aa61a',
+    'd1c40617e70d268c664bf5d781889cf8_50d24de4822109f3f88a4598e2a597d5',
+    '6b500f7c8f30f69e10adcd5cb52f6203_7bf88376911a2b1271b0f63be5f43add',
+    '45032397bfd87ec8a214db70b11b5c80_7815c3215535debb918690e67172c069',
+    'f246300601d4b254f1253988b13a15f1_c7442571fe9de270389e300d25b5cb54',
+    '32e3d965d3105229ac75fc18bf6a8ed2_c47c6ed5ad1bb2d4cdbdac8c9897e72b',
+  ];
+  const fragment = document.createDocumentFragment();
+  images.forEach((name, i) => {
+    const image = document.createElement('img');
+    image.src = `../assets/images/cases/${name}.jpg`;
+    image.alt = `GTI fretboard case ${i + 1}`;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    image.onerror = () => image.remove();
+    fragment.appendChild(image);
+  });
+  gallery.appendChild(fragment);
+})();
+
 // ── HAMBURGER MENU JS ──
 (function(){
   const hamWrap=document.getElementById('hamWrap');
