@@ -61,6 +61,17 @@
       font-family: 'Libre Baskerville', serif;
     }
 
+    .price-list { list-style: none; margin-bottom: 30px; }
+    .price-list li { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; }
+    .price-list .product-price { margin-bottom: 0; }
+    .price-shape { font-family: 'Libre Baskerville', serif; font-size: 1.2rem; }
+    .price-shape small { color: #777; font-size: 0.85rem; margin-left: 6px; }
+    .shop-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .btn-submit { background: var(--accent); color: #fff; padding: 15px; font-weight: 700; letter-spacing: 0.05em; transition: background 0.3s ease; }
+    .btn-submit:hover { background: var(--accent-warm); }
+    .btn-submit.btn-outline { background: transparent; border: 1px solid #333; color: #ccc; }
+    .btn-submit.btn-outline:hover { background: #151515; }
+
     .product-description {
       color: #aaa;
       line-height: 1.8;
@@ -89,6 +100,7 @@
     @media (max-width: 900px) {
       .product-hero { flex-direction: column; text-align: center; }
       .product-name { font-size: 2.5rem; }
+      .price-list li { justify-content: center; gap: 20px; }
     }
     .product-gallery { max-width: 1200px; margin: 0 auto; padding: 0 40px 100px; }
     .gallery-heading { font-family: 'Libre Baskerville', serif; font-size: 1.65rem; margin-bottom: 24px; }
@@ -198,7 +210,10 @@
       <div class="product-info">
         <span class="product-tag">Performance Plectrum</span>
         <h1 class="product-name">Vortex</h1>
-        <div class="product-price">¥4,200</div>
+        <ul class="price-list">
+          <li><span class="price-shape">Single <small>6 / 8 / 10mm</small></span> <span class="product-price">¥800</span></li>
+          <li><span class="price-shape">3-Pick Set <small>6mm・8mm・10mm</small></span> <span class="product-price">¥2,000</span></li>
+        </ul>
         <p class="product-description">
           強烈なアタックと、吸い付くようなグリップ感を追求した「Vortex」。
           重厚なマットフィニッシュのアクリル材を使用し、超高速なピッキング時でもブレない安定性を提供します。
@@ -206,13 +221,17 @@
         </p>
         
         <ul class="spec-list">
-          <li><span class="spec-label">Material</span> <span>Matte Finish Acrylic</span></li>
-          <li><span class="spec-label">Thickness</span> <span>4.0mm / 5.0mm</span></li>
-          <li><span class="spec-label">Edge</span> <span>Aggressive Bevel</span></li>
-          <li><span class="spec-label">Grip</span> <span>Deep Vortex Engraving</span></li>
+          <li><span class="spec-label">Thickness</span> <span>6mm / 8mm / 10mm</span></li>
+          <li><span class="spec-label">Material</span> <span>Acrylic</span></li>
+          <li><span class="spec-label">Grip</span> <span>3D Vortex Grip</span></li>
+          <li><span class="spec-label">Color</span> <span>Random</span></li>
         </ul>
 
-        <a href="../../contact/index.html" class="btn-submit" style="text-align: center; text-decoration: none; display: block;">Inquiry</a>
+        <div class="shop-btns">
+          <a href="https://gti.base.shop/items/40836058" target="_blank" rel="noopener" class="btn-submit" style="text-align: center; text-decoration: none; display: block;">Shop Single</a>
+          <a href="https://gti.base.shop/items/40837573" target="_blank" rel="noopener" class="btn-submit" style="text-align: center; text-decoration: none; display: block;">Shop Set</a>
+        </div>
+        <a href="../../contact/index.html" class="btn-submit btn-outline" style="text-align: center; text-decoration: none; display: block;">Inquiry</a>
       </div>
     </div>
     <section class="product-gallery" aria-labelledby="gallery-title">
