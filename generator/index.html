@@ -4677,12 +4677,15 @@ function run(){
 
   // NUTライン（白太線）を最前面に描画
   if(nutLines.length){
+    // lefty時は他の図形と同じく左右反転グループ内に描画
+    if(lefty) o+='<g transform="scale(-1,1) translate(-'+SW.toFixed(0)+',0)">';
     nutLines.forEach(function(entry){
       var pd=typeof entry==='string'?entry:entry.pd;
       var isSlot=entry&&entry.isNutSlot;
       // 開放弦位置ライン: 白太線 / ナット弦溝ライン（0フレットモード時）: やや細い白線
       o+='<path d="'+pd+'" stroke="#d1d5db" stroke-width="'+(isSlot?1.5:2)+'" fill="none"/>';
     });
+    if(lefty) o+='</g>';
   }
 
 
