@@ -153,6 +153,9 @@ button.primary:active{transform:scale(.98);}
 .legend{font-size:11px;color:var(--text3);display:flex;flex-wrap:wrap;gap:4px 16px;line-height:1.8;font-weight:500;}
 .dxf-area{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .dxf-fname{font-size:12px;color:var(--text3);}
+button.print-btn{font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:var(--text);background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);padding:10px 16px;cursor:pointer;transition:border-color .15s,color .15s;}
+button.print-btn:hover{border-color:var(--accent1);color:var(--accent1);}
+select.print-paper{font-family:'Barlow',sans-serif;font-size:12px;background:var(--bg4);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);padding:9px 6px;}
 a.tip-btn{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);padding:10px 16px;text-decoration:none;transition:color .15s,border-color .15s;}
 a.tip-btn:hover{color:#ffdd00;border-color:#ffdd00;}
 #dxf-link{display:none;font-size:12px;color:var(--accent2);text-decoration:underline;cursor:pointer;word-break:break-all;margin-top:4px;}
@@ -1002,6 +1005,8 @@ a.tip-btn:hover{color:#ffdd00;border-color:#ffdd00;}
     </div>
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0;max-width:100%;">
       <button class="primary" onclick="exportDXF()" data-i18n="btn-dxf">⬇ Export DXF</button>
+      <button class="print-btn" onclick="printTemplate()" data-i18n="btn-print">🖨 Print 1:1 Template</button>
+      <select class="print-paper" id="print-paper" title="Paper"><option value="a4">A4</option><option value="letter">Letter</option></select>
       <span class="dxf-fname" id="dxf-filename"></span>
       <a id="dxf-link">Click to download</a>
       <a class="tip-btn" href="https://buymeacoffee.com/gotakigawa" target="_blank" rel="noopener" data-i18n="btn-tip">☕ Buy me a coffee</a>
@@ -2124,6 +2129,7 @@ const TRANSLATIONS = {
     'lbl-zero-fret-offset': '0 Fret → Nut offset (mm)',
     'btn-dxf': '⬇ Export DXF',
     'btn-tip': '☕ Buy me a coffee',
+    'btn-print': '🖨 Print 1:1 Template',
     'legend-dir-righty': 'Right = Nut &nbsp; Left = Bridge &nbsp; Top = Bass &nbsp; Bottom = Treble',
     'legend-dir-lefty': 'Left = Nut &nbsp; Right = Bridge &nbsp; Top = Bass &nbsp; Bottom = Treble',
     'legend-pf': '■ Perpendicular fret',
@@ -2230,6 +2236,7 @@ const TRANSLATIONS = {
     'lbl-zero-fret-offset': '0フレット → ナット間隔 (mm)',
     'btn-dxf': '⬇ DXFを書き出す',
     'btn-tip': '☕ 投げ銭で応援する',
+    'btn-print': '🖨 原寸テンプレートを印刷',
     'legend-dir-righty': '右 = ナット &nbsp; 左 = ブリッジ &nbsp; 上 = 低音弦 &nbsp; 下 = 1弦側',
     'legend-dir-lefty': '左 = ナット &nbsp; 右 = ブリッジ &nbsp; 上 = 低音弦 &nbsp; 下 = 1弦側',
     'legend-pf': '■ 垂直接線フレット',
@@ -3653,6 +3660,83 @@ function exportDXF(){
   // iOS: click() is blocked — user taps the link directly
   var isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(/Mac/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
   if(!isIOS) link.click();
+}
+
+// ── 1:1 print template（DXFと同じ形状を原寸でA4/Letterに分割印刷）──
+function _dxfEntities(dxf){
+  var t=dxf.split('\n'), ents=[], cur=null;
+  for(var i=0;i+1<t.length;i+=2){
+    var c=t[i].trim(), v=t[i+1].trim();
+    if(c==='0'){ cur=(v==='LINE'||v==='CIRCLE')?{type:v}:null; if(cur) ents.push(cur); continue; }
+    if(!cur) continue;
+    if(c==='8') cur.layer=v; else cur['c'+c]=parseFloat(v);
+  }
+  return ents;
+}
+function printTemplate(){
+  var g=_state; if(!g) return;
+  var lefty=(currentHand==='left');
+  var ents=_dxfEntities(buildDXF(g,lefty));
+  if(!ents.length) return;
+  // 長手方向(z)を縦に。ナット側を上にする
+  var nz=0,nc=0,bz=0,bc=0;
+  ents.forEach(function(e){ if(e.type!=='LINE') return;
+    var z=(e.c20+e.c21)/2; if(e.layer==='NUT'){nz+=z;nc++;} if(e.layer==='BRIDGE'){bz+=z;bc++;} });
+  var flip = (nc&&bc) ? (nz/nc > bz/bc) : false; // trueならzを反転してナットを上へ
+  function X(x){ return x; } function Y(z){ return flip?-z:z; }
+  var minX=1e9,maxX=-1e9,minY=1e9,maxY=-1e9;
+  function ext(x,y,r){ r=r||0; minX=Math.min(minX,x-r);maxX=Math.max(maxX,x+r);minY=Math.min(minY,y-r);maxY=Math.max(maxY,y+r); }
+  ents.forEach(function(e){
+    if(e.type==='LINE'){ ext(X(e.c10),Y(e.c20)); ext(X(e.c11),Y(e.c21)); }
+    else ext(X(e.c10),Y(e.c20),e.c40);
+  });
+  var pad=5; minX-=pad;minY-=pad;maxX+=pad;maxY+=pad;
+  var sty={STRING:'#999;stroke-width:0.15',CENTERLINE:'#999;stroke-width:0.15;stroke-dasharray:3 1.5',
+           FRET:'#000;stroke-width:0.25',NUT:'#000;stroke-width:0.3',BRIDGE:'#000;stroke-width:0.3',
+           EDGE:'#000;stroke-width:0.3',NUT_OH:'#000;stroke-width:0.25',INLAY:'#000;stroke-width:0.2'};
+  var body='';
+  ents.forEach(function(e){
+    var st='fill:none;stroke:'+(sty[e.layer]||'#000;stroke-width:0.2');
+    if(e.type==='LINE') body+='<line x1="'+X(e.c10).toFixed(3)+'" y1="'+Y(e.c20).toFixed(3)+'" x2="'+X(e.c11).toFixed(3)+'" y2="'+Y(e.c21).toFixed(3)+'" style="'+st+'"/>';
+    else body+='<circle cx="'+X(e.c10).toFixed(3)+'" cy="'+Y(e.c20).toFixed(3)+'" r="'+e.c40.toFixed(3)+'" style="'+st+'"/>';
+  });
+  // 用紙と分割
+  var paper=(document.getElementById('print-paper')||{}).value==='letter'?{w:215.9,h:279.4,n:'letter'}:{w:210,h:297,n:'A4'};
+  var M=10, foot=14, ov=10;              // 余白・下部情報欄・のりしろ
+  var cw=paper.w-2*M, ch=paper.h-2*M-foot;
+  var W=maxX-minX, H=maxY-minY;
+  var cols=Math.max(1,Math.ceil((W-ov)/(cw-ov))), rows=Math.max(1,Math.ceil((H-ov)/(ch-ov)));
+  // 1列に収まる場合は中央寄せ
+  var offX = cols===1 ? minX-(cw-W)/2 : minX;
+  var total=cols*rows, pages='', n=0;
+  var fname=buildFilename(g.nStr,g.s1in,g.sNin,g.pd).replace(/\.dxf$/,'');
+  for(var r=0;r<rows;r++) for(var c=0;c<cols;c++){
+    n++;
+    var vx=offX+c*(cw-ov), vy=minY+r*(ch-ov);
+    var marks='';
+    // のりしろの範囲（隣のページと重なる部分）を薄く表示
+    if(r<rows-1) marks+='<rect x="'+vx+'" y="'+(vy+ch-ov)+'" width="'+cw+'" height="'+ov+'" style="fill:#000;fill-opacity:0.05;stroke:none"/>';
+    if(c<cols-1) marks+='<rect x="'+(vx+cw-ov)+'" y="'+vy+'" width="'+ov+'" height="'+ch+'" style="fill:#000;fill-opacity:0.05;stroke:none"/>';
+    pages+='<div class="pg"><svg width="'+cw+'mm" height="'+ch+'mm" viewBox="'+vx.toFixed(3)+' '+vy.toFixed(3)+' '+cw+' '+ch+'" xmlns="http://www.w3.org/2000/svg">'+marks+body+
+      '<rect x="'+vx+'" y="'+vy+'" width="'+cw+'" height="'+ch+'" style="fill:none;stroke:#bbb;stroke-width:0.2"/></svg>'+
+      '<div class="ft"><svg width="50mm" height="4mm" viewBox="0 0 50 4"><rect x="0" y="0" width="50" height="4" style="fill:none;stroke:#000;stroke-width:0.3"/>'+
+      '<line x1="10" y1="0" x2="10" y2="4" style="stroke:#000;stroke-width:0.2"/><line x1="20" y1="0" x2="20" y2="4" style="stroke:#000;stroke-width:0.2"/><line x1="30" y1="0" x2="30" y2="4" style="stroke:#000;stroke-width:0.2"/><line x1="40" y1="0" x2="40" y2="4" style="stroke:#000;stroke-width:0.2"/></svg>'+
+      '<span>50 mm</span><span class="nm">'+fname+'</span><span class="pn">'+n+' / '+total+(total>1?' (row '+(r+1)+', col '+(c+1)+')':'')+'</span></div></div>';
+  }
+  var ja=(currentLang!=='en');
+  var note=ja?'印刷時は「実際のサイズ / 100%」を選び、「用紙に合わせる」はオフにしてください。下の目盛りが 50mm になっているか確認してから使用してください。グレーの帯はのりしろ（隣のページと重なる部分）です。'
+             :'Print at "Actual size / 100%" with "Fit to page" turned off. Check that the scale bar measures 50 mm before use. Grey bands are overlap areas shared with the next sheet.';
+  var html='<!doctype html><html><head><meta charset="utf-8"><title>'+fname+' template</title><style>'+
+    '@page{size:'+paper.n+' portrait;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Helvetica,Arial,sans-serif;color:#000;background:#fff}'+
+    '.pg{width:'+paper.w+'mm;height:'+paper.h+'mm;padding:'+M+'mm;page-break-after:always;break-after:page;overflow:hidden}.pg:last-child{page-break-after:auto;break-after:auto}'+
+    '.pg>svg{display:block}.ft{display:flex;align-items:center;gap:3mm;height:'+foot+'mm;font-size:8pt}.ft .nm{flex:1;text-align:center;color:#555}'+
+    '.note{font-size:10pt;padding:10px 14px;background:#fffbe6;border-bottom:1px solid #e6d98c}.note button{margin-left:10px}'+
+    '@media print{.note{display:none}}@media screen{body{background:#888}.pg{background:#fff;margin:12px auto;box-shadow:0 2px 8px rgba(0,0,0,.3)}}'+
+    '</style></head><body><div class="note">'+note+'<button onclick="window.print()">'+(ja?'印刷':'Print')+'</button></div>'+pages+'</body></html>';
+  var w=window.open('','_blank');
+  if(!w){ alert(ja?'ポップアップがブロックされました。許可してから再度お試しください。':'Pop-up blocked. Please allow pop-ups and try again.'); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+  setTimeout(function(){ try{ w.focus(); w.print(); }catch(e){} }, 400);
 }
 
 function run(){
