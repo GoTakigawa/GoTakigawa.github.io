@@ -60,6 +60,8 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow','DIN Condensed'
 .seed-input:focus{border-color:var(--accent1);}
 .seed-btn{width:64px;flex-shrink:0;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;border-radius:var(--r);cursor:pointer;white-space:nowrap;transition:all .12s;display:flex;align-items:center;justify-content:center;border:1px solid transparent;}
 .seed-copy{background:var(--bg4);border-color:var(--border2);color:var(--text2);}
+.seed-share{width:100%;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;padding:7px 0;border-radius:var(--r);cursor:pointer;background:none;border:1px dashed var(--border2);color:var(--text2);transition:all .12s;}
+.seed-share:hover{border-color:var(--accent1);color:var(--accent1);}
 .seed-copy:hover{background:var(--bg3);color:var(--text);}
 .seed-apply{background:var(--accent1);border-color:var(--accent1);color:#1a1a1a;font-weight:700;}
 .seed-apply:hover{background:#c4b5fd;}
@@ -428,6 +430,7 @@ a.tip-btn:hover{color:#ffdd00;border-color:#ffdd00;}
         </div>
         <button class="seed-btn seed-apply" onclick="applySeed()" data-i18n="btn-apply">Apply</button>
       </div>
+      <button class="seed-share" id="btn-share-url" onclick="copyShareURL()" data-i18n="btn-share-url">🔗 Copy share link</button>
     </div>
     <div class="seed-err" id="seed-err"></div>
 
@@ -1831,6 +1834,31 @@ function copySeed(){
   }).catch(function(){});
 }
 
+// ── share URL（アドレスバーは変えず、ボタン押下時のみリンクを生成）──
+function copyShareURL(){
+  var url = location.origin + location.pathname + '#' + encodeSeed();
+  var btn = document.getElementById('btn-share-url');
+  navigator.clipboard.writeText(url).then(function(){
+    if (btn) {
+      btn.textContent = i18n('copied-link');
+      setTimeout(function(){ btn.textContent = i18n('btn-share-url'); }, 1500);
+    }
+  }).catch(function(){ prompt('URL', url); });
+}
+function loadSeedFromURL(){
+  var h = decodeURIComponent(location.hash.replace(/^#/, ''));
+  if (h.indexOf('GTI-') !== 0) return;
+  var input = document.getElementById('seed-input');
+  if (!input) return;
+  var lang = currentLang;
+  input.value = h;
+  applySeed();
+  input.value = '';
+  // 開いた人の表示言語を維持
+  currentLang = lang;
+  history.replaceState(null, '', location.pathname + location.search);
+}
+
 function applySeed(){
   var input = document.getElementById('seed-input');
   if(!input) return;
@@ -2104,6 +2132,8 @@ const TRANSLATIONS = {
     'legend-no': '■ Nut overhang',
     'scale-list-hd': 'Scale Lengths',
     'copied': 'Copied!',
+    'btn-share-url': '🔗 Copy share link',
+    'copied-link': 'Link copied!',
     'lbl-nut-txt': 'NUT',
     'lbl-bridge-txt': 'BRIDGE',
     'Righty': 'Righty',
@@ -2208,6 +2238,8 @@ const TRANSLATIONS = {
     'legend-no': '■ ナット・オーバーハング',
     'scale-list-hd': 'スケール長 一覧',
     'copied': 'コピー完了',
+    'btn-share-url': '🔗 共有リンクをコピー',
+    'copied-link': 'リンクをコピーしました',
     'copy': 'コピー',
     'lbl-ba': 'ブリッジ角度',
     'lbl-na': 'ナット角度',
@@ -4775,6 +4807,8 @@ document.addEventListener('DOMContentLoaded',function(){
   loadTuningData(); // _tuningData をセット → renderTuningBrowser() を呼ぶ
   setTimeout(updateTensionRows, 100);
   run();
+  // 共有リンクから開いた場合は設定を復元（tuningデータ読込後に適用）
+  if (location.hash.indexOf('GTI-') !== -1) setTimeout(loadSeedFromURL, 150);
 });
 
 // ── tension calculator logic ──
