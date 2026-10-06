@@ -3721,6 +3721,7 @@ function printTemplate(){
   var cols=Math.max(1,Math.ceil((W-ov)/(cw-ov))), rows=Math.max(1,Math.ceil((H-ov)/(ch-ov)));
   // 1列に収まる場合は中央寄せ
   var offX = cols===1 ? minX-(cw-W)/2 : minX;
+  var ja=(currentLang!=='en');
   var total=cols*rows, pages='', n=0;
   var fname=buildFilename(g.nStr,g.s1in,g.sNin,g.pd).replace(/\.dxf$/,'');
   for(var r=0;r<rows;r++) for(var c=0;c<cols;c++){
@@ -3730,15 +3731,38 @@ function printTemplate(){
     // のりしろの範囲（隣のページと重なる部分）を薄く表示
     if(r<rows-1) marks+='<rect x="'+vx+'" y="'+(vy+ch-ov)+'" width="'+cw+'" height="'+ov+'" style="fill:#000;fill-opacity:0.05;stroke:none"/>';
     if(c<cols-1) marks+='<rect x="'+(vx+cw-ov)+'" y="'+vy+'" width="'+ov+'" height="'+ch+'" style="fill:#000;fill-opacity:0.05;stroke:none"/>';
-    pages+='<div class="pg"><svg width="'+cw+'mm" height="'+ch+'mm" viewBox="'+vx.toFixed(3)+' '+vy.toFixed(3)+' '+cw+' '+ch+'" xmlns="http://www.w3.org/2000/svg">'+marks+body+
+    // 貼り合わせガイド：のりしろ側は「重ねる位置」の線、相手側は「切る線」
+    var guides='', fs=2.6, gst='stroke:#000;stroke-width:0.3', tst='font-family:Helvetica,Arial,sans-serif;font-size:'+fs+'px;fill:#000';
+    var pgNo=function(rr,cc){ return rr*cols+cc+1; };
+    function txt(x,y,t,rot){ return '<text x="'+x.toFixed(2)+'" y="'+y.toFixed(2)+'" style="'+tst+'"'+(rot?' transform="rotate(-90 '+x.toFixed(2)+' '+y.toFixed(2)+')"':'')+'>'+t+'</text>'; }
+    function tick(x1,y1,x2,y2){ return '<line x1="'+x1.toFixed(2)+'" y1="'+y1.toFixed(2)+'" x2="'+x2.toFixed(2)+'" y2="'+y2.toFixed(2)+'" style="'+gst+'"/>'; }
+    if(r<rows-1){ // 下側にのりしろ：上端の実線に次ページの切り口を合わせる
+      var gy=vy+ch-ov;
+      guides+=tick(vx,gy,vx+cw,gy)+tick(vx,gy-2,vx,gy+2)+tick(vx+cw,gy-2,vx+cw,gy+2);
+      guides+=txt(vx+2,gy+ov/2+fs/3,(ja?'のりしろ：ページ '+pgNo(r+1,c)+' の切り口をこの線に合わせて重ねる':'GLUE AREA: align the cut edge of page '+pgNo(r+1,c)+' to this line'));
+    }
+    if(c<cols-1){ // 右側にのりしろ
+      var gx=vx+cw-ov;
+      guides+=tick(gx,vy,gx,vy+ch)+tick(gx-2,vy,gx+2,vy)+tick(gx-2,vy+ch,gx+2,vy+ch);
+      guides+=txt(gx+ov/2+fs/3,vy+ch-2,(ja?'のりしろ：ページ '+pgNo(r,c+1)+' の切り口をこの線に合わせる':'GLUE AREA: align the cut edge of page '+pgNo(r,c+1)+' here'),true);
+    }
+    var cutst='stroke:#000;stroke-width:0.3;stroke-dasharray:2 1';
+    if(r>0){ // 上端を切る
+      guides+='<line x1="'+vx+'" y1="'+vy+'" x2="'+(vx+cw)+'" y2="'+vy+'" style="'+cutst+'"/>';
+      guides+=txt(vx+2,vy+fs+1,(ja?'✂ この線で切り、ページ '+pgNo(r-1,c)+' ののりしろに重ねる':'✂ CUT along this line, then overlap onto the glue area of page '+pgNo(r-1,c)));
+    }
+    if(c>0){ // 左端を切る
+      guides+='<line x1="'+vx+'" y1="'+vy+'" x2="'+vx+'" y2="'+(vy+ch)+'" style="'+cutst+'"/>';
+      guides+=txt(vx+fs+1,vy+ch-2,(ja?'✂ この線で切り、ページ '+pgNo(r,c-1)+' に重ねる':'✂ CUT along this line, then overlap onto page '+pgNo(r,c-1)),true);
+    }
+    pages+='<div class="pg"><svg width="'+cw+'mm" height="'+ch+'mm" viewBox="'+vx.toFixed(3)+' '+vy.toFixed(3)+' '+cw+' '+ch+'" xmlns="http://www.w3.org/2000/svg">'+marks+body+guides+
       '<rect x="'+vx+'" y="'+vy+'" width="'+cw+'" height="'+ch+'" style="fill:none;stroke:#bbb;stroke-width:0.2"/></svg>'+
       '<div class="ft"><svg width="50mm" height="4mm" viewBox="0 0 50 4"><rect x="0" y="0" width="50" height="4" style="fill:none;stroke:#000;stroke-width:0.3"/>'+
       '<line x1="10" y1="0" x2="10" y2="4" style="stroke:#000;stroke-width:0.2"/><line x1="20" y1="0" x2="20" y2="4" style="stroke:#000;stroke-width:0.2"/><line x1="30" y1="0" x2="30" y2="4" style="stroke:#000;stroke-width:0.2"/><line x1="40" y1="0" x2="40" y2="4" style="stroke:#000;stroke-width:0.2"/></svg>'+
       '<span>50 mm</span><span class="nm">'+fname+'</span><span class="pn">'+n+' / '+total+(total>1?' (row '+(r+1)+', col '+(c+1)+')':'')+'</span></div></div>';
   }
-  var ja=(currentLang!=='en');
-  var note=ja?'印刷時は「実際のサイズ / 100%」を選び、「用紙に合わせる」はオフにしてください。下の目盛りが 50mm になっているか確認してから使用してください。グレーの帯はのりしろ（隣のページと重なる部分）です。'
-             :'Print at "Actual size / 100%" with "Fit to page" turned off. Check that the scale bar measures 50 mm before use. Grey bands are overlap areas shared with the next sheet.';
+  var note=ja?'印刷時は「実際のサイズ / 100%」を選び、「用紙に合わせる」はオフにしてください。下の目盛りが 50mm になっているか確認してから使用してください。貼り合わせは、破線（✂）で切ってから、グレーののりしろの実線に切り口を合わせて重ねてください。'
+             :'Print at "Actual size / 100%" with "Fit to page" turned off. Check that the scale bar measures 50 mm before use. Cut along the dashed (✂) lines, then lay each cut edge on the solid line in the grey glue area of the adjoining sheet.';
   var html='<!doctype html><html><head><meta charset="utf-8"><title>'+fname+' template</title><style>'+
     '@page{size:'+paper.w+'mm '+paper.h+'mm;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Helvetica,Arial,sans-serif;color:#000;background:#fff}'+
     '.pg{width:'+paper.w+'mm;height:'+paper.h+'mm;padding:'+M+'mm;page-break-after:always;break-after:page;overflow:hidden}.pg:last-child{page-break-after:auto;break-after:auto}'+
