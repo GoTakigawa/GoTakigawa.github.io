@@ -158,6 +158,8 @@ button.print-btn:hover{border-color:var(--accent1);color:var(--accent1);}
 select.print-paper{font-family:'Barlow',sans-serif;font-size:12px;background:var(--bg4);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);padding:9px 6px;}
 a.tip-btn{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);padding:10px 16px;text-decoration:none;transition:color .15s,border-color .15s;}
 a.tip-btn:hover{color:#ffdd00;border-color:#ffdd00;}
+a.tip-btn.tip-stripe{margin-left:0;}
+a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
 #dxf-link{display:none;font-size:12px;color:var(--accent2);text-decoration:underline;cursor:pointer;word-break:break-all;margin-top:4px;}
 
 /* lefty toggle */
@@ -1010,6 +1012,7 @@ a.tip-btn:hover{color:#ffdd00;border-color:#ffdd00;}
       <span class="dxf-fname" id="dxf-filename"></span>
       <a id="dxf-link">Click to download</a>
       <a class="tip-btn" href="https://buymeacoffee.com/gotakigawa" target="_blank" rel="noopener" data-i18n="btn-tip">☕ Buy me a coffee</a>
+      <a class="tip-btn tip-stripe" href="https://buy.stripe.com/eVq9AS27x63Sgtc0595Rm00" target="_blank" rel="noopener" data-i18n="btn-tip-stripe">💳 Support via Card</a>
     </div>
   <div class="tension-sec" id="tension-sec">
     <div class="tension-sec-title"><span data-i18n="sec-tension">String Tension Calculator</span></div>
@@ -2129,6 +2132,7 @@ const TRANSLATIONS = {
     'lbl-zero-fret-offset': '0 Fret → Nut offset (mm)',
     'btn-dxf': '⬇ Export DXF',
     'btn-tip': '☕ Buy me a coffee',
+    'btn-tip-stripe': '💳 Support via Card',
     'btn-print': '🖨 Print 1:1 Template',
     'legend-dir-righty': 'Right = Nut &nbsp; Left = Bridge &nbsp; Top = Bass &nbsp; Bottom = Treble',
     'legend-dir-lefty': 'Left = Nut &nbsp; Right = Bridge &nbsp; Top = Bass &nbsp; Bottom = Treble',
@@ -2236,6 +2240,7 @@ const TRANSLATIONS = {
     'lbl-zero-fret-offset': '0フレット → ナット間隔 (mm)',
     'btn-dxf': '⬇ DXFを書き出す',
     'btn-tip': '☕ 投げ銭で応援する',
+    'btn-tip-stripe': '💳 カードで応援する',
     'btn-print': '🖨 原寸テンプレートを印刷',
     'legend-dir-righty': '右 = ナット &nbsp; 左 = ブリッジ &nbsp; 上 = 低音弦 &nbsp; 下 = 1弦側',
     'legend-dir-lefty': '左 = ナット &nbsp; 右 = ブリッジ &nbsp; 上 = 低音弦 &nbsp; 下 = 1弦側',
