@@ -164,6 +164,20 @@ button.primary:active{transform:scale(.98);}
 button.print-btn{font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:var(--text);background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);padding:10px 16px;cursor:pointer;transition:border-color .15s,color .15s;}
 button.print-btn:hover{border-color:var(--accent1);color:var(--accent1);}
 select.print-paper{font-family:'Barlow',sans-serif;font-size:12px;background:var(--bg4);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);padding:9px 6px;}
+/* terms modal */
+.terms-ov{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:16px;}
+.terms-ov.open{display:flex;}
+.terms-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);width:100%;max-width:520px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;font-family:'Barlow',sans-serif;color:var(--text);}
+.terms-hd{padding:16px 20px 10px;font-size:15px;font-weight:700;letter-spacing:.04em;}
+.terms-body{padding:0 20px;overflow-y:auto;font-size:13px;line-height:1.7;color:var(--text2);}
+.terms-body ol{margin:0;padding-left:1.3em;}
+.terms-body li{margin-bottom:6px;}
+.terms-ft{padding:14px 20px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;}
+.terms-skip{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;margin-right:auto;}
+.terms-ft button{font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;border-radius:var(--r);padding:9px 16px;cursor:pointer;}
+.terms-cancel{background:none;border:1px solid var(--border2);color:var(--text2);}
+.terms-agree{background:var(--accent1);border:1px solid var(--accent1);color:#fff;}
+@media(max-width:600px){.terms-skip{width:100%;margin-right:0;}.terms-ft button{flex:1;}}
 a.tip-btn{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);padding:10px 16px;text-decoration:none;transition:color .15s,border-color .15s;}
 a.tip-btn:hover{color:#ffdd00;border-color:#ffdd00;}
 a.tip-btn.tip-stripe{margin-left:0;}
@@ -1024,8 +1038,8 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
       </label>
     </div>
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0;max-width:100%;">
-      <button class="primary" onclick="exportDXF()" data-i18n="btn-dxf">⬇ Export DXF</button>
-      <button class="print-btn" onclick="printTemplate()" data-i18n="btn-print">🖨 Print 1:1 Template</button>
+      <button class="primary" onclick="withTerms(exportDXF)" data-i18n="btn-dxf">⬇ Export DXF</button>
+      <button class="print-btn" onclick="withTerms(printTemplate)" data-i18n="btn-print">🖨 Print 1:1 Template</button>
       <select class="print-paper" id="print-paper" title="Paper"><option value="a4">A4</option><option value="a3">A3</option><option value="a2">A2</option><option value="a1">A1</option><option value="letter">Letter</option><option value="fit" data-i18n="opt-paper-fit">1 sheet (roll)</option></select>
       <span class="dxf-fname" id="dxf-filename"></span>
       <a id="dxf-link">Click to download</a>
@@ -3668,6 +3682,53 @@ function buildDXF(g,lefty){
   L.push('0\nENDSEC\n0\nEOF');
   return L.join('\n');
 }
+
+// ── 利用規約の確認（DXF出力・印刷の前に表示。「次回から表示しない」で以後スキップ）──
+var TERMS_VERSION='1';  // 規約の内容を変えたら数字を上げる → 全員に再表示される
+var TERMS_KEY='gti-fb-terms-accepted';
+var TERMS_TEXT={
+  en:{title:'Terms of Use',
+    items:[
+      'This generator is provided free of charge, as is. The author makes no guarantee that the output (DXF files, printed templates) is accurate or fit for any particular purpose.',
+      'Always check the dimensions yourself before cutting any material. The author accepts no responsibility for damaged materials, instruments, tools or any other loss arising from use of this tool or its output.',
+      'You may use the files you generate for your own instruments, including instruments you build for sale.',
+      'Do not resell or redistribute this generator itself, or present it as your own work.',
+      'These terms may be updated without notice. When they change, you will be asked to confirm them again.'],
+    skip:'Don’t show this again', cancel:'Cancel', agree:'Agree & continue'},
+  jp:{title:'利用規約',
+    items:[
+      'このジェネレーターは無料で、現状のまま提供されます。出力されるデータ（DXF・印刷テンプレート）の正確性や、特定の目的への適合性は保証しません。',
+      '材料を加工する前に、必ずご自身で寸法を確認してください。本ツールおよび出力データの利用によって生じた材料・楽器・工具の損傷、その他の損害について、作者は責任を負いません。',
+      '出力したデータは、販売用の楽器を含め、ご自身の楽器製作に自由にお使いいただけます。',
+      'ジェネレーターそのものの転売・再配布や、自作であるかのような公開はご遠慮ください。',
+      '本規約は予告なく変更することがあります。変更した場合は、あらためて確認をお願いします。'],
+    skip:'次回から表示しない', cancel:'キャンセル', agree:'同意して続ける'}
+};
+function _termsAccepted(){ try{ return localStorage.getItem(TERMS_KEY)===TERMS_VERSION; }catch(e){ return false; } }
+var _termsNext=null;
+function withTerms(fn){
+  if(_termsAccepted()){ fn(); return; }
+  _termsNext=fn;
+  var t=TERMS_TEXT[currentLang==='en'?'en':'jp'];
+  var ov=document.getElementById('terms-ov');
+  if(!ov){ ov=document.createElement('div'); ov.id='terms-ov'; ov.className='terms-ov'; document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){ if(e.target===ov) closeTerms(); }); }
+  ov.innerHTML='<div class="terms-box" role="dialog" aria-modal="true" aria-labelledby="terms-hd">'+
+    '<div class="terms-hd" id="terms-hd">'+t.title+'</div>'+
+    '<div class="terms-body"><ol>'+t.items.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ol></div>'+
+    '<div class="terms-ft"><label class="terms-skip"><input type="checkbox" id="terms-skip"> '+t.skip+'</label>'+
+    '<button class="terms-cancel" onclick="closeTerms()">'+t.cancel+'</button>'+
+    '<button class="terms-agree" onclick="agreeTerms()">'+t.agree+'</button></div></div>';
+  ov.classList.add('open');
+}
+function closeTerms(){ var ov=document.getElementById('terms-ov'); if(ov) ov.classList.remove('open'); _termsNext=null; }
+function agreeTerms(){
+  var skip=document.getElementById('terms-skip');
+  if(skip && skip.checked){ try{ localStorage.setItem(TERMS_KEY,TERMS_VERSION); }catch(e){} }
+  var fn=_termsNext; closeTerms();
+  if(fn) fn(); // クリック操作の中で実行するので、ダウンロードや印刷画面もブロックされない
+}
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeTerms(); });
 
 function exportDXF(){
   var g=_state; if(!g) return;
