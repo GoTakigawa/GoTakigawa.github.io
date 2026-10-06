@@ -168,7 +168,10 @@ select.print-paper{font-family:'Barlow',sans-serif;font-size:12px;background:var
 .terms-ov{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:16px;}
 .terms-ov.open{display:flex;}
 .terms-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);width:100%;max-width:520px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;font-family:'Barlow',sans-serif;color:var(--text);}
-.terms-hd{padding:16px 20px 10px;font-size:15px;font-weight:700;letter-spacing:.04em;}
+.terms-hd{padding:16px 20px 10px;font-size:15px;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.terms-lang{display:inline-flex;border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;}
+.terms-lang button{background:none;border:none;color:var(--text3);font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;letter-spacing:.06em;}
+.terms-lang button.on{background:var(--accent1);color:#fff;}
 .terms-body{padding:0 20px;overflow-y:auto;font-size:13px;line-height:1.7;color:var(--text2);}
 .terms-body ol{margin:0;padding-left:1.3em;}
 .terms-body li{margin-bottom:6px;}
@@ -2164,6 +2167,14 @@ const TRANSLATIONS = {
     'lbl-zero-fret-offset': '0 Fret → Nut offset (mm)',
     'btn-dxf': '⬇ Export DXF',
     'btn-tip': '☕ Buy me a coffee',
+    'btn-extra': 'Extra',
+    'lbl-allstring': 'All Strings',
+    'lbl-edo': 'Equal Temperament (N-TET)',
+    'lbl-multiscale': 'Multiscale',
+    'sec-edo': 'Divisions per Octave (EDO)',
+    'slib-col-ns': 'Strings',
+    'slib-col-seeds': 'Seeds',
+    'slib-col-type': 'Type',
     'btn-tip-stripe': '💳 Support via Card',
     'btn-print': '🖨 Print 1:1 Template',
     'opt-paper-fit': '1 sheet (roll)',
@@ -2272,6 +2283,14 @@ const TRANSLATIONS = {
     'lbl-zero-fret-offset': '0フレット → ナット間隔 (mm)',
     'btn-dxf': '⬇ DXFを書き出す',
     'btn-tip': '☕ 投げ銭で応援する',
+    'btn-extra': 'その他',
+    'lbl-allstring': '全弦',
+    'lbl-edo': '平均律（N-TET）',
+    'lbl-multiscale': 'マルチスケール',
+    'sec-edo': '1オクターブの分割数（EDO）',
+    'slib-col-ns': '弦数',
+    'slib-col-seeds': 'シード',
+    'slib-col-type': '種類',
     'btn-tip-stripe': '💳 カードで応援する',
     'btn-print': '🖨 原寸テンプレートを印刷',
     'opt-paper-fit': '原寸1枚',
@@ -3705,21 +3724,30 @@ var TERMS_TEXT={
     skip:'次回から表示しない', cancel:'キャンセル', agree:'同意して続ける'}
 };
 function _termsAccepted(){ try{ return localStorage.getItem(TERMS_KEY)===TERMS_VERSION; }catch(e){ return false; } }
-var _termsNext=null;
+var _termsNext=null, _termsLang=null;
 function withTerms(fn){
   if(_termsAccepted()){ fn(); return; }
   _termsNext=fn;
-  var t=TERMS_TEXT[currentLang==='en'?'en':'jp'];
+  _termsLang=(currentLang==='en'?'en':'jp'); // ジェネレーターの表示言語に合わせて開く
+  renderTerms();
+}
+function setTermsLang(l){ _termsLang=l; renderTerms(); }
+function renderTerms(){
+  var t=TERMS_TEXT[_termsLang||'en'];
+  var skipWas=document.getElementById('terms-skip'); skipWas=!!(skipWas&&skipWas.checked);
   var ov=document.getElementById('terms-ov');
   if(!ov){ ov=document.createElement('div'); ov.id='terms-ov'; ov.className='terms-ov'; document.body.appendChild(ov);
     ov.addEventListener('click',function(e){ if(e.target===ov) closeTerms(); }); }
   ov.innerHTML='<div class="terms-box" role="dialog" aria-modal="true" aria-labelledby="terms-hd">'+
-    '<div class="terms-hd" id="terms-hd">'+t.title+'</div>'+
+    '<div class="terms-hd"><span id="terms-hd">'+t.title+'</span>'+
+      '<span class="terms-lang"><button class="'+(_termsLang==='en'?'on':'')+'" onclick="setTermsLang(\'en\')">EN</button>'+
+      '<button class="'+(_termsLang==='jp'?'on':'')+'" onclick="setTermsLang(\'jp\')">JP</button></span></div>'+
     '<div class="terms-body"><ol>'+t.items.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ol></div>'+
     '<div class="terms-ft"><label class="terms-skip"><input type="checkbox" id="terms-skip"> '+t.skip+'</label>'+
     '<button class="terms-cancel" onclick="closeTerms()">'+t.cancel+'</button>'+
     '<button class="terms-agree" onclick="agreeTerms()">'+t.agree+'</button></div></div>';
   ov.classList.add('open');
+  if(skipWas) document.getElementById('terms-skip').checked=true;
 }
 function closeTerms(){ var ov=document.getElementById('terms-ov'); if(ov) ov.classList.remove('open'); _termsNext=null; }
 function agreeTerms(){
@@ -5010,6 +5038,11 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   });
   // 初期化
+  // 表示言語はブラウザの言語設定に合わせる（日本語なら JP、それ以外は EN）
+  try{
+    var navLang=((navigator.languages&&navigator.languages[0])||navigator.language||'').toLowerCase();
+    if(navLang.indexOf('ja')===0 && currentLang==='en') toggleLang();
+  }catch(e){}
   syncSlantDisable();
   if(typeof syncScaleToggle==='function') syncScaleToggle(true);
   loadSeedLib();
