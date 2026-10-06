@@ -175,6 +175,10 @@ select.print-paper{font-family:'Barlow',sans-serif;font-size:12px;background:var
 .terms-body{padding:0 20px;overflow-y:auto;font-size:13px;line-height:1.7;color:var(--text2);}
 .terms-body ol{margin:0;padding-left:1.3em;}
 .terms-body li{margin-bottom:6px;}
+.terms-support{margin:14px 0 0;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);font-size:12.5px;color:var(--text2);}
+.terms-support-links{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.terms-support-links a{font-size:12px;font-weight:600;color:var(--text2);text-decoration:none;border:1px solid var(--border2);border-radius:var(--r);padding:5px 10px;}
+.terms-support-links a:hover{color:#ffdd00;border-color:#ffdd00;}
 .terms-ft{padding:14px 20px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;}
 .terms-skip{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;margin-right:auto;}
 .terms-ft button{font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;border-radius:var(--r);padding:9px 16px;cursor:pointer;}
@@ -3713,6 +3717,7 @@ var TERMS_TEXT={
       'You may use the files you generate for your own instruments, including instruments you build for sale.',
       'Do not resell or redistribute this generator itself, or present it as your own work.',
       'These terms may be updated without notice. When they change, you will be asked to confirm them again.'],
+    support:'If you find this tool useful, a small tip to support it would be truly appreciated.',
     skip:'Don’t show this again', cancel:'Cancel', agree:'Agree & continue'},
   jp:{title:'利用規約',
     items:[
@@ -3721,6 +3726,7 @@ var TERMS_TEXT={
       '出力したデータは、販売用の楽器を含め、ご自身の楽器製作に自由にお使いいただけます。',
       'ジェネレーターそのものの転売・再配布や、自作であるかのような公開はご遠慮ください。',
       '本規約は予告なく変更することがあります。変更した場合は、あらためて確認をお願いします。'],
+    support:'便利だと感じていただけたら、投げ銭で応援していただけるととても励みになります。',
     skip:'次回から表示しない', cancel:'キャンセル', agree:'同意して続ける'}
 };
 function _termsAccepted(){ try{ return localStorage.getItem(TERMS_KEY)===TERMS_VERSION; }catch(e){ return false; } }
@@ -3742,7 +3748,10 @@ function renderTerms(){
     '<div class="terms-hd"><span id="terms-hd">'+t.title+'</span>'+
       '<span class="terms-lang"><button class="'+(_termsLang==='en'?'on':'')+'" onclick="setTermsLang(\'en\')">EN</button>'+
       '<button class="'+(_termsLang==='jp'?'on':'')+'" onclick="setTermsLang(\'jp\')">JP</button></span></div>'+
-    '<div class="terms-body"><ol>'+t.items.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ol></div>'+
+    '<div class="terms-body"><ol>'+t.items.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ol>'+
+      '<p class="terms-support">'+t.support+'<span class="terms-support-links">'+
+      '<a href="https://buymeacoffee.com/gotakigawa" target="_blank" rel="noopener">☕ Buy me a coffee</a>'+
+      '<a href="https://buy.stripe.com/eVq9AS27x63Sgtc0595Rm00" target="_blank" rel="noopener">💳 '+(_termsLang==='en'?'Card':'カード')+'</a></span></p></div>'+
     '<div class="terms-ft"><label class="terms-skip"><input type="checkbox" id="terms-skip"> '+t.skip+'</label>'+
     '<button class="terms-cancel" onclick="closeTerms()">'+t.cancel+'</button>'+
     '<button class="terms-agree" onclick="agreeTerms()">'+t.agree+'</button></div></div>';
