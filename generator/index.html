@@ -1008,7 +1008,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0;max-width:100%;">
       <button class="primary" onclick="exportDXF()" data-i18n="btn-dxf">⬇ Export DXF</button>
       <button class="print-btn" onclick="printTemplate()" data-i18n="btn-print">🖨 Print 1:1 Template</button>
-      <select class="print-paper" id="print-paper" title="Paper"><option value="a4">A4</option><option value="letter">Letter</option></select>
+      <select class="print-paper" id="print-paper" title="Paper"><option value="a4">A4</option><option value="a3">A3</option><option value="a2">A2</option><option value="letter">Letter</option></select>
       <span class="dxf-fname" id="dxf-filename"></span>
       <a id="dxf-link">Click to download</a>
       <a class="tip-btn" href="https://buymeacoffee.com/gotakigawa" target="_blank" rel="noopener" data-i18n="btn-tip">☕ Buy me a coffee</a>
@@ -3706,7 +3706,8 @@ function printTemplate(){
     else body+='<circle cx="'+X(e.c10).toFixed(3)+'" cy="'+Y(e.c20).toFixed(3)+'" r="'+e.c40.toFixed(3)+'" style="'+st+'"/>';
   });
   // 用紙と分割
-  var paper=(document.getElementById('print-paper')||{}).value==='letter'?{w:215.9,h:279.4,n:'letter'}:{w:210,h:297,n:'A4'};
+  var PAPERS={a4:{w:210,h:297,n:'A4'},a3:{w:297,h:420,n:'A3'},a2:{w:420,h:594,n:'A2'},letter:{w:215.9,h:279.4,n:'letter'}};
+  var paper=PAPERS[(document.getElementById('print-paper')||{}).value]||PAPERS.a4;
   var M=10, foot=14, ov=10;              // 余白・下部情報欄・のりしろ
   var cw=paper.w-2*M, ch=paper.h-2*M-foot;
   var W=maxX-minX, H=maxY-minY;
@@ -3732,7 +3733,7 @@ function printTemplate(){
   var note=ja?'印刷時は「実際のサイズ / 100%」を選び、「用紙に合わせる」はオフにしてください。下の目盛りが 50mm になっているか確認してから使用してください。グレーの帯はのりしろ（隣のページと重なる部分）です。'
              :'Print at "Actual size / 100%" with "Fit to page" turned off. Check that the scale bar measures 50 mm before use. Grey bands are overlap areas shared with the next sheet.';
   var html='<!doctype html><html><head><meta charset="utf-8"><title>'+fname+' template</title><style>'+
-    '@page{size:'+paper.n+' portrait;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Helvetica,Arial,sans-serif;color:#000;background:#fff}'+
+    '@page{size:'+paper.w+'mm '+paper.h+'mm;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Helvetica,Arial,sans-serif;color:#000;background:#fff}'+
     '.pg{width:'+paper.w+'mm;height:'+paper.h+'mm;padding:'+M+'mm;page-break-after:always;break-after:page;overflow:hidden}.pg:last-child{page-break-after:auto;break-after:auto}'+
     '.pg>svg{display:block}.ft{display:flex;align-items:center;gap:3mm;height:'+foot+'mm;font-size:8pt}.ft .nm{flex:1;text-align:center;color:#555}'+
     '.note{font-size:10pt;padding:10px 14px;background:#fffbe6;border-bottom:1px solid #e6d98c}.note button{margin-left:10px}'+
