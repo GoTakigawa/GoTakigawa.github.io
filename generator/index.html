@@ -3701,6 +3701,12 @@ function printTemplate(){
   var lefty=(currentHand==='left');
   var ents=_dxfEntities(buildDXF(g,lefty));
   if(!ents.length) return;
+  // ブリッジライン（各弦の終端＝サドル位置を結ぶ線）。両端を少し延長して見やすくする
+  var bpts=[]; for(var bi=0;bi<g.nStr;bi++){ var d=toDXF(g,g.Bp(bi).x,g.Bp(bi).y,lefty); bpts.push(d); }
+  if(bpts.length>1){
+    var b0=bpts[0], b1=bpts[bpts.length-1], bdx=b1.x-b0.x, bdz=b1.z-b0.z, bl=Math.hypot(bdx,bdz)||1, bExt=6;
+    ents.push({type:'LINE',layer:'SADDLE',c10:b0.x-bdx/bl*bExt,c20:b0.z-bdz/bl*bExt,c11:b1.x+bdx/bl*bExt,c21:b1.z+bdz/bl*bExt});
+  }
   // 長手方向(z)を縦に。ナット側を上にする
   var nz=0,nc=0,bz=0,bc=0;
   ents.forEach(function(e){ if(e.type!=='LINE') return;
@@ -3716,12 +3722,17 @@ function printTemplate(){
   var pad=5; minX-=pad;minY-=pad;maxX+=pad;maxY+=pad;
   var sty={STRING:'#000;stroke-width:0.25',CENTERLINE:'#999;stroke-width:0.15;stroke-dasharray:3 1.5',
            FRET:'#000;stroke-width:0.25',NUT:'#000;stroke-width:0.3',BRIDGE:'#000;stroke-width:0.3',
-           EDGE:'#000;stroke-width:0.3',NUT_OH:'#000;stroke-width:0.25',INLAY:'#000;stroke-width:0.2'};
+           EDGE:'#000;stroke-width:0.3',SADDLE:'#000;stroke-width:0.4',NUT_OH:'#000;stroke-width:0.25',INLAY:'#000;stroke-width:0.2'};
   var body='';
   ents.forEach(function(e){
     var st='fill:none;stroke:'+(sty[e.layer]||'#000;stroke-width:0.2');
     if(e.type==='LINE') body+='<line x1="'+X(e.c10).toFixed(3)+'" y1="'+Y(e.c20).toFixed(3)+'" x2="'+X(e.c11).toFixed(3)+'" y2="'+Y(e.c21).toFixed(3)+'" style="'+st+'"/>';
     else body+='<circle cx="'+X(e.c10).toFixed(3)+'" cy="'+Y(e.c20).toFixed(3)+'" r="'+e.c40.toFixed(3)+'" style="'+st+'"/>';
+  });
+  ents.forEach(function(e){
+    if(e.layer!=='SADDLE') return;
+    var lx=Math.max(X(e.c10),X(e.c11))+2, ly=(X(e.c10)>X(e.c11)?Y(e.c20):Y(e.c21))+1;
+    body+='<text x="'+lx.toFixed(2)+'" y="'+ly.toFixed(2)+'" style="font-family:Helvetica,Arial,sans-serif;font-size:3px;font-weight:bold;fill:#000">BRIDGE</text>';
   });
   // 用紙と分割
   var PAPERS={a4:{w:210,h:297,n:'A4'},a3:{w:297,h:420,n:'A3'},a2:{w:420,h:594,n:'A2'},a1:{w:594,h:841,n:'A1'},letter:{w:215.9,h:279.4,n:'letter'}};
