@@ -1008,7 +1008,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0;max-width:100%;">
       <button class="primary" onclick="exportDXF()" data-i18n="btn-dxf">⬇ Export DXF</button>
       <button class="print-btn" onclick="printTemplate()" data-i18n="btn-print">🖨 Print 1:1 Template</button>
-      <select class="print-paper" id="print-paper" title="Paper"><option value="a4">A4</option><option value="a3">A3</option><option value="a2">A2</option><option value="letter">Letter</option></select>
+      <select class="print-paper" id="print-paper" title="Paper"><option value="a4">A4</option><option value="a3">A3</option><option value="a2">A2</option><option value="a1">A1</option><option value="letter">Letter</option><option value="fit" data-i18n="opt-paper-fit">1 sheet (roll)</option></select>
       <span class="dxf-fname" id="dxf-filename"></span>
       <a id="dxf-link">Click to download</a>
       <a class="tip-btn" href="https://buymeacoffee.com/gotakigawa" target="_blank" rel="noopener" data-i18n="btn-tip">☕ Buy me a coffee</a>
@@ -2134,6 +2134,7 @@ const TRANSLATIONS = {
     'btn-tip': '☕ Buy me a coffee',
     'btn-tip-stripe': '💳 Support via Card',
     'btn-print': '🖨 Print 1:1 Template',
+    'opt-paper-fit': '1 sheet (roll)',
     'legend-dir-righty': 'Right = Nut &nbsp; Left = Bridge &nbsp; Top = Bass &nbsp; Bottom = Treble',
     'legend-dir-lefty': 'Left = Nut &nbsp; Right = Bridge &nbsp; Top = Bass &nbsp; Bottom = Treble',
     'legend-pf': '■ Perpendicular fret',
@@ -2242,6 +2243,7 @@ const TRANSLATIONS = {
     'btn-tip': '☕ 投げ銭で応援する',
     'btn-tip-stripe': '💳 カードで応援する',
     'btn-print': '🖨 原寸テンプレートを印刷',
+    'opt-paper-fit': '原寸1枚',
     'legend-dir-righty': '右 = ナット &nbsp; 左 = ブリッジ &nbsp; 上 = 低音弦 &nbsp; 下 = 1弦側',
     'legend-dir-lefty': '左 = ナット &nbsp; 右 = ブリッジ &nbsp; 上 = 低音弦 &nbsp; 下 = 1弦側',
     'legend-pf': '■ 垂直接線フレット',
@@ -3706,9 +3708,14 @@ function printTemplate(){
     else body+='<circle cx="'+X(e.c10).toFixed(3)+'" cy="'+Y(e.c20).toFixed(3)+'" r="'+e.c40.toFixed(3)+'" style="'+st+'"/>';
   });
   // 用紙と分割
-  var PAPERS={a4:{w:210,h:297,n:'A4'},a3:{w:297,h:420,n:'A3'},a2:{w:420,h:594,n:'A2'},letter:{w:215.9,h:279.4,n:'letter'}};
-  var paper=PAPERS[(document.getElementById('print-paper')||{}).value]||PAPERS.a4;
+  var PAPERS={a4:{w:210,h:297,n:'A4'},a3:{w:297,h:420,n:'A3'},a2:{w:420,h:594,n:'A2'},a1:{w:594,h:841,n:'A1'},letter:{w:215.9,h:279.4,n:'letter'}};
   var M=10, foot=14, ov=10;              // 余白・下部情報欄・のりしろ
+  var paperSel=(document.getElementById('print-paper')||{}).value;
+  var paper=PAPERS[paperSel]||PAPERS.a4;
+  if(paperSel==='fit'){
+    // テンプレート全体がちょうど1枚に収まる用紙（ロール紙・大判出力向け）。下部情報欄が収まる最小幅を確保
+    paper={w:Math.ceil(Math.max(maxX-minX,170)+2*M), h:Math.ceil(maxY-minY+2*M+foot), n:'fit'};
+  }
   var cw=paper.w-2*M, ch=paper.h-2*M-foot;
   var W=maxX-minX, H=maxY-minY;
   var cols=Math.max(1,Math.ceil((W-ov)/(cw-ov))), rows=Math.max(1,Math.ceil((H-ov)/(ch-ov)));
