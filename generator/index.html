@@ -2286,7 +2286,7 @@ const TRANSLATIONS = {
     'lbl-zero-fret': '0フレット',
     'lbl-zero-fret-offset': '0フレット → ナット間隔 (mm)',
     'btn-dxf': '⬇ DXFを書き出す',
-    'btn-tip': '☕ 投げ銭で応援する',
+    'btn-tip': '☕ コーヒーを作者に奢る',
     'btn-extra': 'その他',
     'lbl-allstring': '全弦',
     'lbl-edo': '平均律（N-TET）',
@@ -3717,6 +3717,7 @@ var TERMS_TEXT={
       'You may use the files you generate for your own instruments, including instruments you build for sale.',
       'Do not resell or redistribute this generator itself, or present it as your own work.',
       'These terms may be updated without notice. When they change, you will be asked to confirm them again.'],
+    tipCoffee:'☕ Buy me a coffee', tipCard:'💳 Support via Card',
     support:'If you find this tool useful, a small tip to support it would be truly appreciated.',
     skip:'Don’t show this again', cancel:'Cancel', agree:'Agree & continue'},
   jp:{title:'利用規約',
@@ -3726,6 +3727,7 @@ var TERMS_TEXT={
       '出力したデータは、販売用の楽器を含め、ご自身の楽器製作に自由にお使いいただけます。',
       'ジェネレーターそのものの転売・再配布や、自作であるかのような公開はご遠慮ください。',
       '本規約は予告なく変更することがあります。変更した場合は、あらためて確認をお願いします。'],
+    tipCoffee:'☕ コーヒーを作者に奢る', tipCard:'💳 カードで応援する',
     support:'便利だと感じていただけたら、投げ銭で応援していただけるととても励みになります。',
     skip:'次回から表示しない', cancel:'キャンセル', agree:'同意して続ける'}
 };
@@ -3750,8 +3752,8 @@ function renderTerms(){
       '<button class="'+(_termsLang==='jp'?'on':'')+'" onclick="setTermsLang(\'jp\')">JP</button></span></div>'+
     '<div class="terms-body"><ol>'+t.items.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ol>'+
       '<p class="terms-support">'+t.support+'<span class="terms-support-links">'+
-      '<a href="https://buymeacoffee.com/gotakigawa" target="_blank" rel="noopener">☕ Buy me a coffee</a>'+
-      '<a href="https://buy.stripe.com/eVq9AS27x63Sgtc0595Rm00" target="_blank" rel="noopener">💳 '+(_termsLang==='en'?'Card':'カード')+'</a></span></p></div>'+
+      '<a href="https://buymeacoffee.com/gotakigawa" target="_blank" rel="noopener">'+t.tipCoffee+'</a>'+
+      '<a href="https://buy.stripe.com/eVq9AS27x63Sgtc0595Rm00" target="_blank" rel="noopener">'+t.tipCard+'</a></span></p></div>'+
     '<div class="terms-ft"><label class="terms-skip"><input type="checkbox" id="terms-skip"> '+t.skip+'</label>'+
     '<button class="terms-cancel" onclick="closeTerms()">'+t.cancel+'</button>'+
     '<button class="terms-agree" onclick="agreeTerms()">'+t.agree+'</button></div></div>';
