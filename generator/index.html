@@ -196,14 +196,6 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
 .pill-toggle div{font-size:10px;font-weight:700;padding:4px 8px;border-radius:12px;color:var(--text3);transition:color .2s,background .2s;z-index:1;}
 .pill-toggle div.active{color:#1a1a1a;background:var(--accent1);}
 
-#ver{position:fixed;bottom:10px;right:12px;font-size:10px;font-family:'Barlow',monospace,sans-serif;color:var(--text3);letter-spacing:.08em;pointer-events:none;user-select:none;z-index:9999;}
-.home-link{position:fixed;bottom:14px;left:16px;font-size:12px;color:var(--text3);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:6px;transition:color .2s;z-index:9999;}
-/* スマホでは固定表示をやめ、ページ末尾に置く（画面下のカードやボタンに被ってタップを奪わないように） */
-@media(max-width:600px){
-  .home-link{position:static;padding:16px 16px 6px;}
-  #ver{position:static;padding:0 16px 16px;}
-}
-.home-link:hover{color:var(--accent1);}
   /* tension section */
   .tension-sec{margin-top:24px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px;min-width:0;}
   .tension-table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:8px;}
@@ -2176,7 +2168,6 @@ const TRANSLATIONS = {
     'Righty': 'Righty',
     'Lefty': 'Lefty',
     'invalid-seed': 'Invalid seed.',
-    'back-home': '← Back to homepage',
     'lbl-pd-direct': 'P.D. Value (direct)',
     'lbl-equiv-fret': 'Equiv. Fret',
     'lbl-ref-fret': 'Reference Fret No.',
@@ -2291,7 +2282,6 @@ const TRANSLATIONS = {
     'lbl-nut-txt': 'ナット',
     'lbl-bridge-txt': 'ブリッジ',
     'invalid-seed': 'シード値が正しくありません。',
-    'back-home': '← ホームページへ戻る',
     'lbl-pd-direct': 'P.D. 値 (直接入力)',
     'lbl-equiv-fret': '相当フレット',
     'lbl-ref-fret': '基準フレット番号',
@@ -6225,8 +6215,6 @@ function syncTensionUI() {
 
 </script>
 
-<div id="ver">v166-linear-pitch-seed</div>
-<a href="https://www.gtinstruments.xyz/" class="home-link" data-i18n="back-home">← Back to homepage</a>
 
 <script>
 // ── HAMBURGER MENU JS ──
