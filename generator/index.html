@@ -568,7 +568,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
           <div class="num-btns"><button type="button" class="num-btn" data-target="sN" data-dir="up">▲</button><button type="button" class="num-btn" data-target="sN" data-dir="dn">▼</button></div>
         </div>
       </div>
-      <div class="field"><label class="u-alt">→ mm</label><div class="ro-wrap" id="sNmm">—</div></div>
+      <div class="field"><label>→ mm</label><div class="ro-wrap" id="sNmm">—</div></div>
       <div class="field">
         <label data-i18n="lbl-first">1st String</label>
         <div class="num-wrap">
@@ -576,7 +576,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
           <div class="num-btns"><button type="button" class="num-btn" data-target="s1" data-dir="up">▲</button><button type="button" class="num-btn" data-target="s1" data-dir="dn">▼</button></div>
         </div>
       </div>
-      <div class="field"><label class="u-alt">→ mm</label><div class="ro-wrap" id="s1mm">—</div></div>
+      <div class="field"><label>→ mm</label><div class="ro-wrap" id="s1mm">—</div></div>
       <div class="toggle-row" style="grid-column: 1 / -1; margin-top:8px; margin-bottom:0px; justify-content: flex-start; gap: 8px;">
         <label class="toggle-switch" style="transform: scale(0.85); transform-origin: left;">
           <input type="checkbox" id="curved-toggle" onchange="syncSlantDisable();run()">
@@ -593,7 +593,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
           <div class="num-btns"><button type="button" class="num-btn" data-target="sAll" data-dir="up">▲</button><button type="button" class="num-btn" data-target="sAll" data-dir="dn">▼</button></div>
         </div>
       </div>
-      <div class="field" style="max-width:80px;"><label class="u-alt">→ mm</label><div class="ro-wrap" id="sAllmm">—</div></div>
+      <div class="field" style="max-width:80px;"><label>→ mm</label><div class="ro-wrap" id="sAllmm">—</div></div>
     </div>
     <div id="curve-coeff-wrap" style="display:none;margin-top:8px;">
       <div class="g2">
@@ -1273,15 +1273,17 @@ var I2M=25.4;
 
 // ── 長さの単位（表示だけを切り替える。計算・シード・DXFは常に基準単位のまま）──
 // 各入力欄の基準単位は data-len で決まる（"mm"＝ほとんどの欄、"in"＝スケール長）。
+// スケール長（data-len="in"）は単位設定に関係なく常に inch で入力・表示する。
 // 欄ごとに基準単位の値（el._canon）を保持し、ユーザーが編集した欄だけ表示値から変換し直す。
 // 単位を切り替えても基準値から表示し直すだけなので、往復で誤差が溜まらない。
 var UNIT_KEY='gti-fb-unit';
 var _unit=(function(){ try{ return localStorage.getItem(UNIT_KEY)==='in'?'in':'mm'; }catch(e){ return 'mm'; } })();
 function _lenEl(x){ return typeof x==='string'?document.getElementById(x):x; }
 function _canonOf(el){ return (el&&el.dataset&&el.dataset.len)||'mm'; }
-function _dispToCanon(v,canon){ return canon===_unit?v:(_unit==='in'?v*I2M:v/I2M); }
-function _canonToDisp(v,canon){ return canon===_unit?v:(_unit==='in'?v/I2M:v*I2M); }
-function _lenDec(canon){ return _unit==='mm'?2:(canon==='in'?4:3); } // mm:2桁 / inch:3桁（スケール長は4桁）
+function _dispUnit(canon){ return canon==='in'?'in':_unit; }
+function _dispToCanon(v,canon){ var d=_dispUnit(canon); return canon===d?v:(d==='in'?v*I2M:v/I2M); }
+function _canonToDisp(v,canon){ var d=_dispUnit(canon); return canon===d?v:(d==='in'?v/I2M:v*I2M); }
+function _lenDec(canon){ return canon==='in'?4:(_unit==='mm'?2:3); } // mm:2桁 / inch:3桁（スケール長は4桁）
 function _fmtNum(v,dec){ return String(parseFloat(v.toFixed(dec))); }
 // 入力欄の値を基準単位で返す（空欄なら NaN）
 function getLen(x){
@@ -1308,14 +1310,14 @@ function _inchStep(st){ return st<=0.1?0.005:st<=0.5?0.02:0.05; }
 function _applyLenAttrs(el){
   var c=_canonOf(el), d=el.dataset;
   if(d.step0==null){ d.step0=el.getAttribute('step')||''; d.min0=el.getAttribute('min')||''; d.max0=el.getAttribute('max')||''; }
-  if(c===_unit){
+  if(c===_dispUnit(c)){
     if(d.step0!=='') el.setAttribute('step',d.step0);
     if(d.min0!=='') el.setAttribute('min',d.min0); else el.removeAttribute('min');
     if(d.max0!=='') el.setAttribute('max',d.max0); else el.removeAttribute('max');
     return;
   }
   var st=parseFloat(d.step0)||1, dec=_lenDec(c);
-  el.setAttribute('step', _unit==='in'?_inchStep(st):0.5);
+  el.setAttribute('step', _inchStep(st));
   if(d.min0!=='') el.setAttribute('min',_fmtNum(_canonToDisp(parseFloat(d.min0),c),dec));
   if(d.max0!=='') el.setAttribute('max',_fmtNum(_canonToDisp(parseFloat(d.max0),c),dec));
 }
@@ -1329,7 +1331,7 @@ function lenInputAttrs(mm,step0,min0,max0){
 var _SCALE_LBL_KEYS={'sec-scale':1,'lbl-scale':1};
 function unitizeLabel(html,key){
   if(html==null) return html;
-  if(_SCALE_LBL_KEYS[key]) return String(html).replace(/\((inch|in|mm)\)/,function(m,u){ return _unit==='mm'?'(mm)':(u==='inch'?'(inch)':'(in)'); });
+  if(_SCALE_LBL_KEYS[key]) return html; // スケール長は常に inch
   if(_unit==='in') return String(html).replace(/\(mm\)/g,'(in)').replace(/\(mm,/g,'(in,');
   return html;
 }
@@ -1343,7 +1345,6 @@ function applyUnitLabels(){
     el.innerHTML=unitizeLabel(el.dataset.u0,'');
   });
   document.querySelectorAll('.u-len').forEach(function(el){ el.textContent=lenUnit(); });
-  document.querySelectorAll('.u-alt').forEach(function(el){ el.textContent='→ '+(_unit==='mm'?'in':'mm'); });
   var bm=document.getElementById('unit-mm'), bi=document.getElementById('unit-in');
   if(bm) bm.classList.toggle('active',_unit==='mm');
   if(bi) bi.classList.toggle('active',_unit==='in');
@@ -4389,8 +4390,8 @@ function run(){
 
   document.getElementById('pdFret').textContent=pdToFret(pd);
   document.getElementById('pd-val-disp').textContent=pd.toFixed(5);
-  // スケール長の併記: mm表示なら inch、inch表示なら mm
-  var altSc=function(mm){ return _unit==='mm'?(mm/I2M).toFixed(3):mm.toFixed(2); };
+  // スケール長は常に inch 入力＋mm 併記
+  var altSc=function(mm){ return mm.toFixed(2); };
   document.getElementById('s1mm').textContent=altSc(s1);
   document.getElementById('sNmm').textContent=altSc(sN);
   var sAllmmEl=document.getElementById('sAllmm');
@@ -4421,7 +4422,7 @@ function run(){
       sc_in=sc_mm/I2M;
     }
     var lbl=String(i+1);
-    var scTxt=_unit==='mm'?(sc_mm.toFixed(3)+' mm / '+sc_in.toFixed(3)+'"'):(sc_in.toFixed(3)+'" / '+sc_mm.toFixed(3)+' mm');
+    var scTxt=sc_in.toFixed(3)+'" / '+sc_mm.toFixed(3)+' mm';
     shtml+='<div class="scale-item"><span class="scale-item-lbl">'+lbl+'</span><span style="white-space:nowrap;">'+scTxt+'</span></div>';
   }
   sl.innerHTML=shtml;
@@ -6354,7 +6355,7 @@ function runTensionCalc() {
       sc_in = sc_mm / I2M;
     }
     var elSc = document.getElementById('t-sc-' + i);
-    if (elSc) elSc.textContent = _unit==='mm' ? sc_mm.toFixed(1) : sc_in.toFixed(2);
+    if (elSc) elSc.textContent = sc_in.toFixed(2);
 
     var res = calcTensionInternal(s.gauge, s.type, s.note, sc_in);
     results.push(res);
