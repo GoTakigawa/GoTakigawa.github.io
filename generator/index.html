@@ -1935,7 +1935,7 @@ function encodeSeed(){
   for(var ei=0;ei<12;ei++) vals['ext'+ei] = _extFrets[ei]||0;
   // 操作・表示
   vals.hand           = currentHand==='left'?1:0;
-  vals.lang           = currentLang==='ja'?1:currentLang==='ko'?2:0;
+  vals.lang           = 0; // 予約（表示言語はシードに含めず、ブラウザごとに保存）
   vals.stock          = gc('stock-toggle');
   
   // 目標テンション (kg) を取得
@@ -2056,12 +2056,9 @@ function loadSeedFromURL(){
   if (h.indexOf('GTI-') !== 0) return;
   var input = document.getElementById('seed-input');
   if (!input) return;
-  var lang = currentLang;
   input.value = h;
   applySeed();
   input.value = '';
-  // 開いた人の表示言語を維持
-  currentLang = lang;
   history.replaceState(null, '', location.pathname + location.search);
 }
 
@@ -2241,9 +2238,6 @@ function applySeed(){
   currentHand = d.hand>=0.5?'left':'right';
   document.getElementById('hand-right').classList.toggle('active', currentHand==='right');
   document.getElementById('hand-left').classList.toggle('active', currentHand==='left');
-  var langMap=['en','ja','ko'];
-  currentLang = langMap[Math.round(d.lang||0)]||'en';
-  if(typeof applyLang==='function') applyLang(currentLang);
   var stk=document.getElementById('stock-toggle'); if(stk) stk.checked=!!d.stock;
   var tt=document.getElementById('target-tension');
   if(tt && d.target_tension !== undefined) { 
@@ -2570,8 +2564,10 @@ var currentLang = 'en';
 var currentHand = 'right';
 
 function i18n(key){ return TRANSLATIONS[currentLang][key] || key; }
+var LANG_KEY='gti-fb-lang';
 function toggleLang(){
   currentLang = (currentLang==='en'?'jp':'en');
+  try{ localStorage.setItem(LANG_KEY,currentLang); }catch(e){}
   document.getElementById('lang-en').classList.toggle('active', currentLang==='en');
   document.getElementById('lang-jp').classList.toggle('active', currentLang==='jp');
   document.querySelectorAll('[data-i18n]').forEach(function(el){
@@ -5376,10 +5372,9 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   });
   // 初期化
-  // 表示言語はブラウザの言語設定に合わせる（日本語なら JP、それ以外は EN）
+  // 表示言語は EN が既定。JP に切り替えた人はその選択を保存して次回も JP
   try{
-    var navLang=((navigator.languages&&navigator.languages[0])||navigator.language||'').toLowerCase();
-    if(navLang.indexOf('ja')===0 && currentLang==='en') toggleLang();
+    if(localStorage.getItem(LANG_KEY)==='jp' && currentLang==='en') toggleLang();
   }catch(e){}
   syncSlantDisable();
   if(typeof syncScaleToggle==='function') syncScaleToggle(true);
