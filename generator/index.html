@@ -42,10 +42,18 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow','DIN Condensed'
 .num-wrap input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text);-webkit-text-fill-color:var(--text);font-family:'Barlow',sans-serif;font-size:16px;font-weight:500;padding:7px 6px 7px 9px;-moz-appearance:textfield;appearance:textfield;}
 .num-wrap input::-webkit-inner-spin-button,.num-wrap input::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none;}
 .num-btns{display:flex;flex-direction:column;border-left:1px solid var(--border);}
-.num-btn{flex:1;width:22px;background:transparent;border:none;color:var(--text2);font-size:8px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s,color .1s;user-select:none;padding:0;}
+.num-btn{flex:1;width:22px;background:transparent;border:none;color:var(--text2);font-size:8px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s,color .1s;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:0;}
 .num-btn:hover{background:var(--bg4);color:var(--text);}
 .num-btn:active{background:var(--border2);}
 .num-btn+.num-btn{border-top:1px solid var(--border);}
+/* タッチ端末: ▲▼を横並びにして1つあたり約40×44pxのタップ領域を確保 */
+@media (pointer:coarse){
+  .num-wrap{min-height:44px;}
+  .num-btns{flex-direction:row-reverse;}
+  .num-btn{width:40px;font-size:12px;}
+  .num-btn+.num-btn{border-top:none;border-right:1px solid var(--border);}
+  .num-wrap[style*="width"]{min-width:136px;}
+}
 
 /* readonly */
 .ro-wrap{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:7px 9px;font-size:14px;color:var(--text3);font-family:'Barlow',sans-serif;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
@@ -213,6 +221,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
 
 /* language toggle */
 .header-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+.header-toggles{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
 .pill-toggle{display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:2px;cursor:pointer;position:relative;user-select:none;}
 .pill-toggle div{font-size:10px;font-weight:700;padding:4px 8px;border-radius:12px;color:var(--text3);transition:color .2s,background .2s;z-index:1;}
 .pill-toggle div.active{color:#1a1a1a;background:var(--accent1);}
@@ -343,6 +352,14 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
   .extfret-table tr:last-child td{border-bottom:none;}
   .extfret-table .num-wrap{width:70px;height:26px;margin:0 auto;}
   .extfret-table .num-wrap input{font-size:13px;padding:3px 4px;}
+  @media (pointer:coarse){
+    /* 表の中は列幅が決まっているので縦並びのまま、幅と高さを広げる（1つあたり約30×22px、▲▼合わせて44px） */
+    .tension-table .num-wrap,.extfret-table .num-wrap{height:44px;}
+    .extfret-table .num-wrap{width:84px;}
+    .tension-table .num-btns,.extfret-table .num-btns{flex-direction:column;}
+    .tension-table .num-btn,.extfret-table .num-btn{width:30px;font-size:10px;}
+    .tension-table .num-btn+.num-btn,.extfret-table .num-btn+.num-btn{border-right:none;border-top:1px solid var(--border);}
+  }
   .extfret-pitch{font-size:11px;color:var(--accent2);font-family:'Barlow',monospace;white-space:nowrap;}
   .extfret-scale{font-size:10px;color:var(--text3);font-family:'Barlow',monospace;white-space:nowrap;}
   /* slant disabled (curved mode) */
@@ -452,9 +469,15 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
   <div class="logo" data-i18n="logo">GTI / Fretboard Tools</div>
   <div class="header-row">
     <div class="app-title" data-i18n="app-title">Fretboard Generator</div>
-    <div class="pill-toggle" onclick="toggleLang()">
-      <div id="lang-en" class="active">EN</div>
-      <div id="lang-jp">JP</div>
+    <div class="header-toggles">
+      <div class="pill-toggle" onclick="toggleLang()">
+        <div id="lang-en" class="active">EN</div>
+        <div id="lang-jp">JP</div>
+      </div>
+      <div class="pill-toggle" onclick="toggleUnit()" title="Units / 単位">
+        <div id="unit-mm" class="active">mm</div>
+        <div id="unit-in">inch</div>
+      </div>
     </div>
   </div>
 
@@ -514,14 +537,14 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
         <label style="white-space:nowrap; display:flex; gap:6px; align-items:center;"><span data-i18n="lbl-ns">No. of Strings</span> <span class="strings-warn" id="ns-warn" style="display:none;">Too many strings!</span></label>
         <div class="num-wrap">
           <input type="number" id="ns" value="7" step="1" min="1">
-          <div class="num-btns"><button class="num-btn" data-target="ns" data-dir="up">▲</button><button class="num-btn" data-target="ns" data-dir="dn">▼</button></div>
+          <div class="num-btns"><button type="button" class="num-btn" data-target="ns" data-dir="up">▲</button><button type="button" class="num-btn" data-target="ns" data-dir="dn">▼</button></div>
         </div>
       </div>
       <div class="field">
         <label data-i18n="lbl-nf">No. of Frets</label>
         <div class="num-wrap">
           <input type="number" id="nf" value="24" step="1" min="12" max="48">
-          <div class="num-btns"><button class="num-btn" data-target="nf" data-dir="up">▲</button><button class="num-btn" data-target="nf" data-dir="dn">▼</button></div>
+          <div class="num-btns"><button type="button" class="num-btn" data-target="nf" data-dir="up">▲</button><button type="button" class="num-btn" data-target="nf" data-dir="dn">▼</button></div>
         </div>
       </div>
     </div>
@@ -541,16 +564,16 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
       <div class="field">
         <label data-i18n="lbl-last">Last String</label>
         <div class="num-wrap">
-          <input type="number" id="sN" value="27.0" step="0.1" min="20" max="40">
-          <div class="num-btns"><button class="num-btn" data-target="sN" data-dir="up">▲</button><button class="num-btn" data-target="sN" data-dir="dn">▼</button></div>
+          <input type="number" data-len="in" id="sN" value="27.0" step="0.1" min="20" max="40">
+          <div class="num-btns"><button type="button" class="num-btn" data-target="sN" data-dir="up">▲</button><button type="button" class="num-btn" data-target="sN" data-dir="dn">▼</button></div>
         </div>
       </div>
       <div class="field"><label>→ mm</label><div class="ro-wrap" id="sNmm">—</div></div>
       <div class="field">
         <label data-i18n="lbl-first">1st String</label>
         <div class="num-wrap">
-          <input type="number" id="s1" value="25.5" step="0.1" min="20" max="35">
-          <div class="num-btns"><button class="num-btn" data-target="s1" data-dir="up">▲</button><button class="num-btn" data-target="s1" data-dir="dn">▼</button></div>
+          <input type="number" data-len="in" id="s1" value="25.5" step="0.1" min="20" max="35">
+          <div class="num-btns"><button type="button" class="num-btn" data-target="s1" data-dir="up">▲</button><button type="button" class="num-btn" data-target="s1" data-dir="dn">▼</button></div>
         </div>
       </div>
       <div class="field"><label>→ mm</label><div class="ro-wrap" id="s1mm">—</div></div>
@@ -566,8 +589,8 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
       <div class="field" style="max-width:160px;">
         <label data-i18n="lbl-allstring">All Strings</label>
         <div class="num-wrap">
-          <input type="number" id="sAll" value="25.5" step="0.1" min="20" max="40">
-          <div class="num-btns"><button class="num-btn" data-target="sAll" data-dir="up">▲</button><button class="num-btn" data-target="sAll" data-dir="dn">▼</button></div>
+          <input type="number" data-len="in" id="sAll" value="25.5" step="0.1" min="20" max="40">
+          <div class="num-btns"><button type="button" class="num-btn" data-target="sAll" data-dir="up">▲</button><button type="button" class="num-btn" data-target="sAll" data-dir="dn">▼</button></div>
         </div>
       </div>
       <div class="field" style="max-width:80px;"><label>→ mm</label><div class="ro-wrap" id="sAllmm">—</div></div>
@@ -578,7 +601,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
           <label data-i18n="lbl-k">Curvature (k)</label>
           <div class="num-wrap">
             <input type="number" id="curve-k" value="0.5" step="0.1" min="-10" max="10">
-            <div class="num-btns"><button class="num-btn" data-target="curve-k" data-dir="up">▲</button><button class="num-btn" data-target="curve-k" data-dir="dn">▼</button></div>
+            <div class="num-btns"><button type="button" class="num-btn" data-target="curve-k" data-dir="up">▲</button><button type="button" class="num-btn" data-target="curve-k" data-dir="dn">▼</button></div>
           </div>
         </div>
         <div class="field"><label data-i18n="lbl-mid">Mid-scale</label><div class="ro-wrap" id="curve-mid">—</div></div>
@@ -595,7 +618,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
         <label data-i18n="lbl-pfret">Perpendicular Fret</label>
         <div class="num-wrap">
           <input type="number" id="pd-fret" value="8.0" step="0.5" min="0" max="24">
-          <div class="num-btns"><button class="num-btn" data-target="pd-fret" data-dir="up">▲</button><button class="num-btn" data-target="pd-fret" data-dir="dn">▼</button></div>
+          <div class="num-btns"><button type="button" class="num-btn" data-target="pd-fret" data-dir="up">▲</button><button type="button" class="num-btn" data-target="pd-fret" data-dir="dn">▼</button></div>
         </div>
       </div>
       <div class="field">
@@ -623,7 +646,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
               <label data-i18n="lbl-pd-direct">P.D. Value (direct)</label>
               <div class="num-wrap">
                 <input type="number" id="pd" value="0.37004" step="0.001" min="0" max="1">
-                <div class="num-btns"><button class="num-btn" data-target="pd" data-dir="up">▲</button><button class="num-btn" data-target="pd" data-dir="dn">▼</button></div>
+                <div class="num-btns"><button type="button" class="num-btn" data-target="pd" data-dir="up">▲</button><button type="button" class="num-btn" data-target="pd" data-dir="dn">▼</button></div>
               </div>
             </div>
             <div class="field">
@@ -636,7 +659,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
               <label data-i18n="lbl-ref-fret">Reference Fret No.</label>
               <div class="num-wrap">
                 <input type="number" id="pfref" value="8" step="1" min="0" max="36">
-                <div class="num-btns"><button class="num-btn" data-target="pfref" data-dir="up">▲</button><button class="num-btn" data-target="pfref" data-dir="dn">▼</button></div>
+                <div class="num-btns"><button type="button" class="num-btn" data-target="pfref" data-dir="up">▲</button><button type="button" class="num-btn" data-target="pfref" data-dir="dn">▼</button></div>
               </div>
             </div>
             <button class="std" onclick="applyFretPD()" style="align-self:end;" data-i18n="btn-apply-arr">→ Apply</button>
@@ -653,9 +676,21 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
               <label data-i18n="lbl-slant">Slant Angle (°)</label>
               <div class="num-wrap">
                 <input type="number" id="fret_slant" value="0" step="0.5" min="-45" max="45">
-                <div class="num-btns"><button class="num-btn" data-target="fret_slant" data-dir="up">▲</button><button class="num-btn" data-target="fret_slant" data-dir="dn">▼</button></div>
+                <div class="num-btns"><button type="button" class="num-btn" data-target="fret_slant" data-dir="up">▲</button><button type="button" class="num-btn" data-target="fret_slant" data-dir="dn">▼</button></div>
               </div>
             </div>
+          </div>
+        </div>
+        <!-- Fret slot end margin (blind frets) -->
+        <div class="adv-sec" id="slot-margin-sec">
+          <div class="adv-sec-title" data-i18n="sec-slot-margin">Fret Slot Ends (Blind Frets)</div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text2);">
+            <input type="checkbox" id="slot-margin-toggle" onchange="run()" style="accent-color:var(--accent);">
+            <span data-i18n="lbl-slot-margin-on">Stop fret slots short of the edge</span>
+          </label>
+          <div id="slot-margin-wrap" style="display:none;margin-top:6px;">
+            <div class="field" style="max-width:180px;"><label data-i18n="lbl-slot-margin" style="white-space:nowrap;">Fret slot end margin (mm)</label><div class="num-wrap"><input type="number" id="slot_margin" value="2.0" step="0.5" min="0" max="25" data-len="mm"><div class="num-btns"><button type="button" class="num-btn" data-target="slot_margin" data-dir="up">▲</button><button type="button" class="num-btn" data-target="slot_margin" data-dir="dn">▼</button></div></div></div>
+            <div class="hint" style="margin-top:4px;" data-i18n="hint-slot-margin">Measured square to the board edge. DXF / SVG layer: FRET_BLIND</div>
           </div>
         </div>
       </div>
@@ -670,7 +705,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
             <label><span data-i18n="lbl-fb-end">Board End (fret no.)</span></label>
             <div class="num-wrap">
               <input type="number" id="fb_end" value="25" step="1" min="1" max="49">
-              <div class="num-btns"><button class="num-btn" data-target="fb_end" data-dir="up">▲</button><button class="num-btn" data-target="fb_end" data-dir="dn">▼</button></div>
+              <div class="num-btns"><button type="button" class="num-btn" data-target="fb_end" data-dir="up">▲</button><button type="button" class="num-btn" data-target="fb_end" data-dir="dn">▼</button></div>
             </div>
           </div>
           <div style="margin-top:4px;font-size:11px;color:var(--text3);"><span data-i18n="hint-fb-end">Min: Frets + 1 =</span> <span id="fb-end-min">—</span></div>
@@ -683,10 +718,10 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
             </div>
             <div id="end-shape-r-opts" style="display:none;">
               <div class="field">
-                <label style="font-size:11px;">Corner R (mm)</label>
+                <label class="u-lbl" style="font-size:11px;">Corner R (mm)</label>
                 <div class="num-wrap" style="width:90px;">
-                  <input type="number" id="end-corner-r" value="6" step="0.5" min="0" max="30" oninput="run();">
-                  <div class="num-btns"><button class="num-btn" data-target="end-corner-r" data-dir="up">▲</button><button class="num-btn" data-target="end-corner-r" data-dir="dn">▼</button></div>
+                  <input type="number" data-len="mm" id="end-corner-r" value="6" step="0.5" min="0" max="30" oninput="run();">
+                  <div class="num-btns"><button type="button" class="num-btn" data-target="end-corner-r" data-dir="up">▲</button><button type="button" class="num-btn" data-target="end-corner-r" data-dir="dn">▼</button></div>
                 </div>
               </div>
               <div class="field">
@@ -694,7 +729,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
                 <div style="display:flex;gap:4px;align-items:center;">
                   <div class="num-wrap" style="width:80px;">
                     <input type="number" id="end-arc-r" value="5" step="0.5" min="1" max="999" oninput="run();">
-                    <div class="num-btns"><button class="num-btn" data-target="end-arc-r" data-dir="up">▲</button><button class="num-btn" data-target="end-arc-r" data-dir="dn">▼</button></div>
+                    <div class="num-btns"><button type="button" class="num-btn" data-target="end-arc-r" data-dir="up">▲</button><button type="button" class="num-btn" data-target="end-arc-r" data-dir="dn">▼</button></div>
                   </div>
                   <div style="display:flex;gap:0;">
                     <button id="end-arc-unit-in-btn" onclick="_endArcUnit='in';updateEndShapeUI();run();" style="padding:3px 7px;font-size:10px;border:1px solid var(--border);border-radius:var(--r2) 0 0 var(--r2);background:var(--accent);color:#fff;cursor:pointer;">in</button>
@@ -703,10 +738,10 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
                 </div>
               </div>
               <div class="field">
-                <label style="font-size:11px;">Offset from last fret (mm)</label>
+                <label class="u-lbl" style="font-size:11px;">Offset from last fret (mm)</label>
                 <div class="num-wrap" style="width:90px;">
-                  <input type="number" id="end-offset" value="15" step="1" min="0" max="100" oninput="this._userEdited=true;run();">
-                  <div class="num-btns"><button class="num-btn" data-target="end-offset" data-dir="up">▲</button><button class="num-btn" data-target="end-offset" data-dir="dn">▼</button></div>
+                  <input type="number" data-len="mm" id="end-offset" value="15" step="1" min="0" max="100" oninput="this._userEdited=true;run();">
+                  <div class="num-btns"><button type="button" class="num-btn" data-target="end-offset" data-dir="up">▲</button><button type="button" class="num-btn" data-target="end-offset" data-dir="dn">▼</button></div>
                 </div>
               </div>
               <div id="end-shape-curved-note" style="display:none;font-size:10px;color:var(--text3);margin-top:3px;">Curved mode: Line only</div>
@@ -722,12 +757,12 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
           </div>
           <div class="edge-wrap">
             <div class="edge-col">
-              <div class="field"><label data-i18n="lbl-bass">Bass Side</label><div class="num-wrap"><input type="number" id="eeN" value="5.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="eeN" data-dir="up">▲</button><button class="num-btn" data-target="eeN" data-dir="dn">▼</button></div></div></div>
-              <div class="field"><label data-i18n="lbl-treble">Treble Side</label><div class="num-wrap"><input type="number" id="ee1" value="4.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ee1" data-dir="up">▲</button><button class="num-btn" data-target="ee1" data-dir="dn">▼</button></div></div></div>
+              <div class="field"><label data-i18n="lbl-bass">Bass Side</label><div class="num-wrap"><input type="number" data-len="mm" id="eeN" value="5.0" step="0.5" min="0" max="20"><div class="num-btns"><button type="button" class="num-btn" data-target="eeN" data-dir="up">▲</button><button type="button" class="num-btn" data-target="eeN" data-dir="dn">▼</button></div></div></div>
+              <div class="field"><label data-i18n="lbl-treble">Treble Side</label><div class="num-wrap"><input type="number" data-len="mm" id="ee1" value="4.5" step="0.5" min="0" max="20"><div class="num-btns"><button type="button" class="num-btn" data-target="ee1" data-dir="up">▲</button><button type="button" class="num-btn" data-target="ee1" data-dir="dn">▼</button></div></div></div>
             </div>
             <div class="edge-col">
-              <div class="field"><label data-i18n="lbl-bass">Bass Side</label><div class="num-wrap"><input type="number" id="neN" value="4.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="neN" data-dir="up">▲</button><button class="num-btn" data-target="neN" data-dir="dn">▼</button></div></div></div>
-              <div class="field"><label data-i18n="lbl-treble">Treble Side</label><div class="num-wrap"><input type="number" id="ne1" value="3.5" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="ne1" data-dir="up">▲</button><button class="num-btn" data-target="ne1" data-dir="dn">▼</button></div></div></div>
+              <div class="field"><label data-i18n="lbl-bass">Bass Side</label><div class="num-wrap"><input type="number" data-len="mm" id="neN" value="4.0" step="0.5" min="0" max="20"><div class="num-btns"><button type="button" class="num-btn" data-target="neN" data-dir="up">▲</button><button type="button" class="num-btn" data-target="neN" data-dir="dn">▼</button></div></div></div>
+              <div class="field"><label data-i18n="lbl-treble">Treble Side</label><div class="num-wrap"><input type="number" data-len="mm" id="ne1" value="3.5" step="0.5" min="0" max="20"><div class="num-btns"><button type="button" class="num-btn" data-target="ne1" data-dir="up">▲</button><button type="button" class="num-btn" data-target="ne1" data-dir="dn">▼</button></div></div></div>
             </div>
           </div>
         </div>
@@ -735,8 +770,8 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
         <div class="adv-sec">
           <div class="adv-sec-title" data-i18n="sec-nut">Nut Overhang (mm)</div>
           <div class="g2">
-            <div class="field"><label data-i18n="lbl-nut-thick">Nut Thickness (mm)</label><div class="num-wrap"><input type="number" id="nut_thick" value="3.0" step="0.5" min="1" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_thick" data-dir="up">▲</button><button class="num-btn" data-target="nut_thick" data-dir="dn">▼</button></div></div></div>
-            <div class="field"><label data-i18n="lbl-nut-oh" style="white-space:nowrap; letter-spacing:-0.2px;">Headstock Overhang (mm)</label><div class="num-wrap"><input type="number" id="nut_oh" value="8.0" step="0.5" min="0" max="20"><div class="num-btns"><button class="num-btn" data-target="nut_oh" data-dir="up">▲</button><button class="num-btn" data-target="nut_oh" data-dir="dn">▼</button></div></div></div>
+            <div class="field"><label data-i18n="lbl-nut-thick">Nut Thickness (mm)</label><div class="num-wrap"><input type="number" data-len="mm" id="nut_thick" value="3.0" step="0.5" min="1" max="20"><div class="num-btns"><button type="button" class="num-btn" data-target="nut_thick" data-dir="up">▲</button><button type="button" class="num-btn" data-target="nut_thick" data-dir="dn">▼</button></div></div></div>
+            <div class="field"><label data-i18n="lbl-nut-oh" style="white-space:nowrap; letter-spacing:-0.2px;">Headstock Overhang (mm)</label><div class="num-wrap"><input type="number" data-len="mm" id="nut_oh" value="8.0" step="0.5" min="0" max="20"><div class="num-btns"><button type="button" class="num-btn" data-target="nut_oh" data-dir="up">▲</button><button type="button" class="num-btn" data-target="nut_oh" data-dir="dn">▼</button></div></div></div>
           </div>
           <!-- 0フレット設定 -->
           <div style="margin-top:8px;">
@@ -746,7 +781,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
             </label>
           </div>
           <div id="zero-fret-offset-wrap" style="display:none;margin-top:6px;">
-            <div class="field"><label data-i18n="lbl-zero-fret-offset" style="white-space:nowrap;">0 Fret → Nut offset (mm)</label><div class="num-wrap"><input type="number" id="zero_fret_offset" value="2.0" step="0.5" min="0" max="20" oninput="run()"><div class="num-btns"><button class="num-btn" data-target="zero_fret_offset" data-dir="up">▲</button><button class="num-btn" data-target="zero_fret_offset" data-dir="dn">▼</button></div></div></div>
+            <div class="field"><label data-i18n="lbl-zero-fret-offset" style="white-space:nowrap;">0 Fret → Nut offset (mm)</label><div class="num-wrap"><input type="number" data-len="mm" id="zero_fret_offset" value="2.0" step="0.5" min="0" max="20" oninput="run()"><div class="num-btns"><button type="button" class="num-btn" data-target="zero_fret_offset" data-dir="up">▲</button><button type="button" class="num-btn" data-target="zero_fret_offset" data-dir="dn">▼</button></div></div></div>
           </div>
         </div>
       </div>
@@ -767,18 +802,18 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
             <div class="field">
               <label data-i18n="lbl-bpitch">Bridge Spacing (mm)</label>
               <div class="num-wrap">
-                <input type="number" id="bpitch" value="10.5" step="0.1" min="5" max="25">
-                <div class="num-btns"><button class="num-btn" data-target="bpitch" data-dir="up">▲</button><button class="num-btn" data-target="bpitch" data-dir="dn">▼</button></div>
+                <input type="number" data-len="mm" id="bpitch" value="10.5" step="0.1" min="5" max="25">
+                <div class="num-btns"><button type="button" class="num-btn" data-target="bpitch" data-dir="up">▲</button><button type="button" class="num-btn" data-target="bpitch" data-dir="dn">▼</button></div>
               </div>
-              <div class="hint"><span style="color:var(--accent3);" data-i18n="hint-span">Span</span> <span id="bw-calc" style="color:var(--accent3);">—</span> / <span style="color:var(--accent3);" data-i18n="hint-total">Total</span> <span id="bw-total" style="color:var(--accent3);">—</span> mm</div>
+              <div class="hint"><span style="color:var(--accent3);" data-i18n="hint-span">Span</span> <span id="bw-calc" style="color:var(--accent3);">—</span> / <span style="color:var(--accent3);" data-i18n="hint-total">Total</span> <span id="bw-total" style="color:var(--accent3);">—</span> <span class="u-len">mm</span></div>
             </div>
             <div class="field">
               <label data-i18n="lbl-npitch">Nut Spacing (mm)</label>
               <div class="num-wrap">
-                <input type="number" id="npitch" value="7.0" step="0.1" min="5" max="25">
-                <div class="num-btns"><button class="num-btn" data-target="npitch" data-dir="up">▲</button><button class="num-btn" data-target="npitch" data-dir="dn">▼</button></div>
+                <input type="number" data-len="mm" id="npitch" value="7.0" step="0.1" min="5" max="25">
+                <div class="num-btns"><button type="button" class="num-btn" data-target="npitch" data-dir="up">▲</button><button type="button" class="num-btn" data-target="npitch" data-dir="dn">▼</button></div>
               </div>
-              <div class="hint"><span style="color:var(--accent3);" data-i18n="hint-span">Span</span> <span id="nw-calc" style="color:var(--accent3);">—</span> / <span style="color:var(--accent3);" data-i18n="hint-total">Total</span> <span id="nw-total" style="color:var(--accent3);">—</span> mm</div>
+              <div class="hint"><span style="color:var(--accent3);" data-i18n="hint-span">Span</span> <span id="nw-calc" style="color:var(--accent3);">—</span> / <span style="color:var(--accent3);" data-i18n="hint-total">Total</span> <span id="nw-total" style="color:var(--accent3);">—</span> <span class="u-len">mm</span></div>
             </div>
           </div>
         </div>
@@ -794,31 +829,31 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
           </div>
           <div class="g2" style="margin-bottom:4px;">
             <div class="field">
-              <div class="num-wrap"><input type="number" id="b_pitch_N" value="11.5" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="b_pitch_N" data-dir="up">▲</button><button class="num-btn" data-target="b_pitch_N" data-dir="dn">▼</button></div></div>
+              <div class="num-wrap"><input type="number" data-len="mm" id="b_pitch_N" value="11.5" step="0.1" min="5" max="25"><div class="num-btns"><button type="button" class="num-btn" data-target="b_pitch_N" data-dir="up">▲</button><button type="button" class="num-btn" data-target="b_pitch_N" data-dir="dn">▼</button></div></div>
               <div class="hint" style="font-size:10px;" data-i18n="lbl-bNpitch">Low~adj</div>
             </div>
             <div class="field">
-              <div class="num-wrap"><input type="number" id="n_pitch_N" value="7.5" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="n_pitch_N" data-dir="up">▲</button><button class="num-btn" data-target="n_pitch_N" data-dir="dn">▼</button></div></div>
+              <div class="num-wrap"><input type="number" data-len="mm" id="n_pitch_N" value="7.5" step="0.1" min="5" max="25"><div class="num-btns"><button type="button" class="num-btn" data-target="n_pitch_N" data-dir="up">▲</button><button type="button" class="num-btn" data-target="n_pitch_N" data-dir="dn">▼</button></div></div>
               <div class="hint" style="font-size:10px;" data-i18n="lbl-nNpitch">Low~adj</div>
             </div>
           </div>
           <div class="g2" style="margin-bottom:4px;">
             <div class="field">
-              <div class="num-wrap"><input type="number" id="b_pitch_1" value="10.5" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="b_pitch_1" data-dir="up">▲</button><button class="num-btn" data-target="b_pitch_1" data-dir="dn">▼</button></div></div>
+              <div class="num-wrap"><input type="number" data-len="mm" id="b_pitch_1" value="10.5" step="0.1" min="5" max="25"><div class="num-btns"><button type="button" class="num-btn" data-target="b_pitch_1" data-dir="up">▲</button><button type="button" class="num-btn" data-target="b_pitch_1" data-dir="dn">▼</button></div></div>
               <div class="hint" style="font-size:10px;" data-i18n="lbl-b1pitch">1~2 str</div>
             </div>
             <div class="field">
-              <div class="num-wrap"><input type="number" id="n_pitch_1" value="6.5" step="0.1" min="5" max="25"><div class="num-btns"><button class="num-btn" data-target="n_pitch_1" data-dir="up">▲</button><button class="num-btn" data-target="n_pitch_1" data-dir="dn">▼</button></div></div>
+              <div class="num-wrap"><input type="number" data-len="mm" id="n_pitch_1" value="6.5" step="0.1" min="5" max="25"><div class="num-btns"><button type="button" class="num-btn" data-target="n_pitch_1" data-dir="up">▲</button><button type="button" class="num-btn" data-target="n_pitch_1" data-dir="dn">▼</button></div></div>
               <div class="hint" style="font-size:10px;" data-i18n="lbl-n1pitch">1~2 str</div>
             </div>
           </div>
           <!-- Bridge/Nut Span hint (Even modeと同様にhighlight表示) -->
           <div class="g2" style="margin-top:2px;margin-bottom:2px;">
             <div class="field">
-              <div class="hint" id="linear-bspan-hint"><span style="color:var(--accent3);" data-i18n="hint-span">Span</span> <span id="linear-bw-calc" style="color:var(--accent3);">—</span> / <span style="color:var(--accent3);" data-i18n="hint-total">Total</span> <span id="linear-bw-total" style="color:var(--accent3);">—</span> mm</div>
+              <div class="hint" id="linear-bspan-hint"><span style="color:var(--accent3);" data-i18n="hint-span">Span</span> <span id="linear-bw-calc" style="color:var(--accent3);">—</span> / <span style="color:var(--accent3);" data-i18n="hint-total">Total</span> <span id="linear-bw-total" style="color:var(--accent3);">—</span> <span class="u-len">mm</span></div>
             </div>
             <div class="field">
-              <div class="hint" id="linear-nspan-hint"><span style="color:var(--accent3);" data-i18n="hint-span">Span</span> <span id="linear-nw-calc" style="color:var(--accent3);">—</span> / <span style="color:var(--accent3);" data-i18n="hint-total">Total</span> <span id="linear-nw-total" style="color:var(--accent3);">—</span> mm</div>
+              <div class="hint" id="linear-nspan-hint"><span style="color:var(--accent3);" data-i18n="hint-span">Span</span> <span id="linear-nw-calc" style="color:var(--accent3);">—</span> / <span style="color:var(--accent3);" data-i18n="hint-total">Total</span> <span id="linear-nw-total" style="color:var(--accent3);">—</span> <span class="u-len">mm</span></div>
             </div>
           </div>
           <div id="linear-span-hint" style="display:none;">—</div>
@@ -858,10 +893,10 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
               <!-- Center Dot settings -->
               <div id="inlay-center-opts">
                 <div class="field">
-                  <label>Diameter (mm)</label>
+                  <label class="u-lbl">Diameter (mm)</label>
                   <div class="num-wrap" style="width:90px;">
-                    <input type="number" id="inlay-center-diam" value="6.0" step="0.5" min="1" max="20" oninput="_inlaySettings.centerDiam=parseFloat(this.value)||6;updateInlayUI();run();">
-                    <div class="num-btns"><button class="num-btn" data-target="inlay-center-diam" data-dir="up">▲</button><button class="num-btn" data-target="inlay-center-diam" data-dir="dn">▼</button></div>
+                    <input type="number" data-len="mm" id="inlay-center-diam" value="6.0" step="0.5" min="1" max="20" oninput="_inlaySettings.centerDiam=getLen(this)||6;updateInlayUI();run();">
+                    <div class="num-btns"><button type="button" class="num-btn" data-target="inlay-center-diam" data-dir="up">▲</button><button type="button" class="num-btn" data-target="inlay-center-diam" data-dir="dn">▼</button></div>
                   </div>
                 </div>
               </div>
@@ -870,10 +905,10 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
               <div id="inlay-offset-opts" style="display:none;">
 
                 <div class="field">
-                  <label>Diameter (mm)</label>
+                  <label class="u-lbl">Diameter (mm)</label>
                   <div class="num-wrap" style="width:90px;">
-                    <input type="number" id="inlay-offset-diam" value="5.0" step="0.5" min="1" max="20" oninput="_inlaySettings.offsetDiam=parseFloat(this.value)||5;updateInlayUI();run();">
-                    <div class="num-btns"><button class="num-btn" data-target="inlay-offset-diam" data-dir="up">▲</button><button class="num-btn" data-target="inlay-offset-diam" data-dir="dn">▼</button></div>
+                    <input type="number" data-len="mm" id="inlay-offset-diam" value="5.0" step="0.5" min="1" max="20" oninput="_inlaySettings.offsetDiam=getLen(this)||5;updateInlayUI();run();">
+                    <div class="num-btns"><button type="button" class="num-btn" data-target="inlay-offset-diam" data-dir="up">▲</button><button type="button" class="num-btn" data-target="inlay-offset-diam" data-dir="dn">▼</button></div>
                   </div>
                 </div>
                 <div class="field">
@@ -903,12 +938,12 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
                   <div style="display:flex;gap:4px;align-items:center;">
                     <div class="num-wrap" style="width:72px;">
                       <input type="number" id="inlay-hc-start" value="0.50" step="0.01" min="0.1" max="1" oninput="_inlaySettings.hCoefStart=parseFloat(this.value)||0.5;run();">
-                      <div class="num-btns"><button class="num-btn" data-target="inlay-hc-start" data-dir="up">▲</button><button class="num-btn" data-target="inlay-hc-start" data-dir="dn">▼</button></div>
+                      <div class="num-btns"><button type="button" class="num-btn" data-target="inlay-hc-start" data-dir="up">▲</button><button type="button" class="num-btn" data-target="inlay-hc-start" data-dir="dn">▼</button></div>
                     </div>
                     <span style="color:var(--text3);">×</span>
                     <div class="num-wrap" style="width:72px;">
                       <input type="number" id="inlay-wc-start" value="0.60" step="0.01" min="0.1" max="1" oninput="_inlaySettings.wCoefStart=parseFloat(this.value)||0.6;run();">
-                      <div class="num-btns"><button class="num-btn" data-target="inlay-wc-start" data-dir="up">▲</button><button class="num-btn" data-target="inlay-wc-start" data-dir="dn">▼</button></div>
+                      <div class="num-btns"><button type="button" class="num-btn" data-target="inlay-wc-start" data-dir="up">▲</button><button type="button" class="num-btn" data-target="inlay-wc-start" data-dir="dn">▼</button></div>
                     </div>
                   </div>
                 </div>
@@ -917,20 +952,20 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
                   <div style="display:flex;gap:4px;align-items:center;">
                     <div class="num-wrap" style="width:72px;">
                       <input type="number" id="inlay-hc-end" value="0.50" step="0.01" min="0.1" max="1" oninput="_inlaySettings.hCoefEnd=parseFloat(this.value)||0.5;run();">
-                      <div class="num-btns"><button class="num-btn" data-target="inlay-hc-end" data-dir="up">▲</button><button class="num-btn" data-target="inlay-hc-end" data-dir="dn">▼</button></div>
+                      <div class="num-btns"><button type="button" class="num-btn" data-target="inlay-hc-end" data-dir="up">▲</button><button type="button" class="num-btn" data-target="inlay-hc-end" data-dir="dn">▼</button></div>
                     </div>
                     <span style="color:var(--text3);">×</span>
                     <div class="num-wrap" style="width:72px;">
                       <input type="number" id="inlay-wc-end" value="0.60" step="0.01" min="0.1" max="1" oninput="_inlaySettings.wCoefEnd=parseFloat(this.value)||0.6;run();">
-                      <div class="num-btns"><button class="num-btn" data-target="inlay-wc-end" data-dir="up">▲</button><button class="num-btn" data-target="inlay-wc-end" data-dir="dn">▼</button></div>
+                      <div class="num-btns"><button type="button" class="num-btn" data-target="inlay-wc-end" data-dir="up">▲</button><button type="button" class="num-btn" data-target="inlay-wc-end" data-dir="dn">▼</button></div>
                     </div>
                   </div>
                 </div>
                 <div class="field" id="inlay-radius-wrap">
-                  <label style="font-size:11px;">Corner radius (mm, 0=square)</label>
+                  <label class="u-lbl" style="font-size:11px;">Corner radius (mm, 0=square)</label>
                   <div class="num-wrap" style="width:90px;">
-                    <input type="number" id="inlay-radius" value="2.0" step="0.5" min="0" max="20" oninput="_inlaySettings.radius=parseFloat(this.value);run();">
-                    <div class="num-btns"><button class="num-btn" data-target="inlay-radius" data-dir="up">▲</button><button class="num-btn" data-target="inlay-radius" data-dir="dn">▼</button></div>
+                    <input type="number" data-len="mm" id="inlay-radius" value="2.0" step="0.5" min="0" max="20" oninput="_inlaySettings.radius=getLen(this);run();">
+                    <div class="num-btns"><button type="button" class="num-btn" data-target="inlay-radius" data-dir="up">▲</button><button type="button" class="num-btn" data-target="inlay-radius" data-dir="dn">▼</button></div>
                   </div>
                   <div id="inlay-radius-curved-note" style="display:none;font-size:10px;color:var(--text3);margin-top:3px;">Curved mode: R=0 fixed</div>
                 </div>
@@ -1002,7 +1037,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
               <label data-i18n="lbl-edo">Equal Temperament (N-TET)</label>
               <div class="num-wrap">
                 <input type="number" id="edo" value="12" step="1" min="1" max="100">
-                <div class="num-btns"><button class="num-btn" data-target="edo" data-dir="up">▲</button><button class="num-btn" data-target="edo" data-dir="dn">▼</button></div>
+                <div class="num-btns"><button type="button" class="num-btn" data-target="edo" data-dir="up">▲</button><button type="button" class="num-btn" data-target="edo" data-dir="dn">▼</button></div>
               </div>
             </div>
           </div>
@@ -1018,7 +1053,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
   <div class="metrics">
     <div class="metric"><div class="metric-lbl" data-i18n="lbl-ba">Bridge Angle</div><div><span class="metric-val" id="o-ba">—</span><span class="metric-unit">°</span></div></div>
     <div class="metric"><div class="metric-lbl" data-i18n="lbl-na">Nut Angle</div><div><span class="metric-val" id="o-na">—</span><span class="metric-unit">°</span></div></div>
-    <div class="metric"><div class="metric-lbl" data-i18n="lbl-sd">Scale Difference</div><div><span class="metric-val" id="o-df">—</span><span class="metric-unit">mm</span></div></div>
+    <div class="metric"><div class="metric-lbl" data-i18n="lbl-sd">Scale Difference</div><div><span class="metric-val" id="o-df">—</span><span class="metric-unit u-len">mm</span></div></div>
   </div>
   <div class="preview-layout">
     <div class="scale-list" id="scale-list"></div>
@@ -1030,6 +1065,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
     <span style="color:#38bdf8;" data-i18n="legend-br">■ Bridge</span>
     <span style="color:#f59e0b;" data-i18n="legend-bo">■ Board outline</span>
     <span style="color:#86efac;" data-i18n="legend-no">■ Nut overhang</span>
+    <span style="color:#f472b6;display:none;" id="legend-blind" data-i18n="legend-blind">■ Blind fret slot</span>
   </div>
   <div class="dxf-area" style="flex-direction:column;align-items:flex-start;gap:8px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
@@ -1046,6 +1082,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
     </div>
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0;max-width:100%;">
       <button class="primary" onclick="withTerms(exportDXF)" data-i18n="btn-dxf">⬇ Export DXF</button>
+      <button class="primary" onclick="withTerms(exportSVG)" data-i18n="btn-svg">⬇ Export SVG</button>
       <button class="print-btn" onclick="withTerms(printTemplate)" data-i18n="btn-print">🖨 Print 1:1 Template</button>
       <select class="print-paper" id="print-paper" title="Paper"><option value="a4">A4</option><option value="a3">A3</option><option value="a2">A2</option><option value="a1">A1</option><option value="letter">Letter</option><option value="fit" data-i18n="opt-paper-fit">1 sheet (roll)</option></select>
       <span class="dxf-fname" id="dxf-filename"></span>
@@ -1178,7 +1215,9 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
 </div>
 
 <script>
-// ── num-btn long-press ──
+// ── num-btn（▲▼）: タップ・クリック・長押しを Pointer Events に統一 ──
+// 旧実装は touchstart で preventDefault していたため、onclick 依存のボタン
+// （音程・ゲージ）がスマホで反応しなかった。動作はすべてここで振り分ける。
 (function(){
   var _t=null,_iv=null;
   function step(id,dir){
@@ -1193,25 +1232,143 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
     inp.value=v;
     inp.dispatchEvent(new Event('input',{bubbles:true}));
   }
-  function gb(e){return e.target.closest('.num-btn');}
-  document.addEventListener('mousedown',function(e){
-    var b=gb(e); if(!b) return; e.preventDefault();
-    var id=b.dataset.target,dir=b.dataset.dir;
-    step(id,dir);
-    _t=setTimeout(function(){_iv=setInterval(function(){step(id,dir);},60);},400);
+  // ボタンの種類ごとの1ステップ分の動作（要素ではなく値を保持するので、
+  // 長押し中に行が再描画されても動き続ける）
+  function actionFor(b){
+    var d=b.dataset, up=d.dir==='up';
+    if(d.target) return function(){ step(d.target,d.dir); };
+    if(d.extfret!=null) return function(){ stepExtFret(parseInt(d.extfret),d.dir); };
+    if(d.note!=null) return function(){ shiftNote(parseInt(d.note),up?1:-1); };
+    if(d.gauge!=null) return function(){ stepGauge(parseInt(d.gauge),up?1:-1); };
+    return null;
+  }
+  function stop(){ clearTimeout(_t); clearInterval(_iv); _t=_iv=null; }
+  function gb(e){ return e.target&&e.target.closest?e.target.closest('.num-btn'):null; }
+  var _byPointer=false; // ポインター操作のあとに来る click は処理済みなので無視する
+  document.addEventListener('pointerdown',function(e){
+    var b=gb(e); if(!b) return;
+    if(e.pointerType==='mouse'&&e.button!==0) return;
+    _byPointer=true;
+    e.preventDefault(); // フォーカス移動・ソフトキーボード表示・テキスト選択を防ぐ
+    var act=actionFor(b); if(!act) return;
+    stop();
+    act();
+    _t=setTimeout(function(){ _iv=setInterval(act,60); },400);
   });
-  ['mouseup','mouseleave'].forEach(function(ev){document.addEventListener(ev,function(){clearTimeout(_t);clearInterval(_iv);});});
-  document.addEventListener('touchstart',function(e){
-    var b=gb(e); if(!b) return; e.preventDefault();
-    var id=b.dataset.target,dir=b.dataset.dir;
-    step(id,dir);
-    _t=setTimeout(function(){_iv=setInterval(function(){step(id,dir);},60);},400);
-  },{passive:false});
-  ['touchend','touchcancel'].forEach(function(ev){document.addEventListener(ev,function(){clearTimeout(_t);clearInterval(_iv);});});
+  ['pointerup','pointercancel'].forEach(function(ev){ window.addEventListener(ev,stop); });
+  window.addEventListener('blur',stop);
+  document.addEventListener('visibilitychange',stop);
+  // キーボード操作（Enter/Space）は click だけが届くので、ここで1ステップ動かす
+  document.addEventListener('keydown',function(){ _byPointer=false; },true);
+  document.addEventListener('click',function(e){
+    var b=gb(e); if(!b) return;
+    if(_byPointer){ _byPointer=false; return; }
+    var act=actionFor(b); if(act) act();
+  });
+  document.addEventListener('contextmenu',function(e){ if(gb(e)) e.preventDefault(); });
 })();
 
 // ── constants ──
 var I2M=25.4;
+
+// ── 長さの単位（表示だけを切り替える。計算・シード・DXFは常に基準単位のまま）──
+// 各入力欄の基準単位は data-len で決まる（"mm"＝ほとんどの欄、"in"＝スケール長）。
+// スケール長（data-len="in"）は単位設定に関係なく常に inch で入力・表示する。
+// 欄ごとに基準単位の値（el._canon）を保持し、ユーザーが編集した欄だけ表示値から変換し直す。
+// 単位を切り替えても基準値から表示し直すだけなので、往復で誤差が溜まらない。
+var UNIT_KEY='gti-fb-unit';
+var _unit=(function(){ try{ return localStorage.getItem(UNIT_KEY)==='in'?'in':'mm'; }catch(e){ return 'mm'; } })();
+function _lenEl(x){ return typeof x==='string'?document.getElementById(x):x; }
+function _canonOf(el){ return (el&&el.dataset&&el.dataset.len)||'mm'; }
+function _dispUnit(canon){ return canon==='in'?'in':_unit; }
+function _dispToCanon(v,canon){ var d=_dispUnit(canon); return canon===d?v:(d==='in'?v*I2M:v/I2M); }
+function _canonToDisp(v,canon){ var d=_dispUnit(canon); return canon===d?v:(d==='in'?v/I2M:v*I2M); }
+function _lenDec(canon){ return canon==='in'?4:(_unit==='mm'?2:3); } // mm:2桁 / inch:3桁（スケール長は4桁）
+function _fmtNum(v,dec){ return String(parseFloat(v.toFixed(dec))); }
+// 入力欄の値を基準単位で返す（空欄なら NaN）
+function getLen(x){
+  var el=_lenEl(x); if(!el) return NaN;
+  if(el._canon!=null && el.value===el._shown) return el._canon;
+  var v=parseFloat(el.value); if(isNaN(v)) return NaN;
+  return _dispToCanon(v,_canonOf(el));
+}
+// 基準単位の値を入力欄にセット（表示単位に変換して表示）
+function setLen(x,v){
+  var el=_lenEl(x); if(!el) return;
+  var c=_canonOf(el);
+  if(v==null||isNaN(v)){ el._canon=null; el.value=''; el._shown=''; return; }
+  el._canon=v; el.value=_fmtNum(_canonToDisp(v,c),_lenDec(c)); el._shown=el.value;
+}
+// mm の値 → 表示単位の数値文字列（読み取り専用の表示用）
+function fmtLen(mm,decMm,decIn){
+  if(_unit==='in') return (mm/I2M).toFixed(decIn!=null?decIn:3);
+  return mm.toFixed(decMm!=null?decMm:1);
+}
+function lenUnit(){ return _unit==='in'?'in':'mm'; }
+// mm 基準の欄の step/min/max を表示単位に合わせる（元の値は data-*0 に保存）
+function _inchStep(st){ return st<=0.1?0.005:st<=0.5?0.02:0.05; }
+function _applyLenAttrs(el){
+  var c=_canonOf(el), d=el.dataset;
+  if(d.step0==null){ d.step0=el.getAttribute('step')||''; d.min0=el.getAttribute('min')||''; d.max0=el.getAttribute('max')||''; }
+  if(c===_dispUnit(c)){
+    if(d.step0!=='') el.setAttribute('step',d.step0);
+    if(d.min0!=='') el.setAttribute('min',d.min0); else el.removeAttribute('min');
+    if(d.max0!=='') el.setAttribute('max',d.max0); else el.removeAttribute('max');
+    return;
+  }
+  var st=parseFloat(d.step0)||1, dec=_lenDec(c);
+  el.setAttribute('step', _inchStep(st));
+  if(d.min0!=='') el.setAttribute('min',_fmtNum(_canonToDisp(parseFloat(d.min0),c),dec));
+  if(d.max0!=='') el.setAttribute('max',_fmtNum(_canonToDisp(parseFloat(d.max0),c),dec));
+}
+// 動的に生成する mm 基準の入力欄用: 表示値と属性の文字列
+function lenInputAttrs(mm,step0,min0,max0){
+  var dec=_lenDec('mm'), cv=function(v){ return _fmtNum(_canonToDisp(v,'mm'),dec); };
+  var st=_unit==='mm'?step0:_inchStep(step0);
+  return ' data-len="mm" data-step0="'+step0+'" data-min0="'+min0+'" data-max0="'+max0+'" value="'+(_unit==='mm'?mm.toFixed(1):cv(mm))+'" step="'+st+'" min="'+cv(min0)+'" max="'+cv(max0)+'"';
+}
+// ラベル中の単位表記を表示単位に合わせる
+var _SCALE_LBL_KEYS={'sec-scale':1,'lbl-scale':1};
+function unitizeLabel(html,key){
+  if(html==null) return html;
+  if(_SCALE_LBL_KEYS[key]) return html; // スケール長は常に inch
+  if(_unit==='in') return String(html).replace(/\(mm\)/g,'(in)').replace(/\(mm,/g,'(in,');
+  return html;
+}
+function applyUnitLabels(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var k=el.dataset.i18n;
+    if(typeof i18n==='function' && TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][k]!=null) el.innerHTML=unitizeLabel(i18n(k),k);
+  });
+  document.querySelectorAll('.u-lbl').forEach(function(el){
+    if(el.dataset.u0==null) el.dataset.u0=el.innerHTML;
+    el.innerHTML=unitizeLabel(el.dataset.u0,'');
+  });
+  document.querySelectorAll('.u-len').forEach(function(el){ el.textContent=lenUnit(); });
+  var bm=document.getElementById('unit-mm'), bi=document.getElementById('unit-in');
+  if(bm) bm.classList.toggle('active',_unit==='mm');
+  if(bi) bi.classList.toggle('active',_unit==='in');
+}
+function setUnit(u){
+  u=(u==='in')?'in':'mm';
+  var fields=Array.prototype.slice.call(document.querySelectorAll('input[data-len]'));
+  var vals=fields.map(function(el){ return getLen(el); }); // 切り替え前の単位で基準値を確定
+  _unit=u;
+  try{ localStorage.setItem(UNIT_KEY,u); }catch(e){}
+  fields.forEach(function(el,i){ _applyLenAttrs(el); setLen(el,vals[i]); });
+  applyUnitLabels();
+  if(typeof _inlaySettings!=='undefined' && _inlaySettings.enabled) updateInlayUI();
+  run();
+}
+function toggleUnit(){ setUnit(_unit==='mm'?'in':'mm'); }
+function initUnits(){
+  document.querySelectorAll('input[data-len]').forEach(function(el){
+    var c=_canonOf(el), v=parseFloat(el.value);
+    _applyLenAttrs(el);
+    if(!isNaN(v)) setLen(el,v); // HTML に書かれた初期値は基準単位
+  });
+  applyUnitLabels();
+}
 var K2L=0.45359237; // kg per lb
 function getEDO(){ var el=document.getElementById('edo'); return el?(parseInt(el.value)||12):12; }
 
@@ -1300,39 +1457,39 @@ function updateInlayUI(){
       html+='<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">';
       if(isDot){
         html+='<span style="font-size:10px;color:var(--text3);">\u00d8</span>';
-        html+='<div class="num-wrap" style="width:72px;"><input type="number" id="inlay-dbl-diam-'+f+'" value="'+(d.toFixed(1))+'" step="0.5" min="1" max="20" oninput="_inlaySettings.dblFrets['+f+'].diam=parseFloat(this.value)||'+baseDiam+';_inlaySettings.dblFrets['+f+'].linked=false;updateInlayUI();run();">';
-        html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-diam-'+f+'" data-dir="up">\u25b2</button><button class="num-btn" data-target="inlay-dbl-diam-'+f+'" data-dir="dn">\u25bc</button></div></div>';
-        html+='<span style="font-size:10px;color:var(--text3);">mm</span>';
+        html+='<div class="num-wrap" style="width:72px;"><input type="number" id="inlay-dbl-diam-'+f+'"'+lenInputAttrs(d,0.5,1,20)+' oninput="_inlaySettings.dblFrets['+f+'].diam=getLen(this)||'+baseDiam+';_inlaySettings.dblFrets['+f+'].linked=false;updateInlayUI();run();">';
+        html+='<div class="num-btns"><button type="button" class="num-btn" data-target="inlay-dbl-diam-'+f+'" data-dir="up">\u25b2</button><button type="button" class="num-btn" data-target="inlay-dbl-diam-'+f+'" data-dir="dn">\u25bc</button></div></div>';
+        html+='<span style="font-size:10px;color:var(--text3);">'+lenUnit()+'</span>';
         var linkId='inlay-dbl-link-'+f;
         html+='<label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:10px;color:var(--text3);margin-left:3px;">';
         html+='<input type="checkbox" id="'+linkId+'"'+(cfg.linked?' checked':'')+' onchange="_inlaySettings.dblFrets['+f+'].linked=this.checked;if(this.checked){_inlaySettings.dblFrets['+f+'].diam='+baseDiam+';updateInlayUI();}run();" style="accent-color:var(--accent);width:11px;height:11px;">';
         html+=' link</label>';
       } else {
         html+='<span style="font-size:10px;color:var(--text3);">Out</span>';
-        html+='<div class="num-wrap" style="width:68px;"><input type="number" id="inlay-dbl-outer-'+f+'" value="'+(cfg.outer||7.0).toFixed(1)+'" step="0.5" min="1" max="20" oninput="_inlaySettings.dblFrets['+f+'].outer=parseFloat(this.value)||7;run();">';
-        html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-outer-'+f+'" data-dir="up">\u25b2</button><button class="num-btn" data-target="inlay-dbl-outer-'+f+'" data-dir="dn">\u25bc</button></div></div>';
+        html+='<div class="num-wrap" style="width:68px;"><input type="number" id="inlay-dbl-outer-'+f+'"'+lenInputAttrs(cfg.outer||7.0,0.5,1,20)+' oninput="_inlaySettings.dblFrets['+f+'].outer=getLen(this)||7;run();">';
+        html+='<div class="num-btns"><button type="button" class="num-btn" data-target="inlay-dbl-outer-'+f+'" data-dir="up">\u25b2</button><button type="button" class="num-btn" data-target="inlay-dbl-outer-'+f+'" data-dir="dn">\u25bc</button></div></div>';
         html+='<span style="font-size:10px;color:var(--text3);">In</span>';
-        html+='<div class="num-wrap" style="width:68px;"><input type="number" id="inlay-dbl-inner-'+f+'" value="'+(cfg.inner||4.0).toFixed(1)+'" step="0.5" min="1" max="20" oninput="_inlaySettings.dblFrets['+f+'].inner=parseFloat(this.value)||4;run();">';
-        html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-inner-'+f+'" data-dir="up">▲</button><button class="num-btn" data-target="inlay-dbl-inner-'+f+'" data-dir="dn">▼</button></div></div>';
-        html+='<span style="font-size:10px;color:var(--text3);">mm</span>';
+        html+='<div class="num-wrap" style="width:68px;"><input type="number" id="inlay-dbl-inner-'+f+'"'+lenInputAttrs(cfg.inner||4.0,0.5,1,20)+' oninput="_inlaySettings.dblFrets['+f+'].inner=getLen(this)||4;run();">';
+        html+='<div class="num-btns"><button type="button" class="num-btn" data-target="inlay-dbl-inner-'+f+'" data-dir="up">▲</button><button type="button" class="num-btn" data-target="inlay-dbl-inner-'+f+'" data-dir="dn">▼</button></div></div>';
+        html+='<span style="font-size:10px;color:var(--text3);">'+lenUnit()+'</span>';
       }
       
       // C-to-C行 (Centerモードかつダブルドット時のみ有効)
       if(dblEnabled && mode === 'center'){
         html+='<div style="flex-basis:100%;height:4px;"></div>';
         html+='<span style="font-size:10px;color:var(--text3);margin-left:2px;">C-to-C</span>';
-        html+='<div class="num-wrap" style="width:72px;"><input type="number" id="inlay-dbl-ctc-'+f+'" value="'+ctc.toFixed(1)+'" step="0.5" min="2" max="60" oninput="_inlaySettings.dblFrets['+f+'].ctc=parseFloat(this.value)||28; if('+f+'!==12)_inlaySettings.dblFrets['+f+'].ctcManual=true; run();">';
-        html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-ctc-'+f+'" data-dir="up">▲</button><button class="num-btn" data-target="inlay-dbl-ctc-'+f+'" data-dir="dn">▼</button></div></div>';
-        html+='<span style="font-size:10px;color:var(--text3);">mm</span>';
+        html+='<div class="num-wrap" style="width:72px;"><input type="number" id="inlay-dbl-ctc-'+f+'"'+lenInputAttrs(ctc,0.5,2,60)+' oninput="_inlaySettings.dblFrets['+f+'].ctc=getLen(this)||28; if('+f+'!==12)_inlaySettings.dblFrets['+f+'].ctcManual=true; run();">';
+        html+='<div class="num-btns"><button type="button" class="num-btn" data-target="inlay-dbl-ctc-'+f+'" data-dir="up">▲</button><button type="button" class="num-btn" data-target="inlay-dbl-ctc-'+f+'" data-dir="dn">▼</button></div></div>';
+        html+='<span style="font-size:10px;color:var(--text3);">'+lenUnit()+'</span>';
       }
       
       if (mode === 'offset' && !dblEnabled) {
         var offVal = cfg.offset || 0;
         html+='<div style="flex-basis:100%;height:0;"></div>';
         html+='<span style="font-size:10px;color:var(--text3);margin-left:4px;">Offset</span>';
-        html+='<div class="num-wrap" style="width:64px;"><input type="number" id="inlay-dbl-offset-'+f+'" value="'+offVal.toFixed(1)+'" step="0.5" min="-50" max="50" oninput="_inlaySettings.dblFrets['+f+'].offset=parseFloat(this.value)||0;run();">';
-        html+='<div class="num-btns"><button class="num-btn" data-target="inlay-dbl-offset-'+f+'" data-dir="up">▲</button><button class="num-btn" data-target="inlay-dbl-offset-'+f+'" data-dir="dn">▼</button></div></div>';
-        html+='<span style="font-size:10px;color:var(--text3);">mm</span>';
+        html+='<div class="num-wrap" style="width:64px;"><input type="number" id="inlay-dbl-offset-'+f+'"'+lenInputAttrs(offVal,0.5,-50,50)+' oninput="_inlaySettings.dblFrets['+f+'].offset=getLen(this)||0;run();">';
+        html+='<div class="num-btns"><button type="button" class="num-btn" data-target="inlay-dbl-offset-'+f+'" data-dir="up">▲</button><button type="button" class="num-btn" data-target="inlay-dbl-offset-'+f+'" data-dir="dn">▼</button></div></div>';
+        html+='<span style="font-size:10px;color:var(--text3);">'+lenUnit()+'</span>';
       }
       html+='</div>';
       html+='</div>';
@@ -1382,7 +1539,7 @@ function updateEndShapeUI(force){
   if(!force){
     var curvedEl=document.getElementById('curved-toggle');
     var s1El=document.getElementById('s1'),sNEl=document.getElementById('sN');
-    if(curvedEl&&s1El&&sNEl) isCurvedMulti=curvedEl.checked&&Math.abs(parseFloat(s1El.value)-parseFloat(sNEl.value))>0.01;
+    if(curvedEl&&s1El&&sNEl) isCurvedMulti=curvedEl.checked&&Math.abs(getLen(s1El)-getLen(sNEl))>0.01;
     if(isCurvedMulti&&isR){_endShape='line';isR=false;}
   }
 
@@ -1486,7 +1643,7 @@ function renderExtFretTable(){
     var maxFret=_state.nFret;
     html+='<tr>';
     html+='<td style="color:var(--text3);font-weight:600;">'+si+'</td>';
-    html+='<td><div class="num-wrap"><input type="number" id="ef-'+i+'" value="'+val+'" step="1" min="0" max="'+maxFret+'" oninput="setExtFret('+i+',this.value)"><div class="num-btns"><button class="num-btn" data-extfret="'+i+'" data-dir="up">▲</button><button class="num-btn" data-extfret="'+i+'" data-dir="dn">▼</button></div></div></td>';
+    html+='<td><div class="num-wrap"><input type="number" id="ef-'+i+'" value="'+val+'" step="1" min="0" max="'+maxFret+'" oninput="setExtFret('+i+',this.value)"><div class="num-btns"><button type="button" class="num-btn" data-extfret="'+i+'" data-dir="up">▲</button><button type="button" class="num-btn" data-extfret="'+i+'" data-dir="dn">▼</button></div></div></td>';
     html+='<td class="extfret-pitch">'+pitchShiftLabel(val)+'</td>';
     html+='<td class="extfret-scale">'+sc_in.toFixed(3)+'"<br>'+sc_mm.toFixed(1)+'mm</td>';
     html+='</tr>';
@@ -1503,19 +1660,6 @@ function setExtFret(i, val){
   run();
 }
 
-// Extended Frets num-btn handler (delegated)
-document.addEventListener('mousedown',function(e){
-  var b=e.target.closest('.num-btn[data-extfret]'); if(!b) return;
-  e.preventDefault();
-  var i=parseInt(b.dataset.extfret),dir=b.dataset.dir;
-  stepExtFret(i,dir);
-},true);
-document.addEventListener('touchstart',function(e){
-  var b=e.target.closest('.num-btn[data-extfret]'); if(!b) return;
-  e.preventDefault();
-  var i=parseInt(b.dataset.extfret),dir=b.dataset.dir;
-  stepExtFret(i,dir);
-},{passive:false,capture:true});
 function stepExtFret(i,dir){
   var v=(_extFrets[i]||0)+(dir==='up'?1:-1);
   if(v<0) v=0;
@@ -1649,7 +1793,17 @@ var _SPARAMS=[
   ['b_pitch_N',      5,    0.1,   8],
   ['n_pitch_1',      5,    0.1,   8],
   ['n_pitch_N',      5,    0.1,   8],
+  // ── ここから追加分（v4.1）。古いシードでは全ビットが0＝「従来どおり」になる値だけを足すこと ──
+  ['slot_on',        0,    1,     1],   // フレット溝の端止め ON/OFF
+  ['slot_margin',    0,    0.05,  9],   // 端からの距離 mm（0〜25.55）
+  ['sN_fine',        0,    1,     7],   // スケール長の 0.1" 未満の端数（0.001" 単位、ジグザグ符号化）
+  ['s1_fine',        0,    1,     7],
 ];
+// 追加前のビット数。古いシードの長さチェックに使う
+var _SPARAMS_LEGACY_BITS=(function(){ var n=0; for(var i=0;i<_SPARAMS.length&&_SPARAMS[i][0]!=='slot_on';i++) n+=_SPARAMS[i][3]; return n; })();
+// スケール長 = 0.1" 刻みの本体 + 0.001" 単位の端数（mm入力した値もシードでほぼ再現できるように）
+function _scaleFine(v){ var q=Math.round((v-20)/0.1)*0.1+20, r=Math.max(-50,Math.min(50,Math.round((v-q)/0.001))); return r>=0?r*2:-r*2-1; }
+function _scaleFineDecode(z){ z=Math.round(z||0); return ((z%2)?-(z+1)/2:z/2)*0.001; }
 
 function _posArrayToBits(arr){
   // フレット1-36をビットマスクに変換、lo=1-18, hi=19-36
@@ -1706,7 +1860,7 @@ function encodeSeed(){
   var cp=_posArrayToBits(ins.customPositions||[]);
 
   // 各パラメータ値を収集
-  function gv(id){ return parseFloat(document.getElementById(id).value)||0; }
+  function gv(id){ var el=document.getElementById(id); if(el&&el.dataset.len) return getLen(el)||0; return parseFloat(el.value)||0; }
   function gi(id){ return parseInt(document.getElementById(id).value)||0; }
   function gc(id){ return document.getElementById(id).checked?1:0; }
 
@@ -1781,7 +1935,7 @@ function encodeSeed(){
   for(var ei=0;ei<12;ei++) vals['ext'+ei] = _extFrets[ei]||0;
   // 操作・表示
   vals.hand           = currentHand==='left'?1:0;
-  vals.lang           = currentLang==='ja'?1:currentLang==='ko'?2:0;
+  vals.lang           = 0; // 予約（表示言語はシードに含めず、ブラウザごとに保存）
   vals.stock          = gc('stock-toggle');
   
   // 目標テンション (kg) を取得
@@ -1793,6 +1947,11 @@ function encodeSeed(){
   vals.b_pitch_N       = gv('b_pitch_N');
   vals.n_pitch_1       = gv('n_pitch_1');
   vals.n_pitch_N       = gv('n_pitch_N');
+  // 追加分
+  vals.slot_on         = gc('slot-margin-toggle');
+  vals.slot_margin     = vals.slot_on ? gv('slot_margin') : 0; // OFFのときは0にして従来と同じシードにする
+  vals.sN_fine         = _scaleFine(gv('sN'));
+  vals.s1_fine         = _scaleFine(gv('s1'));
 
   // ビット列に詰め込む
   var bits=[];
@@ -1849,7 +2008,7 @@ function decodeSeed(seed){
   if(!seed.startsWith('GTI-')) return null;
   var body=seed.substring(4);
   var totalBits=_SPARAMS.reduce(function(s,p){return s+p[3];},0);
-  var minChars=Math.ceil(totalBits/Math.log2(62));
+  var minChars=Math.ceil(_SPARAMS_LEGACY_BITS/Math.log2(62)); // 追加項目のない旧シードも受け付ける
   if(body.length < minChars-2) return null; // 旧フォーマット・短すぎるseedを弾く
   var bits=_b62Decode(body, totalBits);
 
@@ -1897,12 +2056,9 @@ function loadSeedFromURL(){
   if (h.indexOf('GTI-') !== 0) return;
   var input = document.getElementById('seed-input');
   if (!input) return;
-  var lang = currentLang;
   input.value = h;
   applySeed();
   input.value = '';
-  // 開いた人の表示言語を維持
-  currentLang = lang;
   history.replaceState(null, '', location.pathname + location.search);
 }
 
@@ -1919,15 +2075,17 @@ function applySeed(){
   document.getElementById('seed-err').textContent='';
 
   _isUpdating = true;
-  function sv(id, v){ var el=document.getElementById(id); if(el){ el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); } }
+  function sv(id, v){ var el=document.getElementById(id); if(el){ if(el.dataset.len) setLen(el,v); else el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); } }
   function sc(id, v){ var el=document.getElementById(id); if(el) el.checked=!!v; }
 
   // multiscale-toggleを先にセット（syncScaleToggleによるsN/s1上書きを防ぐ）
   var mtglEarly=document.getElementById('multiscale-toggle');
   if(mtglEarly){ mtglEarly.checked=!!d.multiscale; syncScaleToggle(true); }
 
-  sv('sN',              parseFloat(d.sN.toFixed(1)));
-  sv('s1',              parseFloat(d.s1.toFixed(1)));
+  var sNv=parseFloat((parseFloat(d.sN.toFixed(1))+_scaleFineDecode(d.sN_fine)).toFixed(4));
+  var s1v=parseFloat((parseFloat(d.s1.toFixed(1))+_scaleFineDecode(d.s1_fine)).toFixed(4));
+  sv('sN',              sNv);
+  sv('s1',              s1v);
   sv('pd-fret',         Math.round(d.pdfret));
   sv('ns',              Math.round(d.ns));
   sv('nf',              Math.round(d.nf));
@@ -1973,15 +2131,18 @@ function applySeed(){
 
   // Multiscale設定に応じたUI即時反映
   if (d.multiscale) {
-    sv('sN', parseFloat(d.sN.toFixed(1)));
-    sv('s1', parseFloat(d.s1.toFixed(1)));
+    sv('sN', sNv);
+    sv('s1', s1v);
   } else {
-    sv('sAll', parseFloat(d.s1.toFixed(1)));
+    sv('sAll', s1v);
   }
 
   sv('nut_thick',       parseFloat(d.nut_thick.toFixed(1)));
   sv('nut_oh',          parseFloat(d.nut_oh.toFixed(1)));
   sv('zero_fret_offset',parseFloat(d.zeroFretOffset.toFixed(2)));
+  // フレット溝の端止め（旧シードは slot_on=0 → OFF、距離は既定の 2.0mm）
+  sc('slot-margin-toggle', d.slot_on);
+  sv('slot_margin',     d.slot_on ? parseFloat((d.slot_margin||0).toFixed(2)) : 2.0);
   sc('zero-fret-toggle', d.zfOn);
   sc('curved-toggle',    d.curved);
   sv('curve-k',         parseFloat(d.k.toFixed(2)));
@@ -2030,9 +2191,9 @@ function applySeed(){
   var hce=document.getElementById('inlay-hc-end');   if(hce) hce.value=ins.hCoefEnd;
   var wcs=document.getElementById('inlay-wc-start'); if(wcs) wcs.value=ins.wCoefStart;
   var wce=document.getElementById('inlay-wc-end');   if(wce) wce.value=ins.wCoefEnd;
-  var cd=document.getElementById('inlay-center-diam'); if(cd) cd.value=ins.centerDiam;
-  var od=document.getElementById('inlay-offset-diam'); if(od) od.value=ins.offsetDiam;
-  var rad=document.getElementById('inlay-radius');   if(rad) rad.value=ins.radius;
+  var cd=document.getElementById('inlay-center-diam'); if(cd) setLen(cd,ins.centerDiam);
+  var od=document.getElementById('inlay-offset-diam'); if(od) setLen(od,ins.offsetDiam);
+  var rad=document.getElementById('inlay-radius');   if(rad) setLen(rad,ins.radius);
   var bn1=document.getElementById('inlay-block-no1f'); if(bn1) bn1.checked=ins.blockNo1f;
   var ce=document.getElementById('inlay-custom-enabled'); if(ce) ce.checked=ins.customEnabled;
   // offsetPattern radio
@@ -2077,9 +2238,6 @@ function applySeed(){
   currentHand = d.hand>=0.5?'left':'right';
   document.getElementById('hand-right').classList.toggle('active', currentHand==='right');
   document.getElementById('hand-left').classList.toggle('active', currentHand==='left');
-  var langMap=['en','ja','ko'];
-  currentLang = langMap[Math.round(d.lang||0)]||'en';
-  if(typeof applyLang==='function') applyLang(currentLang);
   var stk=document.getElementById('stock-toggle'); if(stk) stk.checked=!!d.stock;
   var tt=document.getElementById('target-tension');
   if(tt && d.target_tension !== undefined) { 
@@ -2170,6 +2328,7 @@ const TRANSLATIONS = {
     'lbl-zero-fret': '0 Fret',
     'lbl-zero-fret-offset': '0 Fret → Nut offset (mm)',
     'btn-dxf': '⬇ Export DXF',
+    'btn-svg': '⬇ Export SVG',
     'btn-tip': '☕ Buy me a coffee',
     'btn-extra': 'Extra',
     'lbl-allstring': 'All Strings',
@@ -2188,6 +2347,11 @@ const TRANSLATIONS = {
     'legend-br': '■ Bridge',
     'legend-bo': '■ Board outline',
     'legend-no': '■ Nut overhang',
+    'legend-blind': '■ Blind fret slot',
+    'sec-slot-margin': 'Fret Slot Ends (Blind Frets)',
+    'lbl-slot-margin-on': 'Stop fret slots short of the edge',
+    'lbl-slot-margin': 'Fret slot end margin (mm)',
+    'hint-slot-margin': 'Measured square to the board edge. DXF / SVG layer: FRET_BLIND',
     'scale-list-hd': 'Scale Lengths',
     'copied': 'Copied!',
     'btn-share-url': '🔗 Copy share link',
@@ -2286,6 +2450,7 @@ const TRANSLATIONS = {
     'lbl-zero-fret': '0フレット',
     'lbl-zero-fret-offset': '0フレット → ナット間隔 (mm)',
     'btn-dxf': '⬇ DXFを書き出す',
+    'btn-svg': '⬇ SVGを書き出す',
     'btn-tip': '☕ コーヒーを作者に奢る',
     'btn-extra': 'その他',
     'lbl-allstring': '全弦',
@@ -2304,6 +2469,11 @@ const TRANSLATIONS = {
     'legend-br': '■ ブリッジ',
     'legend-bo': '■ 指板外周',
     'legend-no': '■ ナット・オーバーハング',
+    'legend-blind': '■ ブラインドフレット溝',
+    'sec-slot-margin': 'フレット溝の端止め（ブラインドフレット）',
+    'lbl-slot-margin-on': 'フレット溝を指板の端まで通さない',
+    'lbl-slot-margin': '指板の端からの距離 (mm)',
+    'hint-slot-margin': '指板の端から直角に測った距離です。DXF / SVG のレイヤー: FRET_BLIND',
     'scale-list-hd': 'スケール長 一覧',
     'copied': 'コピー完了',
     'btn-share-url': '🔗 共有リンクをコピー',
@@ -2394,13 +2564,15 @@ var currentLang = 'en';
 var currentHand = 'right';
 
 function i18n(key){ return TRANSLATIONS[currentLang][key] || key; }
+var LANG_KEY='gti-fb-lang';
 function toggleLang(){
   currentLang = (currentLang==='en'?'jp':'en');
+  try{ localStorage.setItem(LANG_KEY,currentLang); }catch(e){}
   document.getElementById('lang-en').classList.toggle('active', currentLang==='en');
   document.getElementById('lang-jp').classList.toggle('active', currentLang==='jp');
   document.querySelectorAll('[data-i18n]').forEach(function(el){
     var k=el.dataset.i18n;
-    el.innerHTML = i18n(k);
+    el.innerHTML = unitizeLabel(i18n(k),k);
   });
   run();
 }
@@ -2689,12 +2861,13 @@ function syncScaleToggle(fromInit) {
       if (singleUI) singleUI.style.display = 'none';
       if (pdSec) pdSec.style.display = '';
       if (!fromInit && _mem_sAll !== null) {
-          if (Math.abs(parseFloat(sAll.value) - _mem_sAll) > 0.001 || Math.abs(parseFloat(_mem_sN) - parseFloat(_mem_s1)) < 0.01) {
-              s1.value = sAll.value;
-              sN.value = (parseFloat(sAll.value) + 1.5).toFixed(1);
+          var sAllV = getLen(sAll);
+          if (Math.abs(sAllV - _mem_sAll) > 0.001 || Math.abs(parseFloat(_mem_sN) - parseFloat(_mem_s1)) < 0.01) {
+              setLen(s1, sAllV);
+              setLen(sN, parseFloat((sAllV + 1.5).toFixed(1)));
           } else {
-              s1.value = _mem_s1;
-              sN.value = _mem_sN;
+              setLen(s1, parseFloat(_mem_s1));
+              setLen(sN, parseFloat(_mem_sN));
           }
           cToggle.checked = _mem_curved;
           syncSlantDisable();
@@ -2704,18 +2877,17 @@ function syncScaleToggle(fromInit) {
       if (singleUI) singleUI.style.display = '';
       if (pdSec) pdSec.style.display = 'none';
       if (!fromInit) {
-          _mem_s1 = s1.value;
-          _mem_sN = sN.value;
+          _mem_s1 = getLen(s1);
+          _mem_sN = getLen(sN);
           _mem_curved = cToggle.checked;
           
           cToggle.checked = false;
           syncSlantDisable();
           
-          s1.value = s1.value;
-          sN.value = s1.value; 
+          setLen(sN, getLen(s1));
       }
-      sAll.value = s1.value; 
-      _mem_sAll = parseFloat(s1.value);
+      setLen(sAll, getLen(s1));
+      _mem_sAll = getLen(s1);
   }
 }
 
@@ -2734,20 +2906,21 @@ function setPitchMode(mode){
 
 function calcGeometry(){
   function gEl(id){return document.getElementById(id);}
-  var s1in=+gEl('s1').value||25.5;
-  var sNin=+gEl('sN').value||27.0;
+  var s1in=getLen('s1')||25.5;
+  var sNin=getLen('sN')||27.0;
   var nStr=+gEl('ns').value||7;
   var nFret=Math.min(+gEl('nf').value||24,48);
-  var ne1=+gEl('ne1').value||3.5;
-  var neN=+gEl('neN').value||4.0;
-  var ee1=+gEl('ee1').value||4.5;
-  var eeN=+gEl('eeN').value||5.0;
+  var ne1=getLen('ne1')||3.5;
+  var neN=getLen('neN')||4.0;
+  var ee1=getLen('ee1')||4.5;
+  var eeN=getLen('eeN')||5.0;
   var fbEnd=Math.min(+gEl('fb_end').value||25,49);
-  var nutThick=+gEl('nut_thick').value||3.0;
-  var nutOH_raw=gEl('nut_oh').value;
-  var nutOH=nutOH_raw===''||nutOH_raw===null?8.0:Math.max(0,+nutOH_raw);
+  var nutThick=getLen('nut_thick')||3.0;
+  var nutOH_raw=getLen('nut_oh');
+  var nutOH=isNaN(nutOH_raw)?8.0:Math.max(0,nutOH_raw);
   var zeroFretOn=!!(gEl('zero-fret-toggle')&&gEl('zero-fret-toggle').checked);
-  var zeroFretOffset=+( (gEl('zero_fret_offset')&&gEl('zero_fret_offset').value)||2.0);
+  var zeroFretOffset=gEl('zero_fret_offset')?getLen('zero_fret_offset'):NaN;
+  if(isNaN(zeroFretOffset)) zeroFretOffset=2.0;
   if(zeroFretOffset<0) zeroFretOffset=0;
   var pd=+gEl('pd').value;
   pd=Math.max(0,Math.min(1,isNaN(pd)?0.37004:pd));
@@ -2755,15 +2928,15 @@ function calcGeometry(){
 
   // ── 弦間ピッチ: 均等 / リニア ──
   var pitchMode=_pitchMode||0;
-  var bpitch_even=+gEl('bpitch').value||10.5;
-  var npitch_even=+gEl('npitch').value||7.0;
+  var bpitch_even=getLen('bpitch')||10.5;
+  var npitch_even=getLen('npitch')||7.0;
   // 弦iのブリッジ/ナット側ピッチを返す関数
   var bpitchAt, npitchAt;
   if(pitchMode===1&&nStr>1){
-    var bp1=+gEl('b_pitch_1').value||10.0;
-    var bpN=+gEl('b_pitch_N').value||11.0;
-    var np1=+gEl('n_pitch_1').value||6.5;
-    var npN=+gEl('n_pitch_N').value||7.5;
+    var bp1=getLen('b_pitch_1')||10.0;
+    var bpN=getLen('b_pitch_N')||11.0;
+    var np1=getLen('n_pitch_1')||6.5;
+    var npN=getLen('n_pitch_N')||7.5;
     // t: 0=1弦側(i=0), 1=低音弦側(i=nStr-1)
     // 弦i間(i~i+1)のピッチ → i=0が1~2弦間, i=nStr-2が最低音~隣
     bpitchAt=function(i){var t=(nStr<=2)?0:i/(nStr-2);return bp1+(bpN-bp1)*t;};
@@ -2790,10 +2963,10 @@ function calcGeometry(){
   // 表示用: span/total
   var brgSpanDisp=(nStr<=1)?0:(brgYs[nStr-1]-brgYs[0]);
   var nutSpanDisp=(nStr<=1)?0:(nutYs[nStr-1]-nutYs[0]);
-  gEl('bw-calc').textContent=brgSpanDisp.toFixed(1);
-  gEl('bw-total').textContent=(brgSpanDisp+ee1+eeN).toFixed(1);
-  gEl('nw-calc').textContent=nutSpanDisp.toFixed(1);
-  gEl('nw-total').textContent=(nutSpanDisp+ne1+neN).toFixed(1);
+  gEl('bw-calc').textContent=fmtLen(brgSpanDisp);
+  gEl('bw-total').textContent=fmtLen(brgSpanDisp+ee1+eeN);
+  gEl('nw-calc').textContent=fmtLen(nutSpanDisp);
+  gEl('nw-total').textContent=fmtLen(nutSpanDisp+ne1+neN);
   // Linear: Span/Total表示 + テーブル形式ピッチ表示
   if(pitchMode===1){
     // Bridge Span/Total
@@ -2801,10 +2974,10 @@ function calcGeometry(){
     var lbwTotal = gEl('linear-bw-total');
     var lnwCalc = gEl('linear-nw-calc');
     var lnwTotal = gEl('linear-nw-total');
-    if(lbwCalc) lbwCalc.textContent = brgSpanDisp.toFixed(1);
-    if(lbwTotal) lbwTotal.textContent = (brgSpanDisp+ee1+eeN).toFixed(1);
-    if(lnwCalc) lnwCalc.textContent = nutSpanDisp.toFixed(1);
-    if(lnwTotal) lnwTotal.textContent = (nutSpanDisp+ne1+neN).toFixed(1);
+    if(lbwCalc) lbwCalc.textContent = fmtLen(brgSpanDisp);
+    if(lbwTotal) lbwTotal.textContent = fmtLen(brgSpanDisp+ee1+eeN);
+    if(lnwCalc) lnwCalc.textContent = fmtLen(nutSpanDisp);
+    if(lnwTotal) lnwTotal.textContent = fmtLen(nutSpanDisp+ne1+neN);
     // legacy hint (hidden)
     var lsh=gEl('linear-span-hint');
     if(lsh) lsh.style.display='none';
@@ -2817,9 +2990,9 @@ function calcGeometry(){
       for(var ii=nStr-2;ii>=0;ii--){
         var strLabel=(ii+1)+'~'+(ii+2);
         rows+='<tr>'
-          +'<td style="color:var(--text);text-align:center;padding:2px 4px;font-family:monospace">'+bpitchAt(ii).toFixed(2)+'</td>'
+          +'<td style="color:var(--text);text-align:center;padding:2px 4px;font-family:monospace">'+fmtLen(bpitchAt(ii),2,4)+'</td>'
           +'<td style="color:var(--text3);text-align:center;padding:2px 4px;">'+strLabel+'</td>'
-          +'<td style="color:var(--text);text-align:center;padding:2px 4px;font-family:monospace">'+npitchAt(ii).toFixed(2)+'</td>'
+          +'<td style="color:var(--text);text-align:center;padding:2px 4px;font-family:monospace">'+fmtLen(npitchAt(ii),2,4)+'</td>'
           +'</tr>';
       }
       tbody.innerHTML=rows;
@@ -3016,6 +3189,46 @@ function calcGeometry(){
     nutLineN={x:cornerNutN.x+sNux*zeroFretOffset,y:cornerNutN.y+sNuy*zeroFretOffset};
   }
 
+  // ── フレット溝の端止め（ブラインドフレット）──
+  // 指板の両サイドエッジを内側へ slotMargin だけ平行移動した線で、フレット線（折れ線）を切り取る。
+  // エッジに直角な距離が一定になるので、斜めのフレットや曲線フレットでも端からの距離は同じ。
+  var slotMarginOn=!!(gEl('slot-margin-toggle')&&gEl('slot-margin-toggle').checked);
+  var slotMargin=gEl('slot_margin')?getLen('slot_margin'):2.0;
+  if(!(slotMargin>=0)) slotMargin=0;
+  function edgeDist(a,b,ref){
+    var dx=b.x-a.x,dy=b.y-a.y,l=Math.sqrt(dx*dx+dy*dy)||1,nx=-dy/l,ny=dx/l;
+    if((ref.x-a.x)*nx+(ref.y-a.y)*ny<0){nx=-nx;ny=-ny;}
+    return function(p){return (p.x-a.x)*nx+(p.y-a.y)*ny-slotMargin;};
+  }
+  var slotHalf1=edgeDist(cornerNut1,cornerEnd1,cornerNutN);
+  var slotHalfN=edgeDist(cornerNutN,cornerEndN,cornerNut1);
+  function clipHalf(pieces,f){
+    var out=[];
+    pieces.forEach(function(pts){
+      var cur=[];
+      for(var j=0;j<pts.length;j++){
+        var p=pts[j],d=f(p);
+        if(j>0){
+          var a=pts[j-1],da=f(a);
+          if((da>=0)!==(d>=0)){
+            var t=da/(da-d),q={x:a.x+(p.x-a.x)*t,y:a.y+(p.y-a.y)*t};
+            cur.push(q);
+            if(d<0){ out.push(cur); cur=[]; }
+          }
+        }
+        if(d>=0) cur.push(p);
+      }
+      if(cur.length) out.push(cur);
+    });
+    return out.filter(function(c){
+      if(c.length<2) return false;
+      var L=0; for(var k=1;k<c.length;k++) L+=Math.sqrt((c[k].x-c[k-1].x)*(c[k].x-c[k-1].x)+(c[k].y-c[k-1].y)*(c[k].y-c[k-1].y));
+      return L>1e-6; // 切り取った結果が長さ0以下なら出力しない
+    });
+  }
+  // フレット線 pts（エッジからエッジまで）→ 端止め後の線分リスト（空配列なら出力なし）
+  var clipSlot=function(pts){ return clipHalf(clipHalf([pts],slotHalf1),slotHalfN); };
+
   // rotatePt: slantはNp/Bpに組み込み済みなので恒等関数
   var rotatePt=function(p){return p;};
 
@@ -3047,6 +3260,7 @@ function calcGeometry(){
     cornerNut1:cornerNut1,cornerNutN:cornerNutN,cornerEnd1:cornerEnd1,cornerEndN:cornerEndN,
     nutHeadSide1:nutHeadSide1,nutHeadSideN:nutHeadSideN,oh1:oh1,ohN:ohN,
     fretEdgePts:fretEdgePts,sc:sc,curved:curved,iForY:iForY,
+    slotMarginOn:slotMarginOn,slotMargin:slotMargin,clipSlot:clipSlot,
     stockMinX:(function(){
       var xs=[oh1.x,ohN.x,cornerEnd1.x,cornerEndN.x];
       // Extended Fretsがある場合: 各グループ端のohPt x座標も含める
@@ -3148,22 +3362,135 @@ function toDXF(g,px,py,lefty){
   if(lefty) x=py;
   return{x:x,z:-(px-g.Bp(0).x)};
 }
-function dxfLine(x1,z1,x2,z2,l){
-  return '0\nLINE\n8\n'+l+'\n10\n'+x1.toFixed(6)+'\n20\n'+z1.toFixed(6)+'\n30\n0.000000\n11\n'+x2.toFixed(6)+'\n21\n'+z2.toFixed(6)+'\n31\n0.000000';
+// ── R-End（指板エンドのR弧＋コーナーR）の形状。プレビュー・DXF・端止めフレット溝で共有 ──
+// 戻り値: エンド弧の中心C・半径R、コーナーRの中心K1/KN・半径cR、接点 S（サイド直線とコーナーR）/ T（コーナーRとエンド弧）。作れないときは null
+function calcREnd(g){
+  if(_endShape!=='r') return null;
+  if(g.curved&&Math.abs(g.s1-g.sN)>1e-4) return null;
+  var nStr=g.nStr, Sp=g.Sp, cornerNut1=g.cornerNut1, cornerNutN=g.cornerNutN, cornerEnd1=g.cornerEnd1, cornerEndN=g.cornerEndN;
+  var cR=getLen('end-corner-r')||6;
+  var arcRval=parseFloat(document.getElementById('end-arc-r').value)||5;
+  var R=_endArcUnit==='in'? arcRval*I2M : arcRval;
+  var off=getLen('end-offset')||15;
+  if(R<=cR) cR=R*0.49;
+  // fb_endフレット方向 → ブリッジ方向の単位ベクトル
+  var epFb=g.fretEdgePts(g.fbEnd);
+  var fdx=epFb.ixN.x-epFb.ix1.x, fdy=epFb.ixN.y-epFb.ix1.y, fdl=Math.sqrt(fdx*fdx+fdy*fdy)||1;
+  var ux=fdx/fdl, uy=fdy/fdl;
+  var lxa=uy,lya=-ux, lxb=-uy,lyb=ux;
+  var lx=lxa>=0?lxa:lxb, ly=lxa>=0?lya:lyb;
+  // エンドR弧の中心C（最終フレットから off-R だけブリッジ方向）
+  var pNFret=Sp((nStr-1)/2, FR(g.nFret));
+  var Cx=pNFret.x+(off-R)*lx, Cy=pNFret.y+(off-R)*ly;
+  // サイドライン方向 + 内側法線
+  var sd1x=cornerEnd1.x-cornerNut1.x, sd1y=cornerEnd1.y-cornerNut1.y, sd1l=Math.sqrt(sd1x*sd1x+sd1y*sd1y)||1; sd1x/=sd1l; sd1y/=sd1l;
+  var sdNx=cornerEndN.x-cornerNutN.x, sdNy=cornerEndN.y-cornerNutN.y, sdNl=Math.sqrt(sdNx*sdNx+sdNy*sdNy)||1; sdNx/=sdNl; sdNy/=sdNl;
+  var n1x=-sd1y, n1y=sd1x, nNx=sdNy, nNy=-sdNx;
+  // コーナーR中心K: サイドライン内側cRの平行線上 かつ |K-C| = R-cR（cornerEndに近い解）
+  function calcK(cx,cy,sdx,sdy,nx,ny){
+    var P0x=cx+cR*nx, P0y=cy+cR*ny, bx=P0x-Cx, by=P0y-Cy;
+    var b2=2*(bx*sdx+by*sdy), c2=bx*bx+by*by-(R-cR)*(R-cR), disc=b2*b2-4*c2;
+    if(disc<0) return null;
+    var t1=(-b2-Math.sqrt(disc))/2, t2=(-b2+Math.sqrt(disc))/2;
+    var t=Math.abs(t1)<Math.abs(t2)?t1:t2;
+    return {x:P0x+t*sdx, y:P0y+t*sdy};
+  }
+  var K1=calcK(cornerEnd1.x,cornerEnd1.y,sd1x,sd1y,n1x,n1y);
+  var KN=calcK(cornerEndN.x,cornerEndN.y,sdNx,sdNy,nNx,nNy);
+  if(!K1||!KN) return null;
+  function touchPt(k){ var dx=k.x-Cx, dy=k.y-Cy, dl=Math.sqrt(dx*dx+dy*dy)||1; return {x:Cx+dx/dl*R, y:Cy+dy/dl*R}; }
+  return {C:{x:Cx,y:Cy}, R:R, cR:cR, K1:K1, KN:KN, T1:touchPt(K1), TN:touchPt(KN),
+    S1:{x:K1.x-n1x*cR, y:K1.y-n1y*cR}, SN:{x:KN.x-nNx*cR, y:KN.y-nNy*cR}};
+}
+// 端止めフレット溝: サイドエッジでの切り取り（g.clipSlot）に加えて、R-End のときはエンド側の
+// コーナーR・エンド弧からも同じ距離を空ける。指板の外形は凸なので、外形からの距離は線分上で
+// 山なり（凹関数）になり、条件を満たす範囲は線分ごとに1区間だけになる。
+function clipSlotFull(g,pts){
+  var segs=g.clipSlot(pts);
+  var re=calcREnd(g);
+  if(!re||!segs.length) return segs;
+  var m=g.slotMargin;
+  // 指板の外形（ナット側はサイドエッジを十分に延長して開いておく）を細かい折れ線にする
+  function arc(from,to,c,r,n){
+    var a1=Math.atan2(from.y-c.y,from.x-c.x),a2=Math.atan2(to.y-c.y,to.x-c.x),da=a2-a1;
+    while(da>Math.PI)da-=2*Math.PI; while(da<-Math.PI)da+=2*Math.PI;
+    var o=[]; for(var i=0;i<=n;i++) o.push({x:c.x+r*Math.cos(a1+da*i/n), y:c.y+r*Math.sin(a1+da*i/n)}); return o;
+  }
+  function farPt(a,b){ var dx=a.x-b.x,dy=a.y-b.y,l=Math.sqrt(dx*dx+dy*dy)||1; return {x:a.x+dx/l*600,y:a.y+dy/l*600}; }
+  var poly=[farPt(g.cornerNut1,re.S1)].concat(arc(re.S1,re.T1,re.K1,re.cR,64),arc(re.T1,re.TN,re.C,re.R,256),arc(re.TN,re.SN,re.KN,re.cR,64),[farPt(g.cornerNutN,re.SN)]);
+  // 内側を正とする外形までの距離
+  var cen={x:(g.cornerNut1.x+g.cornerNutN.x+re.T1.x+re.TN.x)/4, y:(g.cornerNut1.y+g.cornerNutN.y+re.T1.y+re.TN.y)/4};
+  function sd(p){
+    var best=Infinity, inside=true;
+    for(var i=0;i<poly.length-1;i++){
+      var a=poly[i],b=poly[i+1],dx=b.x-a.x,dy=b.y-a.y,L2=dx*dx+dy*dy;
+      if(L2<1e-12) continue; // 弧のつなぎ目の長さ0の辺は向きが定まらないので飛ばす
+      var t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/L2));
+      var qx=a.x+dx*t-p.x, qy=a.y+dy*t-p.y, d=Math.sqrt(qx*qx+qy*qy);
+      if(d<best) best=d;
+      // 外形の各辺に対して中心と同じ側にあるか（凸なので全辺で同じ側なら内側）
+      var sp=dx*(p.y-a.y)-dy*(p.x-a.x), sc=dx*(cen.y-a.y)-dy*(cen.x-a.x);
+      if(sp*sc<0) inside=false;
+    }
+    return inside?best:-best;
+  }
+  var out=[];
+  segs.forEach(function(seg){
+    var cur=[];
+    for(var j=0;j<seg.length-1;j++){
+      var a=seg[j],b=seg[j+1];
+      var P=function(t){ return {x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t}; };
+      var f=function(t){ return sd(P(t))-m; };
+      var lo=0,hi=1;
+      for(var k=0;k<60;k++){ var m1=lo+(hi-lo)/3,m2=hi-(hi-lo)/3; if(f(m1)<f(m2)) lo=m1; else hi=m2; }
+      var tm=(lo+hi)/2;
+      if(f(tm)<0){ if(cur.length>1) out.push(cur); cur=[]; continue; }
+      var root=function(x0,x1){ for(var k=0;k<60;k++){ var mid=(x0+x1)/2; if(f(mid)>=0) x1=mid; else x0=mid; } return x1; };
+      var tA=f(0)>=0?0:root(0,tm);
+      var tB=f(1)>=0?1:(function(){ var x0=tm,x1=1; for(var k=0;k<60;k++){ var mid=(x0+x1)/2; if(f(mid)>=0) x0=mid; else x1=mid; } return x0; })();
+      if(tA>0){ if(cur.length>1) out.push(cur); cur=[P(tA)]; }
+      else if(!cur.length) cur=[a];
+      cur.push(P(tB));
+      if(tB<1){ out.push(cur); cur=[]; }
+    }
+    if(cur.length>1) out.push(cur);
+  });
+  return out.filter(function(c){ var L=0; for(var k=1;k<c.length;k++) L+=Math.sqrt((c[k].x-c[k-1].x)*(c[k].x-c[k-1].x)+(c[k].y-c[k-1].y)*(c[k].y-c[k-1].y)); return L>1e-6; });
 }
 
+// 描画データ（DXF座標系の LINE / CIRCLE の一覧）。DXF・SVG書き出し・1:1印刷はすべてこれを共有する。
+// キー名は DXF のグループコード（c10/c20=始点・中心, c11/c21=終点, c40=半径）に合わせている。
+function dxfLine(x1,z1,x2,z2,l){
+  return {type:'LINE',layer:l,c10:x1,c20:z1,c11:x2,c21:z2};
+}
+// レイヤー名と DXF の色番号（ACI）。FRET_BLIND は端止めフレット溝を使うときだけ出力する
+var DRAWING_LAYERS=[['STRING',7],['NUT',3],['BRIDGE',1],['FRET',7],['CENTERLINE',8],['EDGE',2],['NUT_OH',3],['INLAY',4],['FRET_BLIND',6]];
+function drawingLayers(ents){
+  var used={}; ents.forEach(function(e){ used[e.layer]=1; });
+  return DRAWING_LAYERS.filter(function(l){ return l[0]!=='FRET_BLIND'||used.FRET_BLIND; });
+}
 function buildDXF(g,lefty){
+  var ents=buildDrawing(g,lefty);
+  var L=[];
+  L.push('0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1009\n9\n$INSUNITS\n70\n4\n0\nENDSEC');
+  L.push('0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nLAYER\n70\n7');
+  drawingLayers(ents).forEach(function(l){ L.push('0\nLAYER\n2\n'+l[0]+'\n70\n0\n62\n'+l[1]+'\n6\nCONTINUOUS'); });
+  L.push('0\nENDTAB\n0\nENDSEC\n0\nSECTION\n2\nENTITIES');
+  ents.forEach(function(e){
+    if(e.type==='LINE') L.push('0\nLINE\n8\n'+e.layer+'\n10\n'+e.c10.toFixed(6)+'\n20\n'+e.c20.toFixed(6)+'\n30\n0.000000\n11\n'+e.c11.toFixed(6)+'\n21\n'+e.c21.toFixed(6)+'\n31\n0.000000');
+    else L.push('0\nCIRCLE\n8\n'+e.layer+'\n10\n'+e.c10.toFixed(6)+'\n20\n'+e.c20.toFixed(6)+'\n30\n0.000000\n40\n'+e.c40.toFixed(6));
+  });
+  L.push('0\nENDSEC\n0\nEOF');
+  return L.join('\n');
+}
+
+function buildDrawing(g,lefty){
   lefty=!!lefty;
   var nStr=g.nStr,nFret=g.nFret,Np=g.Np,Bp=g.Bp,Sp=g.Sp;
   var ne1=g.ne1,neN=g.neN,nutThick=g.nutThick,nutOH=g.nutOH;
   var cornerNut1=g.cornerNut1,cornerNutN=g.cornerNutN,cornerEnd1=g.cornerEnd1,cornerEndN=g.cornerEndN;
   var nutHeadSide1=g.nutHeadSide1,nutHeadSideN=g.nutHeadSideN,oh1=g.oh1,ohN=g.ohN,fretEdgePts=g.fretEdgePts;
   var L=[];
-  L.push('0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1009\n9\n$INSUNITS\n70\n4\n0\nENDSEC');
-  L.push('0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nLAYER\n70\n7');
-  var ld=function(n,c){return '0\nLAYER\n2\n'+n+'\n70\n0\n62\n'+c+'\n6\nCONTINUOUS';};
-  L.push(ld('STRING',7),ld('NUT',3),ld('BRIDGE',1),ld('FRET',7),ld('CENTERLINE',8),ld('EDGE',2),ld('NUT_OH',3),ld('INLAY',4));
-  L.push('0\nENDTAB\n0\nENDSEC\n0\nSECTION\n2\nENTITIES');
   var dMD=function(pts,layer){
     for(var j=0;j<pts.length-1;j++){
       var a=toDXF(g,pts[j].x,pts[j].y,lefty);
@@ -3183,6 +3510,11 @@ function buildDXF(g,lefty){
   };
   var fNp=function(i){return Np(i);};
   var fEp=function(i){return Sp(i,FR(g.fbEnd));};
+  // フレット線: 端止めが有効なら切り取って FRET_BLIND レイヤーへ
+  var dFret=function(pts){
+    if(!g.slotMarginOn){ dMD(pts,'FRET'); return; }
+    clipSlotFull(g,pts).forEach(function(seg){ dMD(seg,'FRET_BLIND'); });
+  };
 
   var allNx=[],allBx=[];
   for(var ii=0;ii<nStr;ii++){allNx.push(Np(ii).x);allBx.push(Bp(ii).x);}
@@ -3199,61 +3531,30 @@ function buildDXF(g,lefty){
   if(g.zeroFretOn){
     var ep0=fretEdgePts(0);
     var pts0=getMathPts(function(i){return Sp(i,0);},g.curved,null,ep0.iMin,ep0.iMax);
-    dMD(pts0,'FRET');
+    dFret(pts0);
   }
   for(var fn=1;fn<=nFret;fn++){
     var ep=fretEdgePts(fn);
     var tFret=FR(fn);
     var pts=getMathPts(function(i){return Sp(i,tFret);},g.curved,null,ep.iMin,ep.iMax);
-    dMD(pts,'FRET');
+    dFret(pts);
   }
   dp_wrap(cornerNut1,cornerNutN,Np,'EDGE',null,0);
   if(_endShape==='r'&&!(g.curved&&Math.abs(g.s1-g.sN)>1e-4)){
-    // R-EndモードDXF: SVGと同じ計算でポリライン近似出力
-    var cRd=parseFloat(document.getElementById('end-corner-r').value)||6;
-    var arcRvald=parseFloat(document.getElementById('end-arc-r').value)||5;
-    var Rd=_endArcUnit==='in'? arcRvald*I2M : arcRvald;
-    var offD=parseFloat(document.getElementById('end-offset').value)||15;
-    if(Rd<=cRd) cRd=Rd*0.49;
-    var epFbd=fretEdgePts(g.fbEnd);
-    var fdxd=epFbd.ixN.x-epFbd.ix1.x,fdyd=epFbd.ixN.y-epFbd.ix1.y,fdld=Math.sqrt(fdxd*fdxd+fdyd*fdyd)||1;
-    var uxd=fdxd/fdld,uyd=fdyd/fdld;
-    var lxad=uyd,lyad=-uxd,lxbd=-uyd,lybd=uxd;
-    var lxd=lxad>=0?lxad:lxbd,lyd=lxad>=0?lyad:lybd;
-    var cIdxd=(nStr-1)/2;
-    var pNFd=Sp(cIdxd,FR(nFret));
-    var CxD=pNFd.x+(offD-Rd)*lxd, CyD=pNFd.y+(offD-Rd)*lyd;
-    var sd1xd=cornerEnd1.x-cornerNut1.x,sd1yd=cornerEnd1.y-cornerNut1.y,sd1ld=Math.sqrt(sd1xd*sd1xd+sd1yd*sd1yd)||1;
-    sd1xd/=sd1ld;sd1yd/=sd1ld;
-    var sdNxd=cornerEndN.x-cornerNutN.x,sdNyd=cornerEndN.y-cornerNutN.y,sdNld=Math.sqrt(sdNxd*sdNxd+sdNyd*sdNyd)||1;
-    sdNxd/=sdNld;sdNyd/=sdNld;
-    var n1xd=-sd1yd,n1yd=sd1xd,nNxd=sdNyd,nNyd=-sdNxd;
-    function calcKD(cx,cy,sdx,sdy,nx,ny){
-      var P0x=cx+cRd*nx,P0y=cy+cRd*ny,bx=P0x-CxD,by=P0y-CyD;
-      var b2=2*(bx*sdx+by*sdy),c2=bx*bx+by*by-(Rd-cRd)*(Rd-cRd),disc=b2*b2-4*c2;
-      if(disc<0)return null;
-      var t1=(-b2-Math.sqrt(disc))/2,t2=(-b2+Math.sqrt(disc))/2;
-      var t=Math.abs(t1)<Math.abs(t2)?t1:t2;
-      return{x:P0x+t*sdx,y:P0y+t*sdy};
-    }
-    var K1d=calcKD(cornerEnd1.x,cornerEnd1.y,sd1xd,sd1yd,n1xd,n1yd);
-    var KNd=calcKD(cornerEndN.x,cornerEndN.y,sdNxd,sdNyd,nNxd,nNyd);
-    if(K1d&&KNd){
-      function tPtD(kx,ky){var dx=kx-CxD,dy=ky-CyD,dl=Math.sqrt(dx*dx+dy*dy)||1;return{x:CxD+dx/dl*Rd,y:CyD+dy/dl*Rd};}
-      var T1d=tPtD(K1d.x,K1d.y),TNd=tPtD(KNd.x,KNd.y);
-      var S1d={x:K1d.x-n1xd*cRd,y:K1d.y-n1yd*cRd};
-      var SNd={x:KNd.x-nNxd*cRd,y:KNd.y-nNyd*cRd};
+    // R-EndモードDXF: プレビューと同じ calcREnd() の結果をポリライン近似で出力
+    var re=calcREnd(g);
+    if(re){
       function arcPoly(from,to,cx,cy,r,segs){
         var a1=Math.atan2(from.y-cy,from.x-cx),a2=Math.atan2(to.y-cy,to.x-cx);
         var da=a2-a1;while(da>Math.PI)da-=2*Math.PI;while(da<-Math.PI)da+=2*Math.PI;
         var pts=[];for(var si=0;si<=segs;si++)pts.push({x:cx+r*Math.cos(a1+da*si/segs),y:cy+r*Math.sin(a1+da*si/segs)});
         return pts;
       }
-      dMD([cornerNut1,S1d],'EDGE');
-      dMD(arcPoly(S1d,T1d,K1d.x,K1d.y,cRd,8),'EDGE');
-      dMD(arcPoly(T1d,TNd,CxD,CyD,Rd,32),'EDGE');
-      dMD(arcPoly(TNd,SNd,KNd.x,KNd.y,cRd,8),'EDGE');
-      dMD([SNd,cornerNutN],'EDGE');
+      dMD([cornerNut1,re.S1],'EDGE');
+      dMD(arcPoly(re.S1,re.T1,re.K1.x,re.K1.y,re.cR,8),'EDGE');
+      dMD(arcPoly(re.T1,re.TN,re.C.x,re.C.y,re.R,32),'EDGE');
+      dMD(arcPoly(re.TN,re.SN,re.KN.x,re.KN.y,re.cR,8),'EDGE');
+      dMD([re.SN,cornerNutN],'EDGE');
     } else { dp_wrap(cornerEnd1,cornerEndN,fEp,'EDGE',null,tE); dMD([cornerNut1,cornerEnd1],'EDGE'); dMD([cornerNutN,cornerEndN],'EDGE'); }
   } else {
     dp_wrap(cornerEnd1,cornerEndN,fEp,'EDGE',null,tE);
@@ -3433,7 +3734,7 @@ function buildDXF(g,lefty){
       for(var k=1;k<valid.length;k++){if(valid[k]===valid[k-1]+1)segs[segs.length-1].push(valid[k]);else segs.push([valid[k]]);}
       segs.forEach(function(sg){
         var iA=sg[0],iB=sg[sg.length-1];
-        dMD(extPts(fn,iA,iB),'FRET');
+        dFret(extPts(fn,iA,iB));
       });
     }
 
@@ -3474,7 +3775,7 @@ function buildDXF(g,lefty){
     var edo=getEDO();
     var FRl=function(n){return 1-Math.pow(2,-n/edo);};
     function fretTcL(fn){var t1=FRl(fn-1),t2=FRl(fn);return t1+(t2-t1)*(ins.offsetRatio||0.5);}
-    function dCircle(p,r){var d=toDXF(g,p.x,p.y,lefty);L.push('0\nCIRCLE\n8\nINLAY\n10\n'+d.x.toFixed(6)+'\n20\n'+d.z.toFixed(6)+'\n30\n0.000000\n40\n'+r.toFixed(6));}
+    function dCircle(p,r){var d=toDXF(g,p.x,p.y,lefty);L.push({type:'CIRCLE',layer:'INLAY',c10:d.x,c20:d.z,c40:r});}
     function dLine4(corners){for(var k=0;k<4;k++){var a=toDXF(g,corners[k].x,corners[k].y,lefty),b=toDXF(g,corners[(k+1)%4].x,corners[(k+1)%4].y,lefty);L.push(dxfLine(a.x,a.z,b.x,b.z,'INLAY'));}}
     function midPt(iA,iB,tc){var pA=Sp(iA,tc),pB=Sp(iB,tc);return{x:(pA.x+pB.x)/2,y:(pA.y+pB.y)/2};}
     function fretDirDXFc(f){var ep=fretEdgePts(f);var dx=ep.ixN.x-ep.ix1.x,dy=ep.ixN.y-ep.ix1.y;var l=Math.sqrt(dx*dx+dy*dy)||1;return{x:dx/l,y:dy/l};}
@@ -3702,8 +4003,7 @@ function buildDXF(g,lefty){
     }
   })();
 
-  L.push('0\nENDSEC\n0\nEOF');
-  return L.join('\n');
+  return L;
 }
 
 // ── 利用規約の確認（DXF出力・印刷の前に表示。「次回から表示しない」で以後スキップ）──
@@ -3785,21 +4085,74 @@ function exportDXF(){
   if(!isIOS) link.click();
 }
 
+// ── SVG書き出し（DXFと同じ描画データを、実寸mmのSVGとして保存）──
+// ・width/height を mm 単位、viewBox も mm 基準にして、取り込み時に実寸になるようにする
+// ・座標は DXF と同じ（Y上向き）なので、SVG（Y下向き）ではYを反転する
+// ・レイヤーごとに <g> でまとめる（Inkscape ではそのままレイヤーとして読める）。塗りなしの細線のみ
+var SVG_LAYER_COLORS={STRING:'#000000',NUT:'#00a000',BRIDGE:'#e00000',FRET:'#000000',FRET_BLIND:'#d000d0',
+  CENTERLINE:'#808080',EDGE:'#c08000',NUT_OH:'#00a000',INLAY:'#0090c0'};
+function buildSVGExport(g,lefty){
+  var ents=buildDrawing(g,lefty);
+  var f=function(v){ return String(parseFloat(v.toFixed(4))); };
+  var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  function ext(x,y,r){ r=r||0; minX=Math.min(minX,x-r);maxX=Math.max(maxX,x+r);minY=Math.min(minY,y-r);maxY=Math.max(maxY,y+r); }
+  ents.forEach(function(e){
+    if(e.type==='LINE'){ ext(e.c10,-e.c20); ext(e.c11,-e.c21); } else ext(e.c10,-e.c20,e.c40);
+  });
+  var pad=2; minX-=pad; minY-=pad; maxX+=pad; maxY+=pad;
+  var W=maxX-minX, H=maxY-minY;
+  var out=['<?xml version="1.0" encoding="UTF-8"?>',
+    '<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" version="1.1" width="'+f(W)+'mm" height="'+f(H)+'mm" viewBox="'+f(minX)+' '+f(minY)+' '+f(W)+' '+f(H)+'">'];
+  drawingLayers(ents).forEach(function(l){
+    var name=l[0], items=ents.filter(function(e){ return e.layer===name; });
+    if(!items.length) return;
+    out.push('<g id="'+name+'" inkscape:groupmode="layer" inkscape:label="'+name+'" fill="none" stroke="'+(SVG_LAYER_COLORS[name]||'#000000')+'" stroke-width="0.1" stroke-linecap="round" stroke-linejoin="round">');
+    // 連続する線分は1本の polyline にまとめる（CADで扱いやすくするため）
+    var run=null;
+    function flush(){ if(run){ out.push(run.length===2?'<line x1="'+f(run[0][0])+'" y1="'+f(run[0][1])+'" x2="'+f(run[1][0])+'" y2="'+f(run[1][1])+'"/>':'<polyline points="'+run.map(function(p){return f(p[0])+','+f(p[1]);}).join(' ')+'"/>'); run=null; } }
+    items.forEach(function(e){
+      if(e.type==='CIRCLE'){ flush(); out.push('<circle cx="'+f(e.c10)+'" cy="'+f(-e.c20)+'" r="'+f(e.c40)+'"/>'); return; }
+      var a=[e.c10,-e.c20], b=[e.c11,-e.c21];
+      if(run){ var last=run[run.length-1]; if(Math.abs(last[0]-a[0])<1e-6&&Math.abs(last[1]-a[1])<1e-6){ run.push(b); return; } }
+      flush(); run=[a,b];
+    });
+    flush();
+    out.push('</g>');
+  });
+  out.push('</svg>');
+  return out.join('\n');
+}
+// テキストを Blob にしてダウンロード。iOS では click() が効かないことがあるので、DXF と同じくリンクを表示してタップしてもらう
+var _dlURL=null;
+function downloadText(text,mime,fname){
+  if(_dlURL){ try{ URL.revokeObjectURL(_dlURL); }catch(e){} }
+  _dlURL=URL.createObjectURL(new Blob([text],{type:mime}));
+  document.getElementById('dxf-filename').textContent=fname;
+  var link=document.getElementById('dxf-link');
+  link.href=_dlURL; link.download=fname; link.textContent=fname; link.style.display='block';
+  var isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(/Mac/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
+  if(!isIOS) link.click();
+}
+function exportSVG(){
+  var g=_state; if(!g) return;
+  var fname=buildFilename(g.nStr,g.s1in,g.sNin,g.pd).replace(/\.dxf$/,'.svg');
+  downloadText(buildSVGExport(g,currentHand==='left'),'image/svg+xml',fname);
+}
+
 // ── 1:1 print template（DXFと同じ形状を原寸でA4/Letterに分割印刷）──
-function _dxfEntities(dxf){
-  var t=dxf.split('\n'), ents=[], cur=null;
-  for(var i=0;i+1<t.length;i+=2){
-    var c=t[i].trim(), v=t[i+1].trim();
-    if(c==='0'){ cur=(v==='LINE'||v==='CIRCLE')?{type:v}:null; if(cur) ents.push(cur); continue; }
-    if(!cur) continue;
-    if(c==='8') cur.layer=v; else cur['c'+c]=parseFloat(v);
-  }
-  return ents;
+// 描画データを DXF と同じ精度（小数6桁）に丸めたコピー
+function _drawingEntities(g,lefty){
+  var r6=function(v){ return parseFloat(v.toFixed(6)); };
+  return buildDrawing(g,lefty).map(function(e){
+    var o={type:e.type,layer:e.layer};
+    ['c10','c20','c11','c21','c40'].forEach(function(k){ if(e[k]!=null) o[k]=r6(e[k]); });
+    return o;
+  });
 }
 function printTemplate(){
   var g=_state; if(!g) return;
   var lefty=(currentHand==='left');
-  var ents=_dxfEntities(buildDXF(g,lefty));
+  var ents=_drawingEntities(g,lefty);
   if(!ents.length) return;
   // ブリッジライン（各弦の終端＝サドル位置を結ぶ線）。両端を少し延長して見やすくする
   var bpts=[]; for(var bi=0;bi<g.nStr;bi++){ var d=toDXF(g,g.Bp(bi).x,g.Bp(bi).y,lefty); bpts.push(d); }
@@ -3822,7 +4175,7 @@ function printTemplate(){
   var pad=5; minX-=pad;minY-=pad;maxX+=pad;maxY+=pad;
   var sty={STRING:'#000;stroke-width:0.25',CENTERLINE:'#999;stroke-width:0.15;stroke-dasharray:3 1.5',
            FRET:'#000;stroke-width:0.25',NUT:'#000;stroke-width:0.3',BRIDGE:'#000;stroke-width:0.3',
-           EDGE:'#000;stroke-width:0.3',SADDLE:'#000;stroke-width:0.4',NUT_OH:'#000;stroke-width:0.25',INLAY:'#000;stroke-width:0.2'};
+           EDGE:'#000;stroke-width:0.3',FRET_BLIND:'#000;stroke-width:0.25',SADDLE:'#000;stroke-width:0.4',NUT_OH:'#000;stroke-width:0.25',INLAY:'#000;stroke-width:0.2'};
   var body='';
   ents.forEach(function(e){
     var st='fill:none;stroke:'+(sty[e.layer]||'#000;stroke-width:0.2');
@@ -3909,6 +4262,10 @@ function run(){
   var zfToggle=document.getElementById('zero-fret-toggle');
   var zfWrap=document.getElementById('zero-fret-offset-wrap');
   if(zfToggle && zfWrap) zfWrap.style.display=zfToggle.checked?'block':'none';
+  var smToggle=document.getElementById('slot-margin-toggle');
+  var smOn=!!(smToggle&&smToggle.checked);
+  var smWrap=document.getElementById('slot-margin-wrap'); if(smWrap) smWrap.style.display=smOn?'block':'none';
+  var lgBlind=document.getElementById('legend-blind'); if(lgBlind) lgBlind.style.display=smOn?'':'none';
   // ── PD dual-source sync ──
   var pdFretInp=document.getElementById('pd-fret');
   var pdInp=document.getElementById('pd');
@@ -3997,7 +4354,7 @@ function run(){
       var pNf=g.Sp(cIdxOff,FR(g.nFret));
       var pFb=g.Sp(cIdxOff,FR(g.fbEnd));
       var distOff=Math.sqrt((pFb.x-pNf.x)**2+(pFb.y-pNf.y)**2);
-      offEl.value=distOff.toFixed(1);
+      setLen(offEl,parseFloat(distOff.toFixed(1)));
     }
   }
   
@@ -4029,10 +4386,12 @@ function run(){
 
   document.getElementById('pdFret').textContent=pdToFret(pd);
   document.getElementById('pd-val-disp').textContent=pd.toFixed(5);
-  document.getElementById('s1mm').textContent=s1.toFixed(2);
-  document.getElementById('sNmm').textContent=sN.toFixed(2);
+  // スケール長は常に inch 入力＋mm 併記
+  var altSc=function(mm){ return mm.toFixed(2); };
+  document.getElementById('s1mm').textContent=altSc(s1);
+  document.getElementById('sNmm').textContent=altSc(sN);
   var sAllmmEl=document.getElementById('sAllmm');
-  if(sAllmmEl) sAllmmEl.textContent = sN.toFixed(2);
+  if(sAllmmEl) sAllmmEl.textContent = altSc(sN);
   document.getElementById('dxf-filename').textContent=buildFilename(nStr,s1in,sNin,pd);
   document.getElementById('dxf-link').style.display='none';
 
@@ -4044,7 +4403,7 @@ function run(){
   var bAng=Math.atan2(Bp(nStr-1).x-Bp(0).x,Bp(nStr-1).y-Bp(0).y)*180/Math.PI;
   document.getElementById('o-na').textContent=nAng.toFixed(3);
   document.getElementById('o-ba').textContent=bAng.toFixed(3);
-  document.getElementById('o-df').textContent=(sN-s1).toFixed(1);
+  document.getElementById('o-df').textContent=fmtLen(sN-s1,1,3);
 
   var sl=document.getElementById('scale-list');
   var shtml='<div class="scale-list-title" data-i18n="scale-list-hd">'+i18n('scale-list-hd')+'</div>';
@@ -4059,7 +4418,8 @@ function run(){
       sc_in=sc_mm/I2M;
     }
     var lbl=String(i+1);
-    shtml+='<div class="scale-item"><span class="scale-item-lbl">'+lbl+'</span><span style="white-space:nowrap;">'+sc_in.toFixed(3)+'" / '+sc_mm.toFixed(3)+' mm</span></div>';
+    var scTxt=sc_in.toFixed(3)+'" / '+sc_mm.toFixed(3)+' mm';
+    shtml+='<div class="scale-item"><span class="scale-item-lbl">'+lbl+'</span><span style="white-space:nowrap;">'+scTxt+'</span></div>';
   }
   sl.innerHTML=shtml;
 
@@ -4183,65 +4543,10 @@ function run(){
 
   // ── R-End 計算（エンドR弧 + コーナーR） ──
   function buildREndPath(){
-    var cR  = parseFloat(document.getElementById('end-corner-r').value)||6;
-    var arcRval = parseFloat(document.getElementById('end-arc-r').value)||5;
-    var R   = _endArcUnit==='in' ? arcRval*I2M : arcRval;
-    var off = parseFloat(document.getElementById('end-offset').value)||15;
     if(g.curved&&Math.abs(g.s1-g.sN)>1e-4) return null;
-    if(R <= cR) cR = R * 0.49;
-
-    // fb_endフレット方向（弦方向）+ ブリッジ方向
-    var epFb = fretEdgePts(g.fbEnd);
-    var fdx=epFb.ixN.x-epFb.ix1.x, fdy=epFb.ixN.y-epFb.ix1.y;
-    var fdl=Math.sqrt(fdx*fdx+fdy*fdy)||1;
-    var ux=fdx/fdl, uy=fdy/fdl;
-    var lxa=uy,lya=-ux, lxb=-uy,lyb=ux;
-    var lx=lxa>=0?lxa:lxb, ly=lxa>=0?lya:lyb;
-
-    // エンドR弧の中心C（nFretから off-R だけブリッジ方向）
-    var cIdx=(nStr-1)/2;
-    var pNFret=Sp(cIdx, FR(nFret));
-    var Cx = pNFret.x + (off - R)*lx;
-    var Cy = pNFret.y + (off - R)*ly;
-
-    // サイドライン方向 + 内側法線
-    var sd1x=cornerEnd1.x-cornerNut1.x, sd1y=cornerEnd1.y-cornerNut1.y;
-    var sd1l=Math.sqrt(sd1x*sd1x+sd1y*sd1y)||1; sd1x/=sd1l; sd1y/=sd1l;
-    var sdNx=cornerEndN.x-cornerNutN.x, sdNy=cornerEndN.y-cornerNutN.y;
-    var sdNl=Math.sqrt(sdNx*sdNx+sdNy*sdNy)||1; sdNx/=sdNl; sdNy/=sdNl;
-    var n1x=-sd1y, n1y=sd1x;
-    var nNx=sdNy,  nNy=-sdNx;
-
-    // コーナーR中心K:
-    // サイドライン内側cRの平行線上 かつ |K-C| = R-cR
-    function calcK(cx,cy,sdx,sdy,nx,ny){
-      var P0x=cx+cR*nx, P0y=cy+cR*ny;
-      var bx=P0x-Cx, by=P0y-Cy;
-      var b2=2*(bx*sdx+by*sdy);
-      var c2=bx*bx+by*by-(R-cR)*(R-cR);
-      var disc=b2*b2-4*c2;
-      if(disc<0) return null;
-      var t1=(-b2-Math.sqrt(disc))/2;
-      var t2=(-b2+Math.sqrt(disc))/2;
-      // cornerEndに最も近い解（絶対値が小さいt）を選ぶ
-      var t=Math.abs(t1)<Math.abs(t2)?t1:t2;
-      return{x:P0x+t*sdx, y:P0y+t*sdy};
-    }
-    var K1=calcK(cornerEnd1.x,cornerEnd1.y, sd1x,sd1y, n1x,n1y);
-    var KN=calcK(cornerEndN.x,cornerEndN.y, sdNx,sdNy, nNx,nNy);
-    if(!K1||!KN) return null;
-
-    // 接触点T（エンドR弧とコーナーR弧の接点）= C→K方向にR進む
-    function touchPt(kx,ky){
-      var dx=kx-Cx, dy=ky-Cy, dl=Math.sqrt(dx*dx+dy*dy)||1;
-      return{x:Cx+dx/dl*R, y:Cy+dy/dl*R};
-    }
-    var T1=touchPt(K1.x,K1.y);
-    var TN=touchPt(KN.x,KN.y);
-
-    // 接触点S（コーナーRとサイドラインの接点）
-    var S1={x:K1.x-n1x*cR, y:K1.y-n1y*cR};
-    var SN={x:KN.x-nNx*cR, y:KN.y-nNy*cR};
+    var re=calcREnd(g);
+    if(!re) return null;
+    var S1=re.S1,SN=re.SN,K1=re.K1,KN=re.KN,T1=re.T1,TN=re.TN,Cx=re.C.x,Cy=re.C.y,R=re.R,cR=re.cR;
 
     // SVGpxに変換
     var pS1=mp(S1), pSN=mp(SN);
@@ -4478,7 +4783,14 @@ function run(){
       }
       segs.forEach(function(sg){
         var iA=sg[0],iB=sg[sg.length-1];
-        drawPolyline(extPtsSVG(fn,iA,iB),'#6b7280',0.8);
+        var ptsE=extPtsSVG(fn,iA,iB);
+        if(g.slotMarginOn){
+          var pdE='';ptsE.forEach(function(p,j){var q=mp(p);pdE+=(j?'L':'M')+q.x.toFixed(1)+','+q.y.toFixed(1);});
+          o+='<path d="'+pdE+'" stroke="#6b7280" stroke-width="0.6" stroke-dasharray="3,3" stroke-opacity="0.6" fill="none"/>';
+          clipSlotFull(g,ptsE).forEach(function(seg){ drawPolyline(seg,'#f472b6',1.1); });
+        } else {
+          drawPolyline(ptsE,'#6b7280',0.8);
+        }
       });
     }
 
@@ -4552,7 +4864,7 @@ function run(){
     var rW = smx1-smx0, rH = smy1-smy0;
     o+='<rect x="'+smx0.toFixed(1)+'" y="'+smy0.toFixed(1)+'" width="'+rW.toFixed(1)+'" height="'+rH.toFixed(1)+'" fill="none" stroke="#ff75a0" stroke-width="1.2" stroke-dasharray="4 4"/>';
     var tx=(smx0+smx1)/2, ty=smy1+16;
-    var txt = swVal.toFixed(1)+' x '+shVal.toFixed(1)+' mm';
+    var txt = fmtLen(swVal,1,2)+' x '+fmtLen(shVal,1,2)+' '+lenUnit();
     if(lefty){
       o+='<g transform="scale(-1,1) translate(-'+SW.toFixed(0)+',0)">';
       o+='<text x="'+(SW-tx).toFixed(1)+'" y="'+ty.toFixed(1)+'" text-anchor="middle" font-size="14" fill="#ff75a0" '+FF+'>'+txt+'</text>';
@@ -4926,7 +5238,17 @@ function run(){
     }
     var lineCol=isNut?'#d1d5db':isZeroFret?'#86efac':'#6b7280';
     var lineW=isNut?2:isZeroFret?1.5:0.8;
-    o+='<path d="'+pD+'" stroke="'+lineCol+'" stroke-width="'+lineW+'" fill="none"/>';
+    if(g.slotMarginOn&&!isNut){
+      // 端止め: 指板端までの元の線を薄い破線で、実際に切る溝をピンクの実線で
+      o+='<path d="'+pD+'" stroke="'+lineCol+'" stroke-width="0.6" stroke-dasharray="3,3" stroke-opacity="0.6" fill="none"/>';
+      var rawF=g.curved?pts:[ep2.ix1,ep2.ixN];
+      clipSlotFull(g,rawF).forEach(function(seg){
+        var sd='';seg.forEach(function(p,j){var q=mp(p);sd+=(j?'L':'M')+q.x.toFixed(1)+','+q.y.toFixed(1);});
+        o+='<path d="'+sd+'" stroke="#f472b6" stroke-width="'+(isZeroFret?1.5:1.1)+'" fill="none"/>';
+      });
+    } else {
+      o+='<path d="'+pD+'" stroke="'+lineCol+'" stroke-width="'+lineW+'" fill="none"/>';
+    }
     if(showNums.has(fn2)){
       var top2=fa.y<fb.y?fa:fb;
       var labelTxt=fn2===0?(g.zeroFretOn?'0f':i18n('lbl-nut-txt')):fn2;
@@ -5029,16 +5351,17 @@ function run(){
 
 // ── event listeners ──
 document.addEventListener('DOMContentLoaded',function(){
+  initUnits(); // 長さ欄の表示単位を最初に確定（以降の run() は基準単位で読む）
   // num-wrap の input イベント登録
   document.querySelectorAll('.num-wrap input[type=number]').forEach(function(el){
     el.addEventListener('input',function(){
       if(el.id==='pd') _pdSource='direct';
       else if(el.id==='pd-fret') _pdSource='fret';
       else if(el.id==='sAll') {
-         var vStr=this.value;
+         var vAll=getLen(this);
          var en=document.getElementById('sN'), e1=document.getElementById('s1');
-         if(en) en.value=vStr;
-         if(e1) e1.value=vStr;
+         if(en) setLen(en,vAll);
+         if(e1) setLen(e1,vAll);
       }
       run();
       // ns変更時にTuning Presetsを即時更新
@@ -5049,10 +5372,9 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   });
   // 初期化
-  // 表示言語はブラウザの言語設定に合わせる（日本語なら JP、それ以外は EN）
+  // 表示言語は EN が既定。JP に切り替えた人はその選択を保存して次回も JP
   try{
-    var navLang=((navigator.languages&&navigator.languages[0])||navigator.language||'').toLowerCase();
-    if(navLang.indexOf('ja')===0 && currentLang==='en') toggleLang();
+    if(localStorage.getItem(LANG_KEY)==='jp' && currentLang==='en') toggleLang();
   }catch(e){}
   syncSlantDisable();
   if(typeof syncScaleToggle==='function') syncScaleToggle(true);
@@ -5790,7 +6112,7 @@ function updateTensionRows() {
     html += '<tr>';
     html += '<td style="color:var(--text3);font-weight:600;">' + si + '</td>';
     html += '<td class="ro-val" id="t-sc-' + i + '" style="text-align:center;white-space:nowrap;">—</td>';
-    html += '<td><div class="num-wrap"><input type="text" id="t-note-' + i + '" value="' + s.note + '" oninput="updateStringSetting(' + i + ', \'note\', this.value)" spellcheck="false"><div class="num-btns"><button class="num-btn" onclick="shiftNote(' + i + ',1)">▲</button><button class="num-btn" onclick="shiftNote(' + i + ',-1)">▼</button></div></div></td>';
+    html += '<td><div class="num-wrap"><input type="text" id="t-note-' + i + '" value="' + s.note + '" oninput="updateStringSetting(' + i + ', \'note\', this.value)" spellcheck="false"><div class="num-btns"><button type="button" class="num-btn" data-note="' + i + '" data-dir="up" aria-label="Note up">▲</button><button type="button" class="num-btn" data-note="' + i + '" data-dir="dn" aria-label="Note down">▼</button></div></div></td>';
     html += '<td><div class="num-wrap"><select id="t-gauge-' + i + '" onchange="updateGaugeWithType(this.value, ' + i + ')">';
     GAUGE_LIST.forEach(g => {
       // ゲージが一致、かつタイプが一致（またはそのゲージに今のタイプがない場合のフォールバック）を selected にする
@@ -5806,7 +6128,7 @@ function updateTensionRows() {
         html += '<option value="' + valW + '"' + selW + '>' + fmtGauge(g.g) + 'w</option>';
       }
     });
-    html += '</select><div class="num-btns"><button class="num-btn" onclick="stepGauge(' + i + ',1)">▲</button><button class="num-btn" onclick="stepGauge(' + i + ',-1)">▼</button></div></div></td>';
+    html += '</select><div class="num-btns"><button type="button" class="num-btn" data-gauge="' + i + '" data-dir="up" aria-label="Gauge up">▲</button><button type="button" class="num-btn" data-gauge="' + i + '" data-dir="dn" aria-label="Gauge down">▼</button></div></div></td>';
     html += '<td style="vertical-align:middle;padding:0 12px;"><div class="tension-bar-wrap"><div class="tension-bar" id="t-bar-' + i + '" style="width:0%;"></div><div class="tension-dead-line" id="t-dead-' + i + '"></div><div class="tension-proper-line" id="t-proper-' + i + '"></div></div></td>';
     html += '<td style="text-align:center;padding-left:1px;" class="ro-val" id="t-res-' + i + '">—</td>';
     html += '</tr>';
