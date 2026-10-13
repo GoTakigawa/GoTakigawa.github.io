@@ -4006,13 +4006,13 @@ function buildDrawing(g,lefty){
   return L;
 }
 
-// ── 利用規約の確認（DXF出力・印刷の前に表示。「次回から表示しない」で以後スキップ）──
-var TERMS_VERSION='1';  // 規約の内容を変えたら数字を上げる → 全員に再表示される
+// ── 利用規約の確認（DXF/SVG出力・印刷の前に表示。「次回から表示しない」で以後スキップ）──
+var TERMS_VERSION='2';  // 規約の内容を変えたら数字を上げる → 全員に再表示される
 var TERMS_KEY='gti-fb-terms-accepted';
 var TERMS_TEXT={
   en:{title:'Terms of Use',
     items:[
-      'This generator is free to use. However, the author does not guarantee that the output (DXF files, printed templates) is accurate.',
+      'This generator is free to use. However, the author does not guarantee that the output (DXF / SVG files, printed templates) is accurate.',
       'Always check the dimensions yourself before cutting any material. The author accepts no responsibility for damaged materials, instruments, tools or any other loss arising from use of this tool or its output.',
       'You may use the files you generate for your own instruments, including instruments you build for sale.',
       'Do not resell or redistribute this generator itself, or present it as your own work.',
@@ -4022,7 +4022,7 @@ var TERMS_TEXT={
     skip:'Don’t show this again', cancel:'Cancel', agree:'Agree & continue'},
   jp:{title:'利用規約',
     items:[
-      '本ジェネレーターは無料でご利用いただけます。ただし、出力されるデータ（DXF・印刷テンプレート）の正確さは保証いたしません。',
+      '本ジェネレーターは無料でご利用いただけます。ただし、出力されるデータ（DXF・SVG・印刷テンプレート）の正確さは保証いたしません。',
       '材料を加工する前に、必ずご自身で寸法を確認してください。本ツールおよび出力データの利用によって生じた材料・楽器・工具の損傷、その他の損害について、作者は責任を負いません。',
       '出力したデータは、販売用の楽器を含め、ご自身の楽器製作に自由にお使いいただけます。',
       'ジェネレーターそのものの転売・再配布や、自作であるかのような公開はご遠慮ください。',
