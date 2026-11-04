@@ -35,7 +35,7 @@
   <!-- ── SIDEBAR: settings ── -->
   <aside class="sidebar">
     <div class="logo">GTI Tools</div>
-    <h1 class="app-title">Riff Composer<span class="badge">DEV 0.2</span></h1>
+    <h1 class="app-title">Riff Composer<span class="badge">DEV 0.3</span></h1>
     <p class="app-sub">Djent / プログレッシブメタル向けの作曲・練習ツール。いまはピアノ音源だけの叩き台です。</p>
 
     <div class="sec">
@@ -173,6 +173,10 @@
           <div class="toggle-row" style="padding:0"><span class="toggle-label">指板で入力</span><label class="toggle-switch"><input type="checkbox" id="fb-input"><span class="toggle-slider"></span></label></div>
         </div>
         <div class="len-row" id="lead-len" role="group" aria-label="置く音の長さ"></div>
+        <div class="mode-seg" id="lead-mode" hidden role="group" aria-label="選択中の音の編集方法">
+          <button class="mode-btn on" data-mode="replace">選択中の音を変える</button>
+          <button class="mode-btn" data-mode="insert">選択中の前に挿入</button>
+        </div>
         <p class="hint" id="lead-pos" aria-live="polite"></p>
         <div class="panel-hd" style="margin:12px 0 8px"><div class="sec-sub">次の音の候補</div><button class="std small" id="lead-reroll">↻ 別の候補</button></div>
         <div class="suggest" id="lead-suggest"></div>
@@ -185,7 +189,7 @@
           <button class="std small" id="lead-clear">リードをクリア</button>
         </div>
         <div class="lead-chips" id="lead-chips"></div>
-        <p class="hint">音を押すと選択されます。選択中は、指板や候補で音の高さだけを差し替えられます。</p>
+        <p class="hint">音を押すと選択されます。選択中は、音価ボタンで長さを、指板や候補で高さを変えられます。「前に挿入」に切り替えると、その音の前に足していけます。<span>Delete</span> で削除、<span>Esc</span> で選択解除。</p>
       </section>
 
       <section class="panel">
@@ -231,7 +235,7 @@
       </section>
     </div>
 
-    <p class="foot">叩き台（DEV 0.2）：ピアノ音源のみ。プリセットはテクニック別のオリジナル例で、既存曲の譜面ではありません。曲の状態はこのブラウザに自動保存されます。スペースキーで再生／停止。</p>
+    <p class="foot">叩き台（DEV 0.3）：ピアノ音源のみ。プリセットはテクニック別のオリジナル例で、既存曲の譜面ではありません。曲の状態はこのブラウザに自動保存されます。スペースキーで再生／停止。</p>
   </main>
 </div>
 
