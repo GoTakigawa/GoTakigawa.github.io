@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord } from './theory.js';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS } from './positions.js';
-import { PianoEngine } from './audio.js';
-import { encodeSeed, decodeSeed } from './share.js';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord } from './theory.js?v=13';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=13';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS } from './positions.js?v=13';
+import { PianoEngine } from './audio.js?v=13';
+import { encodeSeed, decodeSeed } from './share.js?v=13';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -50,7 +50,8 @@ function sanitize(s) {
   }
   d.hideIv = Array.isArray(s.hideIv) ? s.hideIv.filter(x => typeof x === 'string' && /^(bb|b|##|#)?\d{1,2}$/.test(x)) : [];
   d.hideCells = Array.isArray(s.hideCells) ? s.hideCells.filter(x => typeof x === 'string' && /^\d{1,2}:\d{1,2}$/.test(x)).slice(0, 300) : [];
-  d.shapeTab = ['forms', 'sets', 'sweep', 'search'].includes(s.shapeTab) ? s.shapeTab : 'forms';
+  // the search tab is a temporary picking mode, so a reload starts from chord forms
+  d.shapeTab = ['forms', 'sets', 'sweep'].includes(s.shapeTab) ? s.shapeTab : 'forms';
   if (s.sw && typeof s.sw === 'object') {
     d.sw.size = [0, 3, 4, 5, 6, 7, 8].includes(s.sw.size) ? s.sw.size : 0;
     d.sw.span = int(s.sw.span, 4, 7, 5);
@@ -367,6 +368,7 @@ function thumb(item, c) {
 
 function renderShapes() {
   const c = shapeChord();
+  $('shape-panel').hidden = false;
   // without a chord (single notes, 5/6/8-note scales) only the search tab works
   const tab = c ? st.shapeTab : 'search', search = tab === 'search';
   document.querySelectorAll('.shape-tab').forEach(b => { b.classList.toggle('on', b.dataset.tab === tab); b.disabled = !c && b.dataset.tab !== 'search'; });
