@@ -1,7 +1,7 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad } from './theory.js?v=16';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=16';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS } from './positions.js?v=16';
-import { PianoEngine } from './audio.js?v=16';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad } from './theory.js?v=17';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=17';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms } from './positions.js?v=17';
+import { PianoEngine } from './audio.js?v=17';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -314,7 +314,10 @@ function computeShapes() {
     return { title, meta, cells, muted, tones, name: chordNameWithBass(c, Math.min(...cells.map(x => tun[x.s] + x.f))), tab: frets.map(f => f === null ? 'x' : f).join(' '), play: cells.map(x => tun[x.s] + x.f), strum: true };
   };
   if (st.shapeTab === 'forms') {
-    return chordForms(tun, c.id, rootPc, F, c.pcs).map(v => fromFrets(v.frets, v.name, `${v.name} · ${v.low ? v.low + '〜' + v.high + 'f' : '開放'}`));
+    // registered forms first; any other chord gets forms derived from the basic shapes
+    let list = c.id && FORMS[c.id] ? chordForms(tun, c.id, rootPc, F, c.pcs) : [];
+    if (!list.length) list = derivedForms(tun, c.pcs, rootPc, F);
+    return list.map(v => fromFrets(v.frets, v.name, `${v.name} · ${v.low ? v.low + '〜' + v.high + 'f' : '開放'}`));
   }
   if (st.shapeTab === 'sets') {
     // more than four tones: drop the 5th, then 9th, then 11th so the shape fits four strings
@@ -397,12 +400,12 @@ function renderShapes() {
   $('sw-notes').value = st.sw.notes;
   $('sw-size').value = st.sw.size; $('sw-span').value = st.sw.span; $('sw-root').checked = st.sw.rootStart; $('sw-open').checked = st.sw.allowOpen; $('sw-top').checked = st.sw.topOnly;
   const hints = {
-    forms: '一般的なコードフォーム（E型・A型・D型・C型・G型など）を、いまのチューニングに置き直して並べています。7・8弦では上の6本で作ります。',
+    forms: (c.id && FORMS[c.id] ? '一般的なコードフォーム（E型・A型・D型・C型・G型など）を、いまのチューニングに置き直して並べています。' : 'このコードは定番フォームの登録がないため、E型・A型などの基本フォームの音を近いコードトーンへずらして作った形（変形）を並べています。') + '7・8弦では上の6本で作ります。',
     sets: `隣り合う${Math.min(c.pcs.length > 4 ? 4 : c.pcs.length, st.strings)}本の弦に構成音を1つずつ置く形です（3和音ならトライアド、4和音ならドロップ系の形）。高音弦側から並べています。${c.pcs.length > 4 ? '5音以上のコードは、5度・9度・11度の順に省いて4音にしています。' : ''}`,
     sweep: 'コードトーンを順番に1弦1〜2音ずつ上がっていくスウィープの形です。高音弦側の形から並べています。番号が弾く順番です。'
   };
   $('shape-hint').textContent = hints[st.shapeTab];
-  const noForm = st.shapeTab === 'forms' && (!c.id || !FORMS[c.id]);
+  const noForm = false;
   $('shape-count').textContent = noForm ? '' : shapes.length >= 300 ? '300件以上' : `${shapes.length}件`;
   const shown = shapes.slice(0, 120);
   $('shape-list').innerHTML = noForm
