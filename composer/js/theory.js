@@ -179,3 +179,59 @@ export function euclid(k, n, rot = 0) {
   const r = ((rot % n) + n) % n;
   return steps.slice(n - r).concat(steps.slice(0, n - r));
 }
+
+// ── Lead line ──
+// Lead events: { n: midi | null (rest), len: steps (16ths) }, played back to back from bar 1.
+export const LEAD_LENGTHS = [
+  { len: 1, label: '16分', sym: '𝅘𝅥𝅯' }, { len: 2, label: '8分', sym: '♪' }, { len: 3, label: '付点8分', sym: '♪.' },
+  { len: 4, label: '4分', sym: '♩' }, { len: 8, label: '2分', sym: '𝅗𝅥' }, { len: 16, label: '全', sym: '𝅝' }
+];
+export const leadTotal = lead => lead.reduce((s, e) => s + e.len, 0);
+export function leadRange(tuning) { return { lo: Math.max(36, Math.min(...tuning) + 12), hi: Math.min(96, Math.max(...tuning) + 22) }; }
+
+// Which chord sits under a step of the progression
+export function chordIndexAt(step, spb, bars) { return Math.min(bars - 1, Math.floor(step / spb)); }
+
+// Four candidate next notes. Chord tones lead on strong beats; scale tones connect in between.
+export function suggestLead(key, chordsList, lead, spb, beatSteps, tuning, len, variation = 0) {
+  const pos = leadTotal(lead), cap = spb * chordsList.length;
+  if (pos >= cap) return [];
+  const { lo, hi } = leadRange(tuning);
+  const chord = chordsList[chordIndexAt(pos, spb, chordsList.length)];
+  const strong = pos % beatSteps === 0, barHead = pos % spb === 0;
+  const played = lead.filter(e => e.n !== null), prev = played.length ? played[played.length - 1].n : null;
+  const pool = []; for (let m = lo; m <= hi; m++) { const p = pc(m); if (key.scale.includes(p) || chord.pcs.includes(p)) pool.push(m); }
+  const isCT = m => chord.pcs.includes(pc(m));
+  const centre = Math.round((lo + hi) / 2);
+  const anchor = prev ?? centre;
+  const v = variation;
+  const lastBarTail = pos >= cap - spb && pos % spb >= spb / 2;
+  const profiles = [
+    { tag: 'コードトーン', why: `${chord.name} の構成音。伴奏としっかり重なります。`, target: anchor + [0, 3, -3, 5][v % 4], ct: true },
+    { tag: 'なめらかに', why: '近くの音へ。強い拍ではコードトーン、間の拍ではスケールの音でつなぎます。', target: anchor + [2, -2, 1, -1][v % 4], ct: strong },
+    { tag: '上へ', why: '少し上へ広げて、フレーズに勢いをつけます。', target: anchor + 4 + (v % 3), ct: barHead },
+    { tag: '跳ぶ', why: '離れた音へ跳んで、表情を変えます。近い音と組み合わせると歌いやすくなります。', target: anchor + (anchor > centre + 5 ? -7 : 7) - (v % 3) }
+  ];
+  if (prev === null) Object.assign(profiles[0], { tag: '始まりの音', why: `${chord.name} のルート。落ち着いて始められます。`, target: centre, root: true });
+  if (lastBarTail) Object.assign(profiles[0], { tag: '着地', why: '終わりは中心の音へ。フレーズがまとまります。', target: anchor, tonic: true });
+  const recent = played.slice(-6).map(e => e.n);
+  const used = new Set();
+  return profiles.map(pf => {
+    let cands = pool.filter(m => !used.has(m));
+    if (pf.ct) cands = cands.filter(isCT);
+    if (pf.root) cands = cands.filter(m => pc(m) === chord.root);
+    if (pf.tonic) cands = cands.filter(m => pc(m) === key.tonic);
+    if (!cands.length) cands = pool.filter(m => !used.has(m));
+    const scored = cands.map(m => {
+      let s = Math.abs(m - pf.target);
+      if (prev !== null && m === prev) s += 3.5;
+      s += recent.filter(r => r === m).length * 0.4;
+      if (strong && !isCT(m)) s += 3;
+      // a held note is checked against every chord it rings over
+      for (let t = pos + 1; t < Math.min(pos + len, cap); t++) if (!chordsList[chordIndexAt(t, spb, chordsList.length)].pcs.includes(pc(m))) s += 0.25;
+      return { m, s };
+    }).sort((a, b) => a.s - b.s || a.m - b.m);
+    const n = scored[0].m; used.add(n);
+    return { n, name: noteName(n), tag: pf.tag, why: pf.why, ct: isCT(n) };
+  });
+}

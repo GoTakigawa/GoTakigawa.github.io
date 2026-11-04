@@ -41,6 +41,7 @@ export function buildMidi(tl) {
     track('Chords', [{ t: 0, order: 0, bytes: [0xc0, 0] }, ...noteEvents(conv(tl.pad, 64), 0)], end),
     track('Riff', [{ t: 0, order: 0, bytes: [0xc1, 0] }, ...noteEvents(conv(tl.riff, 100), 1)], end)
   ];
+  if (tl.lead && tl.lead.length) tracks.push(track('Lead', [{ t: 0, order: 0, bytes: [0xc2, 0] }, ...noteEvents(conv(tl.lead, 100), 2)], end));
   const head = [...ascii('MThd'), ...u32(6), ...u16(1), ...u16(tracks.length), ...u16(PPQ)];
   return new Uint8Array([...head, ...tracks.flat()]);
 }
