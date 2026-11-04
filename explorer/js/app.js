@@ -1,7 +1,7 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad } from './theory.js?v=17';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=17';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms } from './positions.js?v=17';
-import { PianoEngine } from './audio.js?v=17';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad } from './theory.js?v=18';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=18';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms } from './positions.js?v=18';
+import { PianoEngine } from './audio.js?v=18';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -407,7 +407,7 @@ function renderShapes() {
   $('shape-hint').textContent = hints[st.shapeTab];
   const noForm = false;
   $('shape-count').textContent = noForm ? '' : shapes.length >= 300 ? '300件以上' : `${shapes.length}件`;
-  const shown = shapes.slice(0, 120);
+  const shown = shapes.slice(0, 240);
   $('shape-list').innerHTML = noForm
     ? '<p class="hint">このコードの定番フォームはまだ登録していません。「弦セット」や「検索」を使ってください。</p>'
     : shown.map((v, i) => `<button class="vo-item ${i === ssel ? 'on' : ''}" data-i="${i}">${thumb(v, c)}<span class="vo-body"><span class="vo-name">${v.name}</span><span class="vo-tones">${v.tones}</span><span class="vo-meta">${v.meta}</span><span class="vo-tab">${v.tab}</span></span></button>`).join('')
