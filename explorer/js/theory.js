@@ -188,3 +188,45 @@ export function identifyChord(midis) {
   const results = out.sort((a, b) => b.score - a.score).filter(x => { if (seen.has(x.name)) return false; seen.add(x.name); return true; }).slice(0, 6);
   return { kind: 'chord', bass, results };
 }
+
+// ── Two notes: the lower one is the root; read the upper one against the scale ──
+// scale = { root, iv } or null. Returns the interval and the chords (built on the
+// lower note) that contain the upper note, diatonic ones first.
+const TENSION = { 1: '♭9', 2: '9', 3: '♯9', 5: '11', 6: '♯11', 8: '♭13', 9: '13' };
+export function interpretDyad(low, high, scale) {
+  const r = pc(low), h = pc(high - low), compound = high - low > 12;
+  const scaleSet = scale ? makeSet(scale.root, scale.iv) : null;
+  const scalePcs = scaleSet ? new Set(scaleSet.pcs) : null;
+  const toneLabel = (ivNames, semi) => { const iv = ivNames.map(parseInterval).find(x => pc(x.semis) === semi); return iv ? (iv.label === '1' ? 'R' : iv.label) : null; };
+  const spell = (rootPc, ivNames) => (scaleSet && scalePcs.has(rootPc)) ? scaleSet : makeSet(rootPc, ivNames);
+  const out = { root: r, interval: DYADS[h] + (compound ? '（オクターブ以上離れています）' : ''), rootInScale: scalePcs ? scalePcs.has(r) : null, highInScale: scalePcs ? scalePcs.has(pc(high)) : null, diatonic: [], others: [] };
+  const seen = new Set();
+  // diatonic chords on the lower note
+  if (scale && scale.iv.length === 7 && scalePcs.has(r)) {
+    const steps = scale.iv.map(n => parseInterval(n).semis);
+    const d = steps.findIndex(s => pc(scale.root + s) === r);
+    out.degree = romanOf(scale.iv, d);
+    [false, true].forEach(seventh => {
+      const c = diatonic(scale.root, scale.iv, d, seventh);
+      const rel = c.semis.map(pc);
+      const id = Object.entries(CHORDS).find(([, cc]) => { const k = cc.iv.map(n => pc(parseInterval(n).semis)).sort((a, b) => a - b).join(','); return k === rel.slice().sort((a, b) => a - b).join(','); });
+      if (!id) return;
+      const [cid, cc] = id, name = spell(r, cc.iv).name(r) + chordSymbol(cid);
+      if (rel.includes(h)) { out.diatonic.push({ name, id: cid, tone: toneLabel(cc.iv, h), kind: seventh ? '4和音' : '3和音' }); seen.add(cid); }
+      else if (seventh && TENSION[h] && scalePcs.has(pc(high))) out.diatonic.push({ name, id: cid, tone: TENSION[h], kind: 'テンション', tension: true });
+    });
+  }
+  // other chord types on the lower note that contain the upper note (and fit the scale)
+  for (const [cid, cc] of Object.entries(CHORDS)) {
+    if (seen.has(cid) || cid === 'quartal') continue;
+    const rel = cc.iv.map(n => pc(parseInterval(n).semis));
+    if (!rel.includes(h)) continue;
+    if (scalePcs && rel.some(x => !scalePcs.has(pc(r + x)))) continue;
+    out.others.push({ name: spell(r, cc.iv).name(r) + chordSymbol(cid), id: cid, tone: toneLabel(cc.iv, h), size: cc.iv.length });
+  }
+  out.others.sort((a, b) => a.size - b.size);
+  out.others = out.others.slice(0, 8);
+  out.rootName = (scaleSet || makeSet(r, ['1'])).name(r);
+  out.highName = (scaleSet || makeSet(r, ['1', ['1','b2','2','b3','3','4','b5','5','b6','6','b7','7'][h]])).name(high);
+  return out;
+}

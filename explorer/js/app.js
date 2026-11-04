@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord } from './theory.js?v=13';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=13';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS } from './positions.js?v=13';
-import { PianoEngine } from './audio.js?v=13';
-import { encodeSeed, decodeSeed } from './share.js?v=13';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad } from './theory.js?v=14';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=14';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS } from './positions.js?v=14';
+import { PianoEngine } from './audio.js?v=14';
+import { encodeSeed, decodeSeed } from './share.js?v=14';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -412,7 +412,19 @@ function renderFinder() {
   $('pick-notes').innerHTML = notes.map(x => `<span class="pick-note">${spellFor.name(x.m)}<small>${tun.length - x.s}弦 ${x.f}f</small></span>`).join('') || '<span class="hint">指板の上で音を押して選んでください（もう一度押すと外れます）。</span>';
   let html = '';
   if (res.kind === 'single') html = '<p class="hint">1音だけです。もう1音以上選ぶとコードを推測します。</p>';
-  else if (res.kind === 'dyad') html = `<p class="hint">2音の音程：<span>${res.interval}</span>${res.results.length ? '（' + res.results.map(r => r.name).join(' / ') + '）' : ''}</p>`;
+  else if (res.kind === 'dyad') {
+    // two notes: lower = root, read the upper one against the selected scale
+    const lowN = notes[0].m, highN = notes.filter(x => pc(x.m) !== pc(lowN)).pop().m;
+    const scale = st.mode === 'scale' ? { root: st.root, iv: SCALES[st.scale].iv } : null;
+    const d = interpretDyad(lowN, highN, scale);
+    const scaleName = scale ? `${makeSet(st.root, SCALES[st.scale].iv).name(st.root)} ${SCALES[st.scale].name}` : '';
+    const card = (x, extra) => `<div class="fd-item ${extra || ''}"><b>${x.name}</b><span>${d.highName} は <em>${x.tone}</em>${x.kind ? '（' + x.kind + '）' : ''}</span><button class="std small fd-go" data-root="${d.root}" data-id="${x.id}">このコードの形を見る</button></div>`;
+    html = `<p class="fd-lead"><b>${d.rootName}</b> をルートとすると、<b>${d.highName}</b> は ${d.interval}。` +
+      (scale ? `${scaleName} では、${d.rootInScale ? `${d.rootName} は ${d.degree || 'スケール音'}` : `${d.rootName} はスケール外`}、${d.highInScale ? `${d.highName} はスケール音です。` : `${d.highName} はスケール外の音です。`}` : 'スケール表示にすると、そのスケールに合うコードで解釈します。') + '</p>';
+    if (d.diatonic.length) html += `<p class="sec-sub fd-sub">ダイアトニックコード${d.degree ? '（' + d.degree + '）' : ''}</p>` + d.diatonic.map((x, i) => card(x, i === 0 ? 'top' : '')).join('');
+    if (d.others.length) html += `<p class="sec-sub fd-sub">${scale ? 'ほかにスケールに合うコード' : '上の音を含むコード'}（${d.rootName} がルート）</p>` + d.others.map(x => card({ ...x, kind: '' })).join('');
+    if (!d.diatonic.length && !d.others.length) html += '<p class="hint">このスケールの中では、この2音を含むコードが見つかりませんでした。</p>';
+  }
   else if (res.kind === 'chord') html = res.results.length
     ? res.results.map((r, i) => {
         const seen = new Set(), uniq = notes.filter(x => { const k = pc(x.m); if (seen.has(k)) return false; seen.add(k); return true; });

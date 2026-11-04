@@ -235,3 +235,7 @@ button.small{font-size:11px;padding:6px 10px;}
 .finder-results .hint{grid-column:1/-1;}
 .fd-go{align-self:flex-start;margin-top:4px;}
 .shape-tab:disabled{opacity:.35;cursor:default;}
+.fd-lead{grid-column:1/-1;font-size:13px;color:var(--text2);line-height:1.7;}
+.fd-lead b{color:var(--text);}
+.fd-sub{grid-column:1/-1;margin-top:6px;}
+.fd-item em{font-style:normal;color:var(--accent3);font-weight:700;}
