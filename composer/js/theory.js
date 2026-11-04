@@ -48,9 +48,43 @@ const CHORD_SUFFIX = {
   '0,5,10':'quartal', '0,5,11':'(4,7)', '0,6,11':'(#4,7)', '0,5,9':'(4,6)', '0,4,10':'(3,b7)', '0,3,8':'(b3,b6)'
 };
 
+// ── Key-aware spelling ──
+// Each scale degree gets its own letter (G Phrygian → G A♭ B♭ C D E♭ F).
+// The tonic spelling with the fewest accidentals wins; tones outside the scale
+// follow the key's direction (♭ keys use ♭, ♯ keys use ♯).
+const LETTERS = ['C','D','E','F','G','A','B'], LETTER_PC = [0,2,4,5,7,9,11];
+const ACC = { '-2': '𝄫', '-1': '♭', '0': '', '1': '♯', '2': '𝄪' };
+const SHARP_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const FLAT_NAMES  = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
+function makeSpeller(tonic, steps) {
+  let best = null;
+  LETTERS.forEach((L, li) => {
+    const tAcc = ((tonic - LETTER_PC[li] + 18) % 12) - 6;
+    if (Math.abs(tAcc) > 1) return;
+    const names = {}; let cost = 0, flats = 0, sharps = 0;
+    steps.forEach((st, d) => {
+      const lj = (li + d) % 7, p = pc(tonic + st), acc = ((p - LETTER_PC[lj] + 18) % 12) - 6;
+      cost += Math.abs(acc) + (Math.abs(acc) > 1 ? 10 : 0);
+      if (acc < 0) flats++; if (acc > 0) sharps++;
+      names[p] = { letter: LETTERS[lj], acc };
+    });
+    if (!best || cost < best.cost || (cost === best.cost && sharps > best.sharps)) best = { cost, names, flats, sharps };
+  });
+  const useFlats = best.flats > best.sharps;
+  const name = p => { const n = best.names[pc(p)]; return n ? n.letter + (ACC[n.acc] ?? '') : (useFlats ? FLAT_NAMES : SHARP_NAMES)[pc(p)]; };
+  const note = m => {
+    const n = best.names[pc(m)];
+    let oct = Math.floor(m / 12) - 1;
+    if (n && n.letter === 'C' && pc(m) === 11) oct += 1;   // C♭ belongs to the octave above
+    if (n && n.letter === 'B' && pc(m) === 0) oct -= 1;    // B♯ belongs to the octave below
+    return name(m) + oct;
+  };
+  return { name, note, useFlats };
+}
+
 export function makeKey(tonic, modeId) {
   const mode = MODES[modeId] || MODES.aeolian;
-  return { tonic, modeId, mode, scale: mode.steps.map(s => pc(s + tonic)) };
+  return { tonic, modeId, mode, scale: mode.steps.map(s => pc(s + tonic)), spell: makeSpeller(tonic, mode.steps) };
 }
 
 // Interval in semitones from the tonic to scale degree d (d may exceed 6 for compound degrees)
@@ -86,7 +120,7 @@ export function chordFor(key, d, type) {
   const set = [...new Set(ints.map(pc))].sort((a, b) => a - b);
   const keyStr = set.join(',');
   const suffix = CHORD_SUFFIX[keyStr];
-  const name = NOTE_NAMES[root] + (suffix !== undefined ? suffix : '(' + set.slice(1).map(i => INTERVAL_NAMES[i]).join(',') + ')');
+  const name = key.spell.name(root) + (suffix !== undefined ? suffix : '(' + set.slice(1).map(i => INTERVAL_NAMES[i]).join(',') + ')');
   return { d, type, root, ints, pcs: set.map(i => pc(i + root)), name, roman: romanFor(key, d) };
 }
 
@@ -232,6 +266,6 @@ export function suggestLead(key, chordsList, lead, spb, beatSteps, tuning, len, 
       return { m, s };
     }).sort((a, b) => a.s - b.s || a.m - b.m);
     const n = scored[0].m; used.add(n);
-    return { n, name: noteName(n), tag: pf.tag, why: pf.why, ct: isCT(n) };
+    return { n, name: key.spell.note(n), tag: pf.tag, why: pf.why, ct: isCT(n) };
   });
 }

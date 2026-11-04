@@ -1,6 +1,6 @@
 import { NOTE_NAMES, MODES, CHORD_TYPES, pc, makeKey, chordFor, chugNotes, accentNotes, padNotes, suggestChords,
          romanFor, roleLabel, stepsPerBar, lcm, patternFromGrouping, euclid,
-         LEAD_LENGTHS, leadTotal, suggestLead, leadRange, noteName, chordIndexAt } from './theory.js';
+         LEAD_LENGTHS, leadTotal, suggestLead, leadRange, chordIndexAt } from './theory.js';
 import { TUNINGS, findTuning, PRESETS } from './presets.js';
 import { PianoEngine } from './audio.js';
 import { buildMidi } from './midi.js';
@@ -24,7 +24,7 @@ let song = structuredClone(DEFAULT);
 let selected = 0, variation = 0, undo = [], redo = [];
 let playing = false, schedTimer = null, rafId = 0, nextTime = 0, playStep = 0, queue = [], shownStep = -1;
 let statusTimer = null;
-let leadLen = 2, leadSel = -1, leadVar = 0, fbInput = true, leadCache = null;
+let leadLen = 2, leadSel = -1, leadVar = 0, fbInput = true, leadCache = null, leadMode = 'replace';
 
 // ── state helpers ──
 function sanitize(s) {
@@ -159,7 +159,7 @@ function highlight(g) {
 function renderSidebar() {
   $('strings').value = song.strings;
   $('tuning').innerHTML = TUNINGS[song.strings].map(t => `<option value="${t.id}" ${t.id === song.tuning ? 'selected' : ''}>${t.name}</option>`).join('');
-  $('tuning-notes').textContent = tuning().slice().reverse().map(n => NOTE_NAMES[pc(n)]).join(' ');
+  $('tuning-notes').textContent = tuning().slice().reverse().map(n => key().spell.name(n)).join(' ');
   $('tonic').value = song.tonic;
   $('mode').value = song.mode;
   $('mode-hint').textContent = MODES[song.mode].hint;
@@ -172,7 +172,7 @@ function renderSidebar() {
 }
 function renderMetrics() {
   const k = key(), spb = S(), L = song.riff.length, cyc = lcm(L, spb) / spb;
-  $('m-key').innerHTML = `${NOTE_NAMES[k.tonic]} <span class="metric-unit">${MODES[song.mode].name.split(' (')[0]}</span>`;
+  $('m-key').innerHTML = `${k.spell.name(k.tonic)} <span class="metric-unit">${MODES[song.mode].name.split(' (')[0]}</span>`;
   $('m-bpm').innerHTML = `${song.bpm}<span class="metric-unit">BPM</span>`;
   $('m-meter').innerHTML = `${song.num}/${song.den}<span class="metric-unit">${spb} steps</span>`;
   $('m-riff').innerHTML = `${L}<span class="metric-unit">steps</span>`;
@@ -222,7 +222,7 @@ function renderRiff() {
     const b0 = b * spb, b1 = b0 + spb;
     spans.filter(e => e.start < b1 && e.start + e.len > b0).forEach(e => {
       const from = Math.max(e.start, b0) - b0 + 1, to = Math.min(e.start + e.len, b1) - b0 + 1;
-      html += `<span class="ld-note ${e.n === null ? 'rest' : ''} ${e.i === leadSel ? 'sel' : ''}" data-i="${e.i}" style="grid-column:${from}/${to}">${e.n === null ? '' : noteName(e.n)}</span>`;
+      html += `<span class="ld-note ${e.n === null ? 'rest' : ''} ${e.i === leadSel ? 'sel' : ''}" data-i="${e.i}" style="grid-column:${from}/${to}">${e.n === null ? '' : key().spell.note(e.n)}</span>`;
     });
     html += '</div></div></div>';
   }
@@ -243,8 +243,12 @@ function renderLead() {
   $('fb-input').checked = fbInput;
   const remain = capacity() - leadTotal(song.lead);
   const barNo = cur.idx + 1, beatNo = Math.floor((cur.pos % spb) / beatSteps()) + 1;
+  $('lead-mode').hidden = leadSel < 0;
+  document.querySelectorAll('#lead-mode .mode-btn').forEach(b => b.classList.toggle('on', b.dataset.mode === leadMode));
   $('lead-pos').innerHTML = leadSel >= 0
-    ? `<span>${leadSel + 1}音目</span>を編集中（${barNo}小節目）。指板か候補で音を差し替えます。`
+    ? (leadMode === 'insert'
+        ? `<span>${leadSel + 1}音目の前</span>に挿入します（${barNo}小節目・${beatNo}拍目）。後ろの音は右にずれます。`
+        : `<span>${leadSel + 1}音目</span>を編集中（${barNo}小節目・${beatNo}拍目）。音価ボタンで長さ、指板か候補で高さを変えられます。`)
     : cur.full ? '最後の小節まで埋まりました。音を選んで差し替えるか、小節を増やしてください。'
     : `次は <span>${barNo}小節目・${beatNo}拍目</span>（${cs[cur.idx].name}）。残り ${remain} ステップ`;
   const list = cur.full ? [] : suggestLead(k, cs, leadSel >= 0 ? song.lead.slice(0, leadSel) : song.lead, spb, beatSteps(), tuning(), leadLen, leadVar);
@@ -254,7 +258,7 @@ function renderLead() {
       <div class="sg-role">${c.tag}</div>
       <div class="sg-why">${c.why}</div>
     </div>`).join('') || '<p class="hint">候補はありません。</p>';
-  $('lead-chips').innerHTML = song.lead.map((e, i) => `<button class="lead-chip ${e.n === null ? 'rest' : ''} ${i === leadSel ? 'sel' : ''}" data-i="${i}">${e.n === null ? '休' : noteName(e.n)}<small>${(LEAD_LENGTHS.find(l => l.len === e.len) || { label: e.len + '/16' }).label}</small></button>`).join('') || '<span class="hint">まだ音がありません。候補か指板から最初の一音を選んでください。</span>';
+  $('lead-chips').innerHTML = song.lead.map((e, i) => `<button class="lead-chip ${e.n === null ? 'rest' : ''} ${i === leadSel ? 'sel' : ''}" data-i="${i}">${e.n === null ? '休' : key().spell.note(e.n)}<small>${(LEAD_LENGTHS.find(l => l.len === e.len) || { label: e.len + '/16' }).label}</small></button>`).join('') || '<span class="hint">まだ音がありません。候補か指板から最初の一音を選んでください。</span>';
   $('lead-del').disabled = leadSel < 0; $('lead-append').hidden = leadSel < 0;
   $('lead-back').disabled = !song.lead.length; $('lead-clear').disabled = !song.lead.length;
 }
@@ -282,14 +286,14 @@ function renderFretboard(barIndex) {
   for (let i = 0; i < n; i++) {
     const s = n - 1 - i, y = top + gap * i, open = tun[s];
     svg += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#555" stroke-width="${0.6 + s * 0.22}"/>`;
-    svg += `<text x="${padL - 12}" y="${y + 3.5}" fill="#888" font-size="10" text-anchor="middle" font-family="Barlow">${NOTE_NAMES[pc(open)]}</text>`;
+    svg += `<text x="${padL - 12}" y="${y + 3.5}" fill="#888" font-size="10" text-anchor="middle" font-family="Barlow">${k.spell.name(open)}</text>`;
     for (let f = 0; f <= frets; f++) {
       const m = open + f, p = pc(m), x = cx(f);
       const inChord = chord.pcs.includes(p), inScale = k.scale.includes(p), isRoot = p === chord.root;
-      if (inChord) svg += `<circle cx="${x}" cy="${y}" r="8" fill="${isRoot ? '#86efac' : '#8c4dff'}"/><text x="${x}" y="${y + 3}" fill="#0a0a0a" font-size="8" font-weight="700" text-anchor="middle" font-family="Barlow">${NOTE_NAMES[p]}</text>`;
+      if (inChord) svg += `<circle cx="${x}" cy="${y}" r="8" fill="${isRoot ? '#86efac' : '#8c4dff'}"/><text x="${x}" y="${y + 3}" fill="#0a0a0a" font-size="8" font-weight="700" text-anchor="middle" font-family="Barlow">${k.spell.name(p)}</text>`;
       else if (inScale) svg += `<circle cx="${x}" cy="${y}" r="5.5" fill="#000" stroke="#38bdf8" stroke-width="1.2"/>${p === k.tonic ? `<circle cx="${x}" cy="${y}" r="2" fill="#38bdf8"/>` : ''}`;
       if (ref !== undefined && m === ref) svg += `<circle cx="${x}" cy="${y}" r="10.5" fill="none" stroke="#fff" stroke-width="1.6"/>`;
-      if (useLead) { const x0 = f === 0 ? padL - 14 : fx(f - 1), x1 = f === 0 ? padL + 2 : fx(f); hits += `<rect class="fb-hit" data-m="${m}" x="${x0}" y="${y - gap / 2}" width="${x1 - x0}" height="${gap}"><title>${noteName(m)}</title></rect>`; }
+      if (useLead) { const x0 = f === 0 ? padL - 14 : fx(f - 1), x1 = f === 0 ? padL + 2 : fx(f); hits += `<rect class="fb-hit" data-m="${m}" x="${x0}" y="${y - gap / 2}" width="${x1 - x0}" height="${gap}"><title>${k.spell.note(m)}</title></rect>`; }
     }
   }
   svg += hits + '</svg>';
@@ -313,16 +317,33 @@ async function auditionLead(n, withChord = true) {
   if (withChord) audio.play(padNotes(chords()[cur.idx]), t, 1.0, 0.35);
   audio.play([n], t, Math.min(1.6, Math.max(0.25, leadLen * sps)), 0.95);
 }
+// apply a lead change, then report notes pushed past the last bar
+function fitCommit(fn) {
+  const before = song.lead.length;
+  commit(() => { fn(); }, true);
+  const lost = before - song.lead.length + (fitCommit.added || 0);
+  fitCommit.added = 0;
+  if (lost > 0) notify(`最後の小節からはみ出した ${lost} 音を削除しました（↶ で戻せます）`);
+}
 function putLead(n) {
-  if (leadSel >= 0) {
-    // replace the pitch of the selected note (its length stays)
+  if (leadSel >= 0 && leadMode === 'replace') {
     commit(() => { song.lead[leadSel].n = n; }, true);
     if (n !== null) auditionLead(n);
     return;
   }
-  const remain = capacity() - leadTotal(song.lead);
-  if (remain <= 0) return notify('最後の小節まで埋まっています。小節を増やすか、音を選んで差し替えてください');
   if (song.lead.length >= 512) return notify('音符と休符は最大512個です');
+  if (leadSel >= 0) {
+    // insert before the selected note; later notes shift right
+    if (n !== null) auditionLead(n);
+    const at = leadSel;
+    fitCommit.added = 1;
+    fitCommit(() => { song.lead.splice(at, 0, { n, len: leadLen }); });
+    if (song.lead.length > at + 1) leadSel = at + 1; else leadSel = -1;
+    leadVar = 0; render();
+    return;
+  }
+  const remain = capacity() - leadTotal(song.lead);
+  if (remain <= 0) return notify('最後の小節まで埋まっています。小節を増やすか、音を選んで差し替え・挿入してください');
   const len = Math.min(leadLen, remain);
   if (n !== null) auditionLead(n);
   commit(() => { song.lead.push({ n, len }); }, true);
@@ -410,7 +431,13 @@ function bind() {
   $('riff-fill').addEventListener('click', () => commit(() => { song.riff = song.riff.map((v, i) => i === 0 ? 2 : 1); song.group = ''; }));
 
   // ── lead ──
-  $('lead-len').addEventListener('click', e => { const b = e.target.closest('.len-btn'); if (!b) return; leadLen = +b.dataset.len; renderLead(); });
+  $('lead-len').addEventListener('click', e => {
+    const b = e.target.closest('.len-btn'); if (!b) return; leadLen = +b.dataset.len;
+    if (leadSel >= 0 && leadMode === 'replace' && song.lead[leadSel] && song.lead[leadSel].len !== leadLen) {
+      const len = leadLen; fitCommit(() => { song.lead[leadSel].len = len; });
+    } else renderLead();
+  });
+  $('lead-mode').addEventListener('click', e => { const b = e.target.closest('.mode-btn'); if (!b) return; leadMode = b.dataset.mode; leadVar = 0; renderLead(); });
   $('fb-input').addEventListener('change', e => { fbInput = e.target.checked; renderFretboard(null); });
   $('lead-reroll').addEventListener('click', () => { leadVar++; renderLead(); });
   $('lead-suggest').addEventListener('click', e => {
@@ -424,7 +451,7 @@ function bind() {
   $('lead-clear').addEventListener('click', () => { commit(() => { song.lead = []; }); leadSel = -1; render(); });
   $('lead-del').addEventListener('click', () => { if (leadSel < 0) return; commit(() => { song.lead.splice(leadSel, 1); }, true); leadSel = -1; render(); });
   $('lead-append').addEventListener('click', () => { leadSel = -1; renderLead(); renderRiff(); renderFretboard(null); });
-  const pickChip = i => { leadSel = leadSel === i ? -1 : i; leadVar = 0; renderLead(); renderRiff(); renderFretboard(null); const e = song.lead[i]; if (leadSel >= 0 && e && e.n !== null) auditionLead(e.n, false); };
+  const pickChip = i => { leadSel = leadSel === i ? -1 : i; leadVar = 0; if (leadSel >= 0 && leadMode === 'replace') leadLen = song.lead[i].len; renderLead(); renderRiff(); renderFretboard(null); const e = song.lead[i]; if (leadSel >= 0 && e && e.n !== null) auditionLead(e.n, false); };
   $('lead-chips').addEventListener('click', e => { const c = e.target.closest('.lead-chip'); if (c) pickChip(+c.dataset.i); });
   $('timeline').addEventListener('click', e => { const c = e.target.closest('.ld-note'); if (c) pickChip(+c.dataset.i); });
 
@@ -434,6 +461,8 @@ function bind() {
   document.addEventListener('keydown', e => {
     if (e.target.closest('input,select,textarea')) return;
     if (e.code === 'Space' && !$('tab-practice').classList.contains('on')) { e.preventDefault(); togglePlay(); }
+    if ((e.key === 'Delete' || e.key === 'Backspace') && leadSel >= 0) { e.preventDefault(); $('lead-del').click(); }
+    if (e.key === 'Escape' && leadSel >= 0) { $('lead-append').click(); }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); (e.shiftKey ? $('redo') : $('undo')).click(); }
   });
 
@@ -465,7 +494,8 @@ function bind() {
 
 // ── boot ──
 async function boot() {
-  $('tonic').innerHTML = NOTE_NAMES.map((n, i) => `<option value="${i}">${n}</option>`).join('');
+  const ENH = ['C','C♯ / D♭','D','D♯ / E♭','E','F','F♯ / G♭','G','G♯ / A♭','A','A♯ / B♭','B'];
+  $('tonic').innerHTML = ENH.map((n, i) => `<option value="${i}">${n}</option>`).join('');
   $('mode').innerHTML = Object.entries(MODES).map(([id, m]) => `<option value="${id}">${m.name}</option>`).join('');
   let loaded = false;
   const m = location.hash.match(/^#s=([zj][A-Za-z0-9_-]+)/);
