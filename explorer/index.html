@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fretboard Explorer — GTI</title>
+<meta name="description" content="スケール・コード・単音のポジションを、チューニングや範囲、パターンの条件で確認できる指板ツール。6〜8弦・ベース・ドロップチューニング対応。">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <a href="../index.html"><span class="d-name">Top</span><span class="d-arr">→</span></a>
+  <a href="../pricing/index.html"><span class="d-name">ギターカスタム / リペア料金表</span><span class="d-arr">→</span></a>
+  <a href="../gallery/index.html"><span class="d-name">Gallery</span><span class="d-arr">→</span></a>
+  <a href="../concept/index.html"><span class="d-name">CG Concept</span><span class="d-arr">→</span></a>
+  <a href="../ax/index.html"><span class="d-name">AX</span><span class="d-arr">→</span></a>
+  <a href="../pedal/index.html"><span class="d-name">Exhaust / Bass Distortion</span><span class="d-arr">→</span></a>
+  <a href="../contact/index.html"><span class="d-name">Contact</span><span class="d-arr">→</span></a>
+  <a href="../generator/index.html"><span class="d-name">Generator</span><span class="d-arr">→</span></a>
+  <a href="../archive/index.html"><span class="d-name">Archive</span><span class="d-arr">→</span></a>
+  <a href="../about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
+</div>
+<nav id="nav" class="gti-nav">
+  <a href="../index.html"><img src="../assets/images/logo.png" alt="GTI" class="nav-logo"></a>
+  <div class="ham-wrap" id="hamWrap"><button class="ham" id="ham" aria-label="Menu"><span></span><span></span><span></span></button></div>
+</nav>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">GTI Tools</div>
+    <h1 class="app-title">Fretboard Explorer<span class="badge">BETA</span></h1>
+    <p class="app-sub">スケール・コード・単音のポジションを、チューニングや範囲の条件を変えながら確認できる指板ツールです。</p>
+
+    <div class="sec">
+      <div class="sec-title">Instrument</div>
+      <div class="g2">
+        <div class="field"><label for="strings">弦数</label><select id="strings"></select></div>
+        <div class="field"><label for="tuning">チューニング</label><select id="tuning"></select></div>
+      </div>
+      <div class="ct-grid" id="custom-tuning" hidden></div>
+      <div class="g2" style="margin-top:8px">
+        <div class="field"><label for="frets">フレット数</label>
+          <select id="frets"><option value="21">21</option><option value="22">22</option><option value="24">24</option><option value="27">27</option></select></div>
+        <div class="field"><label>&nbsp;</label><div class="toggle-row" style="padding:6px 0"><span class="toggle-label">左利き表示</span><label class="toggle-switch"><input type="checkbox" id="lefty"><span class="toggle-slider"></span></label></div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">Show</div>
+      <div class="seg" role="group" aria-label="表示する対象">
+        <button class="mode-btn" data-mode="scale">スケール</button>
+        <button class="mode-btn" data-mode="chord">コード</button>
+        <button class="mode-btn" data-mode="notes">単音</button>
+      </div>
+      <div class="field" id="root-box" style="margin-top:10px"><label for="root">ルート（中心の音）</label>
+        <div class="row" style="flex-wrap:nowrap"><select id="root"></select><button class="std small" id="root-to-low" title="最低弦の開放音をルートにする">最低弦に合わせる</button></div></div>
+      <div class="field" id="scale-box" style="margin-top:8px"><label for="scale">スケール</label><select id="scale"></select></div>
+      <div class="field" id="chord-box" style="margin-top:8px"><label for="chord">コード</label><select id="chord"></select></div>
+      <div id="notes-box" style="margin-top:8px">
+        <div class="field"><label>探したい音（複数選べます）</label></div>
+        <div class="pick-row" id="note-picks" style="margin-top:4px"></div>
+        <button class="dash" id="notes-clear" style="margin-top:8px">選択をクリア</button>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">Range</div>
+      <div class="seg" role="group" aria-label="表示する範囲">
+        <button class="range-btn" data-range="all">全体</button>
+        <button class="range-btn" data-range="frets">フレット範囲</button>
+        <button class="range-btn" data-range="pattern">ポジション型</button>
+      </div>
+      <div id="range-frets" style="margin-top:8px">
+        <div class="g2">
+          <div class="field"><label for="from">開始フレット</label>
+            <div class="num-wrap"><input type="number" id="from" min="0" max="27" inputmode="numeric"><div class="num-btns"><button class="num-btn" data-dir="up" aria-label="上げる">▲</button><button class="num-btn" data-dir="down" aria-label="下げる">▼</button></div></div></div>
+          <div class="field"><label for="to">終了フレット</label>
+            <div class="num-wrap"><input type="number" id="to" min="0" max="27" inputmode="numeric"><div class="num-btns"><button class="num-btn" data-dir="up" aria-label="上げる">▲</button><button class="num-btn" data-dir="down" aria-label="下げる">▼</button></div></div></div>
+        </div>
+        <div class="row" style="margin-top:6px"><button class="std small" id="range-prev">← 1フレット低く</button><button class="std small" id="range-next">1フレット高く →</button></div>
+      </div>
+      <div id="range-pattern" style="margin-top:8px">
+        <div class="row" style="flex-wrap:nowrap"><button class="std small" id="pat-prev" aria-label="前のパターン">←</button><select id="pattern" aria-label="パターン"></select><button class="std small" id="pat-next" aria-label="次のパターン">→</button></div>
+        <p class="hint" id="pattern-hint"></p>
+      </div>
+      <div class="toggle-row" style="margin-top:6px"><span class="toggle-label">範囲外の音も薄く表示</span><label class="toggle-switch"><input type="checkbox" id="ghost"><span class="toggle-slider"></span></label></div>
+      <p class="hint">ポジション型はスケールのみ。5音のスケールは2音ずつ、7・8音は3音ずつ弦を上がる型です。</p>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">Strings <small>押すと表示を切り替え</small></div>
+      <div class="pick-row" id="strings-on"></div>
+      <button class="dash" id="strings-all" style="margin-top:8px">すべての弦を表示</button>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">Labels</div>
+      <div class="seg" role="group" aria-label="丸の中に表示する文字">
+        <button class="label-btn" data-label="name">音名</button>
+        <button class="label-btn" data-label="interval">音程</button>
+        <button class="label-btn" data-label="degree">番号</button>
+        <button class="label-btn" data-label="none">なし</button>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">Seed <small>設定をひとつの文字列に</small></div>
+      <div class="seed-row"><div class="seed-display" id="seed-display">—</div><button class="seed-btn" id="seed-copy">コピー</button></div>
+      <div class="seed-row" style="margin-top:6px"><input class="seed-input" id="seed-input" placeholder="シードを貼り付け" autocomplete="off" aria-label="シード"><button class="seed-btn seed-apply" id="seed-apply">適用</button></div>
+      <div class="seed-err" id="seed-err"></div>
+      <button class="dash" id="seed-share">共有 URL をコピー</button>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">Export</div>
+      <button class="std" id="export-svg" style="width:100%">↓ 指板を SVG で保存</button>
+      <button class="dash" id="reset" style="margin-top:10px">初期状態に戻す</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="metrics">
+      <div class="metric"><div class="metric-lbl">Showing</div><div class="metric-val small" id="m-target"></div></div>
+      <div class="metric"><div class="metric-lbl">Notes</div><div class="metric-val small" id="m-notes"></div></div>
+      <div class="metric"><div class="metric-lbl">Tuning</div><div class="metric-val small" id="m-tuning"></div><div class="metric-sub" id="m-open"></div></div>
+      <div class="metric"><div class="metric-lbl">Range</div><div class="metric-val small" id="m-range"></div></div>
+      <div class="metric"><div class="metric-lbl">Positions</div><div class="metric-val" id="m-count"></div></div>
+    </div>
+
+    <section class="panel">
+      <div class="panel-hd">
+        <div class="panel-title">Fretboard<b id="fb-title"></b></div>
+        <button class="std small" id="play-set">▶ 表示中の音を鳴らす</button>
+      </div>
+      <div class="fb-scroll"><div id="fretboard"></div></div>
+      <div class="legend">
+        <span class="lg"><span class="dot" style="background:#86efac"></span>ルート</span>
+        <span class="lg"><span class="dot" style="background:#8c4dff"></span>強調している音（コードの構成音など）</span>
+        <span class="lg"><span class="dot" style="border:1.5px solid #38bdf8"></span>スケール・対象の音</span>
+        <span class="lg">指板のどこを押しても、その音が鳴ります</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-hd"><div class="panel-title">Notes &amp; Intervals</div>
+        <div class="row" id="emph-tools"><button class="std small" id="emph-chord">1・3・5 を強調</button><button class="std small" id="emph-clear">強調を解除</button></div></div>
+      <div class="iv-row" id="iv-chips"></div>
+      <p class="hint" id="iv-hint"></p>
+      <div id="diat-box" style="margin-top:14px">
+        <div class="panel-hd" style="margin-bottom:8px"><div class="sec-sub">ダイアトニックコードを重ねる</div>
+          <div class="toggle-row" style="padding:0"><span class="toggle-label">4和音にする</span><label class="toggle-switch"><input type="checkbox" id="seventh"><span class="toggle-slider"></span></label></div></div>
+        <div class="deg-row" id="diat"></div>
+        <p class="hint">押すとそのコードの構成音を紫で強調し、スケールの中のどこにあるかを確認できます。もう一度押すと解除します。</p>
+      </div>
+    </section>
+
+    <section class="panel" id="voicing-panel">
+      <div class="panel-hd"><div class="panel-title">Voicings<b id="vo-count"></b></div><button class="std small" id="vo-clear">すべての構成音の表示に戻す</button></div>
+      <div class="vo-opts">
+        <div class="field"><label for="vo-span">押さえる幅（フレット数）</label>
+          <select id="vo-span"><option value="3">3フレット以内</option><option value="4">4フレット以内</option><option value="5">5フレット以内</option><option value="6">6フレット以内</option></select></div>
+        <div class="field"><label for="vo-min">最低限鳴らす弦の数</label>
+          <select id="vo-min"><option value="2">2本</option><option value="3">3本</option><option value="4">4本</option><option value="5">5本</option><option value="6">6本</option></select></div>
+        <div class="toggle-row"><span class="toggle-label">ルートを最低音にする</span><label class="toggle-switch"><input type="checkbox" id="vo-root"><span class="toggle-slider"></span></label></div>
+        <div class="toggle-row"><span class="toggle-label">開放弦を使う</span><label class="toggle-switch"><input type="checkbox" id="vo-open"><span class="toggle-slider"></span></label></div>
+        <div class="toggle-row" id="vo-omit5-row"><span class="toggle-label">5度を省いてもよい</span><label class="toggle-switch"><input type="checkbox" id="vo-omit5"><span class="toggle-slider"></span></label></div>
+      </div>
+      <div class="vo-list" id="vo-list"></div>
+      <p class="hint">隣り合う弦だけを使い、構成音がすべて入る押さえ方を探しています（低い弦から高い弦の順、x はミュート）。押すと指板に表示して鳴らします。</p>
+    </section>
+
+    <p class="foot">設定はこのブラウザに自動保存されます。音名はキーに合わせて ♭・♯ を書き分けています。</p>
+  </main>
+</div>
+
+<div class="status" id="status" role="status" aria-live="polite"></div>
+
+<script type="module" src="js/app.js"></script>
+<script>
+(function(){
+  const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
+  if(!hamWrap||!ham||!drawer||!overlay) return;
+  let closeTimer=null, isTouch=false;
+  function openDrawer(){ clearTimeout(closeTimer); drawer.classList.add('open'); overlay.classList.add('visible'); ham.classList.add('open'); document.body.style.overflow='hidden'; }
+  function closeDrawer(){ clearTimeout(closeTimer); closeTimer=setTimeout(()=>{ drawer.classList.remove('open'); overlay.classList.remove('visible'); ham.classList.remove('open'); document.body.style.overflow=''; },120); }
+  function toggleDrawer(){ drawer.classList.contains('open')?closeDrawer():openDrawer(); }
+  ham.addEventListener('touchstart',e=>{ isTouch=true; e.preventDefault(); toggleDrawer(); },{passive:false});
+  hamWrap.addEventListener('mouseenter',()=>{ if(!isTouch) openDrawer(); });
+  hamWrap.addEventListener('mouseleave',()=>{ if(!isTouch) closeDrawer(); });
+  drawer.addEventListener('mouseenter',()=>{ if(!isTouch) clearTimeout(closeTimer); });
+  drawer.addEventListener('mouseleave',()=>{ if(!isTouch) closeDrawer(); });
+  overlay.addEventListener('click',closeDrawer);
+  overlay.addEventListener('touchstart',e=>{ e.preventDefault(); closeDrawer(); },{passive:false});
+  window.addEventListener('mousemove',()=>{ isTouch=false; },{passive:true});
+})();
+</script>
+</body>
+</html>
