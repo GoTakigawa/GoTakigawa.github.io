@@ -213,3 +213,7 @@ button.small{font-size:11px;padding:6px 10px;}
 .metric-val.small{font-size:15px;line-height:1.35;white-space:normal;}
 .metric-sub{font-size:11px;color:var(--text3);margin-top:3px;letter-spacing:.04em;}
 .sec-sub{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-weight:600;}
+
+.small-seg button{padding:6px 10px;font-size:11px;}
+.iv-chip.hid{opacity:.45;border-style:dashed;background:#000;color:var(--text3);border-color:#555;}
+#fretboard.hide-mode .fb-hit{cursor:crosshair;}

@@ -31,9 +31,10 @@ export function npsPattern(tuning, rootPc, semis, start, nps, frets) {
 // opts: { span, minStrings, rootBass, allowOpen, requireAll, omit5 }
 export function findVoicings(tuning, chordPcs, rootPc, frets, opts) {
   const n = tuning.length, out = [], seen = new Set();
-  const need = new Set(chordPcs.map(pc));
+  const need = new Set((opts.need || chordPcs).map(pc));
   if (opts.omit5) { const fifth = pc(rootPc + 7); if (need.size > 3) need.delete(fifth); }
-  for (let lo = 0; lo < n; lo++) for (let hi = lo + opts.minStrings - 1; hi < n; hi++) {
+  const maxStr = opts.maxStrings || n;
+  for (let lo = 0; lo < n; lo++) for (let hi = lo + opts.minStrings - 1; hi < n && hi - lo + 1 <= maxStr; hi++) {
     for (let base = 0; base <= frets; base++) {
       // candidate frets per string inside [base, base+span-1], plus open strings
       const opts1 = [];
@@ -47,7 +48,7 @@ export function findVoicings(tuning, chordPcs, rootPc, frets, opts) {
       if (!opts1.length) continue;
       const pick = new Array(opts1.length);
       const walk = i => {
-        if (out.length >= 400) return;
+        if (out.length >= (opts.limit || 400)) return;
         if (i === opts1.length) {
           const fretted = pick.filter(f => f > 0);
           if (fretted.length && Math.min(...fretted) !== base && base > 0) return; // anchor at base to avoid duplicates
@@ -68,4 +69,102 @@ export function findVoicings(tuning, chordPcs, rootPc, frets, opts) {
     }
   }
   return out.sort((a, b) => a.low - b.low || b.strings - a.strings || a.high - b.high);
+}
+
+
+// ── Common chord forms (CAGED-style), written as fret offsets from the root
+// fret on the root string, in standard tuning, low string → high string.
+// x = muted. They are re-placed on the real tuning by pitch.
+const X = null;
+export const FORMS = {
+  maj:   [{ name: 'E型', rs: 0, rel: [0,2,2,1,0,0] }, { name: 'A型', rs: 1, rel: [X,0,2,2,2,0] }, { name: 'D型', rs: 2, rel: [X,X,0,2,3,2] }, { name: 'C型', rs: 1, rel: [X,0,-1,-3,-2,-3] }, { name: 'G型', rs: 0, rel: [0,-1,-3,-3,-3,0] }],
+  m:     [{ name: 'Em型', rs: 0, rel: [0,2,2,0,0,0] }, { name: 'Am型', rs: 1, rel: [X,0,2,2,1,0] }, { name: 'Dm型', rs: 2, rel: [X,X,0,2,3,1] }, { name: 'Cm型', rs: 1, rel: [X,0,-2,-3,-2,X] }, { name: 'Gm型', rs: 0, rel: [0,-2,-3,-3,X,X] }],
+  '7':   [{ name: 'E7型', rs: 0, rel: [0,2,0,1,0,0] }, { name: 'A7型', rs: 1, rel: [X,0,2,0,2,0] }, { name: 'D7型', rs: 2, rel: [X,X,0,2,1,2] }, { name: 'C7型', rs: 1, rel: [X,0,-1,0,-2,X] }, { name: 'G7型', rs: 0, rel: [0,-1,-3,-3,-3,-2] }],
+  maj7:  [{ name: 'Emaj7型', rs: 0, rel: [0,X,1,1,0,X] }, { name: 'Amaj7型', rs: 1, rel: [X,0,2,1,2,0] }, { name: 'Dmaj7型', rs: 2, rel: [X,X,0,2,2,2] }, { name: 'Cmaj7型', rs: 1, rel: [X,0,-1,-3,-3,-3] }],
+  m7:    [{ name: 'Em7型', rs: 0, rel: [0,2,0,0,0,0] }, { name: 'Am7型', rs: 1, rel: [X,0,2,0,1,0] }, { name: 'Dm7型', rs: 2, rel: [X,X,0,2,1,1] }, { name: 'E型（4弦）', rs: 0, rel: [0,X,0,0,0,X] }],
+  m7b5:  [{ name: '6弦ルート', rs: 0, rel: [0,X,0,0,-1,X] }, { name: '5弦ルート', rs: 1, rel: [X,0,1,0,1,X] }, { name: '4弦ルート', rs: 2, rel: [X,X,0,1,1,1] }],
+  dim7:  [{ name: '6弦ルート', rs: 0, rel: [0,X,-1,0,-1,X] }, { name: '5弦ルート', rs: 1, rel: [X,0,1,-1,1,X] }, { name: '4弦ルート', rs: 2, rel: [X,X,0,1,0,1] }],
+  sus2:  [{ name: 'Asus2型', rs: 1, rel: [X,0,2,2,0,0] }, { name: 'Dsus2型', rs: 2, rel: [X,X,0,2,3,0] }, { name: 'E型', rs: 0, rel: [0,2,4,4,X,X] }],
+  sus4:  [{ name: 'Esus4型', rs: 0, rel: [0,2,2,2,0,0] }, { name: 'Asus4型', rs: 1, rel: [X,0,2,2,3,0] }, { name: 'Dsus4型', rs: 2, rel: [X,X,0,2,3,3] }],
+  '5':   [{ name: '6弦ルート', rs: 0, rel: [0,2,2,X,X,X] }, { name: '5弦ルート', rs: 1, rel: [X,0,2,2,X,X] }, { name: '4弦ルート', rs: 2, rel: [X,X,0,2,3,X] }],
+  add9:  [{ name: 'C型', rs: 1, rel: [X,0,-1,-3,0,-3] }, { name: '6弦ルート', rs: 0, rel: [0,X,1,1,0,2] }, { name: '5弦ルート', rs: 1, rel: [X,0,-1,-3,0,0] }],
+  '6':   [{ name: '6弦ルート', rs: 0, rel: [0,X,-1,1,0,X] }, { name: '5弦ルート', rs: 1, rel: [X,0,2,2,2,2] }],
+  m6:    [{ name: '6弦ルート', rs: 0, rel: [0,X,-1,0,0,X] }, { name: '5弦ルート', rs: 1, rel: [X,0,2,-1,1,X] }],
+  '9':   [{ name: '5弦ルート', rs: 1, rel: [X,0,-1,0,0,X] }, { name: '6弦ルート', rs: 0, rel: [0,X,0,1,0,2] }],
+  m9:    [{ name: '5弦ルート', rs: 1, rel: [X,0,-2,0,0,X] }],
+  maj9:  [{ name: '5弦ルート', rs: 1, rel: [X,0,-1,1,0,X] }],
+  '7sus4': [{ name: '6弦ルート', rs: 0, rel: [0,2,0,2,0,0] }, { name: '5弦ルート', rs: 1, rel: [X,0,2,0,3,0] }],
+  '7s9': [{ name: '5弦ルート', rs: 1, rel: [X,0,-1,0,1,X] }]
+};
+const STD = [40,45,50,55,59,64];
+
+// Place every form along the neck on the real tuning (forms use the top six strings).
+export function chordForms(tuning, chordId, rootPc, frets, chordPcs) {
+  const forms = FORMS[chordId]; if (!forms || tuning.length < 6) return [];
+  const n = tuning.length, base = n - 6, out = [], seen = new Set();
+  forms.forEach(form => {
+    const offs = form.rel.map((r, s) => r === null ? null : STD[s] + r - (STD[form.rs] + 0)); // pitch offset from root
+    const rsReal = base + form.rs;
+    for (let f = 0; f <= frets; f++) {
+      const rootPitch = tuning[rsReal] + f; if (pc(rootPitch) !== pc(rootPc)) continue;
+      const fr = Array(n).fill(null); let bad = false;
+      offs.forEach((o, s) => {
+        if (o === null) return;
+        const ff = rootPitch + o - tuning[base + s];
+        if (ff >= 0 && ff <= frets) fr[base + s] = ff;
+        else if (s === 0 && form.rs !== 0) fr[base + s] = null; // lowest string only: mute (e.g. drop tunings)
+        else bad = true;
+      });
+      if (bad) continue;
+      const used = fr.map((ff, s) => ff === null ? null : tuning[s] + ff).filter(m => m !== null);
+      if (used.length < 3) continue;
+      const have = new Set(used.map(pc));
+      if (chordPcs.some(p => !have.has(p) && pc(p - rootPc) !== 7)) continue;
+      const fretted = fr.filter(ff => ff !== null && ff > 0);
+      const span = fretted.length ? Math.max(...fretted) - Math.min(...fretted) : 0;
+      if (span > 4) continue;
+      const k = fr.join(','); if (seen.has(k)) continue; seen.add(k);
+      out.push({ name: form.name, frets: fr, low: fretted.length ? Math.min(...fretted) : 0, high: fretted.length ? Math.max(...fretted) : 0 });
+    }
+  });
+  return out.sort((a, b) => a.low - b.low || a.name.localeCompare(b.name));
+}
+
+// Sweep-picking arpeggio shapes: consecutive chord tones going up across a
+// contiguous string set, one or two notes per string, inside a fret span.
+export function sweepShapes(tuning, chordPcs, rootPc, frets, opts) {
+  const n = tuning.length, out = [], seen = new Set();
+  const span = opts.span || 5, sizes = opts.sizes || [3, 4, 5, 6, 7, 8];
+  const tonesAbove = m => { for (let x = m + 1; x < m + 13; x++) if (chordPcs.includes(pc(x))) return x; return null; };
+  for (const size of sizes) {
+    if (size > n) continue;
+    for (let lo = 0; lo + size - 1 < n; lo++) {
+      const hi = lo + size - 1;
+      for (let f0 = 0; f0 <= frets; f0++) {
+        if (f0 === 0 && !opts.allowOpen) continue;
+        const start = tuning[lo] + f0; if (!chordPcs.includes(pc(start))) continue;
+        if (opts.rootStart && pc(start) !== pc(rootPc)) continue;
+        // depth-first: each next chord tone goes on the same string (max 2 per string) or the next one
+        const walk = (notes, s, perStr) => {
+          if (out.length >= 300) return;
+          const last = notes[notes.length - 1];
+          const fs = notes.map(x => x.f).filter(f => f > 0);
+          if (fs.length && Math.max(...fs) - Math.min(...fs) > span - 1) return;
+          if (s === hi && perStr >= 1 && notes.length >= size) {
+            // finish once the top string has its notes
+            const k = notes.map(x => x.s + ':' + x.f).join(' ');
+            if (!seen.has(k) && notes.length >= size) { seen.add(k); out.push({ notes: notes.slice(), lo, hi, low: fs.length ? Math.min(...fs) : 0, high: fs.length ? Math.max(...fs) : 0, size }); }
+          }
+          const next = tonesAbove(tuning[last.s] + last.f); if (next === null) return;
+          if (perStr < 2) { const f = next - tuning[s]; if (f <= frets && (f > 0 || opts.allowOpen)) walk([...notes, { s, f, m: next }], s, perStr + 1); }
+          if (s < hi) { const f = next - tuning[s + 1]; if (f >= (opts.allowOpen ? 0 : 1) && f <= frets) walk([...notes, { s: s + 1, f, m: next }], s + 1, 1); }
+        };
+        walk([{ s: lo, f: f0, m: start }], lo, 1);
+      }
+    }
+  }
+  // keep shapes that end on the top string with one or two notes and don't revisit a string
+  return out.filter(x => x.notes[x.notes.length - 1].s === x.hi)
+    .filter((x, i, arr) => !arr.some((y, j) => j !== i && y.notes.length > x.notes.length && x.notes.every((nn, k) => y.notes[k] && y.notes[k].s === nn.s && y.notes[k].f === nn.f) && y.hi === x.hi && y.lo === x.lo))
+    .sort((a, b) => b.size - a.size || a.low - b.low);
 }
