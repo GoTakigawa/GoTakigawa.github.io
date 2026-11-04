@@ -79,6 +79,9 @@ export const CHORDS = {
   aug7:     { name: 'aug7',        iv: ['1','3','#5','b7'] },
   add11:    { name: 'add11',       iv: ['1','3','5','11'] },
   majb5:    { name: '(♭5)',        iv: ['1','3','b5'] },
+  ms5:      { name: 'm(♯5)',       iv: ['1','b3','#5'] },
+  sus4b5:   { name: 'sus4(♭5)',    iv: ['1','4','b5'] },
+  susb2:    { name: 'sus♭2',       iv: ['1','b2','5'] },
   sus2b5:   { name: 'sus2(♭5)',    iv: ['1','2','b5'] },
   maj7s5:   { name: 'maj7♯5',      iv: ['1','3','#5','7'] },
   '6sus2b5':{ name: '6sus2(♭5)',   iv: ['1','2','b5','6'] },
@@ -140,21 +143,27 @@ export function diatonic(root, ivNames, d, seventh) {
   const semis = tones.map(pick);
   return { root: pc(root + st[d]), semis, pcs: semis.map(s => pc(root + st[d] + s)) };
 }
+// Roman numeral with the suffix taken from the actual triad (same reading as the chord name)
+const TRIAD_SUFFIX = {
+  '4,7': [true, ''], '3,7': [false, ''], '3,6': [false, '°'], '4,8': [true, '+'], '4,6': [true, '(♭5)'],
+  '3,8': [false, '(♯5)'], '2,7': [true, 'sus2'], '5,7': [true, 'sus4'], '1,7': [true, 'sus♭2'],
+  '2,6': [true, 'sus2(♭5)'], '5,6': [true, 'sus4(♭5)'], '2,8': [true, 'sus2(♯5)'], '5,8': [true, 'sus4(♯5)'], '1,6': [true, 'sus♭2(♭5)']
+};
 export function romanOf(ivNames, d) {
-  const ivs = ivNames.map(parseInterval), st = ivs.map(i => i.semis);
-  const third = (st[(d + 2) % 7] + (d + 2 >= 7 ? 12 : 0)) - st[d], fifth = (st[(d + 4) % 7] + (d + 4 >= 7 ? 12 : 0)) - st[d];
+  const ivs = ivNames.map(parseInterval), st = ivs.map(i => i.semis), n = st.length;
+  const at = k => st[(d + k) % n] + 12 * Math.floor((d + k) / n);
+  const third = at(2) - st[d], fifth = at(4) - st[d];
   const R = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][d];
   const acc = st[d] - MAJOR_SEMIS[d];
-  const pre = acc === -1 ? '♭' : acc === 1 ? '♯' : acc === -2 ? '𝄫' : '';
-  const minor = third === 3;
-  const suf = third === 3 && fifth === 6 ? '°' : third === 4 && fifth === 8 ? '+' : fifth === 6 ? '(♭5)' : fifth === 8 ? '(♯5)' : '';
-  return pre + (minor ? R.toLowerCase() : R) + suf;
+  const pre = acc === -1 ? '♭' : acc === 1 ? '♯' : acc === -2 ? '𝄫' : acc === 2 ? '𝄪' : '';
+  const [upper, suf] = TRIAD_SUFFIX[third + ',' + fifth] || [true, '(' + third + ',' + fifth + ')'];
+  return pre + (upper ? R : R.toLowerCase()) + suf;
 }
 
 
 // ── Chord finder: guess chord names from picked pitches (MIDI) ──
 const DYADS = ['ユニゾン/オクターブ','短2度','長2度','短3度','長3度','完全4度','増4度/減5度','完全5度','短6度','長6度','短7度','長7度'];
-const EXOTIC = ['quartal', 'add11', 'aug7', '7b5', 'majb5', 'sus2b5', 'maj7s5', '6sus2b5'];
+const EXOTIC = ['quartal', 'add11', 'aug7', '7b5', 'majb5', 'sus2b5', 'maj7s5', '6sus2b5', 'ms5', 'sus4b5', 'susb2'];
 const ROOTLESS_OK = ['7', 'maj7', 'm7', 'm7b5', 'dim7', '9', 'maj9', 'm9', '13'];
 export function identifyChord(midis) {
   const uniq = [...new Set(midis)].sort((a, b) => a - b);
@@ -186,7 +195,7 @@ export function identifyChord(midis) {
     let s = { exact: 100, omit5: 78, rootless: 55 }[how];
     if (rootInBass) s += 25;
     s -= CHORDS[id].iv.length * 1.5;                 // prefer simpler names
-    if (['quartal', 'add11', 'aug7', '7b5', 'majb5', 'sus2b5', 'maj7s5', '6sus2b5'].includes(id)) s -= 8;
+    if (EXOTIC.includes(id)) s -= 8;
     if (['6', 'm6'].includes(id)) s -= 3;             // a 6 chord is usually read as the m7 / m7♭5 it inverts
     const set = makeSet(r, CHORDS[id].iv);
     const name = set.name(r) + chordSymbol(id) + (how !== 'rootless' && !rootInBass ? '/' + set.name(bass) : how === 'rootless' ? '' : '');

@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=19">
+<link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
 
@@ -195,6 +195,7 @@
           <select id="sw-notes"><option value="0">すべて</option><option value="3">3音</option><option value="4">4音</option><option value="5">5音</option><option value="6">6音</option><option value="7">7音</option><option value="8">8音</option><option value="9">9音</option><option value="10">10音</option><option value="11">11音</option><option value="12">12音</option></select></div>
         <div class="field"><label for="sw-span">押さえる幅</label>
           <select id="sw-span"><option value="4">4フレット以内</option><option value="5">5フレット以内</option><option value="6">6フレット以内</option><option value="7">7フレット以内</option></select></div>
+        <div class="toggle-row"><span class="toggle-label">一般的な形だけ</span><label class="toggle-switch"><input type="checkbox" id="sw-common"><span class="toggle-slider"></span></label></div>
         <div class="toggle-row"><span class="toggle-label">1弦まで上がる形だけ</span><label class="toggle-switch"><input type="checkbox" id="sw-top"><span class="toggle-slider"></span></label></div>
         <div class="toggle-row"><span class="toggle-label">ルートから始まる形だけ</span><label class="toggle-switch"><input type="checkbox" id="sw-root"><span class="toggle-slider"></span></label></div>
         <div class="toggle-row"><span class="toggle-label">開放弦を使う</span><label class="toggle-switch"><input type="checkbox" id="sw-open"><span class="toggle-slider"></span></label></div>
@@ -217,7 +218,7 @@
 
 <div class="status" id="status" role="status" aria-live="polite"></div>
 
-<script type="module" src="js/app.js?v=19"></script>
+<script type="module" src="js/app.js?v=20"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
