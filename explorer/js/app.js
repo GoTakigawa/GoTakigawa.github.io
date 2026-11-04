@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad } from './theory.js?v=14';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=14';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS } from './positions.js?v=14';
-import { PianoEngine } from './audio.js?v=14';
-import { encodeSeed, decodeSeed } from './share.js?v=14';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad } from './theory.js?v=15';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=15';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS } from './positions.js?v=15';
+import { PianoEngine } from './audio.js?v=15';
+import { encodeSeed, decodeSeed } from './share.js?v=15';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -16,10 +16,12 @@ const DEFAULT = {
   strOn: [], label: 'name',
   vo: { span: 4, minStrings: 3, rootBass: false, allowOpen: true, omit5: false },
   hideIv: [], hideCells: [],
-  shapeTab: 'forms', sw: { size: 0, span: 5, rootStart: false, allowOpen: false, topOnly: true }
+  shapeTab: 'forms', sw: { size: 0, notes: 0, span: 5, rootStart: false, allowOpen: false, topOnly: true }
 };
 let st = structuredClone(DEFAULT);
 let shapes = null, ssel = -1, statusTimer = null, chipAction = 'emph', fbAction = 'play', picks = [];
+// a chord chosen from the search results, used by Shapes only (Show stays as it is)
+let shapeOverride = null;
 
 // ── state ──
 function sanitize(s) {
@@ -49,12 +51,13 @@ function sanitize(s) {
     ['rootBass', 'allowOpen', 'omit5'].forEach(k => { if (k in s.vo) d.vo[k] = !!s.vo[k]; });
   }
   d.hideIv = Array.isArray(s.hideIv) ? s.hideIv.filter(x => typeof x === 'string' && /^(bb|b|##|#)?\d{1,2}$/.test(x)) : [];
-  d.hideCells = Array.isArray(s.hideCells) ? s.hideCells.filter(x => typeof x === 'string' && /^\d{1,2}:\d{1,2}$/.test(x)).slice(0, 300) : [];
+  d.hideCells = Array.isArray(s.hideCells) ? s.hideCells.filter(x => typeof x === 'string' && /^\d{1,2}:\d{1,2}$/.test(x)).slice(0, 1500) : [];
   // the search tab is a temporary picking mode, so a reload starts from chord forms
   d.shapeTab = ['forms', 'sets', 'sweep'].includes(s.shapeTab) ? s.shapeTab : 'forms';
   if (s.sw && typeof s.sw === 'object') {
     d.sw.size = [0, 3, 4, 5, 6, 7, 8].includes(s.sw.size) ? s.sw.size : 0;
     d.sw.span = int(s.sw.span, 4, 7, 5);
+    d.sw.notes = int(s.sw.notes, 0, 16, 0);
     d.sw.rootStart = !!s.sw.rootStart; d.sw.allowOpen = !!s.sw.allowOpen; d.sw.topOnly = s.sw.topOnly !== false;
   }
   return d;
@@ -87,6 +90,10 @@ function chordIdFor(semis) {
   return null;
 }
 function shapeChord() {
+  if (shapeOverride) {
+    const set = makeSet(shapeOverride.root, CHORDS[shapeOverride.id].iv), sym = set.name(shapeOverride.root) + chordSymbol(shapeOverride.id);
+    return { root: shapeOverride.root, id: shapeOverride.id, pcs: set.pcs, set, cset: set, sym, label: sym, override: true };
+  }
   if (st.mode === 'chord') { const set = makeSet(st.root, CHORDS[st.chord].iv); return { root: st.root, id: st.chord, pcs: set.pcs, set, cset: set, sym: set.name(st.root) + chordSymbol(st.chord), label: set.name(st.root) + chordSymbol(st.chord) }; }
   if (st.mode === 'scale' && scaleLen() === 7) {
     const d = st.diat >= 0 ? st.diat : 0, c = diatonic(st.root, SCALES[st.scale].iv, d, st.seventh), id = chordIdFor(c.semis);
@@ -105,8 +112,8 @@ const toneOf = (c, m) => { const iv = c.cset.intervalOf(m); return iv === '1' ? 
 
 // Which pitch classes get the filled (purple) emphasis
 function emphasisPcs(set) {
-  if (st.mode === 'chord' || st.mode === 'notes') return set.pcs;
   if (selectedShape()) { const c = shapeChord(); if (c) return c.pcs; }
+  if (st.mode === 'chord' || st.mode === 'notes') return set.pcs;
   if (st.diat >= 0 && scaleLen() === 7) return diatonic(st.root, SCALES[st.scale].iv, st.diat, st.seventh).pcs;
   return st.emph.map(i => set.ivs[i]).filter(Boolean).map(iv => pc(st.root + iv.semis));
 }
@@ -182,6 +189,7 @@ function renderSetInfo(set) {
   document.querySelectorAll('.chip-act').forEach(b => b.classList.toggle('on', b.dataset.act === chipAction));
   document.querySelectorAll('.fb-act').forEach(b => b.classList.toggle('on', b.dataset.act === fbAction));
   const nHidden = st.hideIv.length + st.hideCells.length;
+  $('fb-show-all').disabled = !nHidden; $('fb-deselect').disabled = !picks.length && ssel < 0;
   $('hide-restore').disabled = !nHidden; $('hide-restore').textContent = nHidden ? `隠した音をすべて戻す（${st.hideIv.length ? '音 ' + st.hideIv.length + ' ' : ''}${st.hideCells.length ? '位置 ' + st.hideCells.length : ''}）` : '隠した音をすべて戻す';
   if (chipAction === 'hide') { $('iv-hint').textContent = '押した音を指板から隠します（もう一度押すと戻ります）。点線の丸は隠している位置です。'; } else
   $('iv-hint').textContent = st.mode === 'scale'
@@ -253,15 +261,15 @@ function renderFretboard() {
     for (let f = 0; f <= F; f++) {
       const m = open + f, p = pc(m), x = cx(f);
       hits += `<rect class="fb-hit" data-m="${m}" data-c="${s}:${f}" x="${Math.min(f === 0 ? X(padL - 26) : fx(f - 1), f === 0 ? X(padL) : fx(f))}" y="${y - gap / 2}" width="${Math.abs((f === 0 ? 26 : raw(f) - raw(f - 1)))}" height="${gap}"><title>${set.note(m)}</title></rect>`;
-      if (!set.has(p)) continue;
+      if (!set.has(p) && !(sh && inShape.has(s + ':' + f))) continue;
       const hidden = isHiddenCell(s, f) || isHiddenIv(set, p);
       const visible = vis(s, f) && !hidden;
       if (hidden) { if (showHidden && vis(s, f)) dots += `<circle cx="${x}" cy="${y}" r="9.5" fill="none" stroke="#555" stroke-width="1.2" stroke-dasharray="2.5 2.5"/>`; continue; }
       if (!visible && !(st.ghost && on)) continue;
       if (visible) count++;
-      const isRoot = st.mode !== 'notes' && p === pc(sh && st.mode === 'scale' ? shapeChord().root : st.root), isEm = emph.includes(p);
+      const isRoot = sh ? p === pc(shC.root) : st.mode !== 'notes' && p === pc(st.root), isEm = emph.includes(p);
       const op = visible ? 1 : 0.16;
-      const lbl = st.label === 'none' ? '' : shC && inShape.has(s + ':' + f) ? toneOf(shC, m) : st.label === 'interval' ? set.intervalOf(p) : st.label === 'degree' ? String(set.info(p).index + 1) : set.name(p);
+      const lbl = st.label === 'none' ? '' : shC && inShape.has(s + ':' + f) ? toneOf(shC, m) : st.label === 'interval' ? (set.intervalOf(p) || '') : st.label === 'degree' ? String(set.info(p) ? set.info(p).index + 1 : '') : set.name(p);
       const fs = lbl.length > 2 ? 8 : 10;
       if (isRoot) dots += `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="10.5" fill="#86efac"/><text x="${x}" y="${y + 3.6}" fill="#0a0a0a" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Barlow">${lbl}</text></g>`;
       else if (isEm) dots += `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="10.5" fill="#8c4dff"/><text x="${x}" y="${y + 3.6}" fill="#0a0a0a" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Barlow">${lbl}</text></g>`;
@@ -328,13 +336,14 @@ function computeShapes() {
     const sizes = st.sw.size ? [st.sw.size] : [8, 7, 6, 5, 4, 3];
     let list = sweepShapes(tun, c.pcs, rootPc, Math.min(F, 24), { span: st.sw.span, sizes, rootStart: st.sw.rootStart, allowOpen: st.sw.allowOpen });
     if (st.sw.topOnly) list = list.filter(sw => sw.hi === n - 1);
+    if (st.sw.notes) list = list.filter(sw => sw.notes.length === st.sw.notes);
     // treble side first: sets ending nearer the 1st string, then fewer strings, then lower on the neck
     list.sort((x, y) => y.hi - x.hi || y.lo - x.lo || x.low - y.low);
     return list.map(sw => {
       const cells = sw.notes.map((x, i) => ({ s: x.s, f: x.f, order: i + 1 }));
       const tones = sw.notes.map(x => toneOf(c, x.m)).join(' → ');
       const strs = `${n - sw.hi}〜${n - sw.lo}弦`;
-      return { name: chordNameWithBass(c, sw.notes[0].m), title: `${sw.size}弦スウィープ（${strs}）`, meta: `${strs} · ${sw.low}〜${sw.high}f · ${toneOf(c, sw.notes[0].m)} から`, cells, muted: [], tones,
+      return { name: chordNameWithBass(c, sw.notes[0].m), title: `${sw.size}弦スウィープ（${strs}）`, meta: `${strs} · ${sw.notes.length}音 · ${sw.low}〜${sw.high}f · ${toneOf(c, sw.notes[0].m)} から`, cells, muted: [], tones,
         tab: sw.notes.map(x => `${n - x.s}弦${x.f}`).join(' '), play: sw.notes.map(x => x.m), strum: false };
     });
   }
@@ -382,9 +391,11 @@ function renderShapes() {
     return;
   }
   if (!shapes) shapes = computeShapes();
-  $('shape-target').textContent = c.label + '　構成音：' + c.cset.ivs.map(iv => `${c.cset.name(c.root + iv.semis)}(${iv.label === '1' ? 'R' : iv.label})`).join(' ') + (c.fromScale && st.diat < 0 ? '　※ダイアトニックで選んだコードに切り替わります' : '');
+  $('shape-back').hidden = !c.override;
+  $('shape-target').textContent = c.label + (c.override ? '（検索から選んだコード）' : '') + '　構成音：' + c.cset.ivs.map(iv => `${c.cset.name(c.root + iv.semis)}(${iv.label === '1' ? 'R' : iv.label})`).join(' ') + (c.fromScale && st.diat < 0 && !c.override ? '　※ダイアトニックで選んだコードに切り替わります' : '');
   $('sets-span').value = st.vo.span; $('sets-open').checked = st.vo.allowOpen;
   $('sw-size').innerHTML = '<option value="0">すべて</option>' + [3, 4, 5, 6, 7, 8].filter(k => k <= st.strings).map(k => `<option value="${k}">${k}弦</option>`).join('');
+  $('sw-notes').value = st.sw.notes;
   $('sw-size').value = st.sw.size; $('sw-span').value = st.sw.span; $('sw-root').checked = st.sw.rootStart; $('sw-open').checked = st.sw.allowOpen; $('sw-top').checked = st.sw.topOnly;
   const hints = {
     forms: '一般的なコードフォーム（E型・A型・D型・C型・G型など）を、いまのチューニングに置き直して並べています。7・8弦では上の6本で作ります。',
@@ -474,10 +485,11 @@ function bind() {
   $('frets').addEventListener('change', e => update(() => { st.frets = +e.target.value; }));
   $('lefty').addEventListener('change', e => update(() => { st.lefty = e.target.checked; }, true));
   $('root-to-low').addEventListener('click', () => update(() => { st.root = pc(Math.min(...tuning())); }));
-  document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => update(() => { st.mode = b.dataset.mode; })));
-  $('root').addEventListener('change', e => update(() => { st.root = +e.target.value; }));
-  $('scale').addEventListener('change', e => update(() => { st.scale = e.target.value; st.emph = [0]; st.diat = -1; st.pattern = 0; }));
-  $('chord').addEventListener('change', e => update(() => { st.chord = e.target.value; }));
+  document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => { shapeOverride = null; update(() => { st.mode = b.dataset.mode; }); }));
+  $('shape-back').addEventListener('click', () => { shapeOverride = null; update(() => {}); });
+  $('root').addEventListener('change', e => { shapeOverride = null; update(() => { st.root = +e.target.value; }); });
+  $('scale').addEventListener('change', e => (shapeOverride = null, update(() => { st.scale = e.target.value; st.emph = [0]; st.diat = -1; st.pattern = 0; })));
+  $('chord').addEventListener('change', e => { shapeOverride = null; update(() => { st.chord = e.target.value; }); });
   $('note-picks').addEventListener('click', e => { const b = e.target.closest('.pick'); if (!b) return; const p = +b.dataset.p; update(() => { st.notes = st.notes.includes(p) ? st.notes.filter(x => x !== p) : [...st.notes, p]; }); playNotes([60 + p]); });
   $('notes-clear').addEventListener('click', () => update(() => { st.notes = []; }));
 
@@ -505,6 +517,7 @@ function bind() {
   $('emph-clear').addEventListener('click', () => update(() => { st.diat = -1; st.emph = []; }));
   $('diat').addEventListener('click', e => {
     const b = e.target.closest('.deg-btn'); if (!b) return; const d = +b.dataset.d;
+    shapeOverride = null;
     update(() => { st.diat = st.diat === d ? -1 : d; });
     if (st.diat >= 0) { const c = diatonic(st.root, SCALES[st.scale].iv, d, st.seventh); playNotes(c.semis.map(s => 48 + c.root + s), 0.05, 1.2); }
   });
@@ -519,14 +532,16 @@ function bind() {
   $('finder-results').addEventListener('click', e => {
     const g = e.target.closest('.fd-go'); if (!g) return;
     fbAction = 'play';
-    update(() => { st.mode = 'chord'; st.root = +g.dataset.root; st.chord = g.dataset.id; st.shapeTab = 'forms'; });
-    notify('そのコードの形を表示しました（選んだ音は残っています）');
+    shapeOverride = { root: +g.dataset.root, id: g.dataset.id };
+    update(() => { st.shapeTab = 'forms'; });
+    notify('Shapes だけをそのコードに切り替えました（Show の設定と選んだ音はそのままです）');
   });
   const vo = (k, v) => update(() => { st.vo[k] = v; });
   $('sets-span').addEventListener('change', e => vo('span', +e.target.value));
   $('sets-open').addEventListener('change', e => vo('allowOpen', e.target.checked));
   const sw = (k, v) => update(() => { st.sw[k] = v; });
   $('sw-size').addEventListener('change', e => sw('size', +e.target.value));
+  $('sw-notes').addEventListener('change', e => sw('notes', +e.target.value));
   $('sw-span').addEventListener('change', e => sw('span', +e.target.value));
   $('sw-root').addEventListener('change', e => sw('rootStart', e.target.checked));
   $('sw-open').addEventListener('change', e => sw('allowOpen', e.target.checked));
@@ -549,6 +564,16 @@ function bind() {
   $('pick-play').addEventListener('click', () => { const tun = tuning(); const ms = picks.map(k => { const [s, f] = k.split(':').map(Number); return tun[s] + f; }).sort((a, b) => a - b); playNotes(ms, 0.05, 1.4); });
   $('pick-clear').addEventListener('click', () => { picks = []; render(); });
   $('sw-top').addEventListener('change', e => update(() => { st.sw.topOnly = e.target.checked; }));
+  // fretboard-wide actions
+  $('fb-hide-all').addEventListener('click', () => {
+    const set = currentSet(), tun = tuning(), cells = new Set(st.hideCells);
+    tun.forEach((open, s) => { for (let f = 0; f <= st.frets; f++) if (set.has(open + f)) cells.add(s + ':' + f); });
+    fbAction = 'hide';
+    update(() => { st.hideCells = [...cells]; }, true);
+    notify('すべての音を隠しました。「押すと隠す」のまま、見せたい位置を押すと戻ります');
+  });
+  $('fb-show-all').addEventListener('click', () => update(() => { st.hideIv = []; st.hideCells = []; }, true));
+  $('fb-deselect').addEventListener('click', () => { picks = []; ssel = -1; render(); });
   $('hide-restore').addEventListener('click', () => update(() => { st.hideIv = []; st.hideCells = []; }, true));
 
   // sound

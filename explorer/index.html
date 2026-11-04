@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=14">
+<link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 
@@ -137,6 +137,9 @@
         <div class="panel-title">Fretboard<b id="fb-title"></b></div>
         <div class="row">
           <div class="seg small-seg" role="group" aria-label="指板を押したときの動作"><button class="fb-act" data-act="play">押すと鳴らす</button><button class="fb-act" data-act="hide">押すと隠す</button><button class="fb-act" data-act="pick">押して選ぶ</button></div>
+          <button class="std small" id="fb-hide-all">すべて隠す</button>
+          <button class="std small" id="fb-show-all">すべて表示に戻す</button>
+          <button class="std small" id="fb-deselect">選択をすべて解除</button>
           <button class="std small" id="play-set">▶ 表示中の音を鳴らす</button>
         </div>
       </div>
@@ -168,7 +171,7 @@
     </section>
 
     <section class="panel" id="shape-panel">
-      <div class="panel-hd"><div class="panel-title">Shapes<b id="shape-count"></b></div><button class="std small" id="shape-clear">形の表示をやめる</button></div>
+      <div class="panel-hd"><div class="panel-title">Shapes<b id="shape-count"></b></div><div class="row"><button class="std small" id="shape-back" hidden>Show の設定に戻す</button><button class="std small" id="shape-clear">形の表示をやめる</button></div></div>
       <p class="hint" style="margin:-4px 0 10px">対象：<span id="shape-target"></span></p>
       <div class="seg" role="tablist" aria-label="形の種類">
         <button class="shape-tab" data-tab="forms">コードフォーム</button>
@@ -183,6 +186,8 @@
       </div>
       <div class="vo-opts" id="opts-sweep" style="margin-top:12px">
         <div class="field"><label for="sw-size">使う弦の本数</label><select id="sw-size"></select></div>
+        <div class="field"><label for="sw-notes">ノート数</label>
+          <select id="sw-notes"><option value="0">すべて</option><option value="3">3音</option><option value="4">4音</option><option value="5">5音</option><option value="6">6音</option><option value="7">7音</option><option value="8">8音</option><option value="9">9音</option><option value="10">10音</option><option value="11">11音</option><option value="12">12音</option></select></div>
         <div class="field"><label for="sw-span">押さえる幅</label>
           <select id="sw-span"><option value="4">4フレット以内</option><option value="5">5フレット以内</option><option value="6">6フレット以内</option><option value="7">7フレット以内</option></select></div>
         <div class="toggle-row"><span class="toggle-label">1弦まで上がる形だけ</span><label class="toggle-switch"><input type="checkbox" id="sw-top"><span class="toggle-slider"></span></label></div>
@@ -206,7 +211,7 @@
 
 <div class="status" id="status" role="status" aria-live="polite"></div>
 
-<script type="module" src="js/app.js?v=14"></script>
+<script type="module" src="js/app.js?v=15"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
