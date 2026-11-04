@@ -154,6 +154,8 @@ export function romanOf(ivNames, d) {
 
 // ── Chord finder: guess chord names from picked pitches (MIDI) ──
 const DYADS = ['ユニゾン/オクターブ','短2度','長2度','短3度','長3度','完全4度','増4度/減5度','完全5度','短6度','長6度','短7度','長7度'];
+const EXOTIC = ['quartal', 'add11', 'aug7', '7b5', 'majb5', 'sus2b5', 'maj7s5', '6sus2b5'];
+const ROOTLESS_OK = ['7', 'maj7', 'm7', 'm7b5', 'dim7', '9', 'maj9', 'm9', '13'];
 export function identifyChord(midis) {
   const uniq = [...new Set(midis)].sort((a, b) => a - b);
   if (!uniq.length) return { kind: 'empty', results: [] };
@@ -173,16 +175,18 @@ export function identifyChord(midis) {
       if (id === 'quartal' || id === 'b5') continue;
       const cs = new Set(c.iv.map(n => pc(parseInterval(n).semis)));
       const same = (a, b) => a.size === b.size && [...a].every(x => b.has(x));
-      if (same(rel, cs)) out.push(score(r, id, 'exact', r === bass));
+      // unusual chord types only as root-position readings
+      if (same(rel, cs) && (r === bass || !EXOTIC.includes(id))) out.push(score(r, id, 'exact', r === bass));
       else if (cs.has(7) && cs.size >= 4) { const no5 = new Set([...cs].filter(x => x !== 7)); if (same(rel, no5)) out.push(score(r, id, 'omit5', r === bass)); }
-      if (!rel.has(0) && pcs.length >= 3) { const withR = new Set([...rel, 0]); if (same(withR, cs)) out.push(score(r, id, 'rootless', false)); }
+      // rootless readings only for the common 7th / 9th chords
+      if (!rel.has(0) && pcs.length >= 3 && ROOTLESS_OK.includes(id)) { const withR = new Set([...rel, 0]); if (same(withR, cs)) out.push(score(r, id, 'rootless', false)); }
     }
   }
   function score(r, id, how, rootInBass) {
     let s = { exact: 100, omit5: 78, rootless: 55 }[how];
     if (rootInBass) s += 25;
     s -= CHORDS[id].iv.length * 1.5;                 // prefer simpler names
-    if (['quartal', 'add11', 'aug7', '7b5'].includes(id)) s -= 6;
+    if (['quartal', 'add11', 'aug7', '7b5', 'majb5', 'sus2b5', 'maj7s5', '6sus2b5'].includes(id)) s -= 8;
     if (['6', 'm6'].includes(id)) s -= 3;             // a 6 chord is usually read as the m7 / m7♭5 it inverts
     const set = makeSet(r, CHORDS[id].iv);
     const name = set.name(r) + chordSymbol(id) + (how !== 'rootless' && !rootInBass ? '/' + set.name(bass) : how === 'rootless' ? '' : '');
