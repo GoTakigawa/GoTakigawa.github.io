@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=15">
+<link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
 
@@ -109,17 +109,7 @@
     </div>
 
     <div class="sec">
-      <div class="sec-title">Seed <small>設定をひとつの文字列に</small></div>
-      <div class="seed-row"><div class="seed-display" id="seed-display">—</div><button class="seed-btn" id="seed-copy">コピー</button></div>
-      <div class="seed-row" style="margin-top:6px"><input class="seed-input" id="seed-input" placeholder="シードを貼り付け" autocomplete="off" aria-label="シード"><button class="seed-btn seed-apply" id="seed-apply">適用</button></div>
-      <div class="seed-err" id="seed-err"></div>
-      <button class="dash" id="seed-share">共有 URL をコピー</button>
-    </div>
-
-    <div class="sec">
-      <div class="sec-title">Export</div>
-      <button class="std" id="export-svg" style="width:100%">↓ 指板を SVG で保存</button>
-      <button class="dash" id="reset" style="margin-top:10px">初期状態に戻す</button>
+      <button class="dash" id="reset">初期状態に戻す</button>
     </div>
   </aside>
 
@@ -211,7 +201,7 @@
 
 <div class="status" id="status" role="status" aria-live="polite"></div>
 
-<script type="module" src="js/app.js?v=15"></script>
+<script type="module" src="js/app.js?v=16"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
