@@ -1,7 +1,7 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad } from './theory.js?v=18';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=18';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms } from './positions.js?v=18';
-import { PianoEngine } from './audio.js?v=18';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad } from './theory.js?v=19';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=19';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms } from './positions.js?v=19';
+import { PianoEngine } from './audio.js?v=19';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -189,7 +189,8 @@ function renderSetInfo(set) {
   document.querySelectorAll('.fb-act').forEach(b => b.classList.toggle('on', b.dataset.act === fbAction));
   const nHidden = st.hideIv.length + st.hideCells.length;
   $('fb-show-all').disabled = !nHidden; $('fb-deselect').disabled = !picks.length && ssel < 0;
-  $('hide-restore').disabled = !nHidden; $('hide-restore').textContent = nHidden ? `隠した音をすべて戻す（${st.hideIv.length ? '音 ' + st.hideIv.length + ' ' : ''}${st.hideCells.length ? '位置 ' + st.hideCells.length : ''}）` : '隠した音をすべて戻す';
+  $('fb-show-all').textContent = nHidden ? `すべて表示（${st.hideIv.length ? '音' + st.hideIv.length : ''}${st.hideIv.length && st.hideCells.length ? '・' : ''}${st.hideCells.length ? '位置' + st.hideCells.length : ''}）` : 'すべて表示';
+  $('fb-mode-hint').textContent = fbAction === 'hide' ? '押した位置を隠します。点線の丸を押すと戻ります' : fbAction === 'pick' ? '押した音を選びます。Shapes の「検索」に推測したコードが出ます' : '';
   if (chipAction === 'hide') { $('iv-hint').textContent = '押した音を指板から隠します（もう一度押すと戻ります）。点線の丸は隠している位置です。'; } else
   $('iv-hint').textContent = st.mode === 'scale'
     ? (st.diat >= 0 ? 'ダイアトニックコードを重ねています。解除すると、音を押して強調を自由に選べます。' : '音を押すと、その音を紫で強調します（もう一度押すと解除）。')
@@ -392,6 +393,7 @@ function renderShapes() {
     renderFinder();
     return;
   }
+  $('finder-results').innerHTML = '';
   if (!shapes) shapes = computeShapes();
   $('shape-back').hidden = !c.override;
   $('shape-target').textContent = c.label + (c.override ? '（検索から選んだコード）' : '') + '　構成音：' + c.cset.ivs.map(iv => `${c.cset.name(c.root + iv.semis)}(${iv.label === '1' ? 'R' : iv.label})`).join(' ') + (c.fromScale && st.diat < 0 && !c.override ? '　※ダイアトニックで選んだコードに切り替わります' : '');
@@ -561,7 +563,6 @@ function bind() {
   });
   $('fb-show-all').addEventListener('click', () => update(() => { st.hideIv = []; st.hideCells = []; }, true));
   $('fb-deselect').addEventListener('click', () => { picks = []; ssel = -1; render(); });
-  $('hide-restore').addEventListener('click', () => update(() => { st.hideIv = []; st.hideCells = []; }, true));
 
   // sound
   $('fretboard').addEventListener('click', e => {
