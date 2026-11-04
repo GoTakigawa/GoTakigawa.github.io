@@ -35,7 +35,7 @@
   <!-- ── SIDEBAR: settings ── -->
   <aside class="sidebar">
     <div class="logo">GTI Tools</div>
-    <h1 class="app-title">Riff Composer<span class="badge">DEV 0.1</span></h1>
+    <h1 class="app-title">Riff Composer<span class="badge">DEV 0.2</span></h1>
     <p class="app-sub">Djent / プログレッシブメタル向けの作曲・練習ツール。いまはピアノ音源だけの叩き台です。</p>
 
     <div class="sec">
@@ -95,6 +95,7 @@
       <div class="sec-title">Mix</div>
       <div class="toggle-row"><span class="toggle-label">コード（パッド）</span><label class="toggle-switch"><input type="checkbox" id="mix-pad"><span class="toggle-slider"></span></label></div>
       <div class="toggle-row"><span class="toggle-label">リフ</span><label class="toggle-switch"><input type="checkbox" id="mix-riff"><span class="toggle-slider"></span></label></div>
+      <div class="toggle-row"><span class="toggle-label">リード</span><label class="toggle-switch"><input type="checkbox" id="mix-lead"><span class="toggle-slider"></span></label></div>
       <div class="toggle-row"><span class="toggle-label">クリック</span><label class="toggle-switch"><input type="checkbox" id="mix-click"><span class="toggle-slider"></span></label></div>
       <div class="toggle-row"><span class="toggle-label">低音を1オクターブ上げて試聴</span><label class="toggle-switch"><input type="checkbox" id="mix-lift"><span class="toggle-slider"></span></label></div>
       <p class="hint">8弦の低音はピアノだと濁りやすいので、聴き分けたいときに。</p>
@@ -110,7 +111,7 @@
 
     <div class="sec">
       <div class="sec-title">Export</div>
-      <button class="std" id="export-midi" style="width:100%">↓ MIDI（コード＋リフ）</button>
+      <button class="std" id="export-midi" style="width:100%">↓ MIDI（コード＋リフ＋リード）</button>
       <p class="hint">リフが小節と一周ずれる場合は、頭が揃うまでの長さで書き出します（最大16周）。</p>
       <button class="dash" id="reset" style="margin-top:10px">初期状態に戻す</button>
     </div>
@@ -138,7 +139,7 @@
       </div>
 
       <section class="panel">
-        <div class="panel-hd"><div class="panel-title">Fretboard<b id="fb-chord"></b></div></div>
+        <div class="panel-hd"><div class="panel-title">Fretboard<b id="fb-chord"></b></div><span class="fb-mode" id="fb-mode"></span></div>
         <div class="fb-scroll"><div id="fretboard"></div></div>
         <div class="legend">
           <span class="lg"><span class="dot" style="background:#86efac"></span>コードのルート</span>
@@ -168,6 +169,27 @@
 
       <section class="panel">
         <div class="panel-hd">
+          <div class="panel-title">Lead</div>
+          <div class="toggle-row" style="padding:0"><span class="toggle-label">指板で入力</span><label class="toggle-switch"><input type="checkbox" id="fb-input"><span class="toggle-slider"></span></label></div>
+        </div>
+        <div class="len-row" id="lead-len" role="group" aria-label="置く音の長さ"></div>
+        <p class="hint" id="lead-pos" aria-live="polite"></p>
+        <div class="panel-hd" style="margin:12px 0 8px"><div class="sec-sub">次の音の候補</div><button class="std small" id="lead-reroll">↻ 別の候補</button></div>
+        <div class="suggest" id="lead-suggest"></div>
+        <p class="hint">強い拍ではコードトーンを、間の拍ではスケールの音を優先しています。<span>▶</span> を押すと、その位置のコードと一緒に鳴ります。候補にない音は、指板を直接クリックすれば置けます。</p>
+        <div class="row" style="margin-top:12px">
+          <button class="std small" id="lead-rest">＋ 休符</button>
+          <button class="std small" id="lead-back">↶ 1音戻す</button>
+          <button class="std small" id="lead-del">選択中を削除</button>
+          <button class="std small" id="lead-append" hidden>末尾への追加に戻る</button>
+          <button class="std small" id="lead-clear">リードをクリア</button>
+        </div>
+        <div class="lead-chips" id="lead-chips"></div>
+        <p class="hint">音を押すと選択されます。選択中は、指板や候補で音の高さだけを差し替えられます。</p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-hd">
           <div class="panel-title">Riff</div>
           <div class="row">
             <label class="hint" for="riff-len" style="margin:0">長さ</label>
@@ -178,7 +200,7 @@
         <div class="pattern" id="pattern"></div>
         <p class="hint">押すたびに 休み → <span>·</span> チャグ（パームミュートのルート）→ <span>&gt;</span> アクセント（パワーコード）と切り替わります。</p>
         <div class="timeline" id="timeline"></div>
-        <p class="hint">下の帯は小節ごとの並びです。緑の線がリフの頭。リフと小節の長さが違うと、頭の位置が少しずつずれていきます。</p>
+        <p class="hint">下の帯は小節ごとの並びです。上の段がリフ（緑の線＝リフの頭）、下の段がリード。リフと小節の長さが違うと、頭の位置が少しずつずれていきます。</p>
       </section>
     </div>
 
@@ -209,7 +231,7 @@
       </section>
     </div>
 
-    <p class="foot">叩き台（DEV 0.1）：ピアノ音源のみ。プリセットはテクニック別のオリジナル例で、既存曲の譜面ではありません。曲の状態はこのブラウザに自動保存されます。スペースキーで再生／停止。</p>
+    <p class="foot">叩き台（DEV 0.2）：ピアノ音源のみ。プリセットはテクニック別のオリジナル例で、既存曲の譜面ではありません。曲の状態はこのブラウザに自動保存されます。スペースキーで再生／停止。</p>
   </main>
 </div>
 

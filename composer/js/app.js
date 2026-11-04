@@ -1,5 +1,6 @@
 import { NOTE_NAMES, MODES, CHORD_TYPES, pc, makeKey, chordFor, chugNotes, accentNotes, padNotes, suggestChords,
-         romanFor, roleLabel, stepsPerBar, lcm, patternFromGrouping, euclid } from './theory.js';
+         romanFor, roleLabel, stepsPerBar, lcm, patternFromGrouping, euclid,
+         LEAD_LENGTHS, leadTotal, suggestLead, leadRange, noteName, chordIndexAt } from './theory.js';
 import { TUNINGS, findTuning, PRESETS } from './presets.js';
 import { PianoEngine } from './audio.js';
 import { buildMidi } from './midi.js';
@@ -15,13 +16,15 @@ const DEFAULT = {
   v: 1, strings: 7, tuning: 'b-std', tonic: 11, mode: 'phrygian', bpm: 120, num: 4, den: 4,
   bars: [{ d: 0, t: '5' }, { d: 1, t: '5' }, { d: 6, t: '5' }, { d: 0, t: '5' }],
   riff: patternFromGrouping('3+3+3+3+2+2'), group: '3+3+3+3+2+2',
-  mix: { pad: true, riff: true, click: true, lift: false }
+  lead: [],
+  mix: { pad: true, riff: true, lead: true, click: true, lift: false }
 };
 
 let song = structuredClone(DEFAULT);
 let selected = 0, variation = 0, undo = [], redo = [];
 let playing = false, schedTimer = null, rafId = 0, nextTime = 0, playStep = 0, queue = [], shownStep = -1;
 let statusTimer = null;
+let leadLen = 2, leadSel = -1, leadVar = 0, fbInput = true, leadCache = null;
 
 // ── state helpers ──
 function sanitize(s) {
@@ -40,19 +43,37 @@ function sanitize(s) {
   if (Array.isArray(s.riff) && s.riff.length && s.riff.length <= MAX_RIFF)
     d.riff = s.riff.map(v => [0, 1, 2].includes(v) ? v : 0);
   d.group = typeof s.group === 'string' ? s.group.slice(0, 64) : '';
-  if (s.mix && typeof s.mix === 'object') ['pad', 'riff', 'click', 'lift'].forEach(k => { d.mix[k] = !!s.mix[k]; });
+  if (Array.isArray(s.lead)) d.lead = s.lead.slice(0, 512).filter(e => e && Number.isInteger(e.len) && e.len >= 1 && e.len <= 16 && (e.n === null || (Number.isInteger(e.n) && e.n >= 0 && e.n <= 127))).map(e => ({ n: e.n, len: e.len }));
+  if (s.mix && typeof s.mix === 'object') ['pad', 'riff', 'lead', 'click', 'lift'].forEach(k => { if (k in s.mix) d.mix[k] = !!s.mix[k]; });
+  trimLead(d);
   return d;
 }
 const key = () => makeKey(song.tonic, song.mode);
 const tuning = () => findTuning(song.strings, song.tuning).notes;
 const chords = () => { const k = key(); return song.bars.map(b => chordFor(k, b.d, b.t)); };
 const S = () => stepsPerBar(song.num, song.den);
+const beatSteps = () => Math.max(1, 16 / song.den);
+const capacity = (s = song) => stepsPerBar(s.num, s.den) * s.bars.length;
+// keep the lead inside the progression; a note crossing the end is shortened
+function trimLead(s = song) {
+  const cap = capacity(s); let t = 0; const out = [];
+  for (const e of s.lead) { if (t >= cap) break; const len = Math.min(e.len, cap - t); out.push({ n: e.n, len }); t += len; }
+  s.lead = out;
+}
+function leadMap() {
+  if (leadCache) return leadCache;
+  const map = {}; let t = 0;
+  song.lead.forEach((e, i) => { map[t] = { ...e, i }; t += e.len; });
+  return (leadCache = map);
+}
 
 function save() { try { localStorage.setItem(STORE, JSON.stringify(song)); } catch (e) {} }
 function commit(fn, keepVariation) {
   undo.push(JSON.stringify(song)); if (undo.length > 80) undo.shift(); redo = [];
   fn(); if (!keepVariation) variation = 0;
+  trimLead(); leadCache = null;
   selected = Math.min(selected, song.bars.length - 1);
+  if (leadSel >= song.lead.length) leadSel = -1;
   save(); render();
 }
 function notify(msg) {
@@ -74,8 +95,9 @@ function scheduleStep(g, t) {
   const spb = S(), bar = Math.floor(g / spb) % song.bars.length, inBar = g % spb;
   const chord = chords()[bar], tun = tuning(), sps = 60 / song.bpm / 4;
   if (inBar === 0 && song.mix.pad) audio.play(padNotes(chord), t, spb * sps * 0.97, 0.42);
-  const beatSteps = Math.max(1, 16 / song.den);
-  if (song.mix.click && inBar % beatSteps === 0) audio.click(t, inBar === 0);
+  if (song.mix.click && inBar % beatSteps() === 0) audio.click(t, inBar === 0);
+  const ev = leadMap()[g];
+  if (song.mix.lead && ev && ev.n !== null) audio.play([ev.n], t, ev.len * sps * 0.92, 0.95);
   const L = song.riff.length, state = song.riff[g % L];
   if (song.mix.riff && state) {
     if (state === 1) audio.play(lift(chugNotes(chord, tun)), t, sps * 0.55, 0.8);
@@ -120,11 +142,16 @@ function highlight(g) {
   if (g >= 0) {
     const c = document.querySelector(`.tl-cell[data-g="${g}"]`); if (c) c.classList.add('now');
     const p = document.querySelector(`.pat-cell[data-i="${g % song.riff.length}"]`); if (p) p.classList.add('now');
-  }
+    const ev = leadMap()[g];
+    if (ev) {
+      document.querySelectorAll('.lead-chip.now,.ld-note.now').forEach(el => el.classList.remove('now'));
+      document.querySelectorAll(`.lead-chip[data-i="${ev.i}"],.ld-note[data-i="${ev.i}"]`).forEach(el => el.classList.add('now'));
+    }
+  } else document.querySelectorAll('.lead-chip.now,.ld-note.now').forEach(el => el.classList.remove('now'));
   if (bar !== lastBar) {
     document.querySelectorAll('.bar-card').forEach((el, i) => el.classList.toggle('playing', i === bar));
     lastBar = bar;
-    renderFretboard(bar >= 0 ? bar : selected);
+    renderFretboard(bar >= 0 ? bar : null);
   }
 }
 
@@ -141,7 +168,7 @@ function renderSidebar() {
   $('steps-hint').innerHTML = `1小節 = 16分音符 <span>${S()}</span> 個`;
   $('group').value = song.group || '';
   $('riff-len').value = song.riff.length;
-  ['pad', 'riff', 'click', 'lift'].forEach(k => { $('mix-' + k).checked = song.mix[k]; });
+  ['pad', 'riff', 'lead', 'click', 'lift'].forEach(k => { $('mix-' + k).checked = song.mix[k]; });
 }
 function renderMetrics() {
   const k = key(), spb = S(), L = song.riff.length, cyc = lcm(L, spb) / spb;
@@ -178,52 +205,129 @@ function renderSuggest() {
   }).join('');
 }
 function renderRiff() {
-  const L = song.riff.length, spb = S(), bars = song.bars.length, beat = Math.max(1, 16 / song.den);
+  const L = song.riff.length, spb = S(), bars = song.bars.length, beat = beatSteps();
   $('pattern').innerHTML = song.riff.map((v, i) => `<button class="pat-cell s${v}" data-i="${i}" aria-label="ステップ${i + 1}">${v === 2 ? '>' : v === 1 ? '·' : ''}</button>`).join('');
+  // lead spans per bar (a note crossing a bar line is drawn in both bars)
+  const spans = []; let t = 0;
+  song.lead.forEach((e, i) => { spans.push({ ...e, i, start: t }); t += e.len; });
   let html = '';
   for (let b = 0; b < bars; b++) {
-    html += `<div class="tl-row"><span class="tl-lbl">${String(b + 1).padStart(2, '0')}</span><div class="tl-cells" style="grid-template-columns:repeat(${spb},minmax(0,1fr))">`;
+    const cols = `grid-template-columns:repeat(${spb},minmax(0,1fr))`;
+    html += `<div class="tl-row"><span class="tl-lbl">${String(b + 1).padStart(2, '0')}</span><div class="tl-stack"><div class="tl-cells" style="${cols}">`;
     for (let s = 0; s < spb; s++) {
       const g = b * spb + s, v = song.riff[g % L], head = g % L === 0;
       html += `<span class="tl-cell s${v} ${s % beat === 0 ? 'beat' : ''} ${head ? 'head' : ''}" data-g="${g}"></span>`;
     }
-    html += '</div></div>';
+    html += `</div><div class="ld-lane" style="${cols}">`;
+    const b0 = b * spb, b1 = b0 + spb;
+    spans.filter(e => e.start < b1 && e.start + e.len > b0).forEach(e => {
+      const from = Math.max(e.start, b0) - b0 + 1, to = Math.min(e.start + e.len, b1) - b0 + 1;
+      html += `<span class="ld-note ${e.n === null ? 'rest' : ''} ${e.i === leadSel ? 'sel' : ''}" data-i="${e.i}" style="grid-column:${from}/${to}">${e.n === null ? '' : noteName(e.n)}</span>`;
+    });
+    html += '</div></div></div>';
   }
   $('timeline').innerHTML = html;
 }
+
+// chord under the lead cursor (selected note, or the next free position)
+function leadCursor() {
+  const spb = S();
+  let pos = leadTotal(song.lead);
+  if (leadSel >= 0) pos = leadTotal(song.lead.slice(0, leadSel));
+  const idx = chordIndexAt(Math.min(pos, capacity() - 1), spb, song.bars.length);
+  return { pos, idx, full: leadSel < 0 && pos >= capacity() };
+}
+function renderLead() {
+  const k = key(), cs = chords(), spb = S(), cur = leadCursor();
+  $('lead-len').innerHTML = LEAD_LENGTHS.map(l => `<button class="len-btn ${l.len === leadLen ? 'on' : ''}" data-len="${l.len}" title="${l.label}">${l.sym}<small>${l.label}</small></button>`).join('');
+  $('fb-input').checked = fbInput;
+  const remain = capacity() - leadTotal(song.lead);
+  const barNo = cur.idx + 1, beatNo = Math.floor((cur.pos % spb) / beatSteps()) + 1;
+  $('lead-pos').innerHTML = leadSel >= 0
+    ? `<span>${leadSel + 1}音目</span>を編集中（${barNo}小節目）。指板か候補で音を差し替えます。`
+    : cur.full ? '最後の小節まで埋まりました。音を選んで差し替えるか、小節を増やしてください。'
+    : `次は <span>${barNo}小節目・${beatNo}拍目</span>（${cs[cur.idx].name}）。残り ${remain} ステップ`;
+  const list = cur.full ? [] : suggestLead(k, cs, leadSel >= 0 ? song.lead.slice(0, leadSel) : song.lead, spb, beatSteps(), tuning(), leadLen, leadVar);
+  $('lead-suggest').innerHTML = list.map(c => `
+    <div class="sg-card ld-cand" data-n="${c.n}">
+      <div class="sg-top"><span class="sg-roman">${c.name}</span><span class="sg-name">${c.ct ? 'コードトーン' : 'スケール音'}</span><button class="sg-play" data-n="${c.n}" aria-label="${c.name} を試聴">▶</button></div>
+      <div class="sg-role">${c.tag}</div>
+      <div class="sg-why">${c.why}</div>
+    </div>`).join('') || '<p class="hint">候補はありません。</p>';
+  $('lead-chips').innerHTML = song.lead.map((e, i) => `<button class="lead-chip ${e.n === null ? 'rest' : ''} ${i === leadSel ? 'sel' : ''}" data-i="${i}">${e.n === null ? '休' : noteName(e.n)}<small>${(LEAD_LENGTHS.find(l => l.len === e.len) || { label: e.len + '/16' }).label}</small></button>`).join('') || '<span class="hint">まだ音がありません。候補か指板から最初の一音を選んでください。</span>';
+  $('lead-del').disabled = leadSel < 0; $('lead-append').hidden = leadSel < 0;
+  $('lead-back').disabled = !song.lead.length; $('lead-clear').disabled = !song.lead.length;
+}
+
 function renderFretboard(barIndex) {
-  const k = key(), tun = tuning(), chord = chords()[Math.max(0, Math.min(barIndex, song.bars.length - 1))];
+  const k = key(), tun = tuning(), cs = chords();
+  const cur = leadCursor();
+  const useLead = barIndex == null && fbInput;
+  const idx = barIndex != null ? barIndex : useLead ? cur.idx : selected;
+  const chord = cs[Math.max(0, Math.min(idx, cs.length - 1))];
+  // reference note: the note being edited, or the last played lead note
+  const before = leadSel >= 0 ? song.lead.slice(0, leadSel + 1) : song.lead;
+  const ref = useLead ? (before.filter(e => e.n !== null).pop() || {}).n : undefined;
   const n = tun.length, frets = 24, W = 1000, padL = 34, padR = 10, top = 16, gap = 22, H = top * 2 + gap * (n - 1);
   const scaleLen = (W - padL - padR) / (1 - Math.pow(2, -frets / 12));
   const fx = f => padL + scaleLen * (1 - Math.pow(2, -f / 12));
-  let svg = `<svg viewBox="0 0 ${W} ${H + 14}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="指板：${chord.name}">`;
+  const cx = f => f === 0 ? padL - 1 : (fx(f) + fx(f - 1)) / 2;
+  let svg = `<svg viewBox="0 0 ${W} ${H + 14}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="指板：${chord.name}" class="${useLead ? 'input' : ''}">`;
   svg += `<rect x="${padL}" y="${top - 8}" width="${W - padL - padR}" height="${gap * (n - 1) + 16}" fill="#0f0f0f" rx="2"/>`;
-  [3, 5, 7, 9, 15, 17, 19, 21].forEach(f => svg += `<circle cx="${(fx(f) + fx(f - 1)) / 2}" cy="${top + gap * (n - 1) / 2}" r="3.5" fill="#222"/>`);
-  [12, 24].forEach(f => { const x = (fx(f) + fx(f - 1)) / 2; svg += `<circle cx="${x}" cy="${top + gap * (n - 1) / 2 - gap}" r="3.5" fill="#222"/><circle cx="${x}" cy="${top + gap * (n - 1) / 2 + gap}" r="3.5" fill="#222"/>`; });
+  [3, 5, 7, 9, 15, 17, 19, 21].forEach(f => svg += `<circle cx="${cx(f)}" cy="${top + gap * (n - 1) / 2}" r="3.5" fill="#222"/>`);
+  [12, 24].forEach(f => { svg += `<circle cx="${cx(f)}" cy="${top + gap * (n - 1) / 2 - gap}" r="3.5" fill="#222"/><circle cx="${cx(f)}" cy="${top + gap * (n - 1) / 2 + gap}" r="3.5" fill="#222"/>`; });
   for (let f = 0; f <= frets; f++) svg += `<line x1="${fx(f)}" y1="${top - 8}" x2="${fx(f)}" y2="${top + gap * (n - 1) + 8}" stroke="${f === 0 ? '#888' : '#2a2a2a'}" stroke-width="${f === 0 ? 3 : 1}"/>`;
-  for (let f = 1; f <= frets; f++) if ([3, 5, 7, 9, 12, 15, 17, 19, 21, 24].includes(f)) svg += `<text x="${(fx(f) + fx(f - 1)) / 2}" y="${H + 10}" fill="#555" font-size="9" text-anchor="middle" font-family="Barlow">${f}</text>`;
+  for (let f = 1; f <= frets; f++) if ([3, 5, 7, 9, 12, 15, 17, 19, 21, 24].includes(f)) svg += `<text x="${cx(f)}" y="${H + 10}" fill="#555" font-size="9" text-anchor="middle" font-family="Barlow">${f}</text>`;
+  let hits = '';
   for (let i = 0; i < n; i++) {
     const s = n - 1 - i, y = top + gap * i, open = tun[s];
     svg += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#555" stroke-width="${0.6 + s * 0.22}"/>`;
     svg += `<text x="${padL - 12}" y="${y + 3.5}" fill="#888" font-size="10" text-anchor="middle" font-family="Barlow">${NOTE_NAMES[pc(open)]}</text>`;
     for (let f = 0; f <= frets; f++) {
-      const p = pc(open + f), x = f === 0 ? padL - 1 : (fx(f) + fx(f - 1)) / 2;
+      const m = open + f, p = pc(m), x = cx(f);
       const inChord = chord.pcs.includes(p), inScale = k.scale.includes(p), isRoot = p === chord.root;
       if (inChord) svg += `<circle cx="${x}" cy="${y}" r="8" fill="${isRoot ? '#86efac' : '#8c4dff'}"/><text x="${x}" y="${y + 3}" fill="#0a0a0a" font-size="8" font-weight="700" text-anchor="middle" font-family="Barlow">${NOTE_NAMES[p]}</text>`;
       else if (inScale) svg += `<circle cx="${x}" cy="${y}" r="5.5" fill="#000" stroke="#38bdf8" stroke-width="1.2"/>${p === k.tonic ? `<circle cx="${x}" cy="${y}" r="2" fill="#38bdf8"/>` : ''}`;
+      if (ref !== undefined && m === ref) svg += `<circle cx="${x}" cy="${y}" r="10.5" fill="none" stroke="#fff" stroke-width="1.6"/>`;
+      if (useLead) { const x0 = f === 0 ? padL - 14 : fx(f - 1), x1 = f === 0 ? padL + 2 : fx(f); hits += `<rect class="fb-hit" data-m="${m}" x="${x0}" y="${y - gap / 2}" width="${x1 - x0}" height="${gap}"><title>${noteName(m)}</title></rect>`; }
     }
   }
-  svg += '</svg>';
+  svg += hits + '</svg>';
   $('fretboard').innerHTML = svg;
-  $('fb-chord').textContent = `${chord.roman} · ${chord.name}`;
+  $('fb-chord').textContent = `${idx + 1}小節目 · ${chord.roman} · ${chord.name}`;
+  $('fb-mode').textContent = useLead ? '指板をクリックしてリードに入力（白い輪＝直前の音）' : '';
 }
 async function renderSeed() {
   try { const seed = await encodeSeed(song); $('seed-display').textContent = seed; $('seed-display').title = seed; } catch (e) {}
 }
 function render() {
-  renderSidebar(); renderMetrics(); renderBars(); renderSuggest(); renderRiff(); renderFretboard(selected); renderSeed();
+  leadCache = null; renderSidebar(); renderMetrics(); renderBars(); renderSuggest(); renderRiff(); renderLead(); renderFretboard(null); renderSeed();
   $('undo').disabled = !undo.length; $('redo').disabled = !redo.length;
   $('preset-desc').textContent = $('preset-desc').dataset.text || 'テクニック別の進行例です。読み込むとキー・テンポ・リフも置き換わります。';
+}
+
+// ── lead editing ──
+async function auditionLead(n, withChord = true) {
+  await audio.ready();
+  const t = audio.now + 0.03, sps = 60 / song.bpm / 4, cur = leadCursor();
+  if (withChord) audio.play(padNotes(chords()[cur.idx]), t, 1.0, 0.35);
+  audio.play([n], t, Math.min(1.6, Math.max(0.25, leadLen * sps)), 0.95);
+}
+function putLead(n) {
+  if (leadSel >= 0) {
+    // replace the pitch of the selected note (its length stays)
+    commit(() => { song.lead[leadSel].n = n; }, true);
+    if (n !== null) auditionLead(n);
+    return;
+  }
+  const remain = capacity() - leadTotal(song.lead);
+  if (remain <= 0) return notify('最後の小節まで埋まっています。小節を増やすか、音を選んで差し替えてください');
+  if (song.lead.length >= 512) return notify('音符と休符は最大512個です');
+  const len = Math.min(leadLen, remain);
+  if (n !== null) auditionLead(n);
+  commit(() => { song.lead.push({ n, len }); }, true);
+  leadVar = 0; renderLead();
+  if (len < leadLen) notify(`小節の終わりに合わせて ${len} ステップに縮めました`);
 }
 
 // ── export ──
@@ -238,7 +342,10 @@ function exportMidi() {
     if (v === 1) riff.push({ step: g, len: 0.6, notes: chugNotes(c, tun), vel: 92 });
     else { let len = 1; while (len < 4 && !song.riff[(g + len) % L] && g + len < total) len++; riff.push({ step: g, len: len * 0.9, notes: accentNotes(c, tun), vel: 116 }); }
   }
-  const bytes = buildMidi({ bpm: song.bpm, num: song.num, den: song.den, totalSteps: total, pad, riff });
+  const lead = []; let lt = 0;
+  song.lead.forEach(e => { if (e.n !== null) lead.push({ step: lt, len: e.len * 0.95, notes: [e.n], vel: 100 }); lt += e.len; });
+  const leadAll = []; for (let r = 0; r < reps; r++) lead.forEach(e => leadAll.push({ ...e, step: e.step + r * progSteps }));
+  const bytes = buildMidi({ bpm: song.bpm, num: song.num, den: song.den, totalSteps: total, pad, riff, lead: leadAll });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([bytes], { type: 'audio/midi' }));
   a.download = `riff_${NOTE_NAMES[song.tonic].replace('#', 's')}_${song.mode}_${song.bpm}bpm.mid`;
@@ -261,7 +368,7 @@ function bind() {
   $('bpm').addEventListener('change', e => commit(() => { song.bpm = Math.max(30, Math.min(300, parseInt(e.target.value) || 120)); }));
   $('num').addEventListener('change', e => commit(() => { song.num = Math.max(1, Math.min(32, parseInt(e.target.value) || 4)); }));
   $('den').addEventListener('change', e => commit(() => { song.den = +e.target.value; }));
-  ['pad', 'riff', 'click', 'lift'].forEach(k => $('mix-' + k).addEventListener('change', e => { song.mix[k] = e.target.checked; save(); renderSeed(); }));
+  ['pad', 'riff', 'lead', 'click', 'lift'].forEach(k => $('mix-' + k).addEventListener('change', e => { song.mix[k] = e.target.checked; save(); renderSeed(); }));
 
   $('presets').innerHTML = PRESETS.map(p => `<button class="preset-btn" data-id="${p.id}" title="${p.desc}"><span class="preset-icon">${p.icon}</span>${p.name}</button>`).join('');
   $('presets').addEventListener('click', e => {
@@ -301,6 +408,25 @@ function bind() {
   $('riff-len').addEventListener('change', e => { const n = Math.max(1, Math.min(MAX_RIFF, parseInt(e.target.value) || 16)); commit(() => { const r = song.riff; song.riff = Array.from({ length: n }, (_, i) => r[i] || 0); song.group = ''; }); });
   $('riff-clear').addEventListener('click', () => commit(() => { song.riff = song.riff.map(() => 0); song.group = ''; }));
   $('riff-fill').addEventListener('click', () => commit(() => { song.riff = song.riff.map((v, i) => i === 0 ? 2 : 1); song.group = ''; }));
+
+  // ── lead ──
+  $('lead-len').addEventListener('click', e => { const b = e.target.closest('.len-btn'); if (!b) return; leadLen = +b.dataset.len; renderLead(); });
+  $('fb-input').addEventListener('change', e => { fbInput = e.target.checked; renderFretboard(null); });
+  $('lead-reroll').addEventListener('click', () => { leadVar++; renderLead(); });
+  $('lead-suggest').addEventListener('click', e => {
+    const play = e.target.closest('.sg-play');
+    if (play) { e.stopPropagation(); auditionLead(+play.dataset.n); return; }
+    const c = e.target.closest('.ld-cand'); if (c) putLead(+c.dataset.n);
+  });
+  $('fretboard').addEventListener('click', e => { const h = e.target.closest('.fb-hit'); if (h) putLead(+h.dataset.m); });
+  $('lead-rest').addEventListener('click', () => putLead(null));
+  $('lead-back').addEventListener('click', () => { if (!song.lead.length) return; commit(() => { song.lead.pop(); }, true); leadSel = -1; render(); });
+  $('lead-clear').addEventListener('click', () => { commit(() => { song.lead = []; }); leadSel = -1; render(); });
+  $('lead-del').addEventListener('click', () => { if (leadSel < 0) return; commit(() => { song.lead.splice(leadSel, 1); }, true); leadSel = -1; render(); });
+  $('lead-append').addEventListener('click', () => { leadSel = -1; renderLead(); renderRiff(); renderFretboard(null); });
+  const pickChip = i => { leadSel = leadSel === i ? -1 : i; leadVar = 0; renderLead(); renderRiff(); renderFretboard(null); const e = song.lead[i]; if (leadSel >= 0 && e && e.n !== null) auditionLead(e.n, false); };
+  $('lead-chips').addEventListener('click', e => { const c = e.target.closest('.lead-chip'); if (c) pickChip(+c.dataset.i); });
+  $('timeline').addEventListener('click', e => { const c = e.target.closest('.ld-note'); if (c) pickChip(+c.dataset.i); });
 
   $('play').addEventListener('click', togglePlay);
   $('undo').addEventListener('click', () => { if (!undo.length) return; redo.push(JSON.stringify(song)); song = JSON.parse(undo.pop()); save(); render(); });

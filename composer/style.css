@@ -196,6 +196,31 @@ button.small{font-size:11px;padding:6px 10px;}
 .tl-cell.head::after{content:'';position:absolute;left:-2px;top:-3px;bottom:-3px;width:2px;background:var(--accent3);}
 .tl-cell.now{outline:2px solid var(--accent2);}
 
+/* lead */
+.fb-mode{font-size:11px;color:var(--accent3);}
+#fretboard svg.input .fb-hit{fill:transparent;cursor:pointer;}
+#fretboard svg.input .fb-hit:hover{fill:rgba(255,255,255,.08);}
+.sec-sub{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-weight:600;}
+.len-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;}
+.len-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:var(--r);padding:6px 0 5px;font-size:17px;line-height:1.1;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.len-btn small{font-size:10px;color:var(--text3);}
+.len-btn:hover{border-color:var(--accent1);}
+.len-btn.on{background:var(--accent1);border-color:var(--accent1);color:#1a1a1a;}
+.len-btn.on small{color:#1a1a1a;}
+.lead-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:12px;max-height:180px;overflow-y:auto;}
+.lead-chip{background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:var(--r);padding:5px 8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;line-height:1.15;min-width:44px;}
+.lead-chip small{font-size:9px;color:var(--text3);font-weight:500;}
+.lead-chip.rest{color:var(--text3);border-style:dashed;}
+.lead-chip:hover{border-color:var(--accent1);}
+.lead-chip.sel{border-color:var(--accent3);box-shadow:0 0 0 1px var(--accent3) inset;}
+.lead-chip.now{background:#1c1530;border-color:var(--accent2);}
+.tl-stack{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.ld-lane{display:grid;gap:2px;min-height:16px;}
+.ld-note{background:#14324a;border:1px solid #38bdf8;color:#cdeeff;border-radius:3px;font-size:9px;line-height:14px;height:16px;padding:0 3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;}
+.ld-note.rest{background:none;border:1px dashed #2f4a5c;}
+.ld-note.sel{border-color:var(--accent3);box-shadow:0 0 0 1px var(--accent3) inset;}
+.ld-note.now{background:#38bdf8;color:#001018;}
+
 /* practice */
 .yt-box{position:relative;width:100%;aspect-ratio:16/9;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;}
 .yt-box iframe,#yt-player{position:absolute;inset:0;width:100%;height:100%;}

@@ -7,13 +7,15 @@ export const TUNINGS = {
     { id: 'drop-d', name: 'Drop D',      notes: [38,45,50,55,59,64] },
     { id: 'drop-c', name: 'Drop C',      notes: [36,43,48,53,57,62] },
     { id: 'drop-b', name: 'Drop B',      notes: [35,42,47,52,56,61] },
-    { id: 'drop-a6',name: 'Drop A (6)',  notes: [33,40,45,50,54,59] }
+    { id: 'drop-a6',name: 'Drop A (6)',  notes: [33,40,45,50,54,59] },
+    { id: 'drop-g6',name: 'Drop G (6)',  notes: [31,38,43,48,52,57] }
   ],
   7: [
     { id: 'b-std',  name: 'B Standard',  notes: [35,40,45,50,55,59,64] },
     { id: 'drop-a', name: 'Drop A',      notes: [33,40,45,50,55,59,64] },
     { id: 'a-std',  name: 'A Standard',  notes: [33,38,43,48,53,57,62] },
-    { id: 'drop-gs',name: 'Drop G#',     notes: [32,39,44,49,54,58,63] }
+    { id: 'drop-gs',name: 'Drop G#',     notes: [32,39,44,49,54,58,63] },
+    { id: 'drop-g', name: 'Drop G',      notes: [31,38,43,48,53,57,62] }
   ],
   8: [
     { id: 'fs-std', name: 'F# Standard', notes: [30,35,40,45,50,55,59,64] },
