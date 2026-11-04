@@ -86,13 +86,14 @@ function chordIdFor(semis) {
   return null;
 }
 function shapeChord() {
-  if (st.mode === 'chord') { const set = makeSet(st.root, CHORDS[st.chord].iv); return { root: st.root, id: st.chord, pcs: set.pcs, set, cset: set, label: set.name(st.root) + chordSymbol(st.chord) }; }
+  if (st.mode === 'chord') { const set = makeSet(st.root, CHORDS[st.chord].iv); return { root: st.root, id: st.chord, pcs: set.pcs, set, cset: set, sym: set.name(st.root) + chordSymbol(st.chord), label: set.name(st.root) + chordSymbol(st.chord) }; }
   if (st.mode === 'scale' && scaleLen() === 7) {
     const d = st.diat >= 0 ? st.diat : 0, c = diatonic(st.root, SCALES[st.scale].iv, d, st.seventh), id = chordIdFor(c.semis);
     const scaleSet = makeSet(st.root, SCALES[st.scale].iv);
     const DEF = ['1','b2','2','b3','3','4','b5','5','b6','6','b7','7'];
     const cset = makeSet(c.root, id ? CHORDS[id].iv : c.semis.map(x => DEF[pc(x)]));
-    return { root: c.root, id, pcs: c.pcs, set: scaleSet, cset, label: `${romanOf(SCALES[st.scale].iv, d)}（${scaleSet.name(c.root)}${id ? chordSymbol(id) : ''}）`, fromScale: true };
+    const sym = scaleSet.name(c.root) + (id ? chordSymbol(id) : chordNameFor(c.semis));
+    return { root: c.root, id, pcs: c.pcs, set: scaleSet, cset, sym, label: `${romanOf(SCALES[st.scale].iv, d)}（${sym}）`, fromScale: true };
   }
   return null;
 }
@@ -277,7 +278,7 @@ function renderFretboard() {
   if (sh) sh.muted.forEach(s => { const y = top + gap * (n - 1 - s); dots += `<text x="${X(padL - 13)}" y="${y + 4}" fill="#f87171" font-size="12" text-anchor="middle" font-family="Barlow" font-weight="700">×</text>`; });
   svg += dots + hits + '</svg>';
   $('fretboard').innerHTML = svg;
-  $('fb-title').textContent = titleFor(set) + (sh ? ` ／ ${sh.title}` : '');
+  $('fb-title').textContent = titleFor(set) + (sh ? ` ／ ${sh.name}・${sh.title}` : '');
   $('fretboard').classList.toggle('hide-mode', fbAction === 'hide');
   return count;
 }
@@ -302,7 +303,7 @@ function computeShapes() {
     frets.forEach((f, s) => f === null ? muted.push(s) : cells.push({ s, f }));
     // chord tones written high string → low string to match the diagram (1st string on top)
     const tones = frets.map((f, s) => f === null ? '×' : toneOf(c, tun[s] + f)).reverse().join(' ');
-    return { title, meta, cells, muted, tones, tab: frets.map(f => f === null ? 'x' : f).join(' '), play: cells.map(x => tun[x.s] + x.f), strum: true };
+    return { title, meta, cells, muted, tones, name: chordNameWithBass(c, Math.min(...cells.map(x => tun[x.s] + x.f))), tab: frets.map(f => f === null ? 'x' : f).join(' '), play: cells.map(x => tun[x.s] + x.f), strum: true };
   };
   if (st.shapeTab === 'forms') {
     return chordForms(tun, c.id, rootPc, F, c.pcs).map(v => fromFrets(v.frets, v.name, `${v.name} · ${v.low ? v.low + '〜' + v.high + 'f' : '開放'}`));
@@ -332,13 +333,15 @@ function computeShapes() {
       const cells = sw.notes.map((x, i) => ({ s: x.s, f: x.f, order: i + 1 }));
       const tones = sw.notes.map(x => toneOf(c, x.m)).join(' → ');
       const strs = `${n - sw.hi}〜${n - sw.lo}弦`;
-      return { title: `${sw.size}弦スウィープ（${strs}）`, meta: `${strs} · ${sw.low}〜${sw.high}f · ${toneOf(c, sw.notes[0].m)} から`, cells, muted: [], tones,
+      return { name: chordNameWithBass(c, sw.notes[0].m), title: `${sw.size}弦スウィープ（${strs}）`, meta: `${strs} · ${sw.low}〜${sw.high}f · ${toneOf(c, sw.notes[0].m)} から`, cells, muted: [], tones,
         tab: sw.notes.map(x => `${n - x.s}弦${x.f}`).join(' '), play: sw.notes.map(x => x.m), strum: false };
     });
   }
   const list = findVoicings(tun, c.pcs, rootPc, Math.min(F, 17), { ...st.vo, requireAll: true, minStrings: Math.min(st.vo.minStrings, n) });
   return list.map(v => fromFrets(v.frets, 'ボイシング', `${v.low ? v.low + '〜' : '開放〜'}${v.high}f · ${v.strings}弦`));
 }
+// Chord symbol for a shape; when the lowest note is not the root it becomes a slash chord
+function chordNameWithBass(c, bassMidi) { return pc(bassMidi) === pc(c.root) ? c.sym : `${c.sym}/${c.cset.name(bassMidi)}`; }
 function selectedShape() { return shapes && ssel >= 0 ? shapes[ssel] || null : null; }
 
 // Small diagram of a shape: 1st string on top, a few frets around the shape
@@ -389,7 +392,7 @@ function renderShapes() {
   const shown = shapes.slice(0, 120);
   $('shape-list').innerHTML = noForm
     ? '<p class="hint">このコードの定番フォームはまだ登録していません。「弦セット」や「検索」を使ってください。</p>'
-    : shown.map((v, i) => `<button class="vo-item ${i === ssel ? 'on' : ''}" data-i="${i}">${thumb(v, c)}<span class="vo-body"><span class="vo-tones">${v.tones}</span><span class="vo-meta">${v.meta}</span><span class="vo-tab">${v.tab}</span></span></button>`).join('')
+    : shown.map((v, i) => `<button class="vo-item ${i === ssel ? 'on' : ''}" data-i="${i}">${thumb(v, c)}<span class="vo-body"><span class="vo-name">${v.name}</span><span class="vo-tones">${v.tones}</span><span class="vo-meta">${v.meta}</span><span class="vo-tab">${v.tab}</span></span></button>`).join('')
       || '<p class="hint">条件に合う形が見つかりませんでした。条件をゆるめてみてください。</p>';
   if (shapes.length > shown.length) $('shape-list').insertAdjacentHTML('beforeend', `<p class="hint" style="grid-column:1/-1">ほか ${shapes.length - shown.length} 件。条件で絞り込んでください。</p>`);
   $('shape-clear').disabled = ssel < 0;
@@ -484,14 +487,14 @@ function bind() {
     if (b.dataset.ro) return;
     update(() => { st.emph = st.emph.includes(i) ? st.emph.filter(x => x !== i) : [...st.emph, i]; }, true);
   });
-  $('emph-chord').addEventListener('click', () => update(() => { st.diat = -1; st.emph = [0, 2, 4].filter(i => i < scaleLen()); }, true));
-  $('emph-clear').addEventListener('click', () => update(() => { st.diat = -1; st.emph = []; }, true));
+  $('emph-chord').addEventListener('click', () => update(() => { st.diat = -1; st.emph = [0, 2, 4].filter(i => i < scaleLen()); }));
+  $('emph-clear').addEventListener('click', () => update(() => { st.diat = -1; st.emph = []; }));
   $('diat').addEventListener('click', e => {
     const b = e.target.closest('.deg-btn'); if (!b) return; const d = +b.dataset.d;
-    update(() => { st.diat = st.diat === d ? -1 : d; }, true);
+    update(() => { st.diat = st.diat === d ? -1 : d; });
     if (st.diat >= 0) { const c = diatonic(st.root, SCALES[st.scale].iv, d, st.seventh); playNotes(c.semis.map(s => 48 + c.root + s), 0.05, 1.2); }
   });
-  $('seventh').addEventListener('change', e => update(() => { st.seventh = e.target.checked; }, true));
+  $('seventh').addEventListener('change', e => update(() => { st.seventh = e.target.checked; }));
 
   // shapes
   document.querySelectorAll('.shape-tab').forEach(b => b.addEventListener('click', () => update(() => { st.shapeTab = b.dataset.tab; })));
