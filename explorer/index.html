@@ -150,14 +150,6 @@
       </div>
     </section>
 
-    <section class="panel" id="finder-panel">
-      <div class="panel-hd"><div class="panel-title">Chord Finder</div>
-        <div class="row"><button class="std small" id="pick-play">▶ 選んだ音を鳴らす</button><button class="std small" id="pick-clear">選択をクリア</button></div></div>
-      <div class="pick-notes" id="pick-notes"></div>
-      <div class="finder-results" id="finder-results"></div>
-      <p class="hint">「押して選ぶ」にして指板の音を選ぶと、何のコードになっているかを推測します。いちばん低い音をベースとして扱い、ルートが違う場合は分数コードで表示します。</p>
-    </section>
-
     <section class="panel">
       <div class="panel-hd"><div class="panel-title">Notes &amp; Intervals</div>
         <div class="row">
@@ -182,7 +174,7 @@
         <button class="shape-tab" data-tab="forms">コードフォーム</button>
         <button class="shape-tab" data-tab="sets">弦セット</button>
         <button class="shape-tab" data-tab="sweep">スウィープ</button>
-        <button class="shape-tab" data-tab="search">検索</button>
+        <button class="shape-tab" data-tab="search">検索（選んだ音から）</button>
       </div>
       <div class="vo-opts" id="opts-sets" style="margin-top:12px">
         <div class="field"><label for="sets-span">押さえる幅</label>
@@ -197,18 +189,15 @@
         <div class="toggle-row"><span class="toggle-label">ルートから始まる形だけ</span><label class="toggle-switch"><input type="checkbox" id="sw-root"><span class="toggle-slider"></span></label></div>
         <div class="toggle-row"><span class="toggle-label">開放弦を使う</span><label class="toggle-switch"><input type="checkbox" id="sw-open"><span class="toggle-slider"></span></label></div>
       </div>
-      <div class="vo-opts" id="opts-search" style="margin-top:12px">
-        <div class="field"><label for="vo-span">押さえる幅（フレット数）</label>
-          <select id="vo-span"><option value="3">3フレット以内</option><option value="4">4フレット以内</option><option value="5">5フレット以内</option><option value="6">6フレット以内</option></select></div>
-        <div class="field"><label for="vo-min">最低限鳴らす弦の数</label>
-          <select id="vo-min"><option value="2">2本</option><option value="3">3本</option><option value="4">4本</option><option value="5">5本</option><option value="6">6本</option></select></div>
-        <div class="toggle-row"><span class="toggle-label">ルートを最低音にする</span><label class="toggle-switch"><input type="checkbox" id="vo-root"><span class="toggle-slider"></span></label></div>
-        <div class="toggle-row"><span class="toggle-label">開放弦を使う</span><label class="toggle-switch"><input type="checkbox" id="vo-open"><span class="toggle-slider"></span></label></div>
-        <div class="toggle-row" id="vo-omit5-row"><span class="toggle-label">5度を省いてもよい</span><label class="toggle-switch"><input type="checkbox" id="vo-omit5"><span class="toggle-slider"></span></label></div>
+      <div id="opts-search" style="margin-top:12px">
+        <div class="panel-hd" style="margin-bottom:8px"><div class="sec-sub">選んだ音</div>
+          <div class="row"><button class="std small" id="pick-play">▶ 選んだ音を鳴らす</button><button class="std small" id="pick-clear">選択をクリア</button></div></div>
+        <div class="pick-notes" id="pick-notes"></div>
+        <div class="finder-results" id="finder-results"></div>
       </div>
       <div class="vo-list" id="shape-list"></div>
       <p class="hint" id="shape-hint"></p>
-      <p class="hint">各カードは、図（上が1弦、緑＝ルート）、コードトーン（1弦から順。スウィープは弾く順）、位置、TAB（低い弦から）の順です。押すと指板にコードトーンで表示して鳴らします。スケール表示のときは、ダイアトニックで選んだコードが対象になります。</p>
+      <p class="hint">各カードは、図（上が1弦、緑＝ルート）、コード名、コードトーン（1弦から順。スウィープは弾く順）、位置、TAB（低い弦から）の順です。押すと指板にコードトーンで表示して鳴らします。スケール表示のときは、ダイアトニックで選んだコードが対象になります。「検索」は、指板で選んだ音からコードを推測します。</p>
     </section>
 
     <p class="foot">設定はこのブラウザに自動保存されます。音名はキーに合わせて ♭・♯ を書き分けています。</p>

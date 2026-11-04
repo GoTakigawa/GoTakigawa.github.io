@@ -296,7 +296,7 @@ function renderMetrics(set, count) {
 
 // ── shapes: chord forms / string sets / sweeps / search ──
 function computeShapes() {
-  const c = shapeChord(); if (!c) return [];
+  const c = shapeChord(); if (!c || st.shapeTab === 'search') return [];
   const tun = tuning(), n = tun.length, F = st.frets, rootPc = pc(c.root), name = m => c.set.name(m);
   const fromFrets = (frets, title, meta) => {
     const cells = [], muted = [];
@@ -337,8 +337,7 @@ function computeShapes() {
         tab: sw.notes.map(x => `${n - x.s}弦${x.f}`).join(' '), play: sw.notes.map(x => x.m), strum: false };
     });
   }
-  const list = findVoicings(tun, c.pcs, rootPc, Math.min(F, 17), { ...st.vo, requireAll: true, minStrings: Math.min(st.vo.minStrings, n) });
-  return list.map(v => fromFrets(v.frets, 'ボイシング', `${v.low ? v.low + '〜' : '開放〜'}${v.high}f · ${v.strings}弦`));
+  return [];
 }
 // Chord symbol for a shape; when the lowest note is not the root it becomes a slash chord
 function chordNameWithBass(c, bassMidi) { return pc(bassMidi) === pc(c.root) ? c.sym : `${c.sym}/${c.cset.name(bassMidi)}`; }
@@ -368,23 +367,27 @@ function thumb(item, c) {
 
 function renderShapes() {
   const c = shapeChord();
-  $('shape-panel').hidden = !c;
-  if (!c) return;
+  // without a chord (single notes, 5/6/8-note scales) only the search tab works
+  const tab = c ? st.shapeTab : 'search', search = tab === 'search';
+  document.querySelectorAll('.shape-tab').forEach(b => { b.classList.toggle('on', b.dataset.tab === tab); b.disabled = !c && b.dataset.tab !== 'search'; });
+  $('opts-search').hidden = !search; $('shape-list').hidden = search; $('shape-clear').hidden = search;
+  $('opts-sweep').hidden = tab !== 'sweep'; $('opts-sets').hidden = tab !== 'sets';
+  if (search) {
+    $('shape-target').textContent = '指板で選んだ音';
+    $('shape-count').textContent = '';
+    $('shape-hint').textContent = '指板の上で音を押して選ぶと（もう一度押すと外れます）、何のコードになっているかを推測します。いちばん低い音をベースとして扱い、ルートと違う場合は分数コードで表示します。';
+    renderFinder();
+    return;
+  }
   if (!shapes) shapes = computeShapes();
-  document.querySelectorAll('.shape-tab').forEach(b => b.classList.toggle('on', b.dataset.tab === st.shapeTab));
   $('shape-target').textContent = c.label + '　構成音：' + c.cset.ivs.map(iv => `${c.cset.name(c.root + iv.semis)}(${iv.label === '1' ? 'R' : iv.label})`).join(' ') + (c.fromScale && st.diat < 0 ? '　※ダイアトニックで選んだコードに切り替わります' : '');
-  $('opts-search').hidden = st.shapeTab !== 'search'; $('opts-sweep').hidden = st.shapeTab !== 'sweep'; $('opts-sets').hidden = st.shapeTab !== 'sets';
-  $('vo-span').value = st.vo.span; $('vo-min').value = st.vo.minStrings;
-  $('vo-root').checked = st.vo.rootBass; $('vo-open').checked = st.vo.allowOpen; $('vo-omit5').checked = st.vo.omit5;
-  $('vo-omit5-row').hidden = c.pcs.length < 4;
   $('sets-span').value = st.vo.span; $('sets-open').checked = st.vo.allowOpen;
   $('sw-size').innerHTML = '<option value="0">すべて</option>' + [3, 4, 5, 6, 7, 8].filter(k => k <= st.strings).map(k => `<option value="${k}">${k}弦</option>`).join('');
   $('sw-size').value = st.sw.size; $('sw-span').value = st.sw.span; $('sw-root').checked = st.sw.rootStart; $('sw-open').checked = st.sw.allowOpen; $('sw-top').checked = st.sw.topOnly;
   const hints = {
     forms: '一般的なコードフォーム（E型・A型・D型・C型・G型など）を、いまのチューニングに置き直して並べています。7・8弦では上の6本で作ります。',
     sets: `隣り合う${Math.min(c.pcs.length > 4 ? 4 : c.pcs.length, st.strings)}本の弦に構成音を1つずつ置く形です（3和音ならトライアド、4和音ならドロップ系の形）。高音弦側から並べています。${c.pcs.length > 4 ? '5音以上のコードは、5度・9度・11度の順に省いて4音にしています。' : ''}`,
-    sweep: 'コードトーンを順番に1弦1〜2音ずつ上がっていくスウィープの形です。高音弦側の形から並べています。番号が弾く順番です。',
-    search: '隣り合う弦だけを使い、構成音がすべて入る押さえ方を条件で探します。'
+    sweep: 'コードトーンを順番に1弦1〜2音ずつ上がっていくスウィープの形です。高音弦側の形から並べています。番号が弾く順番です。'
   };
   $('shape-hint').textContent = hints[st.shapeTab];
   const noForm = st.shapeTab === 'forms' && (!c.id || !FORMS[c.id]);
@@ -400,9 +403,7 @@ function renderShapes() {
 
 // ── chord finder (picked notes) ──
 function renderFinder() {
-  const tun = tuning(), on = fbAction === 'pick' || picks.length;
-  $('finder-panel').hidden = !on;
-  if (!on) return;
+  const tun = tuning();
   const notes = picks.map(k => { const [s, f] = k.split(':').map(Number); return { s, f, m: tun[s] + f }; }).filter(x => x.s < tun.length).sort((a, b) => a.m - b.m);
   const res = identifyChord(notes.map(x => x.m));
   const spellFor = res.results[0] ? res.results[0].set : currentSet();
@@ -413,7 +414,7 @@ function renderFinder() {
   else if (res.kind === 'chord') html = res.results.length
     ? res.results.map((r, i) => {
         const seen = new Set(), uniq = notes.filter(x => { const k = pc(x.m); if (seen.has(k)) return false; seen.add(k); return true; });
-        return `<div class="fd-item ${i === 0 ? 'top' : ''}"><b>${r.name}</b><span>${uniq.map(x => `${r.set.name(x.m)}<small>${(r.set.intervalOf(x.m) || '?').replace(/^1$/, 'R')}</small>`).join(' ')}</span></div>`;
+        return `<div class="fd-item ${i === 0 ? 'top' : ''}"><b>${r.name}</b><span>${uniq.map(x => `${r.set.name(x.m)}<small>${(r.set.intervalOf(x.m) || '?').replace(/^1$/, 'R')}</small>`).join(' ')}</span><button class="std small fd-go" data-root="${r.root}" data-id="${r.id}">このコードの形を見る</button></div>`;
       }).join('')
     : '<p class="hint">登録しているコードの形には当てはまりませんでした。</p>';
   $('finder-results').innerHTML = html;
@@ -429,7 +430,6 @@ function render() {
   const count = renderFretboard();
   renderMetrics(set, count);
   renderShapes();
-  renderFinder();
   renderSeed();
 }
 
@@ -497,13 +497,18 @@ function bind() {
   $('seventh').addEventListener('change', e => update(() => { st.seventh = e.target.checked; }));
 
   // shapes
-  document.querySelectorAll('.shape-tab').forEach(b => b.addEventListener('click', () => update(() => { st.shapeTab = b.dataset.tab; })));
+  document.querySelectorAll('.shape-tab').forEach(b => b.addEventListener('click', () => {
+    const t = b.dataset.tab;
+    if (t === 'search') fbAction = 'pick'; else if (fbAction === 'pick') fbAction = 'play';
+    update(() => { st.shapeTab = t; });
+  }));
+  $('finder-results').addEventListener('click', e => {
+    const g = e.target.closest('.fd-go'); if (!g) return;
+    fbAction = 'play';
+    update(() => { st.mode = 'chord'; st.root = +g.dataset.root; st.chord = g.dataset.id; st.shapeTab = 'forms'; });
+    notify('そのコードの形を表示しました（選んだ音は残っています）');
+  });
   const vo = (k, v) => update(() => { st.vo[k] = v; });
-  $('vo-span').addEventListener('change', e => vo('span', +e.target.value));
-  $('vo-min').addEventListener('change', e => vo('minStrings', +e.target.value));
-  $('vo-root').addEventListener('change', e => vo('rootBass', e.target.checked));
-  $('vo-open').addEventListener('change', e => vo('allowOpen', e.target.checked));
-  $('vo-omit5').addEventListener('change', e => vo('omit5', e.target.checked));
   $('sets-span').addEventListener('change', e => vo('span', +e.target.value));
   $('sets-open').addEventListener('change', e => vo('allowOpen', e.target.checked));
   const sw = (k, v) => update(() => { st.sw[k] = v; });
@@ -522,7 +527,11 @@ function bind() {
 
   // hide controls
   document.querySelectorAll('.chip-act').forEach(b => b.addEventListener('click', () => { chipAction = b.dataset.act; render(); }));
-  document.querySelectorAll('.fb-act').forEach(b => b.addEventListener('click', () => { fbAction = b.dataset.act; render(); }));
+  document.querySelectorAll('.fb-act').forEach(b => b.addEventListener('click', () => {
+    fbAction = b.dataset.act;
+    if (fbAction === 'pick' && st.shapeTab !== 'search') { update(() => { st.shapeTab = 'search'; }); $('shape-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    else render();
+  }));
   $('pick-play').addEventListener('click', () => { const tun = tuning(); const ms = picks.map(k => { const [s, f] = k.split(':').map(Number); return tun[s] + f; }).sort((a, b) => a - b); playNotes(ms, 0.05, 1.4); });
   $('pick-clear').addEventListener('click', () => { picks = []; render(); });
   $('sw-top').addEventListener('change', e => update(() => { st.sw.topOnly = e.target.checked; }));
