@@ -1,5 +1,5 @@
 // ── Position logic: N-notes-per-string patterns and chord voicing search ──
-import { pc } from './theory.js?v=16';
+import { pc } from './theory.js?v=17';
 
 // Scale pattern: starting on degree `start` on the lowest string, take `nps`
 // consecutive scale notes per string going up. Returns Set of "string:fret".
@@ -94,7 +94,20 @@ export const FORMS = {
   m9:    [{ name: '5弦ルート', rs: 1, rel: [X,0,-2,0,0,X] }],
   maj9:  [{ name: '5弦ルート', rs: 1, rel: [X,0,-1,1,0,X] }],
   '7sus4': [{ name: '6弦ルート', rs: 0, rel: [0,2,0,2,0,0] }, { name: '5弦ルート', rs: 1, rel: [X,0,2,0,3,0] }],
-  '7s9': [{ name: '5弦ルート', rs: 1, rel: [X,0,-1,0,1,X] }]
+  '7s9': [{ name: '5弦ルート', rs: 1, rel: [X,0,-1,0,1,X] }],
+  dim:   [{ name: '6弦ルート', rs: 0, rel: [0,1,2,0,X,X] }, { name: '5弦ルート', rs: 1, rel: [X,0,1,2,1,X] }, { name: '4弦ルート', rs: 2, rel: [X,X,0,1,3,1] }],
+  aug:   [{ name: 'C型', rs: 1, rel: [X,0,-1,-2,-2,X] }, { name: 'G型', rs: 0, rel: [0,-1,-2,-3,-3,0] }, { name: 'D型', rs: 2, rel: [X,X,0,3,3,2] }],
+  mMaj7: [{ name: 'Em(maj7)型', rs: 0, rel: [0,2,1,0,0,0] }, { name: 'Am(maj7)型', rs: 1, rel: [X,0,2,1,1,0] }, { name: 'Dm(maj7)型', rs: 2, rel: [X,X,0,2,2,1] }],
+  aug7:  [{ name: '6弦ルート', rs: 0, rel: [0,X,0,1,1,0] }, { name: '5弦ルート', rs: 1, rel: [X,0,3,0,2,1] }],
+  '7b5': [{ name: '6弦ルート', rs: 0, rel: [0,1,0,1,X,X] }, { name: '5弦ルート', rs: 1, rel: [X,0,1,0,2,X] }],
+  '7b9': [{ name: '6弦ルート', rs: 0, rel: [0,X,0,1,0,1] }, { name: '5弦ルート', rs: 1, rel: [X,0,-1,0,-1,X] }],
+  '13':  [{ name: '6弦ルート', rs: 0, rel: [0,X,0,1,2,X] }, { name: '5弦ルート', rs: 1, rel: [X,0,X,0,2,2] }],
+  '69':  [{ name: '5弦ルート', rs: 1, rel: [X,0,-1,-1,0,0] }],
+  m11:   [{ name: '6弦ルート', rs: 0, rel: [0,0,0,0,0,2] }, { name: '5弦ルート', rs: 1, rel: [X,0,0,0,1,0] }],
+  madd9: [{ name: 'C型', rs: 1, rel: [X,0,-2,-3,0,X] }, { name: '5弦ルート', rs: 1, rel: [X,0,2,4,1,0] }],
+  add11: [{ name: 'C型', rs: 1, rel: [X,0,-1,-3,-2,-2] }, { name: '5弦ルート', rs: 1, rel: [X,0,0,2,2,0] }],
+  maj7s11: [{ name: '6弦ルート', rs: 0, rel: [0,X,1,1,-1,-1] }, { name: '5弦ルート', rs: 1, rel: [X,0,-1,1,X,-1] }],
+  '7s11': [{ name: '6弦ルート', rs: 0, rel: [0,X,0,1,-1,X] }, { name: '5弦ルート', rs: 1, rel: [X,0,-1,0,X,-1] }]
 };
 const STD = [40,45,50,55,59,64];
 
@@ -118,8 +131,12 @@ export function chordForms(tuning, chordId, rootPc, frets, chordPcs) {
       if (bad) continue;
       const used = fr.map((ff, s) => ff === null ? null : tuning[s] + ff).filter(m => m !== null);
       if (used.length < 3) continue;
-      const have = new Set(used.map(pc));
-      if (chordPcs.some(p => !have.has(p) && pc(p - rootPc) !== 7)) continue;
+      const have = new Set(used.map(m => pc(m - rootPc)));
+      // the 5th may be left out; with five or more tones, the 9th (then 11th) too
+      let need = [...new Set(chordPcs.map(p => pc(p - rootPc)))];
+      for (const drop of [7, 2, 5]) if (need.length > 4 && need.includes(drop)) need = need.filter(x => x !== drop);
+      if (need.length === chordPcs.length) need = need.filter(x => x !== 7 || chordPcs.length < 4);
+      if (need.some(x => !have.has(x))) continue;
       const fretted = fr.filter(ff => ff !== null && ff > 0);
       const span = fretted.length ? Math.max(...fretted) - Math.min(...fretted) : 0;
       if (span > 4) continue;
@@ -167,4 +184,48 @@ export function sweepShapes(tuning, chordPcs, rootPc, frets, opts) {
   return out.filter(x => x.notes[x.notes.length - 1].s === x.hi)
     .filter((x, i, arr) => !arr.some((y, j) => j !== i && y.notes.length > x.notes.length && x.notes.every((nn, k) => y.notes[k] && y.notes[k].s === nn.s && y.notes[k].f === nn.f) && y.hi === x.hi && y.lo === x.lo))
     .sort((a, b) => b.size - a.size || a.low - b.low);
+}
+
+
+// ── Forms for any chord: start from the common major / minor / 7th shapes and
+// move each note to the nearest chord tone (at most two frets), keeping shapes
+// that still contain the chord and stay playable. Used when no form is registered.
+const BASES = ['maj', 'm', '7', 'maj7', 'm7', 'sus4', 'sus2'];
+export function derivedForms(tuning, chordPcs, rootPc, frets) {
+  if (tuning.length < 6) return [];
+  const n = tuning.length, base = n - 6, out = [], seen = new Set();
+  const rel = [...new Set(chordPcs.map(p => pc(p - rootPc)))];
+  // with many tones, the 5th (then 9th, 11th) may be left out
+  let need = rel.slice();
+  for (const drop of [7, 2, 5]) if (need.length > 4 && need.includes(drop)) need = need.filter(x => x !== drop);
+  const nearest = o => {
+    let best = null;
+    for (const t of rel) for (const k of [-12, 0, 12]) { const cand = t + k + 12 * Math.floor(o / 12), d = cand - o; if (Math.abs(d) <= 2 && (!best || Math.abs(d) < Math.abs(best.d) || (Math.abs(d) === Math.abs(best.d) && d < best.d))) best = { o: cand, d }; }
+    return best;
+  };
+  BASES.forEach(bid => (FORMS[bid] || []).forEach(form => {
+    const offs = form.rel.map((r, s) => r === null ? null : STD[s] + r - STD[form.rs]);
+    const moved = offs.map(o => { if (o === null) return null; if (rel.includes(pc(o))) return o; const nb = nearest(o); return nb ? nb.o : null; });
+    if (moved[form.rs] === null || pc(moved[form.rs]) !== 0) return;
+    const rsReal = base + form.rs;
+    for (let f = 0; f <= frets; f++) {
+      const rootPitch = tuning[rsReal] + f; if (pc(rootPitch) !== pc(rootPc)) continue;
+      const fr = Array(n).fill(null); let bad = false;
+      moved.forEach((o, s) => {
+        if (o === null) return;
+        const ff = rootPitch + o - tuning[base + s];
+        if (ff >= 0 && ff <= frets) fr[base + s] = ff; else if (s === 0 && form.rs !== 0) fr[base + s] = null; else bad = true;
+      });
+      if (bad) continue;
+      const used = fr.map((ff, s) => ff === null ? null : tuning[s] + ff).filter(m => m !== null);
+      if (used.length < 3) continue;
+      const have = new Set(used.map(m => pc(m - rootPc)));
+      if (need.some(x => !have.has(x))) continue;
+      const fretted = fr.filter(ff => ff !== null && ff > 0);
+      if (fretted.length && Math.max(...fretted) - Math.min(...fretted) > 4) continue;
+      const k = fr.join(','); if (seen.has(k)) continue; seen.add(k);
+      out.push({ name: form.name.replace(/^(E|A|D|C|G)(m|7|maj7|m7|sus4|sus2)?型$/, '$1型') + '（変形）', frets: fr, low: fretted.length ? Math.min(...fretted) : 0, high: fretted.length ? Math.max(...fretted) : 0 });
+    }
+  }));
+  return out.sort((a, b) => a.low - b.low || a.name.localeCompare(b.name));
 }

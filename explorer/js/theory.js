@@ -78,6 +78,10 @@ export const CHORDS = {
   '7b5':    { name: '7♭5',         iv: ['1','3','b5','b7'] },
   aug7:     { name: 'aug7',        iv: ['1','3','#5','b7'] },
   add11:    { name: 'add11',       iv: ['1','3','5','11'] },
+  majb5:    { name: '(♭5)',        iv: ['1','3','b5'] },
+  sus2b5:   { name: 'sus2(♭5)',    iv: ['1','2','b5'] },
+  maj7s5:   { name: 'maj7♯5',      iv: ['1','3','#5','7'] },
+  '6sus2b5':{ name: '6sus2(♭5)',   iv: ['1','2','b5','6'] },
   quartal:  { name: '4度堆積',      iv: ['1','4','b7'] }
 };
 export const chordSymbol = id => ({ maj: '', '5': '5', b5: '5(♭5)' })[id] ?? CHORDS[id].name;
