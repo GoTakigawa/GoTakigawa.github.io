@@ -136,7 +136,7 @@
       <div class="panel-hd">
         <div class="panel-title">Fretboard<b id="fb-title"></b></div>
         <div class="row">
-          <div class="seg small-seg" role="group" aria-label="指板を押したときの動作"><button class="fb-act" data-act="play">押すと鳴らす</button><button class="fb-act" data-act="hide">押すと隠す</button></div>
+          <div class="seg small-seg" role="group" aria-label="指板を押したときの動作"><button class="fb-act" data-act="play">押すと鳴らす</button><button class="fb-act" data-act="hide">押すと隠す</button><button class="fb-act" data-act="pick">押して選ぶ</button></div>
           <button class="std small" id="play-set">▶ 表示中の音を鳴らす</button>
         </div>
       </div>
@@ -146,7 +146,16 @@
         <span class="lg"><span class="dot" style="background:#8c4dff"></span>強調している音（コードの構成音など）</span>
         <span class="lg"><span class="dot" style="border:1.5px solid #38bdf8"></span>スケール・対象の音</span>
         <span class="lg"><span class="dot" style="border:1.5px dashed #555"></span>隠している位置（隠す操作中だけ表示）</span>
+        <span class="lg"><span class="dot" style="background:#f5f5f5"></span>コード判定のために選んだ音</span>
       </div>
+    </section>
+
+    <section class="panel" id="finder-panel">
+      <div class="panel-hd"><div class="panel-title">Chord Finder</div>
+        <div class="row"><button class="std small" id="pick-play">▶ 選んだ音を鳴らす</button><button class="std small" id="pick-clear">選択をクリア</button></div></div>
+      <div class="pick-notes" id="pick-notes"></div>
+      <div class="finder-results" id="finder-results"></div>
+      <p class="hint">「押して選ぶ」にして指板の音を選ぶと、何のコードになっているかを推測します。いちばん低い音をベースとして扱い、ルートが違う場合は分数コードで表示します。</p>
     </section>
 
     <section class="panel">
@@ -184,6 +193,7 @@
         <div class="field"><label for="sw-size">使う弦の本数</label><select id="sw-size"></select></div>
         <div class="field"><label for="sw-span">押さえる幅</label>
           <select id="sw-span"><option value="4">4フレット以内</option><option value="5">5フレット以内</option><option value="6">6フレット以内</option><option value="7">7フレット以内</option></select></div>
+        <div class="toggle-row"><span class="toggle-label">1弦まで上がる形だけ</span><label class="toggle-switch"><input type="checkbox" id="sw-top"><span class="toggle-slider"></span></label></div>
         <div class="toggle-row"><span class="toggle-label">ルートから始まる形だけ</span><label class="toggle-switch"><input type="checkbox" id="sw-root"><span class="toggle-slider"></span></label></div>
         <div class="toggle-row"><span class="toggle-label">開放弦を使う</span><label class="toggle-switch"><input type="checkbox" id="sw-open"><span class="toggle-slider"></span></label></div>
       </div>
@@ -198,7 +208,7 @@
       </div>
       <div class="vo-list" id="shape-list"></div>
       <p class="hint" id="shape-hint"></p>
-      <p class="hint">TAB は低い弦から高い弦の順（x はミュート）。押すと指板に表示して鳴らします。スケール表示のときは、ダイアトニックで選んだコードが対象になります。</p>
+      <p class="hint">各カードは、図（上が1弦、緑＝ルート）、コードトーン（1弦から順。スウィープは弾く順）、位置、TAB（低い弦から）の順です。押すと指板にコードトーンで表示して鳴らします。スケール表示のときは、ダイアトニックで選んだコードが対象になります。</p>
     </section>
 
     <p class="foot">設定はこのブラウザに自動保存されます。音名はキーに合わせて ♭・♯ を書き分けています。</p>

@@ -1,4 +1,4 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol } from './theory.js';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord } from './theory.js';
 import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js';
 import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS } from './positions.js';
 import { PianoEngine } from './audio.js';
@@ -16,10 +16,10 @@ const DEFAULT = {
   strOn: [], label: 'name',
   vo: { span: 4, minStrings: 3, rootBass: false, allowOpen: true, omit5: false },
   hideIv: [], hideCells: [],
-  shapeTab: 'forms', sw: { size: 0, span: 5, rootStart: false, allowOpen: false }
+  shapeTab: 'forms', sw: { size: 0, span: 5, rootStart: false, allowOpen: false, topOnly: true }
 };
 let st = structuredClone(DEFAULT);
-let shapes = null, ssel = -1, statusTimer = null, chipAction = 'emph', fbAction = 'play';
+let shapes = null, ssel = -1, statusTimer = null, chipAction = 'emph', fbAction = 'play', picks = [];
 
 // ── state ──
 function sanitize(s) {
@@ -54,7 +54,7 @@ function sanitize(s) {
   if (s.sw && typeof s.sw === 'object') {
     d.sw.size = [0, 3, 4, 5, 6, 7, 8].includes(s.sw.size) ? s.sw.size : 0;
     d.sw.span = int(s.sw.span, 4, 7, 5);
-    d.sw.rootStart = !!s.sw.rootStart; d.sw.allowOpen = !!s.sw.allowOpen;
+    d.sw.rootStart = !!s.sw.rootStart; d.sw.allowOpen = !!s.sw.allowOpen; d.sw.topOnly = s.sw.topOnly !== false;
   }
   return d;
 }
@@ -86,16 +86,20 @@ function chordIdFor(semis) {
   return null;
 }
 function shapeChord() {
-  if (st.mode === 'chord') { const set = makeSet(st.root, CHORDS[st.chord].iv); return { root: st.root, id: st.chord, pcs: set.pcs, set, label: set.name(st.root) + chordSymbol(st.chord) }; }
+  if (st.mode === 'chord') { const set = makeSet(st.root, CHORDS[st.chord].iv); return { root: st.root, id: st.chord, pcs: set.pcs, set, cset: set, label: set.name(st.root) + chordSymbol(st.chord) }; }
   if (st.mode === 'scale' && scaleLen() === 7) {
     const d = st.diat >= 0 ? st.diat : 0, c = diatonic(st.root, SCALES[st.scale].iv, d, st.seventh), id = chordIdFor(c.semis);
     const scaleSet = makeSet(st.root, SCALES[st.scale].iv);
-    return { root: c.root, id, pcs: c.pcs, set: scaleSet, label: `${romanOf(SCALES[st.scale].iv, d)}（${scaleSet.name(c.root)}${id ? chordSymbol(id) : ''}）`, fromScale: true };
+    const DEF = ['1','b2','2','b3','3','4','b5','5','b6','6','b7','7'];
+    const cset = makeSet(c.root, id ? CHORDS[id].iv : c.semis.map(x => DEF[pc(x)]));
+    return { root: c.root, id, pcs: c.pcs, set: scaleSet, cset, label: `${romanOf(SCALES[st.scale].iv, d)}（${scaleSet.name(c.root)}${id ? chordSymbol(id) : ''}）`, fromScale: true };
   }
   return null;
 }
 const isHiddenIv = (set, p) => { const iv = set.intervalOf(p); return !!iv && st.hideIv.includes(set.info(p).iv.name); };
 const isHiddenCell = (s, f) => st.hideCells.includes(s + ':' + f);
+// chord tone label (R, 3, ♭7 ...) of a pitch against the shape chord
+const toneOf = (c, m) => { const iv = c.cset.intervalOf(m); return iv === '1' ? 'R' : iv || '?'; };
 
 // Which pitch classes get the filled (purple) emphasis
 function emphasisPcs(set) {
@@ -216,7 +220,8 @@ function titleFor(set) {
 function renderFretboard() {
   const set = currentSet(), tun = tuning(), n = tun.length, F = st.frets;
   const emph = emphasisPcs(set), vis = visibility(set), sh = selectedShape();
-  const order = {}; if (sh) sh.cells.forEach(c => { if (c.order) order[c.s + ':' + c.f] = c.order; });
+  const order = {}, inShape = new Set(); if (sh) sh.cells.forEach(c => { inShape.add(c.s + ':' + c.f); if (c.order) order[c.s + ':' + c.f] = c.order; });
+  const shC = sh ? shapeChord() : null;
   const W = 1180, padL = 40, padR = 14, top = 22, gap = 28, H = top * 2 + gap * (n - 1);
   const len = (W - padL - padR) / (1 - Math.pow(2, -F / 12));
   const raw = f => padL + len * (1 - Math.pow(2, -f / 12));
@@ -254,7 +259,7 @@ function renderFretboard() {
       if (visible) count++;
       const isRoot = st.mode !== 'notes' && p === pc(sh && st.mode === 'scale' ? shapeChord().root : st.root), isEm = emph.includes(p);
       const op = visible ? 1 : 0.16;
-      const lbl = st.label === 'none' ? '' : st.label === 'interval' ? set.intervalOf(p) : st.label === 'degree' ? String(set.info(p).index + 1) : set.name(p);
+      const lbl = st.label === 'none' ? '' : shC && inShape.has(s + ':' + f) ? toneOf(shC, m) : st.label === 'interval' ? set.intervalOf(p) : st.label === 'degree' ? String(set.info(p).index + 1) : set.name(p);
       const fs = lbl.length > 2 ? 8 : 10;
       if (isRoot) dots += `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="10.5" fill="#86efac"/><text x="${x}" y="${y + 3.6}" fill="#0a0a0a" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Barlow">${lbl}</text></g>`;
       else if (isEm) dots += `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="10.5" fill="#8c4dff"/><text x="${x}" y="${y + 3.6}" fill="#0a0a0a" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Barlow">${lbl}</text></g>`;
@@ -263,6 +268,12 @@ function renderFretboard() {
       if (visible && ord) dots += `<circle cx="${x + 10}" cy="${y - 10}" r="6.5" fill="#e8e8e8"/><text x="${x + 10}" y="${y - 7.3}" fill="#0a0a0a" font-size="8" font-weight="700" text-anchor="middle" font-family="Barlow">${ord}</text>`;
     }
   }
+  // picked notes for the chord finder (any pitch, drawn on top)
+  picks.forEach(k => {
+    const [s, f] = k.split(':').map(Number); if (s >= n || f > F) return;
+    const x = cx(f), y = top + gap * (n - 1 - s);
+    dots += `<circle cx="${x}" cy="${y}" r="11.5" fill="#f5f5f5" stroke="#fff" stroke-width="1.5"/><text x="${x}" y="${y + 3.6}" fill="#0a0a0a" font-size="9" font-weight="700" text-anchor="middle" font-family="Barlow">${set.name(tun[s] + f)}</text>`;
+  });
   if (sh) sh.muted.forEach(s => { const y = top + gap * (n - 1 - s); dots += `<text x="${X(padL - 13)}" y="${y + 4}" fill="#f87171" font-size="12" text-anchor="middle" font-family="Barlow" font-weight="700">×</text>`; });
   svg += dots + hits + '</svg>';
   $('fretboard').innerHTML = svg;
@@ -289,10 +300,12 @@ function computeShapes() {
   const fromFrets = (frets, title, meta) => {
     const cells = [], muted = [];
     frets.forEach((f, s) => f === null ? muted.push(s) : cells.push({ s, f }));
-    return { title, meta, cells, muted, tab: frets.map(f => f === null ? 'x' : f).join(' '), play: cells.map(x => tun[x.s] + x.f), strum: true };
+    // chord tones written high string → low string to match the diagram (1st string on top)
+    const tones = frets.map((f, s) => f === null ? '×' : toneOf(c, tun[s] + f)).reverse().join(' ');
+    return { title, meta, cells, muted, tones, tab: frets.map(f => f === null ? 'x' : f).join(' '), play: cells.map(x => tun[x.s] + x.f), strum: true };
   };
   if (st.shapeTab === 'forms') {
-    return chordForms(tun, c.id, rootPc, F, c.pcs).map(v => fromFrets(v.frets, v.name, `${v.low ? v.low + 'f〜' + v.high + 'f' : '開放'} · ${v.name}`));
+    return chordForms(tun, c.id, rootPc, F, c.pcs).map(v => fromFrets(v.frets, v.name, `${v.name} · ${v.low ? v.low + '〜' + v.high + 'f' : '開放'}`));
   }
   if (st.shapeTab === 'sets') {
     // more than four tones: drop the 5th, then 9th, then 11th so the shape fits four strings
@@ -303,22 +316,52 @@ function computeShapes() {
     }
     const k = Math.min(need.length, n);
     const list = findVoicings(tun, need, rootPc, Math.min(F, 19), { span: st.vo.span, minStrings: k, maxStrings: k, requireAll: true, allowOpen: st.vo.allowOpen, need, limit: 300 });
-    return list.map(v => { const bassS = v.frets.findIndex(f => f !== null), bass = tun[bassS] + v.frets[bassS], top = v.frets.map((f, s) => f === null ? null : s).filter(x => x !== null);
-      const strs = `${n - top[top.length - 1]}〜${n - top[0]}弦`;
-      return fromFrets(v.frets, `${strs}・ベース ${name(bass)}`, `${strs} · ${v.low || 0}f〜 · ベース ${name(bass)}`); });
+    // high string sets first
+    list.sort((x, y) => Math.max(...y.frets.map((f, s) => f === null ? -1 : s)) - Math.max(...x.frets.map((f, s) => f === null ? -1 : s)) || x.low - y.low);
+    return list.map(v => { const used = v.frets.map((f, s) => f === null ? null : s).filter(x => x !== null);
+      const strs = `${n - used[used.length - 1]}〜${n - used[0]}弦`;
+      return fromFrets(v.frets, strs, `${strs} · ${v.low || 0}〜${v.high}f`); });
   }
   if (st.shapeTab === 'sweep') {
     const sizes = st.sw.size ? [st.sw.size] : [8, 7, 6, 5, 4, 3];
-    return sweepShapes(tun, c.pcs, rootPc, Math.min(F, 24), { span: st.sw.span, sizes, rootStart: st.sw.rootStart, allowOpen: st.sw.allowOpen }).map(sw => {
+    let list = sweepShapes(tun, c.pcs, rootPc, Math.min(F, 24), { span: st.sw.span, sizes, rootStart: st.sw.rootStart, allowOpen: st.sw.allowOpen });
+    if (st.sw.topOnly) list = list.filter(sw => sw.hi === n - 1);
+    // treble side first: sets ending nearer the 1st string, then fewer strings, then lower on the neck
+    list.sort((x, y) => y.hi - x.hi || y.lo - x.lo || x.low - y.low);
+    return list.map(sw => {
       const cells = sw.notes.map((x, i) => ({ s: x.s, f: x.f, order: i + 1 }));
-      const tab = sw.notes.map(x => `${n - x.s}弦${x.f}`).join(' ');
-      return { title: `${sw.size}弦スウィープ（${name(sw.notes[0].m)} から）`, meta: `${sw.size}弦 · ${sw.low}f〜${sw.high}f · ${name(sw.notes[0].m)} から`, cells, muted: [], tab, play: sw.notes.map(x => x.m), strum: false };
+      const tones = sw.notes.map(x => toneOf(c, x.m)).join(' → ');
+      const strs = `${n - sw.hi}〜${n - sw.lo}弦`;
+      return { title: `${sw.size}弦スウィープ（${strs}）`, meta: `${strs} · ${sw.low}〜${sw.high}f · ${toneOf(c, sw.notes[0].m)} から`, cells, muted: [], tones,
+        tab: sw.notes.map(x => `${n - x.s}弦${x.f}`).join(' '), play: sw.notes.map(x => x.m), strum: false };
     });
   }
   const list = findVoicings(tun, c.pcs, rootPc, Math.min(F, 17), { ...st.vo, requireAll: true, minStrings: Math.min(st.vo.minStrings, n) });
-  return list.map(v => { const bassS = v.frets.findIndex(f => f !== null); return fromFrets(v.frets, 'ボイシング', `${v.low ? v.low + 'f〜' : '開放〜'}${v.high}f · ${v.strings}弦 · ベース ${name(tun[bassS] + v.frets[bassS])}`); });
+  return list.map(v => fromFrets(v.frets, 'ボイシング', `${v.low ? v.low + '〜' : '開放〜'}${v.high}f · ${v.strings}弦`));
 }
 function selectedShape() { return shapes && ssel >= 0 ? shapes[ssel] || null : null; }
+
+// Small diagram of a shape: 1st string on top, a few frets around the shape
+function thumb(item, c) {
+  const tun = tuning(), n = tun.length;
+  const fr = item.cells.map(x => x.f).filter(f => f > 0);
+  const lo = fr.length ? Math.max(1, Math.min(...fr)) : 1, hi = Math.max(lo + 3, fr.length ? Math.max(...fr) : 4);
+  const cols = hi - lo + 1, W = 18 + cols * 22 + 6, gap = 9, top = 8, H = top * 2 + gap * (n - 1) + 10;
+  const x0 = 18, colX = f => x0 + (f - lo) * 22 + 11, Y = s => top + gap * (n - 1 - s);
+  let g = `<svg class="thumb" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">`;
+  for (let k = 0; k <= cols; k++) g += `<line x1="${x0 + k * 22}" y1="${top - 3}" x2="${x0 + k * 22}" y2="${top + gap * (n - 1) + 3}" stroke="${k === 0 && lo === 1 ? '#bbb' : '#333'}" stroke-width="${k === 0 && lo === 1 ? 2.5 : 1}"/>`;
+  for (let s = 0; s < n; s++) g += `<line x1="${x0}" y1="${Y(s)}" x2="${x0 + cols * 22}" y2="${Y(s)}" stroke="#555" stroke-width="${(0.5 + (n - 1 - s) * 0.18).toFixed(2)}"/>`;
+  item.muted.forEach(s => g += `<text x="9" y="${Y(s) + 3}" fill="#f87171" font-size="8" text-anchor="middle" font-family="Barlow" font-weight="700">×</text>`);
+  item.cells.forEach(cell => {
+    const m = tun[cell.s] + cell.f, isR = pc(m) === pc(c.root);
+    const x = cell.f === 0 ? 9 : colX(cell.f), y = Y(cell.s);
+    if (cell.f === 0) g += `<circle cx="${x}" cy="${y}" r="3.6" fill="none" stroke="${isR ? '#86efac' : '#8c4dff'}" stroke-width="1.4"/>`;
+    else g += `<circle cx="${x}" cy="${y}" r="4.2" fill="${isR ? '#86efac' : '#8c4dff'}"/>`;
+    if (cell.order) g += `<text x="${x}" y="${y + 2.4}" fill="#0a0a0a" font-size="6" font-weight="700" text-anchor="middle" font-family="Barlow">${cell.order}</text>`;
+  });
+  g += `<text x="${x0 + 2}" y="${H - 1}" fill="#777" font-size="8" font-family="Barlow">${lo}f</text></svg>`;
+  return g;
+}
 
 function renderShapes() {
   const c = shapeChord();
@@ -326,28 +369,52 @@ function renderShapes() {
   if (!c) return;
   if (!shapes) shapes = computeShapes();
   document.querySelectorAll('.shape-tab').forEach(b => b.classList.toggle('on', b.dataset.tab === st.shapeTab));
-  $('shape-target').textContent = c.label + (c.fromScale && st.diat < 0 ? ' ※ダイアトニックで選んだコードに切り替わります' : '');
+  $('shape-target').textContent = c.label + '　構成音：' + c.cset.ivs.map(iv => `${c.cset.name(c.root + iv.semis)}(${iv.label === '1' ? 'R' : iv.label})`).join(' ') + (c.fromScale && st.diat < 0 ? '　※ダイアトニックで選んだコードに切り替わります' : '');
   $('opts-search').hidden = st.shapeTab !== 'search'; $('opts-sweep').hidden = st.shapeTab !== 'sweep'; $('opts-sets').hidden = st.shapeTab !== 'sets';
   $('vo-span').value = st.vo.span; $('vo-min').value = st.vo.minStrings;
   $('vo-root').checked = st.vo.rootBass; $('vo-open').checked = st.vo.allowOpen; $('vo-omit5').checked = st.vo.omit5;
   $('vo-omit5-row').hidden = c.pcs.length < 4;
   $('sets-span').value = st.vo.span; $('sets-open').checked = st.vo.allowOpen;
   $('sw-size').innerHTML = '<option value="0">すべて</option>' + [3, 4, 5, 6, 7, 8].filter(k => k <= st.strings).map(k => `<option value="${k}">${k}弦</option>`).join('');
-  $('sw-size').value = st.sw.size; $('sw-span').value = st.sw.span; $('sw-root').checked = st.sw.rootStart; $('sw-open').checked = st.sw.allowOpen;
+  $('sw-size').value = st.sw.size; $('sw-span').value = st.sw.span; $('sw-root').checked = st.sw.rootStart; $('sw-open').checked = st.sw.allowOpen; $('sw-top').checked = st.sw.topOnly;
   const hints = {
     forms: '一般的なコードフォーム（E型・A型・D型・C型・G型など）を、いまのチューニングに置き直して並べています。7・8弦では上の6本で作ります。',
-    sets: `隣り合う${Math.min(c.pcs.length > 4 ? 4 : c.pcs.length, st.strings)}本の弦に構成音を1つずつ置く形です（3和音ならトライアド、4和音ならドロップ系の形）。${c.pcs.length > 4 ? '5音以上のコードは、5度・9度・11度の順に省いて4音にしています。' : ''}`,
-    sweep: 'コードトーンを順番に1弦1〜2音ずつ上がっていくスウィープの形です。白い番号が弾く順番です。',
+    sets: `隣り合う${Math.min(c.pcs.length > 4 ? 4 : c.pcs.length, st.strings)}本の弦に構成音を1つずつ置く形です（3和音ならトライアド、4和音ならドロップ系の形）。高音弦側から並べています。${c.pcs.length > 4 ? '5音以上のコードは、5度・9度・11度の順に省いて4音にしています。' : ''}`,
+    sweep: 'コードトーンを順番に1弦1〜2音ずつ上がっていくスウィープの形です。高音弦側の形から並べています。番号が弾く順番です。',
     search: '隣り合う弦だけを使い、構成音がすべて入る押さえ方を条件で探します。'
   };
   $('shape-hint').textContent = hints[st.shapeTab];
   const noForm = st.shapeTab === 'forms' && (!c.id || !FORMS[c.id]);
   $('shape-count').textContent = noForm ? '' : shapes.length >= 300 ? '300件以上' : `${shapes.length}件`;
+  const shown = shapes.slice(0, 120);
   $('shape-list').innerHTML = noForm
     ? '<p class="hint">このコードの定番フォームはまだ登録していません。「弦セット」や「検索」を使ってください。</p>'
-    : shapes.map((v, i) => `<button class="vo-item ${i === ssel ? 'on' : ''}" data-i="${i}"><span class="vo-tab">${v.tab}</span><span class="vo-meta">${v.meta}</span></button>`).join('')
+    : shown.map((v, i) => `<button class="vo-item ${i === ssel ? 'on' : ''}" data-i="${i}">${thumb(v, c)}<span class="vo-body"><span class="vo-tones">${v.tones}</span><span class="vo-meta">${v.meta}</span><span class="vo-tab">${v.tab}</span></span></button>`).join('')
       || '<p class="hint">条件に合う形が見つかりませんでした。条件をゆるめてみてください。</p>';
+  if (shapes.length > shown.length) $('shape-list').insertAdjacentHTML('beforeend', `<p class="hint" style="grid-column:1/-1">ほか ${shapes.length - shown.length} 件。条件で絞り込んでください。</p>`);
   $('shape-clear').disabled = ssel < 0;
+}
+
+// ── chord finder (picked notes) ──
+function renderFinder() {
+  const tun = tuning(), on = fbAction === 'pick' || picks.length;
+  $('finder-panel').hidden = !on;
+  if (!on) return;
+  const notes = picks.map(k => { const [s, f] = k.split(':').map(Number); return { s, f, m: tun[s] + f }; }).filter(x => x.s < tun.length).sort((a, b) => a.m - b.m);
+  const res = identifyChord(notes.map(x => x.m));
+  const spellFor = res.results[0] ? res.results[0].set : currentSet();
+  $('pick-notes').innerHTML = notes.map(x => `<span class="pick-note">${spellFor.name(x.m)}<small>${tun.length - x.s}弦 ${x.f}f</small></span>`).join('') || '<span class="hint">指板の上で音を押して選んでください（もう一度押すと外れます）。</span>';
+  let html = '';
+  if (res.kind === 'single') html = '<p class="hint">1音だけです。もう1音以上選ぶとコードを推測します。</p>';
+  else if (res.kind === 'dyad') html = `<p class="hint">2音の音程：<span>${res.interval}</span>${res.results.length ? '（' + res.results.map(r => r.name).join(' / ') + '）' : ''}</p>`;
+  else if (res.kind === 'chord') html = res.results.length
+    ? res.results.map((r, i) => {
+        const seen = new Set(), uniq = notes.filter(x => { const k = pc(x.m); if (seen.has(k)) return false; seen.add(k); return true; });
+        return `<div class="fd-item ${i === 0 ? 'top' : ''}"><b>${r.name}</b><span>${uniq.map(x => `${r.set.name(x.m)}<small>${(r.set.intervalOf(x.m) || '?').replace(/^1$/, 'R')}</small>`).join(' ')}</span></div>`;
+      }).join('')
+    : '<p class="hint">登録しているコードの形には当てはまりませんでした。</p>';
+  $('finder-results').innerHTML = html;
+  $('pick-play').disabled = !notes.length; $('pick-clear').disabled = !notes.length;
 }
 
 async function renderSeed() { try { $('seed-display').textContent = await encodeSeed(st); } catch (e) {} }
@@ -359,6 +426,7 @@ function render() {
   const count = renderFretboard();
   renderMetrics(set, count);
   renderShapes();
+  renderFinder();
   renderSeed();
 }
 
@@ -383,7 +451,7 @@ function bind() {
   $('chord').innerHTML = Object.entries(CHORDS).map(([id, c]) => `<option value="${id}">${c.name}</option>`).join('');
   $('strings').innerHTML = STRING_COUNTS.map(n => `<option value="${n}">${n}弦${n <= 5 ? '（ベース）' : ''}</option>`).join('');
 
-  $('strings').addEventListener('change', e => update(() => { st.strings = +e.target.value; st.tuning = TUNINGS[st.strings][0].id; st.custom = TUNINGS[st.strings][0].notes.slice(); st.strOn = Array(st.strings).fill(true); st.hideCells = []; }));
+  $('strings').addEventListener('change', e => update(() => { st.strings = +e.target.value; st.tuning = TUNINGS[st.strings][0].id; st.custom = TUNINGS[st.strings][0].notes.slice(); st.strOn = Array(st.strings).fill(true); st.hideCells = []; picks = []; }));
   $('tuning').addEventListener('change', e => update(() => { if (e.target.value === 'custom' && st.tuning !== 'custom') st.custom = tuning().slice(); st.tuning = e.target.value; }));
   $('custom-tuning').addEventListener('change', e => { const s = e.target.dataset.s; if (s === undefined) return; update(() => { st.custom[+s] = +e.target.value; }); });
   $('frets').addEventListener('change', e => update(() => { st.frets = +e.target.value; }));
@@ -452,11 +520,20 @@ function bind() {
   // hide controls
   document.querySelectorAll('.chip-act').forEach(b => b.addEventListener('click', () => { chipAction = b.dataset.act; render(); }));
   document.querySelectorAll('.fb-act').forEach(b => b.addEventListener('click', () => { fbAction = b.dataset.act; render(); }));
+  $('pick-play').addEventListener('click', () => { const tun = tuning(); const ms = picks.map(k => { const [s, f] = k.split(':').map(Number); return tun[s] + f; }).sort((a, b) => a - b); playNotes(ms, 0.05, 1.4); });
+  $('pick-clear').addEventListener('click', () => { picks = []; render(); });
+  $('sw-top').addEventListener('change', e => update(() => { st.sw.topOnly = e.target.checked; }));
   $('hide-restore').addEventListener('click', () => update(() => { st.hideIv = []; st.hideCells = []; }, true));
 
   // sound
   $('fretboard').addEventListener('click', e => {
     const h = e.target.closest('.fb-hit'); if (!h) return;
+    if (fbAction === 'pick') {
+      const c = h.dataset.c;
+      picks = picks.includes(c) ? picks.filter(x => x !== c) : [...picks, c];
+      if (picks.includes(c)) playNotes([+h.dataset.m], 0, 0.6);
+      render(); return;
+    }
     if (fbAction === 'hide') {
       const set = currentSet(); if (!set.has(+h.dataset.m)) return;
       const c = h.dataset.c; update(() => { st.hideCells = st.hideCells.includes(c) ? st.hideCells.filter(x => x !== c) : [...st.hideCells, c]; }, true); return;

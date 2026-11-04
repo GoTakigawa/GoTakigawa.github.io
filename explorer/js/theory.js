@@ -75,6 +75,9 @@ export const CHORDS = {
   maj7s11:  { name: 'maj7♯11',     iv: ['1','3','5','7','#11'] },
   '7s11':   { name: '7♯11',        iv: ['1','3','5','b7','#11'] },
   '13':     { name: '13',          iv: ['1','3','5','b7','9','13'] },
+  '7b5':    { name: '7♭5',         iv: ['1','3','b5','b7'] },
+  aug7:     { name: 'aug7',        iv: ['1','3','#5','b7'] },
+  add11:    { name: 'add11',       iv: ['1','3','5','11'] },
   quartal:  { name: '4度堆積',      iv: ['1','4','b7'] }
 };
 export const chordSymbol = id => ({ maj: '', '5': '5', b5: '5(♭5)' })[id] ?? CHORDS[id].name;
@@ -142,4 +145,46 @@ export function romanOf(ivNames, d) {
   const minor = third === 3;
   const suf = third === 3 && fifth === 6 ? '°' : third === 4 && fifth === 8 ? '+' : fifth === 6 ? '(♭5)' : fifth === 8 ? '(♯5)' : '';
   return pre + (minor ? R.toLowerCase() : R) + suf;
+}
+
+
+// ── Chord finder: guess chord names from picked pitches (MIDI) ──
+const DYADS = ['ユニゾン/オクターブ','短2度','長2度','短3度','長3度','完全4度','増4度/減5度','完全5度','短6度','長6度','短7度','長7度'];
+export function identifyChord(midis) {
+  const uniq = [...new Set(midis)].sort((a, b) => a - b);
+  if (!uniq.length) return { kind: 'empty', results: [] };
+  const pcs = [...new Set(uniq.map(pc))], bass = pc(uniq[0]);
+  if (pcs.length === 1) return { kind: 'single', results: [] };
+  if (pcs.length === 2) {
+    const iv = pc(pcs.find(p => p !== bass) - bass);
+    const res = [];
+    if (iv === 7) res.push(score(bass, '5', 'exact', true));
+    if (iv === 6) res.push(score(bass, 'b5', 'exact', true));
+    return { kind: 'dyad', interval: DYADS[iv], results: res.filter(Boolean) };
+  }
+  const out = [];
+  for (let r = 0; r < 12; r++) {
+    const rel = new Set(pcs.map(p => pc(p - r)));
+    for (const [id, c] of Object.entries(CHORDS)) {
+      if (id === 'quartal' || id === 'b5') continue;
+      const cs = new Set(c.iv.map(n => pc(parseInterval(n).semis)));
+      const same = (a, b) => a.size === b.size && [...a].every(x => b.has(x));
+      if (same(rel, cs)) out.push(score(r, id, 'exact', r === bass));
+      else if (cs.has(7) && cs.size >= 4) { const no5 = new Set([...cs].filter(x => x !== 7)); if (same(rel, no5)) out.push(score(r, id, 'omit5', r === bass)); }
+      if (!rel.has(0) && pcs.length >= 3) { const withR = new Set([...rel, 0]); if (same(withR, cs)) out.push(score(r, id, 'rootless', false)); }
+    }
+  }
+  function score(r, id, how, rootInBass) {
+    let s = { exact: 100, omit5: 78, rootless: 55 }[how];
+    if (rootInBass) s += 25;
+    s -= CHORDS[id].iv.length * 1.5;                 // prefer simpler names
+    if (['quartal', 'add11', 'aug7', '7b5'].includes(id)) s -= 6;
+    if (['6', 'm6'].includes(id)) s -= 3;             // a 6 chord is usually read as the m7 / m7♭5 it inverts
+    const set = makeSet(r, CHORDS[id].iv);
+    const name = set.name(r) + chordSymbol(id) + (how !== 'rootless' && !rootInBass ? '/' + set.name(bass) : how === 'rootless' ? '' : '');
+    return { root: r, id, how, score: s, name: how === 'rootless' ? name + '（ルートなし）' : how === 'omit5' ? name + '（5度省略）' : name, set };
+  }
+  const seen = new Set();
+  const results = out.sort((a, b) => b.score - a.score).filter(x => { if (seen.has(x.name)) return false; seen.add(x.name); return true; }).slice(0, 6);
+  return { kind: 'chord', bass, results };
 }
