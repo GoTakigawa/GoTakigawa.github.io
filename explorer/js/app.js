@@ -1,7 +1,7 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad } from './theory.js?v=19';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=19';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms } from './positions.js?v=19';
-import { PianoEngine } from './audio.js?v=19';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad } from './theory.js?v=20';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=20';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore } from './positions.js?v=20';
+import { PianoEngine } from './audio.js?v=20';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -15,7 +15,7 @@ const DEFAULT = {
   strOn: [], label: 'name',
   vo: { span: 4, minStrings: 3, rootBass: false, allowOpen: true, omit5: false },
   hideIv: [], hideCells: [],
-  shapeTab: 'forms', sw: { size: 0, notes: 0, span: 5, rootStart: false, allowOpen: false, topOnly: true }
+  shapeTab: 'forms', sw: { size: 0, notes: 0, span: 5, rootStart: false, allowOpen: false, topOnly: true, common: true }
 };
 let st = structuredClone(DEFAULT);
 let shapes = null, ssel = -1, statusTimer = null, chipAction = 'emph', fbAction = 'play', picks = [];
@@ -57,7 +57,7 @@ function sanitize(s) {
     d.sw.size = [0, 3, 4, 5, 6, 7, 8].includes(s.sw.size) ? s.sw.size : 0;
     d.sw.span = int(s.sw.span, 4, 7, 5);
     d.sw.notes = int(s.sw.notes, 0, 16, 0);
-    d.sw.rootStart = !!s.sw.rootStart; d.sw.allowOpen = !!s.sw.allowOpen; d.sw.topOnly = s.sw.topOnly !== false;
+    d.sw.rootStart = !!s.sw.rootStart; d.sw.allowOpen = !!s.sw.allowOpen; d.sw.topOnly = s.sw.topOnly !== false; d.sw.common = s.sw.common !== false;
   }
   return d;
 }
@@ -340,13 +340,18 @@ function computeShapes() {
     let list = sweepShapes(tun, c.pcs, rootPc, Math.min(F, 24), { span: st.sw.span, sizes, rootStart: st.sw.rootStart, allowOpen: st.sw.allowOpen });
     if (st.sw.topOnly) list = list.filter(sw => sw.hi === n - 1);
     if (st.sw.notes) list = list.filter(sw => sw.notes.length === st.sw.notes);
-    // treble side first: sets ending nearer the 1st string, then fewer strings, then lower on the neck
-    list.sort((x, y) => y.hi - x.hi || y.lo - x.lo || x.low - y.low);
+    // how standard each shape is: inside a chord-form box, root start, regular two-note strings, compact
+    const forms = (c.id && FORMS[c.id] ? chordForms(tun, c.id, rootPc, F, c.pcs) : []).concat(derivedForms(tun, c.pcs, rootPc, F));
+    const boxes = forms.map(f => ({ low: f.low, high: f.high }));
+    list.forEach(sw => { const r = sweepScore(sw, rootPc, boxes); sw.score = r.score; sw.common = r.common; });
+    if (st.sw.common) list = list.filter(sw => sw.common);
+    // treble side first, then the more standard shapes, then lower on the neck
+    list.sort((x, y) => y.hi - x.hi || y.lo - x.lo || y.score - x.score || x.low - y.low);
     return list.map(sw => {
       const cells = sw.notes.map((x, i) => ({ s: x.s, f: x.f, order: i + 1 }));
       const tones = sw.notes.map(x => toneOf(c, x.m)).join(' → ');
       const strs = `${n - sw.hi}〜${n - sw.lo}弦`;
-      return { name: chordNameWithBass(c, sw.notes[0].m), title: `${sw.size}弦スウィープ（${strs}）`, meta: `${strs} · ${sw.notes.length}音 · ${sw.low}〜${sw.high}f · ${toneOf(c, sw.notes[0].m)} から`, cells, muted: [], tones,
+      return { std: sw.common, name: chordNameWithBass(c, sw.notes[0].m), title: `${sw.size}弦スウィープ（${strs}）`, meta: `${strs} · ${sw.notes.length}音 · ${sw.low}〜${sw.high}f · ${toneOf(c, sw.notes[0].m)} から`, cells, muted: [], tones,
         tab: sw.notes.map(x => `${n - x.s}弦${x.f}`).join(' '), play: sw.notes.map(x => x.m), strum: false };
     });
   }
@@ -400,11 +405,11 @@ function renderShapes() {
   $('sets-span').value = st.vo.span; $('sets-open').checked = st.vo.allowOpen;
   $('sw-size').innerHTML = '<option value="0">すべて</option>' + [3, 4, 5, 6, 7, 8].filter(k => k <= st.strings).map(k => `<option value="${k}">${k}弦</option>`).join('');
   $('sw-notes').value = st.sw.notes;
-  $('sw-size').value = st.sw.size; $('sw-span').value = st.sw.span; $('sw-root').checked = st.sw.rootStart; $('sw-open').checked = st.sw.allowOpen; $('sw-top').checked = st.sw.topOnly;
+  $('sw-size').value = st.sw.size; $('sw-span').value = st.sw.span; $('sw-root').checked = st.sw.rootStart; $('sw-open').checked = st.sw.allowOpen; $('sw-top').checked = st.sw.topOnly; $('sw-common').checked = st.sw.common;
   const hints = {
     forms: (c.id && FORMS[c.id] ? '一般的なコードフォーム（E型・A型・D型・C型・G型など）を、いまのチューニングに置き直して並べています。' : 'このコードは定番フォームの登録がないため、E型・A型などの基本フォームの音を近いコードトーンへずらして作った形（変形）を並べています。') + '7・8弦では上の6本で作ります。',
     sets: `隣り合う${Math.min(c.pcs.length > 4 ? 4 : c.pcs.length, st.strings)}本の弦に構成音を1つずつ置く形です（3和音ならトライアド、4和音ならドロップ系の形）。高音弦側から並べています。${c.pcs.length > 4 ? '5音以上のコードは、5度・9度・11度の順に省いて4音にしています。' : ''}`,
-    sweep: 'コードトーンを順番に1弦1〜2音ずつ上がっていくスウィープの形です。高音弦側の形から並べています。番号が弾く順番です。'
+    sweep: `コードトーンを順番に1弦1〜2音ずつ上がっていくスウィープの形です。高音弦側から並べ、同じ弦の範囲では一般的な形（コードフォームの範囲に収まる・ルートから始まる・幅が狭い）を先にしています。${st.sw.common ? '「一般的な形だけ」をオフにすると、ほかの形も出ます。' : ''}番号が弾く順番です。`
   };
   $('shape-hint').textContent = hints[st.shapeTab];
   const noForm = false;
@@ -412,7 +417,7 @@ function renderShapes() {
   const shown = shapes.slice(0, 240);
   $('shape-list').innerHTML = noForm
     ? '<p class="hint">このコードの定番フォームはまだ登録していません。「弦セット」や「検索」を使ってください。</p>'
-    : shown.map((v, i) => `<button class="vo-item ${i === ssel ? 'on' : ''}" data-i="${i}">${thumb(v, c)}<span class="vo-body"><span class="vo-name">${v.name}</span><span class="vo-tones">${v.tones}</span><span class="vo-meta">${v.meta}</span><span class="vo-tab">${v.tab}</span></span></button>`).join('')
+    : shown.map((v, i) => `<button class="vo-item ${i === ssel ? 'on' : ''}" data-i="${i}">${thumb(v, c)}<span class="vo-body"><span class="vo-name">${v.name}${v.std ? '<i class="std-tag">定番</i>' : ''}</span><span class="vo-tones">${v.tones}</span><span class="vo-meta">${v.meta}</span><span class="vo-tab">${v.tab}</span></span></button>`).join('')
       || '<p class="hint">条件に合う形が見つかりませんでした。条件をゆるめてみてください。</p>';
   if (shapes.length > shown.length) $('shape-list').insertAdjacentHTML('beforeend', `<p class="hint" style="grid-column:1/-1">ほか ${shapes.length - shown.length} 件。条件で絞り込んでください。</p>`);
   $('shape-clear').disabled = ssel < 0;
@@ -531,6 +536,7 @@ function bind() {
   const sw = (k, v) => update(() => { st.sw[k] = v; });
   $('sw-size').addEventListener('change', e => sw('size', +e.target.value));
   $('sw-notes').addEventListener('change', e => sw('notes', +e.target.value));
+  $('sw-common').addEventListener('change', e => sw('common', e.target.checked));
   $('sw-span').addEventListener('change', e => sw('span', +e.target.value));
   $('sw-root').addEventListener('change', e => sw('rootStart', e.target.checked));
   $('sw-open').addEventListener('change', e => sw('allowOpen', e.target.checked));

@@ -1,5 +1,5 @@
 // ── Position logic: N-notes-per-string patterns and chord voicing search ──
-import { pc } from './theory.js?v=19';
+import { pc } from './theory.js?v=20';
 
 // Scale pattern: starting on degree `start` on the lowest string, take `nps`
 // consecutive scale notes per string going up. Returns Set of "string:fret".
@@ -107,7 +107,8 @@ export const FORMS = {
   madd9: [{ name: 'C型', rs: 1, rel: [X,0,-2,-3,0,X] }, { name: '5弦ルート', rs: 1, rel: [X,0,2,4,1,0] }],
   add11: [{ name: 'C型', rs: 1, rel: [X,0,-1,-3,-2,-2] }, { name: '5弦ルート', rs: 1, rel: [X,0,0,2,2,0] }],
   maj7s11: [{ name: '6弦ルート', rs: 0, rel: [0,X,1,1,-1,-1] }, { name: '5弦ルート', rs: 1, rel: [X,0,-1,1,X,-1] }],
-  '7s11': [{ name: '6弦ルート', rs: 0, rel: [0,X,0,1,-1,X] }, { name: '5弦ルート', rs: 1, rel: [X,0,-1,0,X,-1] }]
+  '7s11': [{ name: '6弦ルート', rs: 0, rel: [0,X,0,1,-1,X] }, { name: '5弦ルート', rs: 1, rel: [X,0,-1,0,X,-1] }],
+  susb2: [{ name: '6弦ルート', rs: 0, rel: [0,2,3,X,X,X] }, { name: '5弦ルート', rs: 1, rel: [X,0,2,3,X,X] }, { name: '4弦ルート', rs: 2, rel: [X,X,0,2,4,X] }]
 };
 const STD = [40,45,50,55,59,64];
 
@@ -206,7 +207,8 @@ export function derivedForms(tuning, chordPcs, rootPc, frets) {
   };
   BASES.forEach(bid => (FORMS[bid] || []).forEach(form => {
     const offs = form.rel.map((r, s) => r === null ? null : STD[s] + r - STD[form.rs]);
-    const moved = offs.map(o => { if (o === null) return null; if (rel.includes(pc(o))) return o; const nb = nearest(o); return nb ? nb.o : null; });
+    let moves = 0;
+    const moved = offs.map(o => { if (o === null) return null; if (rel.includes(pc(o))) return o; const nb = nearest(o); if (nb) moves++; return nb ? nb.o : null; });
     if (moved[form.rs] === null || pc(moved[form.rs]) !== 0) return;
     const rsReal = base + form.rs;
     for (let f = 0; f <= frets; f++) {
@@ -223,10 +225,48 @@ export function derivedForms(tuning, chordPcs, rootPc, frets) {
       const have = new Set(used.map(m => pc(m - rootPc)));
       if (need.some(x => !have.has(x))) continue;
       const fretted = fr.filter(ff => ff !== null && ff > 0);
-      if (fretted.length && Math.max(...fretted) - Math.min(...fretted) > 4) continue;
+      const ps = playScore(fr); if (!ps.ok) continue;   // drop cramped shapes
       const k = fr.join(','); if (seen.has(k)) continue; seen.add(k);
-      out.push({ name: form.name.replace(/^(E|A|D|C|G)(m|7|maj7|m7|sus4|sus2)?型$/, '$1型') + '（変形）', frets: fr, low: fretted.length ? Math.min(...fretted) : 0, high: fretted.length ? Math.max(...fretted) : 0 });
+      out.push({ name: form.name.replace(/^(E|A|D|C|G)(m|7|maj7|m7|sus4|sus2)?型$/, '$1型') + '（変形）', frets: fr, low: fretted.length ? Math.min(...fretted) : 0, high: fretted.length ? Math.max(...fretted) : 0, cost: moves * 3 + ps.score });
     }
   }));
-  return out.sort((a, b) => a.low - b.low || a.name.localeCompare(b.name));
+  // in each neck region keep the most natural shapes (fewest changed notes, easiest grip)
+  const best = out.slice().sort((a, b) => a.cost - b.cost);
+  const kept = best.filter((x, i) => best.slice(0, i).filter(y => Math.abs(y.low - x.low) <= 1).length < 2);
+  return kept.sort((a, b) => a.low - b.low || a.cost - b.cost);
+}
+
+
+// ── Playability of a chord shape (frets per string, null = muted) ──
+// fingers: one barre/finger for the lowest fret, one finger for each higher note.
+export function playScore(fr) {
+  const sounding = fr.map((f, s) => f === null ? null : s).filter(x => x !== null);
+  const fretted = fr.filter(f => f !== null && f > 0);
+  if (!fretted.length) return { ok: true, score: 0 };
+  const lo = Math.min(...fretted), hi = Math.max(...fretted), span = hi - lo;
+  const fingers = (fretted.includes(lo) ? 1 : 0) + fretted.filter(f => f > lo).length;
+  let inner = 0; for (let s = sounding[0]; s <= sounding[sounding.length - 1]; s++) if (fr[s] === null) inner++;
+  const ok = fingers <= 4 && span <= 3 + (fretted.length <= 3 ? 1 : 0) && inner <= 1;
+  return { ok, score: span * 2 + inner * 3 + Math.max(0, fingers - 3) * 2 };
+}
+
+// How "standard" a sweep shape is: fits inside a chord-form box, starts on the
+// root (or 3rd/5th), at most two strings carry two notes, compact span.
+export function sweepScore(sw, rootPc, formBoxes) {
+  const perStr = {}; sw.notes.forEach(x => perStr[x.s] = (perStr[x.s] || 0) + 1);
+  const doubles = Object.values(perStr).filter(v => v === 2).length;
+  const span = sw.high - sw.low;
+  const start = pc(sw.notes[0].m - rootPc);
+  let score = 0;
+  const inBox = formBoxes.some(b => sw.low >= b.low - 1 && sw.high <= b.high + 1);
+  if (inBox) score += 5;
+  // stretch on one string (two notes on the same string)
+  const byStr = {}; sw.notes.forEach(x => (byStr[x.s] = byStr[x.s] || []).push(x.f));
+  const stretch = Math.max(0, ...Object.values(byStr).map(fs => fs.length > 1 ? Math.max(...fs) - Math.min(...fs) : 0));
+  score -= stretch >= 5 ? 3 : stretch === 4 ? 1 : 0;
+  score += start === 0 ? 3 : 1;
+  score += doubles <= 2 ? 2 : -2 * (doubles - 2);
+  score += span <= 3 ? 2 : span === 4 ? 1 : -2;
+  if (perStr[sw.hi] && perStr[sw.hi] <= 2) score += 1;
+  return { score, common: inBox && doubles <= 2 && span <= 4 && stretch <= 4 };
 }
