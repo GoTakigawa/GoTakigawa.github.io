@@ -1,5 +1,5 @@
 // ── Position logic: N-notes-per-string patterns and chord voicing search ──
-import { pc } from './theory.js?v=17';
+import { pc } from './theory.js?v=18';
 
 // Scale pattern: starting on degree `start` on the lowest string, take `nps`
 // consecutive scale notes per string going up. Returns Set of "string:fret".
@@ -155,6 +155,7 @@ export function sweepShapes(tuning, chordPcs, rootPc, frets, opts) {
   const tonesAbove = m => { for (let x = m + 1; x < m + 13; x++) if (chordPcs.includes(pc(x))) return x; return null; };
   for (const size of sizes) {
     if (size > n) continue;
+    const startLen = out.length; // the cap applies per string count, so "all" contains every count
     for (let lo = 0; lo + size - 1 < n; lo++) {
       const hi = lo + size - 1;
       for (let f0 = 0; f0 <= frets; f0++) {
@@ -163,7 +164,7 @@ export function sweepShapes(tuning, chordPcs, rootPc, frets, opts) {
         if (opts.rootStart && pc(start) !== pc(rootPc)) continue;
         // depth-first: each next chord tone goes on the same string (max 2 per string) or the next one
         const walk = (notes, s, perStr) => {
-          if (out.length >= 300) return;
+          if (out.length - startLen >= 400) return;
           const last = notes[notes.length - 1];
           const fs = notes.map(x => x.f).filter(f => f > 0);
           if (fs.length && Math.max(...fs) - Math.min(...fs) > span - 1) return;
