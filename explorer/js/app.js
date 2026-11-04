@@ -1,8 +1,7 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad } from './theory.js?v=15';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=15';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS } from './positions.js?v=15';
-import { PianoEngine } from './audio.js?v=15';
-import { encodeSeed, decodeSeed } from './share.js?v=15';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad } from './theory.js?v=16';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=16';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS } from './positions.js?v=16';
+import { PianoEngine } from './audio.js?v=16';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -446,7 +445,6 @@ function renderFinder() {
   $('pick-play').disabled = !notes.length; $('pick-clear').disabled = !notes.length;
 }
 
-async function renderSeed() { try { $('seed-display').textContent = await encodeSeed(st); } catch (e) {} }
 
 function render() {
   renderControls();
@@ -455,21 +453,7 @@ function render() {
   const count = renderFretboard();
   renderMetrics(set, count);
   renderShapes();
-  renderSeed();
 }
-
-// ── export ──
-function exportSVG() {
-  const svg = $('fretboard').querySelector('svg').cloneNode(true);
-  svg.querySelectorAll('.fb-hit').forEach(el => el.remove());
-  svg.setAttribute('width', '2360'); svg.setAttribute('height', String(Math.round(2360 * svg.viewBox.baseVal.height / svg.viewBox.baseVal.width)));
-  const text = '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(svg);
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([text], { type: 'image/svg+xml' }));
-  a.download = 'fretboard_' + $('fb-title').textContent.replace(/♭/g, 'b').replace(/♯/g, 's').replace(/[^\w]+/g, '_').replace(/^_|_$/g, '') + '.svg';
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-}
-async function copy(text, msg) { try { await navigator.clipboard.writeText(text); notify(msg); } catch (e) { prompt('コピーしてください', text); } }
 
 // ── events ──
 function bind() {
@@ -599,13 +583,6 @@ function bind() {
     playNotes(up.concat(up.slice(0, -1).reverse()), 0.17, 0.35);
   });
 
-  $('export-svg').addEventListener('click', exportSVG);
-  $('seed-copy').addEventListener('click', async () => copy(await encodeSeed(st), 'シードをコピーしました'));
-  $('seed-share').addEventListener('click', async () => copy(location.origin + location.pathname + '#s=' + await encodeSeed(st), '共有 URL をコピーしました'));
-  $('seed-apply').addEventListener('click', async () => {
-    try { const s = sanitize(await decodeSeed($('seed-input').value)); update(() => { st = s; }); $('seed-err').textContent = ''; notify('シードを読み込みました'); }
-    catch (e) { $('seed-err').textContent = e.message || 'シードを読み込めませんでした。'; }
-  });
   $('reset').addEventListener('click', () => update(() => { st = structuredClone(DEFAULT); st.strOn = Array(st.strings).fill(true); }));
 
   document.querySelectorAll('.num-wrap').forEach(w => {
@@ -618,13 +595,7 @@ function bind() {
 }
 
 async function boot() {
-  let loaded = false;
-  const m = location.hash.match(/^#s=([zj][A-Za-z0-9_-]+)/);
-  if (m) {
-    try { st = sanitize(await decodeSeed(m[1])); loaded = true; notify('共有された設定を読み込みました'); } catch (e) { notify('共有リンクを読み込めませんでした'); }
-    history.replaceState(null, '', location.pathname);
-  }
-  if (!loaded) { try { const s = localStorage.getItem(STORE); st = sanitize(s ? JSON.parse(s) : null); } catch (e) { st = sanitize(null); } }
+  try { const s = localStorage.getItem(STORE); st = sanitize(s ? JSON.parse(s) : null); } catch (e) { st = sanitize(null); }
   bind(); render();
 }
 boot();
