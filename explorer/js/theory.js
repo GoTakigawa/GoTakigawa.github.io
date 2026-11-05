@@ -37,7 +37,7 @@ export const SCALES = {
   lydianDominant: { name: 'Lydian dominant',             group: 'メロディックマイナー系', pop: 2, iv: ['1','2','3','#4','5','6','b7'] },
   mixolydianb6:   { name: 'Mixolydian ♭6',               group: 'メロディックマイナー系', pop: 1, iv: ['1','2','3','4','5','b6','b7'] },
   locrianNat2:    { name: 'Locrian ♮2 (Half-diminished)', group: 'メロディックマイナー系', pop: 2, iv: ['1','2','b3','4','b5','b6','b7'] },
-  altered:        { name: 'Altered (Super Locrian)',     group: 'メロディックマイナー系', pop: 2, iv: ['1','b2','#2','3','b5','#5','b7'] },
+  altered:        { name: 'Altered (Super Locrian)',     group: 'メロディックマイナー系', pop: 2, iv: ['1','b9','#9','3','#11','b13','b7'] },
   // ── Harmonic minor / harmonic major modes ──
   harmonicMinor:    { name: 'Harmonic minor',              group: 'ハーモニック系', pop: 3, iv: ['1','2','b3','4','5','b6','7'] },
   locrianNat6:      { name: 'Locrian ♮6',                  group: 'ハーモニック系', pop: 1, iv: ['1','b2','b3','4','b5','6','b7'] },
@@ -45,7 +45,7 @@ export const SCALES = {
   ukrainianDorian:  { name: 'Ukrainian dorian (Dorian ♯4)', group: 'ハーモニック系', pop: 1, iv: ['1','2','b3','#4','5','6','b7'] },
   phrygianDominant: { name: 'Phrygian dominant',           group: 'ハーモニック系', pop: 3, iv: ['1','b2','3','4','5','b6','b7'] },
   lydianSharp2:     { name: 'Lydian ♯2',                   group: 'ハーモニック系', pop: 1, iv: ['1','#2','3','#4','5','6','7'] },
-  ultralocrian:     { name: 'Ultralocrian',                group: 'ハーモニック系', pop: 1, iv: ['1','b2','b3','b4','b5','b6','bb7'] },
+  ultralocrian:     { name: 'Ultralocrian',                group: 'ハーモニック系', pop: 1, iv: ['1','b2','b3','3','b5','b6','6'] },
   harmonicMajor:    { name: 'Harmonic major',              group: 'ハーモニック系', pop: 1, iv: ['1','2','3','4','5','b6','7'] },
   // ── Middle East / Eastern Europe ──
   doubleHarmonic:  { name: 'Double harmonic (Byzantine)', group: '民族（中東・東欧）', pop: 2, iv: ['1','b2','3','4','5','b6','7'] },
@@ -56,7 +56,7 @@ export const SCALES = {
   neapolitanMinor: { name: 'Neapolitan minor',            group: '民族（中東・東欧）', pop: 1, iv: ['1','b2','b3','4','5','b6','7'] },
   neapolitanMajor: { name: 'Neapolitan major',            group: '民族（中東・東欧）', pop: 1, iv: ['1','b2','b3','4','5','6','7'] },
   enigmatic:       { name: 'Enigmatic',                   group: '民族（中東・東欧）', pop: 1, iv: ['1','b2','3','#4','#5','#6','7'] },
-  spanish8:        { name: 'Spanish 8-tone',              group: '民族（中東・東欧）', pop: 1, iv: ['1','b2','#2','3','4','b5','b6','b7'] },
+  spanish8:        { name: 'Spanish 8-tone',              group: '民族（中東・東欧）', pop: 1, iv: ['1','b2','b3','3','4','b5','b6','b7'] },
   // ── India ──
   todi:            { name: 'Todi (Raga)',                 group: '民族（インド）', pop: 1, iv: ['1','b2','b3','#4','5','b6','7'] },
   purvi:           { name: 'Purvi (Raga)',                group: '民族（インド）', pop: 1, iv: ['1','b2','3','#4','5','b6','7'] },
@@ -79,9 +79,9 @@ export const SCALES = {
   dominantPent:{ name: 'Dominant pentatonic', group: 'ペンタ・ブルース', pop: 1, iv: ['1','2','3','5','b7'] },
   // ── Symmetric / other (prog, fusion) ──
   wholeTone:   { name: 'Whole tone',          group: '対称・その他', pop: 2, iv: ['1','2','3','#4','#5','b7'] },
-  dimHW:       { name: 'Diminished (H-W)',    group: '対称・その他', pop: 2, iv: ['1','b2','#2','3','#4','5','6','b7'] },
+  dimHW:       { name: 'Diminished (H-W)',    group: '対称・その他', pop: 2, iv: ['1','b9','#9','3','#11','5','13','b7'] },
   dimWH:       { name: 'Diminished (W-H)',    group: '対称・その他', pop: 2, iv: ['1','2','b3','4','b5','b6','6','7'] },
-  augmented:   { name: 'Augmented (hexatonic)', group: '対称・その他', pop: 1, iv: ['1','#2','3','5','#5','7'] },
+  augmented:   { name: 'Augmented (hexatonic)', group: '対称・その他', pop: 1, iv: ['1','b3','3','5','#5','7'] },
   tritone:     { name: 'Tritone',             group: '対称・その他', pop: 1, iv: ['1','b2','3','b5','5','b7'] },
   prometheus:  { name: 'Prometheus',          group: '対称・その他', pop: 1, iv: ['1','2','3','#4','6','b7'] },
   bebopDom:    { name: 'Bebop dominant',      group: '対称・その他', pop: 1, iv: ['1','2','3','4','5','6','b7','7'] },
@@ -180,7 +180,7 @@ export function makeSet(root, ivNames) {
 // Diatonic chord on a scale degree (triad or seventh) — only for 7-note scales
 export function diatonic(root, ivNames, d, seventh) {
   const ivs = ivNames.map(parseInterval);
-  const st = ivs.map(i => i.semis);
+  const st = ivs.map(i => pc(i.semis));
   const pick = k => st[(d + k) % 7] + 12 * Math.floor((d + k) / 7) - st[d];
   const tones = seventh ? [0, 2, 4, 6] : [0, 2, 4];
   const semis = tones.map(pick);
@@ -193,14 +193,17 @@ const TRIAD_SUFFIX = {
   '2,6': [true, 'sus2(♭5)'], '5,6': [true, 'sus4(♭5)'], '2,8': [true, 'sus2(♯5)'], '5,8': [true, 'sus4(♯5)'], '1,6': [true, 'sus♭2(♭5)']
 };
 export function romanOf(ivNames, d) {
-  const ivs = ivNames.map(parseInterval), st = ivs.map(i => i.semis), n = st.length;
+  // conventional numerals: the numeral comes from the distance in semitones from the tonic
+  // (♭II, ♭III, ♭VI, ♭VII ...), not from the letter of the spelled note
+  const ivs = ivNames.map(parseInterval), st = ivs.map(i => pc(i.semis)), n = st.length;
   const at = k => st[(d + k) % n] + 12 * Math.floor((d + k) / n);
   const third = at(2) - st[d], fifth = at(4) - st[d];
-  const R = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][d];
-  const acc = st[d] - MAJOR_SEMIS[d];
-  const pre = acc === -1 ? '♭' : acc === 1 ? '♯' : acc === -2 ? '𝄫' : acc === 2 ? '𝄪' : '';
+  const NUM = ['I', '♭II', 'II', '♭III', 'III', 'IV', null, 'V', '♭VI', 'VI', '♭VII', 'VII'];
+  let num = NUM[st[d]];
+  if (num === null) num = /^#(4|11)$/.test(ivs[d].name) ? '♯IV' : '♭V';
   const [upper, suf] = TRIAD_SUFFIX[third + ',' + fifth] || [true, '(' + third + ',' + fifth + ')'];
-  return pre + (upper ? R : R.toLowerCase()) + suf;
+  const m = /^([♭♯]?)(.+)$/.exec(num);
+  return m[1] + (upper ? m[2] : m[2].toLowerCase()) + suf;
 }
 
 
@@ -314,4 +317,14 @@ export function identifyScales(midis, rootPc) {
     }
   }
   return out.sort((a, b) => b.score - a.score || a.size - b.size);
+}
+
+
+// Root name of a diatonic chord, spelled the same way as its numeral
+// (♭iii → B♭m rather than A♯m in G altered)
+export function diatonicRootName(set, ivNames, d, rootPc) {
+  const num = romanOf(ivNames, d), name = set.name(rootPc);
+  if (num.startsWith('♭') && name.includes('♯')) return FLAT_NAMES[pc(rootPc)];
+  if (num.startsWith('♯') && name.includes('♭')) return SHARP_NAMES[pc(rootPc)];
+  return name;
 }

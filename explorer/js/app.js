@@ -1,7 +1,7 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales } from './theory.js?v=21';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=21';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore } from './positions.js?v=21';
-import { PianoEngine } from './audio.js?v=21';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=22';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=22';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore } from './positions.js?v=22';
+import { PianoEngine } from './audio.js?v=22';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -101,7 +101,7 @@ function shapeChord() {
     const scaleSet = makeSet(st.root, SCALES[st.scale].iv);
     const DEF = ['1','b2','2','b3','3','4','b5','5','b6','6','b7','7'];
     const cset = makeSet(c.root, id ? CHORDS[id].iv : c.semis.map(x => DEF[pc(x)]));
-    const sym = scaleSet.name(c.root) + (id ? chordSymbol(id) : chordNameFor(c.semis));
+    const sym = diatonicRootName(scaleSet, SCALES[st.scale].iv, d, c.root) + (id ? chordSymbol(id) : chordNameFor(c.semis));
     return { root: c.root, id, pcs: c.pcs, set: scaleSet, cset, sym, label: `${romanOf(SCALES[st.scale].iv, d)}（${sym}）`, fromScale: true };
   }
   return null;
@@ -204,7 +204,7 @@ function renderSetInfo(set) {
   if (diaOk) {
     $('diat').innerHTML = Array.from({ length: 7 }, (_, d) => {
       const c = diatonic(st.root, SCALES[st.scale].iv, d, st.seventh);
-      return `<button class="deg-btn ${d === st.diat ? 'on' : ''}" data-d="${d}"><b>${romanOf(SCALES[st.scale].iv, d)}</b><small>${set.name(c.root)}${chordNameFor(c.semis)}</small></button>`;
+      return `<button class="deg-btn ${d === st.diat ? 'on' : ''}" data-d="${d}"><b>${romanOf(SCALES[st.scale].iv, d)}</b><small>${diatonicRootName(set, SCALES[st.scale].iv, d, c.root)}${chordNameFor(c.semis)}</small></button>`;
     }).join('');
     $('seventh').checked = st.seventh;
   }
@@ -222,7 +222,7 @@ function chordNameFor(semis) {
 function titleFor(set) {
   if (st.mode === 'scale') {
     let t = `${set.name(st.root)} ${SCALES[st.scale].name}`;
-    if (st.diat >= 0 && scaleLen() === 7) { const c = diatonic(st.root, SCALES[st.scale].iv, st.diat, st.seventh); t += ` ／ ${romanOf(SCALES[st.scale].iv, st.diat)}（${set.name(c.root)}${chordNameFor(c.semis)}）`; }
+    if (st.diat >= 0 && scaleLen() === 7) { const c = diatonic(st.root, SCALES[st.scale].iv, st.diat, st.seventh); t += ` ／ ${romanOf(SCALES[st.scale].iv, st.diat)}（${diatonicRootName(set, SCALES[st.scale].iv, st.diat, c.root)}${chordNameFor(c.semis)}）`; }
     return t;
   }
   if (st.mode === 'chord') return set.name(st.root) + chordSymbol(st.chord);
