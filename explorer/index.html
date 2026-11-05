@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20">
+<link rel="stylesheet" href="style.css?v=21">
 </head>
 <body>
 
@@ -207,6 +207,14 @@
         </div>
       </div>
       <div class="finder-results" id="finder-results"></div>
+      <div class="scale-finder" id="scale-finder" hidden>
+        <div class="panel-hd" style="margin:14px 0 8px">
+          <div class="sec-sub">スケール候補</div>
+          <label class="inline-field">ルート
+            <select id="sc-root" aria-label="スケール推測のルート"></select></label>
+        </div>
+        <div class="finder-results" id="scale-results"></div>
+      </div>
       <div class="vo-list" id="shape-list"></div>
       <p class="hint" id="shape-hint"></p>
       <details class="help"><summary>カードの見かた</summary><p class="hint">図は上が1弦で、緑がルート、紫がほかのコードトーン。スウィープは番号が弾く順です。その下にコード名、コードトーン（1弦から順。スウィープは弾く順）、位置、TAB（低い弦から順、x はミュート）。カードを押すと、指板にコードトーンで表示して鳴らします。</p></details>
@@ -218,7 +226,7 @@
 
 <div class="status" id="status" role="status" aria-live="polite"></div>
 
-<script type="module" src="js/app.js?v=20"></script>
+<script type="module" src="js/app.js?v=21"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
