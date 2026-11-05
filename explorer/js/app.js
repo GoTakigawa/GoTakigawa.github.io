@@ -1,7 +1,7 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=22';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=22';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore } from './positions.js?v=22';
-import { PianoEngine } from './audio.js?v=22';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=23';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=23';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore } from './positions.js?v=23';
+import { PianoEngine } from './audio.js?v=23';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -410,7 +410,7 @@ function renderShapes() {
   $('sw-size').value = st.sw.size; $('sw-span').value = st.sw.span; $('sw-root').checked = st.sw.rootStart; $('sw-open').checked = st.sw.allowOpen; $('sw-top').checked = st.sw.topOnly; $('sw-common').checked = st.sw.common;
   const hints = {
     forms: (c.id && FORMS[c.id] ? '一般的なコードフォーム（E型・A型・D型・C型・G型など）を、いまのチューニングに置き直して並べています。' : 'このコードは定番フォームの登録がないため、E型・A型などの基本フォームの音を近いコードトーンへずらして作った形（変形）を並べています。') + '7・8弦では上の6本で作ります。',
-    sets: `隣り合う${Math.min(c.pcs.length > 4 ? 4 : c.pcs.length, st.strings)}本の弦に構成音を1つずつ置く形です（3和音ならトライアド、4和音ならドロップ系の形）。高音弦側から並べています。${c.pcs.length > 4 ? '5音以上のコードは、5度・9度・11度の順に省いて4音にしています。' : ''}`,
+    sets: `転回形：隣り合う${Math.min(c.pcs.length > 4 ? 4 : c.pcs.length, st.strings)}本の弦に構成音を1つずつ、重ねずに置いた形です。どの音が一番下・一番上に来るかの違いで並びます（3和音ならトライアドの転回形、4和音ならクローズやドロップ2・3の形）。高音弦側から並べています。${c.pcs.length > 4 ? '5音以上のコードは、5度・9度・11度の順に省いて4音にしています。' : ''}`,
     sweep: `コードトーンを順番に1弦1〜2音ずつ上がっていくスウィープの形です。高音弦側から並べ、同じ弦の範囲では一般的な形（コードフォームの範囲に収まる・ルートから始まる・幅が狭い）を先にしています。${st.sw.common ? '「一般的な形だけ」をオフにすると、ほかの形も出ます。' : ''}番号が弾く順番です。`
   };
   $('shape-hint').textContent = hints[st.shapeTab];
@@ -418,7 +418,7 @@ function renderShapes() {
   $('shape-count').textContent = noForm ? '' : shapes.length >= 300 ? '300件以上' : `${shapes.length}件`;
   const shown = shapes.slice(0, 240);
   $('shape-list').innerHTML = noForm
-    ? '<p class="hint">このコードの定番フォームはまだ登録していません。「弦セット」や「検索」を使ってください。</p>'
+    ? '<p class="hint">このコードの定番フォームはまだ登録していません。「転回形」や「検索」を使ってください。</p>'
     : shown.map((v, i) => `<button class="vo-item ${i === ssel ? 'on' : ''}" data-i="${i}">${thumb(v, c)}<span class="vo-body"><span class="vo-name">${v.name}${v.std ? '<i class="std-tag">定番</i>' : ''}</span><span class="vo-tones">${v.tones}</span><span class="vo-meta">${v.meta}</span><span class="vo-tab">${v.tab}</span></span></button>`).join('')
       || '<p class="hint">条件に合う形が見つかりませんでした。条件をゆるめてみてください。</p>';
   if (shapes.length > shown.length) $('shape-list').insertAdjacentHTML('beforeend', `<p class="hint" style="grid-column:1/-1">ほか ${shapes.length - shown.length} 件。条件で絞り込んでください。</p>`);
