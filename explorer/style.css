@@ -260,3 +260,9 @@ button.small{font-size:11px;padding:6px 10px;}
 #finder-results{margin-top:12px;}
 
 .std-tag{font-style:normal;font-size:9px;font-weight:700;color:#0a0a0a;background:var(--accent3);border-radius:3px;padding:1px 5px;margin-left:6px;vertical-align:2px;letter-spacing:.04em;}
+
+.inline-field{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.inline-field select{width:auto;font-size:13px;padding:5px 8px;}
+.sc-item .sc-meta{font-size:11px;color:var(--text3);}
+.sc-item .sc-miss{font-size:11px;color:var(--text2);}
+.sc-item .sc-miss em{font-style:normal;color:#9fdcf9;}

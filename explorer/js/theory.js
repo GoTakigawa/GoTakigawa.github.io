@@ -20,29 +20,72 @@ export function parseInterval(name) {
   return { name, deg, semis: MAJOR_SEMIS[deg] + acc + 12 * oct, label: (m[1] || '').replace(/b/g, '♭').replace(/#/g, '♯') + num };
 }
 
+// pop: how commonly the scale is used (3 = everyday, 2 = common in rock/metal/jazz, 1 = colour / exotic)
 export const SCALES = {
-  ionian:      { name: 'Major (Ionian)',     group: 'モード', iv: ['1','2','3','4','5','6','7'] },
-  dorian:      { name: 'Dorian',             group: 'モード', iv: ['1','2','b3','4','5','6','b7'] },
-  phrygian:    { name: 'Phrygian',           group: 'モード', iv: ['1','b2','b3','4','5','b6','b7'] },
-  lydian:      { name: 'Lydian',             group: 'モード', iv: ['1','2','3','#4','5','6','7'] },
-  mixolydian:  { name: 'Mixolydian',         group: 'モード', iv: ['1','2','3','4','5','6','b7'] },
-  aeolian:     { name: 'Natural minor (Aeolian)', group: 'モード', iv: ['1','2','b3','4','5','b6','b7'] },
-  locrian:     { name: 'Locrian',            group: 'モード', iv: ['1','b2','b3','4','b5','b6','b7'] },
-  harmonicMinor:    { name: 'Harmonic minor',    group: 'マイナー系', iv: ['1','2','b3','4','5','b6','7'] },
-  melodicMinor:     { name: 'Melodic minor',     group: 'マイナー系', iv: ['1','2','b3','4','5','6','7'] },
-  phrygianDominant: { name: 'Phrygian dominant', group: 'マイナー系', iv: ['1','b2','3','4','5','b6','b7'] },
-  lydianDominant:   { name: 'Lydian dominant',   group: 'マイナー系', iv: ['1','2','3','#4','5','6','b7'] },
-  hungarianMinor:   { name: 'Hungarian minor',   group: 'マイナー系', iv: ['1','2','b3','#4','5','b6','7'] },
-  doubleHarmonic:   { name: 'Double harmonic',   group: 'マイナー系', iv: ['1','b2','3','4','5','b6','7'] },
-  majorPent:   { name: 'Major pentatonic',   group: 'ペンタ・ブルース', iv: ['1','2','3','5','6'] },
-  minorPent:   { name: 'Minor pentatonic',   group: 'ペンタ・ブルース', iv: ['1','b3','4','5','b7'] },
-  blues:       { name: 'Blues',              group: 'ペンタ・ブルース', iv: ['1','b3','4','b5','5','b7'] },
-  majorBlues:  { name: 'Major blues',        group: 'ペンタ・ブルース', iv: ['1','2','b3','3','5','6'] },
-  wholeTone:   { name: 'Whole tone',         group: '対称', iv: ['1','2','3','#4','#5','b7'] },
-  dimHW:       { name: 'Diminished (H-W)',   group: '対称', iv: ['1','b2','#2','3','#4','5','6','b7'] },
-  dimWH:       { name: 'Diminished (W-H)',   group: '対称', iv: ['1','2','b3','4','b5','b6','6','7'] },
-  hirajoshi:   { name: 'Hirajoshi',          group: 'その他', iv: ['1','2','b3','5','b6'] },
-  insen:       { name: 'In-sen',             group: 'その他', iv: ['1','b2','4','5','b7'] }
+  // ── Major modes ──
+  ionian:      { name: 'Major (Ionian)',          group: 'モード', pop: 3, iv: ['1','2','3','4','5','6','7'] },
+  dorian:      { name: 'Dorian',                  group: 'モード', pop: 3, iv: ['1','2','b3','4','5','6','b7'] },
+  phrygian:    { name: 'Phrygian',                group: 'モード', pop: 3, iv: ['1','b2','b3','4','5','b6','b7'] },
+  lydian:      { name: 'Lydian',                  group: 'モード', pop: 3, iv: ['1','2','3','#4','5','6','7'] },
+  mixolydian:  { name: 'Mixolydian',              group: 'モード', pop: 3, iv: ['1','2','3','4','5','6','b7'] },
+  aeolian:     { name: 'Natural minor (Aeolian)', group: 'モード', pop: 3, iv: ['1','2','b3','4','5','b6','b7'] },
+  locrian:     { name: 'Locrian',                 group: 'モード', pop: 2, iv: ['1','b2','b3','4','b5','b6','b7'] },
+  // ── Melodic minor modes ──
+  melodicMinor:   { name: 'Melodic minor',               group: 'メロディックマイナー系', pop: 2, iv: ['1','2','b3','4','5','6','7'] },
+  dorianb2:       { name: 'Dorian ♭2 (Phrygian ♮6)',     group: 'メロディックマイナー系', pop: 1, iv: ['1','b2','b3','4','5','6','b7'] },
+  lydianAug:      { name: 'Lydian augmented',            group: 'メロディックマイナー系', pop: 1, iv: ['1','2','3','#4','#5','6','7'] },
+  lydianDominant: { name: 'Lydian dominant',             group: 'メロディックマイナー系', pop: 2, iv: ['1','2','3','#4','5','6','b7'] },
+  mixolydianb6:   { name: 'Mixolydian ♭6',               group: 'メロディックマイナー系', pop: 1, iv: ['1','2','3','4','5','b6','b7'] },
+  locrianNat2:    { name: 'Locrian ♮2 (Half-diminished)', group: 'メロディックマイナー系', pop: 2, iv: ['1','2','b3','4','b5','b6','b7'] },
+  altered:        { name: 'Altered (Super Locrian)',     group: 'メロディックマイナー系', pop: 2, iv: ['1','b2','#2','3','b5','#5','b7'] },
+  // ── Harmonic minor / harmonic major modes ──
+  harmonicMinor:    { name: 'Harmonic minor',              group: 'ハーモニック系', pop: 3, iv: ['1','2','b3','4','5','b6','7'] },
+  locrianNat6:      { name: 'Locrian ♮6',                  group: 'ハーモニック系', pop: 1, iv: ['1','b2','b3','4','b5','6','b7'] },
+  ionianSharp5:     { name: 'Ionian ♯5',                   group: 'ハーモニック系', pop: 1, iv: ['1','2','3','4','#5','6','7'] },
+  ukrainianDorian:  { name: 'Ukrainian dorian (Dorian ♯4)', group: 'ハーモニック系', pop: 1, iv: ['1','2','b3','#4','5','6','b7'] },
+  phrygianDominant: { name: 'Phrygian dominant',           group: 'ハーモニック系', pop: 3, iv: ['1','b2','3','4','5','b6','b7'] },
+  lydianSharp2:     { name: 'Lydian ♯2',                   group: 'ハーモニック系', pop: 1, iv: ['1','#2','3','#4','5','6','7'] },
+  ultralocrian:     { name: 'Ultralocrian',                group: 'ハーモニック系', pop: 1, iv: ['1','b2','b3','b4','b5','b6','bb7'] },
+  harmonicMajor:    { name: 'Harmonic major',              group: 'ハーモニック系', pop: 1, iv: ['1','2','3','4','5','b6','7'] },
+  // ── Middle East / Eastern Europe ──
+  doubleHarmonic:  { name: 'Double harmonic (Byzantine)', group: '民族（中東・東欧）', pop: 2, iv: ['1','b2','3','4','5','b6','7'] },
+  hungarianMinor:  { name: 'Hungarian minor',             group: '民族（中東・東欧）', pop: 2, iv: ['1','2','b3','#4','5','b6','7'] },
+  hungarianMajor:  { name: 'Hungarian major',             group: '民族（中東・東欧）', pop: 1, iv: ['1','#2','3','#4','5','6','b7'] },
+  persian:         { name: 'Persian',                     group: '民族（中東・東欧）', pop: 1, iv: ['1','b2','3','4','b5','b6','7'] },
+  arabian:         { name: 'Arabian (Major Locrian)',     group: '民族（中東・東欧）', pop: 1, iv: ['1','2','3','4','b5','b6','b7'] },
+  neapolitanMinor: { name: 'Neapolitan minor',            group: '民族（中東・東欧）', pop: 1, iv: ['1','b2','b3','4','5','b6','7'] },
+  neapolitanMajor: { name: 'Neapolitan major',            group: '民族（中東・東欧）', pop: 1, iv: ['1','b2','b3','4','5','6','7'] },
+  enigmatic:       { name: 'Enigmatic',                   group: '民族（中東・東欧）', pop: 1, iv: ['1','b2','3','#4','#5','#6','7'] },
+  spanish8:        { name: 'Spanish 8-tone',              group: '民族（中東・東欧）', pop: 1, iv: ['1','b2','#2','3','4','b5','b6','b7'] },
+  // ── India ──
+  todi:            { name: 'Todi (Raga)',                 group: '民族（インド）', pop: 1, iv: ['1','b2','b3','#4','5','b6','7'] },
+  purvi:           { name: 'Purvi (Raga)',                group: '民族（インド）', pop: 1, iv: ['1','b2','3','#4','5','b6','7'] },
+  marwa:           { name: 'Marwa (Raga)',                group: '民族（インド）', pop: 1, iv: ['1','b2','3','#4','5','6','7'] },
+  // ── Japan / East Asia ──
+  hirajoshi:       { name: 'Hirajoshi',                   group: '民族（日本・アジア）', pop: 2, iv: ['1','2','b3','5','b6'] },
+  insen:           { name: 'In-sen',                      group: '民族（日本・アジア）', pop: 2, iv: ['1','b2','4','5','b7'] },
+  iwato:           { name: 'Iwato',                       group: '民族（日本・アジア）', pop: 1, iv: ['1','b2','4','b5','b7'] },
+  kumoi:           { name: 'Kumoi',                       group: '民族（日本・アジア）', pop: 1, iv: ['1','2','b3','5','6'] },
+  yo:              { name: 'Yo',                          group: '民族（日本・アジア）', pop: 1, iv: ['1','2','4','5','6'] },
+  ryukyu:          { name: 'Ryukyu',                      group: '民族（日本・アジア）', pop: 1, iv: ['1','3','4','5','7'] },
+  pelog:           { name: 'Pelog',                       group: '民族（日本・アジア）', pop: 1, iv: ['1','b2','b3','5','b6'] },
+  egyptian:        { name: 'Egyptian (Suspended)',        group: '民族（日本・アジア）', pop: 1, iv: ['1','2','4','5','b7'] },
+  // ── Pentatonic / blues ──
+  majorPent:   { name: 'Major pentatonic',   group: 'ペンタ・ブルース', pop: 3, iv: ['1','2','3','5','6'] },
+  minorPent:   { name: 'Minor pentatonic',   group: 'ペンタ・ブルース', pop: 3, iv: ['1','b3','4','5','b7'] },
+  blues:       { name: 'Blues',              group: 'ペンタ・ブルース', pop: 3, iv: ['1','b3','4','b5','5','b7'] },
+  majorBlues:  { name: 'Major blues',        group: 'ペンタ・ブルース', pop: 2, iv: ['1','2','b3','3','5','6'] },
+  minorPentb5: { name: 'Minor pentatonic ♭5', group: 'ペンタ・ブルース', pop: 1, iv: ['1','b3','4','b5','b7'] },
+  dominantPent:{ name: 'Dominant pentatonic', group: 'ペンタ・ブルース', pop: 1, iv: ['1','2','3','5','b7'] },
+  // ── Symmetric / other (prog, fusion) ──
+  wholeTone:   { name: 'Whole tone',          group: '対称・その他', pop: 2, iv: ['1','2','3','#4','#5','b7'] },
+  dimHW:       { name: 'Diminished (H-W)',    group: '対称・その他', pop: 2, iv: ['1','b2','#2','3','#4','5','6','b7'] },
+  dimWH:       { name: 'Diminished (W-H)',    group: '対称・その他', pop: 2, iv: ['1','2','b3','4','b5','b6','6','7'] },
+  augmented:   { name: 'Augmented (hexatonic)', group: '対称・その他', pop: 1, iv: ['1','#2','3','5','#5','7'] },
+  tritone:     { name: 'Tritone',             group: '対称・その他', pop: 1, iv: ['1','b2','3','b5','5','b7'] },
+  prometheus:  { name: 'Prometheus',          group: '対称・その他', pop: 1, iv: ['1','2','3','#4','6','b7'] },
+  bebopDom:    { name: 'Bebop dominant',      group: '対称・その他', pop: 1, iv: ['1','2','3','4','5','6','b7','7'] },
+  phrygianMaj8:{ name: 'Phrygian ♭4 / ♮3 (8-tone)', group: '対称・その他', pop: 1, iv: ['1','b2','b3','3','4','5','b6','b7'] }
 };
 
 export const CHORDS = {
@@ -65,7 +108,7 @@ export const CHORDS = {
   '7sus4':  { name: '7sus4',       iv: ['1','4','5','b7'] },
   add9:     { name: 'add9',        iv: ['1','3','5','9'] },
   madd9:    { name: 'm(add9)',     iv: ['1','b3','5','9'] },
-  '69':     { name: '6/9',         iv: ['1','3','5','6','9'] },
+  '69':     { name: '6(9)',         iv: ['1','3','5','6','9'] },
   '9':      { name: '9',           iv: ['1','3','5','b7','9'] },
   maj9:     { name: 'maj9',        iv: ['1','3','5','7','9'] },
   m9:       { name: 'm9',          iv: ['1','b3','5','b7','9'] },
@@ -246,4 +289,29 @@ export function interpretDyad(low, high, scale) {
   out.rootName = (scaleSet || makeSet(r, ['1'])).name(r);
   out.highName = (scaleSet || makeSet(r, ['1', ['1','b2','2','b3','3','4','b5','5','b6','6','b7','7'][h]])).name(high);
   return out;
+}
+
+
+// ── Scale finder: scales that contain every picked pitch class ──
+// rootPc = number to force the root, or null to try all roots.
+export function identifyScales(midis, rootPc) {
+  const pcs = [...new Set(midis.map(pc))];
+  if (!pcs.length) return [];
+  const bass = pc(Math.min(...midis));
+  const out = [];
+  for (let r = 0; r < 12; r++) {
+    if (rootPc !== null && rootPc !== undefined && r !== rootPc) continue;
+    for (const [id, sc] of Object.entries(SCALES)) {
+      const set = new Set(sc.iv.map(n => pc(r + parseInterval(n).semis)));
+      if (!pcs.every(p => set.has(p))) continue;
+      const cover = pcs.length / set.size;                 // how much of the scale was picked
+      let score = cover * 10 + sc.pop * 1.6;
+      if (r === bass) score += 2.5;                        // lowest note as the root
+      if (pcs.includes(r)) score += 1.5;                   // root is among the picked notes
+      const spell = makeSet(r, sc.iv);
+      const missing = sc.iv.map(n => pc(r + parseInterval(n).semis)).filter(p => !pcs.includes(p));
+      out.push({ root: r, id, score, size: set.size, picked: pcs.length, name: spell.name(r) + ' ' + sc.name, missing: missing.map(p => spell.name(p)), exact: cover === 1, set: spell });
+    }
+  }
+  return out.sort((a, b) => b.score - a.score || a.size - b.size);
 }

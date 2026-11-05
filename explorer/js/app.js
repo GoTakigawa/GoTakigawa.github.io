@@ -1,7 +1,7 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad } from './theory.js?v=20';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=20';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore } from './positions.js?v=20';
-import { PianoEngine } from './audio.js?v=20';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales } from './theory.js?v=21';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=21';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore } from './positions.js?v=21';
+import { PianoEngine } from './audio.js?v=21';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -21,6 +21,8 @@ let st = structuredClone(DEFAULT);
 let shapes = null, ssel = -1, statusTimer = null, chipAction = 'emph', fbAction = 'play', picks = [];
 // a chord chosen from the search results, used by Shapes only (Show stays as it is)
 let shapeOverride = null;
+// root used by the scale finder: 'none' (try all), 'bass' (lowest picked note) or a pitch class
+let scRoot = 'none';
 
 // ── state ──
 function sanitize(s) {
@@ -398,7 +400,7 @@ function renderShapes() {
     renderFinder();
     return;
   }
-  $('finder-results').innerHTML = '';
+  $('finder-results').innerHTML = ''; $('scale-finder').hidden = true;
   if (!shapes) shapes = computeShapes();
   $('shape-back').hidden = !c.override;
   $('shape-target').textContent = c.label + (c.override ? '（検索から選んだコード）' : '') + '　構成音：' + c.cset.ivs.map(iv => `${c.cset.name(c.root + iv.semis)}(${iv.label === '1' ? 'R' : iv.label})`).join(' ') + (c.fromScale && st.diat < 0 && !c.override ? '　※ダイアトニックで選んだコードに切り替わります' : '');
@@ -421,6 +423,25 @@ function renderShapes() {
       || '<p class="hint">条件に合う形が見つかりませんでした。条件をゆるめてみてください。</p>';
   if (shapes.length > shown.length) $('shape-list').insertAdjacentHTML('beforeend', `<p class="hint" style="grid-column:1/-1">ほか ${shapes.length - shown.length} 件。条件で絞り込んでください。</p>`);
   $('shape-clear').disabled = ssel < 0;
+}
+
+// ── scale finder (picked notes) ──
+function renderScaleFinder(notes) {
+  $('scale-finder').hidden = false;
+  const bassName = notes.length ? currentSet().name(notes[0].m) : '';
+  $('sc-root').innerHTML = `<option value="none">指定なし</option><option value="bass">最低音${bassName ? '（' + bassName + '）' : ''}</option>` + ROOT_LABELS.map((n, i) => `<option value="${i}">${n}</option>`).join('');
+  $('sc-root').value = String(scRoot);
+  const pcsN = new Set(notes.map(x => pc(x.m))).size;
+  const root = scRoot === 'none' ? null : scRoot === 'bass' ? (notes.length ? pc(notes[0].m) : null) : +scRoot;
+  if (pcsN < (root === null ? 3 : 2)) { $('scale-results').innerHTML = `<p class="hint">${root === null ? '3種類以上' : '2種類以上'}の音を選ぶと、それを含むスケールを推測します。</p>`; return; }
+  const list = identifyScales(notes.map(x => x.m), root);
+  if (!list.length) { $('scale-results').innerHTML = '<p class="hint">選んだ音をすべて含むスケールは見つかりませんでした。</p>'; return; }
+  const shown = list.slice(0, 12);
+  $('scale-results').innerHTML = shown.map((x, i) => `<div class="fd-item sc-item ${i === 0 ? 'top' : ''}"><b>${x.name}</b>
+      <span class="sc-meta">${x.size}音中 ${x.picked}音が一致${x.exact ? '（すべて）' : ''} · ${SCALES[x.id].group}</span>
+      ${x.missing.length ? `<span class="sc-miss">足りない音：<em>${x.missing.join(' ')}</em></span>` : ''}
+      <button class="std small sc-go" data-root="${x.root}" data-id="${x.id}">Show をこのスケールにする</button></div>`).join('')
+    + (list.length > shown.length ? `<p class="hint">ほか ${list.length - shown.length} 件。ルートを指定すると絞り込めます。</p>` : '');
 }
 
 // ── chord finder (picked notes) ──
@@ -453,6 +474,7 @@ function renderFinder() {
     : '<p class="hint">登録しているコードの形には当てはまりませんでした。</p>';
   $('finder-results').innerHTML = html;
   $('pick-play').disabled = !notes.length; $('pick-clear').disabled = !notes.length;
+  renderScaleFinder(notes);
 }
 
 
@@ -523,6 +545,13 @@ function bind() {
     if (t === 'search') fbAction = 'pick'; else if (fbAction === 'pick') fbAction = 'play';
     update(() => { st.shapeTab = t; });
   }));
+  $('sc-root').addEventListener('change', e => { scRoot = e.target.value === 'none' || e.target.value === 'bass' ? e.target.value : +e.target.value; renderShapes(); });
+  $('scale-results').addEventListener('click', e => {
+    const g = e.target.closest('.sc-go'); if (!g) return;
+    shapeOverride = null;
+    update(() => { st.mode = 'scale'; st.root = +g.dataset.root; st.scale = g.dataset.id; st.diat = -1; st.emph = [0]; st.pattern = 0; });
+    notify('Show をそのスケールにしました（選んだ音はそのままです）');
+  });
   $('finder-results').addEventListener('click', e => {
     const g = e.target.closest('.fd-go'); if (!g) return;
     fbAction = 'play';
