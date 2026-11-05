@@ -1,5 +1,5 @@
 // ── Position logic: N-notes-per-string patterns and chord voicing search ──
-import { pc } from './theory.js?v=23';
+import { pc } from './theory.js?v=24';
 
 // Scale pattern: starting on degree `start` on the lowest string, take `nps`
 // consecutive scale notes per string going up. Returns Set of "string:fret".
@@ -40,7 +40,7 @@ export function findVoicings(tuning, chordPcs, rootPc, frets, opts) {
       const opts1 = [];
       for (let s = lo; s <= hi; s++) {
         const c = [];
-        if (opts.allowOpen && need.has(pc(tuning[s]))) c.push(0);
+        if (opts.allowOpen && base <= 3 && need.has(pc(tuning[s]))) c.push(0); // open strings only near the nut
         for (let f = Math.max(1, base); f < base + opts.span && f <= frets; f++) if (chordPcs.includes(pc(tuning[s] + f))) c.push(f);
         if (!c.length) { opts1.length = 0; break; }
         opts1.push(c);
@@ -53,6 +53,7 @@ export function findVoicings(tuning, chordPcs, rootPc, frets, opts) {
           const fretted = pick.filter(f => f > 0);
           if (fretted.length && Math.min(...fretted) !== base && base > 0) return; // anchor at base to avoid duplicates
           if (fretted.length && Math.max(...fretted) - Math.min(...fretted) >= opts.span) return;
+          if (opts.noUnison && new Set(pick.map((f, k) => tuning[lo + k] + f)).size < pick.length) return; // same pitch twice
           const pcsHit = new Set(pick.map((f, k) => pc(tuning[lo + k] + f)));
           if (opts.requireAll && [...need].some(p => !pcsHit.has(p))) return;
           if (opts.rootBass && pc(tuning[lo] + pick[0]) !== rootPc) return;

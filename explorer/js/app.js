@@ -1,7 +1,7 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=23';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=23';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore } from './positions.js?v=23';
-import { PianoEngine } from './audio.js?v=23';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=24';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=24';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=24';
+import { PianoEngine } from './audio.js?v=24';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -13,11 +13,12 @@ const DEFAULT = {
   emph: [0], diat: -1, seventh: false,
   range: 'all', from: 5, to: 8, pattern: 0, ghost: true,
   strOn: [], label: 'name',
-  vo: { span: 4, minStrings: 3, rootBass: false, allowOpen: true, omit5: false },
+  vo: { span: 4, minStrings: 3, rootBass: false, allowOpen: true, omit5: false, kind: 'all', count: 0, easy: false, range: '' },
   hideIv: [], hideCells: [],
   shapeTab: 'forms', sw: { size: 0, notes: 0, span: 5, rootStart: false, allowOpen: false, topOnly: true, common: true }
 };
 let st = structuredClone(DEFAULT);
+let voSets = [];
 let shapes = null, ssel = -1, statusTimer = null, chipAction = 'emph', fbAction = 'play', picks = [];
 // a chord chosen from the search results, used by Shapes only (Show stays as it is)
 let shapeOverride = null;
@@ -49,7 +50,10 @@ function sanitize(s) {
   d.label = ['name', 'interval', 'degree', 'none'].includes(s.label) ? s.label : 'name';
   if (s.vo && typeof s.vo === 'object') {
     d.vo.span = int(s.vo.span, 3, 6, 4); d.vo.minStrings = int(s.vo.minStrings, 2, 8, 3);
-    ['rootBass', 'allowOpen', 'omit5'].forEach(k => { if (k in s.vo) d.vo[k] = !!s.vo[k]; });
+    ['rootBass', 'allowOpen', 'omit5', 'easy'].forEach(k => { if (k in s.vo) d.vo[k] = !!s.vo[k]; });
+    d.vo.kind = s.vo.kind === 'power' ? 'power' : 'all';
+    d.vo.count = [0, 2, 3, 4, 5, 6].includes(s.vo.count) ? s.vo.count : 0;
+    d.vo.range = typeof s.vo.range === 'string' && /^\d{1,2}〜\d{1,2}弦$/.test(s.vo.range) ? s.vo.range : '';
   }
   d.hideIv = Array.isArray(s.hideIv) ? s.hideIv.filter(x => typeof x === 'string' && /^(bb|b|##|#)?\d{1,2}$/.test(x)) : [];
   d.hideCells = Array.isArray(s.hideCells) ? s.hideCells.filter(x => typeof x === 'string' && /^\d{1,2}:\d{1,2}$/.test(x)).slice(0, 1500) : [];
@@ -323,19 +327,35 @@ function computeShapes() {
     return list.map(v => fromFrets(v.frets, v.name, `${v.name} · ${v.low ? v.low + '〜' + v.high + 'f' : '開放'}`));
   }
   if (st.shapeTab === 'sets') {
-    // more than four tones: drop the 5th, then 9th, then 11th so the shape fits four strings
+    const power = st.vo.kind === 'power', relOf = p => pc(p - c.root);
     let need = c.pcs.slice();
-    if (need.length > 4) {
-      const relOf = p => pc(p - c.root);
-      for (const drop of [7, 2, 5, 1, 3]) { if (need.length <= 4) break; need = need.filter(p => relOf(p) !== drop || need.length <= 4); }
-    }
-    const k = Math.min(need.length, n);
-    const list = findVoicings(tun, need, rootPc, Math.min(F, 19), { span: st.vo.span, minStrings: k, maxStrings: k, requireAll: true, allowOpen: st.vo.allowOpen, need, limit: 300 });
-    // high string sets first
-    list.sort((x, y) => Math.max(...y.frets.map((f, s) => f === null ? -1 : s)) - Math.max(...x.frets.map((f, s) => f === null ? -1 : s)) || x.low - y.low);
-    return list.map(v => { const used = v.frets.map((f, s) => f === null ? null : s).filter(x => x !== null);
-      const strs = `${n - used[used.length - 1]}〜${n - used[0]}弦`;
-      return fromFrets(v.frets, strs, `${strs} · ${v.low || 0}〜${v.high}f`); });
+    // power-chord family: leave out the 3rd (or ♭3rd) and keep the root, the 5th and the colour tones
+    if (power) need = need.filter(p => ![3, 4].includes(relOf(p)));
+    // more than four tones: drop the 5th, then 9th, then 11th so the shape fits four strings
+    // (the power family keeps its 5th and drops the colour tones instead)
+    const order = power ? [2, 5, 1, 9, 10, 11] : [7, 2, 5, 1, 3];
+    for (const drop of order) { if (need.length <= (power ? 3 : 4)) break; need = need.filter(p => relOf(p) !== drop); }
+    const k = Math.min(st.vo.count || Math.max(need.length, power ? 3 : 0), n);
+    voSets = [];
+    if (need.length < 2 || k < need.length) return [];
+    let list = findVoicings(tun, need, rootPc, Math.min(F, 19), { span: st.vo.span, minStrings: k, maxStrings: k, requireAll: true, allowOpen: st.vo.allowOpen, need, limit: 3000, noUnison: true });
+    if (st.vo.easy) list = list.filter(v => playScore(v.frets).ok);
+    const topOf = v => Math.max(...v.frets.map((f, s) => f === null ? -1 : s));
+    // standard tuning labels use string numbers counted from the 1st string
+    const labelOf = v => { const used = v.frets.map((f, s) => f === null ? null : s).filter(x => x !== null); return `${n - used[used.length - 1]}〜${n - used[0]}弦`; };
+    list.forEach(v => v.strs = labelOf(v));
+    voSets = [...new Set(list.slice().sort((x, y) => topOf(y) - topOf(x)).map(v => v.strs))];
+    if (power) voSets.reverse();
+    if (st.vo.range && voSets.includes(st.vo.range)) list = list.filter(v => v.strs === st.vo.range);
+    // high string sets first (power-chord family: low strings first)
+    list.sort((x, y) => (power ? topOf(x) - topOf(y) : topOf(y) - topOf(x)) || x.low - y.low);
+    const fifth = c.cset.ivs.find(iv => [6, 7, 8].includes(iv.semis));
+    const plain = need.length === 2 && fifth && fifth.semis === 7;
+    return list.map(v => {
+      const bass = Math.min(...v.frets.map((f, s) => f === null ? Infinity : tun[s] + f));
+      const f = fromFrets(v.frets, v.strs, `${v.strs} · ${v.low || 0}〜${v.high}f`);
+      if (power) { const rn = c.cset.name(c.root); f.name = (plain ? rn + '5' : c.sym + '（3度抜き）') + (pc(bass) === pc(c.root) ? '' : '/' + c.cset.name(bass)); }
+      return f; });
   }
   if (st.shapeTab === 'sweep') {
     const sizes = st.sw.size ? [st.sw.size] : [8, 7, 6, 5, 4, 3];
@@ -404,13 +424,18 @@ function renderShapes() {
   if (!shapes) shapes = computeShapes();
   $('shape-back').hidden = !c.override;
   $('shape-target').textContent = c.label + (c.override ? '（検索から選んだコード）' : '') + '　構成音：' + c.cset.ivs.map(iv => `${c.cset.name(c.root + iv.semis)}(${iv.label === '1' ? 'R' : iv.label})`).join(' ') + (c.fromScale && st.diat < 0 && !c.override ? '　※ダイアトニックで選んだコードに切り替わります' : '');
-  $('sets-span').value = st.vo.span; $('sets-open').checked = st.vo.allowOpen;
+  $('sets-span').value = st.vo.span; $('sets-open').checked = st.vo.allowOpen; $('sets-easy').checked = st.vo.easy;
+  $('sets-kind').value = st.vo.kind; $('sets-count').value = String(st.vo.count);
+  $('sets-range').innerHTML = '<option value="">すべて</option>' + voSets.map(x => `<option value="${x}">${x}</option>`).join('');
+  $('sets-range').value = voSets.includes(st.vo.range) ? st.vo.range : '';
   $('sw-size').innerHTML = '<option value="0">すべて</option>' + [3, 4, 5, 6, 7, 8].filter(k => k <= st.strings).map(k => `<option value="${k}">${k}弦</option>`).join('');
   $('sw-notes').value = st.sw.notes;
   $('sw-size').value = st.sw.size; $('sw-span').value = st.sw.span; $('sw-root').checked = st.sw.rootStart; $('sw-open').checked = st.sw.allowOpen; $('sw-top').checked = st.sw.topOnly; $('sw-common').checked = st.sw.common;
   const hints = {
     forms: (c.id && FORMS[c.id] ? '一般的なコードフォーム（E型・A型・D型・C型・G型など）を、いまのチューニングに置き直して並べています。' : 'このコードは定番フォームの登録がないため、E型・A型などの基本フォームの音を近いコードトーンへずらして作った形（変形）を並べています。') + '7・8弦では上の6本で作ります。',
-    sets: `転回形：隣り合う${Math.min(c.pcs.length > 4 ? 4 : c.pcs.length, st.strings)}本の弦に構成音を1つずつ、重ねずに置いた形です。どの音が一番下・一番上に来るかの違いで並びます（3和音ならトライアドの転回形、4和音ならクローズやドロップ2・3の形）。高音弦側から並べています。${c.pcs.length > 4 ? '5音以上のコードは、5度・9度・11度の順に省いて4音にしています。' : ''}`,
+    sets: st.vo.kind === 'power'
+      ? `パワーコード系：3度（短3度）を抜いて、ルート・5度とあれば7度などの音だけで隣り合う弦に置いた形です。3本ならルート・5度・ルート（またはその転回）の形になり、低音弦側から並べています。「使う弦の本数」を増やすと、同じ音をオクターブで重ねた形も出ます。`
+      : `転回形：隣り合う弦に構成音を重ねずに置いた形です。どの音が一番下・一番上に来るかの違いで並びます（3和音ならトライアドの転回形、4和音ならクローズやドロップ2・3の形）。「使う弦の本数」を音の数より増やすと、同じ音を重ねた形（たとえば3和音を2〜5弦の4本で）も出ます。高音弦側から並べています。${c.pcs.length > 4 ? '5音以上のコードは、5度・9度・11度の順に省いて4音にしています。' : ''}`,
     sweep: `コードトーンを順番に1弦1〜2音ずつ上がっていくスウィープの形です。高音弦側から並べ、同じ弦の範囲では一般的な形（コードフォームの範囲に収まる・ルートから始まる・幅が狭い）を先にしています。${st.sw.common ? '「一般的な形だけ」をオフにすると、ほかの形も出ます。' : ''}番号が弾く順番です。`
   };
   $('shape-hint').textContent = hints[st.shapeTab];
@@ -562,6 +587,10 @@ function bind() {
   const vo = (k, v) => update(() => { st.vo[k] = v; });
   $('sets-span').addEventListener('change', e => vo('span', +e.target.value));
   $('sets-open').addEventListener('change', e => vo('allowOpen', e.target.checked));
+  $('sets-easy').addEventListener('change', e => vo('easy', e.target.checked));
+  $('sets-kind').addEventListener('change', e => update(() => { st.vo.kind = e.target.value; st.vo.range = ''; }));
+  $('sets-count').addEventListener('change', e => update(() => { st.vo.count = +e.target.value; st.vo.range = ''; }));
+  $('sets-range').addEventListener('change', e => vo('range', e.target.value));
   const sw = (k, v) => update(() => { st.sw[k] = v; });
   $('sw-size').addEventListener('change', e => sw('size', +e.target.value));
   $('sw-notes').addEventListener('change', e => sw('notes', +e.target.value));
