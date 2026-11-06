@@ -91,10 +91,14 @@ export class PitchListener {
       return;
     }
     if (level < 0.006) { this.onFrame({ freq: null, clarity: 0, level }); return; }
-    // fast path: the newest 2048 samples (~43 ms) answer for notes above ~100 Hz; low notes need the full window
-    const sr = this.ctx.sampleRate, half = this.buf.length >> 1;
-    let r = yin(this.buf.subarray(half), sr, sr / (half - 2));
-    if (!r || r.freq < 100) r = yin(this.buf, sr);
+    // three window lengths: notes from B3 up are answered from the newest 1024 samples (~21 ms), notes down to ~100 Hz
+    // from 2048 (~43 ms), and only the low strings wait for the full 4096 (~85 ms)
+    const sr = this.ctx.sampleRate, n = this.buf.length;
+    let r = yin(this.buf.subarray(n - 1024), sr, sr / 510);
+    if (!r || r.freq < 250) {
+      r = yin(this.buf.subarray(n - 2048), sr, sr / 1022);
+      if (!r || r.freq < 100) r = yin(this.buf, sr);
+    }
     this.onFrame(r && r.clarity > 0.8 ? { freq: r.freq, clarity: r.clarity, level } : { freq: null, clarity: 0, level });
   }
   async stop() {
