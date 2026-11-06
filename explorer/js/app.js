@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=38';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=38';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=38';
-import { PianoEngine } from './audio.js?v=38';
-import { PitchListener } from './pitch.js?v=38';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=39';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=39';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=39';
+import { PianoEngine } from './audio.js?v=39';
+import { PitchListener } from './pitch.js?v=39';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -339,6 +339,7 @@ function onChordFrame(fr) {
 const listener = new PitchListener(fr => {
   const now = performance.now();
   if (fr.freq) {
+    if (now - live.lastT > 250) { live.hist = []; live.gap = true; }   // a fresh attack: do not mix it with the old note
     live.hist.push(69 + 12 * Math.log2(fr.freq / tnA4())); if (live.hist.length > 3) live.hist.shift();
     const h = live.hist.slice().sort((x, y) => x - y); live.midi = h[h.length >> 1]; live.lastT = now;
   } else if (now - live.lastT > 400) live.hist = [];
@@ -396,7 +397,7 @@ function liveFrame(t) {
   const tun = tuning(), n = tun.length;
   // commit a new note only when it has been steady for ~45 ms (skips pluck noise and half-way readings)
   const rnd = Math.round(live.midi);
-  if (live.near === null) live.near = rnd;
+  if (live.near === null || live.gap) { live.near = rnd; live.pend = null; live.gap = false; }   // first reading of a new attack shows at once; later readings still have to hold
   else if (rnd !== live.near && Math.abs(live.midi - live.near) > 0.65) {
     if (!live.pend || live.pend.n !== rnd) live.pend = { n: rnd, t };
     else if (t - live.pend.t >= 45) { live.near = rnd; live.pend = null; }
@@ -426,7 +427,7 @@ async function tunerStart() {
     $('tn-device').innerHTML = '<option value="">既定の入力</option>' + devs.map(d => `<option value="${d.deviceId}">${(d.label || '入力デバイス').replace(/</g, '&lt;')}</option>`).join('');
     $('tn-device').value = devs.some(d => d.deviceId === cur) ? cur : '';
   } catch (e) {}
-  live.on = true; live.hist = []; live.sincePitch = null; live.midi = null; live.near = null; live.pend = null; live.hand = null; live.prim = null; live.pos = null; live.trail = []; live.lastT = -1e9;
+  live.on = true; live.gap = false; live.hist = []; live.sincePitch = null; live.midi = null; live.near = null; live.pend = null; live.hand = null; live.prim = null; live.pos = null; live.trail = []; live.lastT = -1e9;
   $('tn-toggle').textContent = '■ 停止'; $('tn-toggle').classList.add('on');
   msg.textContent = '音を弾いてください。指板の光る輪が、いま鳴っている高さの音が出せる位置です（同じ高さの音は複数の場所で出せるので、すべて同じように光ります）。±5セント以内で、音名の表示が緑になります。';
   cancelAnimationFrame(live.raf); live.prevT = 0; live.raf = requestAnimationFrame(liveFrame);
