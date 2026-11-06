@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=26';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=26';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=26';
-import { PianoEngine } from './audio.js?v=26';
-import { PitchListener } from './pitch.js?v=26';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=27';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=27';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=27';
+import { PianoEngine } from './audio.js?v=27';
+import { PitchListener } from './pitch.js?v=27';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -313,7 +313,7 @@ function renderFretboard() {
 
 // ── live tuner: pitch from the input → note, cents and a moving dot on the fretboard ──
 let fbGeom = null;
-const live = { on: false, hist: [], midi: null, lastT: 0, prim: null, pos: null, since: 0, trail: [], raf: 0, prevT: 0 };
+const live = { on: false, hist: [], midi: null, near: null, pend: null, hand: null, lastT: 0, prim: null, pos: null, since: 0, trail: [], raf: 0, prevT: 0 };
 const listener = new PitchListener(fr => {
   const now = performance.now();
   if (fr.freq) {
@@ -350,7 +350,15 @@ function liveFrame(t) {
   if (!active && t - live.lastT > 1500) { tunerReadout(false); }
   const layer = $('fb-live');
   if (!$('tn-show').checked || !fbGeom || live.midi === null) { layer.innerHTML = ''; return; }
-  const tun = tuning(), n = tun.length, near = Math.round(live.midi);
+  const tun = tuning(), n = tun.length;
+  // commit a new note only when it has been steady for ~100 ms (skips pluck noise and half-way readings)
+  const rnd = Math.round(live.midi);
+  if (live.near === null) live.near = rnd;
+  else if (rnd !== live.near && Math.abs(live.midi - live.near) > 0.65) {
+    if (!live.pend || live.pend.n !== rnd) live.pend = { n: rnd, t };
+    else if (t - live.pend.t >= 100) { live.near = rnd; live.pend = null; }
+  } else live.pend = null;
+  const near = live.near;
   if (active) tunerReadout(true, live.midi);
   const fade = active ? 1 : Math.max(0, 1 - (t - live.lastT - 350) / 600);
   if (fade <= 0) { layer.innerHTML = ''; return; }
@@ -358,11 +366,14 @@ function liveFrame(t) {
   if (!cands.length) { layer.innerHTML = ''; return; }
   const same = (a, b) => a && b && a.s === b.s && a.f === b.f;
   if (!cands.some(c => same(c, live.prim))) {
-    // a new note: follow from the previous position if there is one, otherwise the lowest fret
+    // a new note: keep the hand where it already is (nearest fret to the recent hand position),
+    // moving across strings only as a small extra cost. The first note starts from the lowest fret.
     const old = live.prim;
-    const pick = old ? cands.slice().sort((a, b) => (2 * Math.abs(a.s - old.s) + Math.abs(a.f - old.f)) - (2 * Math.abs(b.s - old.s) + Math.abs(b.f - old.f)))[0] : cands.slice().sort((a, b) => a.f - b.f)[0];
+    const cost = c => Math.abs((c.f === 0 ? 0 : c.f) - (live.hand ?? 0)) + (old ? 0.5 * Math.abs(c.s - old.s) : 0) + (c.f === 0 ? 0.5 : 0);
+    const pick = cands.slice().sort((a, b) => live.hand === null && !old ? a.f - b.f : cost(a) - cost(b))[0];
     if (live.pos) live.trail.push({ x: live.pos.x, y: live.pos.y, t });
     live.prim = pick; live.since = t;
+    if (pick.f > 0) live.hand = live.hand === null ? pick.f : live.hand * 0.6 + pick.f * 0.4;
   }
   const tx = fbGeom.cx(live.prim.f), ty = fbGeom.Y(live.prim.s);
   if (!live.pos) live.pos = { x: tx, y: ty };
@@ -392,9 +403,9 @@ async function tunerStart() {
     $('tn-device').innerHTML = '<option value="">既定の入力</option>' + devs.map(d => `<option value="${d.deviceId}">${(d.label || '入力デバイス').replace(/</g, '&lt;')}</option>`).join('');
     $('tn-device').value = devs.some(d => d.deviceId === cur) ? cur : '';
   } catch (e) {}
-  live.on = true; live.hist = []; live.midi = null; live.prim = null; live.pos = null; live.trail = []; live.lastT = -1e9;
+  live.on = true; live.hist = []; live.midi = null; live.near = null; live.pend = null; live.hand = null; live.prim = null; live.pos = null; live.trail = []; live.lastT = -1e9;
   $('tn-toggle').textContent = '■ 停止'; $('tn-toggle').classList.add('on');
-  msg.textContent = '音を弾いてください。指板の青い点が、いま鳴っている音の位置です（同じ高さの音が出せるほかの位置は点線で出ます）。±5セント以内で緑になります。';
+  msg.textContent = '音を弾いてください。指板の青い点が、いま鳴っている音の位置です（同じ高さの音が出せるほかの位置は点線で出ます。実際の位置とずれたら、その位置を押すと覚えさせられます）。±5セント以内で緑になります。';
   cancelAnimationFrame(live.raf); live.prevT = 0; live.raf = requestAnimationFrame(liveFrame);
 }
 async function tunerStop() {
@@ -741,6 +752,11 @@ function bind() {
   // sound
   $('fretboard').addEventListener('click', e => {
     const h = e.target.closest('.fb-hit'); if (!h) return;
+    // while the tuner is listening, pressing a place with the sounding pitch tells it where you really are
+    if (live.on && fbAction === 'play' && live.near !== null && +h.dataset.m === live.near) {
+      const [cs, cf] = h.dataset.c.split(':').map(Number);
+      live.prim = { s: cs, f: cf }; live.hand = cf; live.since = performance.now(); return;
+    }
     if (fbAction === 'pick') {
       const c = h.dataset.c;
       picks = picks.includes(c) ? picks.filter(x => x !== c) : [...picks, c];
