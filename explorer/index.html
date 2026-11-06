@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=25">
+<link rel="stylesheet" href="style.css?v=26">
 </head>
 <body>
 
@@ -127,7 +127,7 @@
         <div class="panel-title">Fretboard<b id="fb-title"></b></div>
         <button class="std small" id="play-set">▶ 表示中の音を鳴らす</button>
       </div>
-      <div class="fb-scroll"><div id="fretboard"></div></div>
+      <div class="fb-scroll"><div class="fb-stack"><div id="fretboard"></div><svg id="fb-live" aria-hidden="true"></svg></div></div>
 
       <div class="tool-bar" role="toolbar" aria-label="指板の操作">
         <div class="tool-group">
@@ -153,6 +153,30 @@
         <span class="lg"><span class="dot" style="border:1.5px dashed #555"></span>隠している位置</span>
         <span class="lg"><span class="dot" style="background:#f5f5f5"></span>選んだ音</span>
       </div>
+    </section>
+
+    <section class="panel" id="tuner-panel">
+      <div class="panel-hd">
+        <div class="panel-title">Tuner<b>弾いている音と位置をリアルタイム表示</b></div>
+        <button class="std small" id="tn-toggle">● 入力を開始</button>
+      </div>
+      <div class="tn-body">
+        <div class="tn-read">
+          <div class="tn-note" id="tn-note">—</div>
+          <div class="tn-sub"><span id="tn-hz">— Hz</span><span id="tn-cents">—</span></div>
+        </div>
+        <div class="tn-meter" id="tn-meter" aria-hidden="true">
+          <span class="tn-tick" style="left:0">−50</span><span class="tn-tick" style="left:25%"></span><span class="tn-tick mid" style="left:50%">0</span><span class="tn-tick" style="left:75%"></span><span class="tn-tick" style="left:100%">+50</span>
+          <i class="tn-needle" id="tn-needle"></i>
+        </div>
+        <div class="tn-strings" id="tn-strings"></div>
+      </div>
+      <div class="tn-opts">
+        <div class="field"><label for="tn-device">入力デバイス</label><select id="tn-device"><option value="">既定の入力</option></select></div>
+        <div class="field"><label for="tn-a4">基準音 A4</label><select id="tn-a4"></select></div>
+        <div class="toggle-row"><span class="toggle-label">指板に位置を表示</span><label class="toggle-switch"><input type="checkbox" id="tn-show" checked><span class="toggle-slider"></span></label></div>
+      </div>
+      <p class="hint" id="tn-msg">「入力を開始」を押すとマイクの使用許可を求められます。音声はこのページの中で処理するだけで、どこにも送られません。単音で弾くのがいちばん正確です。オーディオインターフェースは入力デバイスで選べます。</p>
     </section>
 
     <section class="panel">
@@ -232,7 +256,7 @@
 
 <div class="status" id="status" role="status" aria-live="polite"></div>
 
-<script type="module" src="js/app.js?v=25"></script>
+<script type="module" src="js/app.js?v=26"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
