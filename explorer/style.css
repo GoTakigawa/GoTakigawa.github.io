@@ -293,4 +293,8 @@ button.small{font-size:11px;padding:6px 10px;}
 
 .tn-chord{display:grid;gap:10px;}
 .tn-chord.idle{opacity:.55;}
-#tn-chord-res{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;}
+#tn-chord-res{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));grid-auto-rows:98px;gap:8px;align-content:start;height:204px;overflow-y:auto;}
+#tn-chord-res .fd-item{height:98px;box-sizing:border-box;overflow:hidden;}
+#tn-chord-res .hint{grid-column:1/-1;}
+#tn-chord-notes{min-height:40px;align-content:flex-start;}
+@media(max-width:700px){#tn-chord-res{height:310px;}}

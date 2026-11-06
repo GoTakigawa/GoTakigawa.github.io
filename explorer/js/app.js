@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=35';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=35';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=35';
-import { PianoEngine } from './audio.js?v=35';
-import { PitchListener } from './pitch.js?v=35';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=38';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=38';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=38';
+import { PianoEngine } from './audio.js?v=38';
+import { PitchListener } from './pitch.js?v=38';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -314,7 +314,7 @@ function renderFretboard() {
 // ── live tuner: pitch from the input → note, cents and a moving dot on the fretboard ──
 let fbGeom = null;
 const live = { gap: false, on: false, hist: [], midi: null, near: null, pend: null, hand: null, lastT: 0, prim: null, pos: null, since: 0, trail: [], raf: 0, prevT: 0 };
-const chordHist = []; let chordT = 0;
+const chordHist = []; let chordT = 0; const chordLive = { notes: [], root: null, t: -1e9 };
 function onChordFrame(fr) {
   const now = performance.now();
   if (!fr.notes.length) { if (now - chordT > 1500) $('tn-chord').classList.add('idle'); return; }
@@ -324,6 +324,7 @@ function onChordFrame(fr) {
   const need = Math.ceil(chordHist.length * 0.6), stable = [...cnt].filter(([, c]) => c >= need).map(([m]) => m).sort((a, b) => a - b);
   $('tn-chord').classList.remove('idle');
   const res = identifyChord(stable), set = res.results[0] ? res.results[0].set : currentSet();
+  chordLive.notes = stable; chordLive.root = res.results[0] ? pc(res.results[0].root) : pc(stable[0]); chordLive.t = performance.now();
   const seen = new Set();
   $('tn-chord-notes').innerHTML = stable.map(m => `<span class="pick-note">${set.name(m)}<small>${Math.floor(m / 12) - 1}</small></span>`).join('') || '<span class="hint">音がはっきりしません</span>';
   let html = '';
@@ -364,13 +365,33 @@ function tunerReadout(active, m) {
     c.querySelector('.tn-d').textContent = isNear ? (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(0) + '¢' : '';
   });
 }
+// Glow for a list of places { x, y, root }: green for the root, sky blue otherwise
+function glowSvg(items, fade, t) {
+  const breathe = 0.65 + 0.35 * Math.sin(t / 260);
+  let g = `<defs><filter id="lv-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="4.5"/></filter><filter id="lv-glow2" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><g opacity="${fade.toFixed(2)}">`;
+  items.forEach(c => {
+    const hi = c.root ? '#86efac' : '#38bdf8', core = c.root ? '#c9f9dc' : '#bfe9fb', x = c.x.toFixed(1);
+    g += `<circle cx="${x}" cy="${c.y}" r="14" fill="none" stroke="${hi}" stroke-width="7" filter="url(#lv-glow)" opacity="${(0.55 + 0.4 * breathe).toFixed(2)}"/>`;
+    g += `<circle cx="${x}" cy="${c.y}" r="14" fill="none" stroke="${hi}" stroke-width="3" filter="url(#lv-glow2)" opacity="${(0.5 + 0.4 * breathe).toFixed(2)}"/>`;
+    g += `<circle cx="${x}" cy="${c.y}" r="14" fill="none" stroke="${core}" stroke-width="1.6"/>`;
+  });
+  return g + '</g>';
+}
+
 function liveFrame(t) {
   live.raf = requestAnimationFrame(liveFrame);
   const dt = Math.min(100, t - (live.prevT || t)); live.prevT = t;
   const active = live.midi !== null && t - live.lastT < 350;
   if (!active && t - live.lastT > 1500) { tunerReadout(false); }
   const layer = $('fb-live');
-  if (listener.mode === 'chord') { layer.innerHTML = ''; return; }
+  if (listener.mode === 'chord') {
+    // every place that gives any of the heard notes; the root of the best reading is green
+    const age = t - chordLive.t, fadeC = age < 2000 ? 1 : Math.max(0, 1 - (age - 2000) / 800);
+    if (!$('tn-show').checked || !fbGeom || !chordLive.notes.length || fadeC <= 0) { layer.innerHTML = ''; return; }
+    const tunC = tuning(), items = [];
+    chordLive.notes.forEach(m => tunC.forEach((open, s) => { const f = m - open; if (st.strOn[s] && f >= 0 && f <= st.frets) items.push({ x: fbGeom.cx(f), y: fbGeom.Y(s), root: chordLive.root !== null && pc(m) === chordLive.root }); }));
+    layer.innerHTML = items.length ? glowSvg(items, fadeC, t) : ''; return;
+  }
   if (!$('tn-show').checked || !fbGeom || live.midi === null) { layer.innerHTML = ''; return; }
   const tun = tuning(), n = tun.length;
   // commit a new note only when it has been steady for ~45 ms (skips pluck noise and half-way readings)
@@ -386,16 +407,9 @@ function liveFrame(t) {
   if (fade <= 0) { layer.innerHTML = ''; return; }
   const cands = []; for (let s = 0; s < n; s++) { const f = near - tun[s]; if (st.strOn[s] && f >= 0 && f <= st.frets) cands.push({ s, f }); }
   if (!cands.length) { layer.innerHTML = ''; return; }
-  // The same pitch can sit at several places, so every place that gives it glows the same way (site green + sky blue)
-  const breathe = 0.65 + 0.35 * Math.sin(t / 260);
-  let g = `<defs><filter id="lv-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="4.5"/></filter><filter id="lv-glow2" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><g opacity="${fade.toFixed(2)}">`;
-  cands.forEach(c => {
-    const x = fbGeom.cx(c.f).toFixed(1), y = fbGeom.Y(c.s);
-    g += `<circle cx="${x}" cy="${y}" r="14" fill="none" stroke="#38bdf8" stroke-width="7" filter="url(#lv-glow)" opacity="${(0.55 + 0.4 * breathe).toFixed(2)}"/>`;
-    g += `<circle cx="${x}" cy="${y}" r="14" fill="none" stroke="#86efac" stroke-width="3" filter="url(#lv-glow2)" opacity="${(0.5 + 0.4 * breathe).toFixed(2)}"/>`;
-    g += `<circle cx="${x}" cy="${y}" r="14" fill="none" stroke="#c9f9dc" stroke-width="1.6"/>`;
-  });
-  g += '</g>';
+  // The same pitch can sit at several places, so every place that gives it glows the same way
+  const isRoot = st.mode !== 'notes' && pc(near) === pc(st.root);
+  const g = glowSvg(cands.map(c => ({ x: fbGeom.cx(c.f), y: fbGeom.Y(c.s), root: isRoot })), fade, t);
   layer.innerHTML = g;
 }
 async function tunerStart() {
@@ -799,7 +813,7 @@ function bindTuner() {
   $('tn-a4').addEventListener('change', () => { try { localStorage.setItem('gti-explorer:a4', $('tn-a4').value); } catch (e) {} });
   $('tn-toggle').addEventListener('click', () => live.on ? tunerStop() : tunerStart());
   document.querySelectorAll('.tn-mode').forEach(btn => btn.addEventListener('click', () => {
-    listener.mode = btn.dataset.m; chordHist.length = 0;
+    listener.mode = btn.dataset.m; chordHist.length = 0; chordLive.notes = [];
     document.querySelectorAll('.tn-mode').forEach(b => b.classList.toggle('on', b === btn));
     $('tn-single').hidden = btn.dataset.m === 'chord'; $('tn-chord').hidden = btn.dataset.m !== 'chord';
     if (btn.dataset.m === 'chord') { $('fb-live').innerHTML = ''; $('tn-chord').classList.add('idle'); }
