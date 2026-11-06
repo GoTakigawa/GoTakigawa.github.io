@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=32';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=32';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=32';
-import { PianoEngine } from './audio.js?v=32';
-import { PitchListener } from './pitch.js?v=32';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=33';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=33';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=33';
+import { PianoEngine } from './audio.js?v=33';
+import { PitchListener } from './pitch.js?v=33';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -339,7 +339,6 @@ const listener = new PitchListener(fr => {
   const now = performance.now();
   if (fr.freq) {
     live.hist.push(69 + 12 * Math.log2(fr.freq / tnA4())); if (live.hist.length > 3) live.hist.shift();
-    if (now - live.lastT > 300) live.gap = true;           // a fresh attack after a pause
     const h = live.hist.slice().sort((x, y) => x - y); live.midi = h[h.length >> 1]; live.lastT = now;
   } else if (now - live.lastT > 400) live.hist = [];
 }, onChordFrame);
@@ -387,41 +386,16 @@ function liveFrame(t) {
   if (fade <= 0) { layer.innerHTML = ''; return; }
   const cands = []; for (let s = 0; s < n; s++) { const f = near - tun[s]; if (st.strOn[s] && f >= 0 && f <= st.frets) cands.push({ s, f }); }
   if (!cands.length) { layer.innerHTML = ''; return; }
-  const same = (a, b) => a && b && a.s === b.s && a.f === b.f;
-  if (!cands.some(c => same(c, live.prim))) {
-    // a new note: keep the hand where it already is (nearest fret to the recent hand position),
-    // moving across strings only as a small extra cost. The first note starts from the lowest fret.
-    const old = live.prim;
-    // cost in "frets": distance from the hand, a small price for changing string (so a near fret on another
-    // string beats a long slide on the same one), and a penalty for the low strings far up the neck
-    const cost = c => {
-      const pos = n > 1 ? c.s / (n - 1) : 1, low = Math.max(0, 1 - 2 * pos);   // 1 on the lowest string, 0 from the middle up
-      const dist = c.f === 0 ? Math.min(live.hand ?? 0, 4) + 0.5 : Math.abs(c.f - (live.hand ?? 0));
-      return dist + (old ? 0.2 * Math.abs(c.s - old.s) : 0) + low * Math.max(0, c.f - 5) * 0.45;
-    };
-    const pick = cands.slice().sort((a, b) => live.hand === null && !old ? a.f - b.f : cost(a) - cost(b))[0];
-    if (live.pos) live.trail.push({ x: live.pos.x, y: live.pos.y, t });
-    live.prim = pick; live.since = t;
-    if (pick.f > 0) live.hand = live.hand === null ? pick.f : live.hand * 0.5 + pick.f * 0.5;
-  }
-  // after a pause, a pitch that an open string can give is almost always the open string
-  if (live.gap && active && rnd === near) {
-    live.gap = false;
-    const open = cands.find(c => c.f === 0);
-    if (open && !same(open, live.prim)) { if (live.pos) live.trail.push({ x: live.pos.x, y: live.pos.y, t }); live.prim = open; live.since = t; }
-  }
-  const tx = fbGeom.cx(live.prim.f), ty = fbGeom.Y(live.prim.s);
-  if (!live.pos) live.pos = { x: tx, y: ty };
-  const k = 1 - Math.exp(-dt / 28); live.pos.x += (tx - live.pos.x) * k; live.pos.y += (ty - live.pos.y) * k;
-  live.trail = live.trail.filter(p => t - p.t < 700);
-  const col = '#8c4dff';
-  let g = `<g opacity="${fade.toFixed(2)}">`;
-  live.trail.forEach(p => { const a = 1 - (t - p.t) / 700; g += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(4 + 5 * a).toFixed(1)}" fill="${col}" opacity="${(a * 0.4).toFixed(2)}"/>`; });
-  cands.filter(c => !same(c, live.prim)).forEach(c => g += `<circle cx="${fbGeom.cx(c.f).toFixed(1)}" cy="${fbGeom.Y(c.s)}" r="9" fill="none" stroke="#8c4dff" stroke-width="1.6" stroke-dasharray="3 3" opacity=".6"/>`);
+  // The same pitch can sit at several places, so every place that gives it is lit equally
+  if (live.sincePitch !== near) { live.sincePitch = near; live.since = t; }
   const ph = ((t - live.since) % 900) / 900;
-  g += `<circle cx="${live.pos.x.toFixed(1)}" cy="${live.pos.y.toFixed(1)}" r="${(12 + 16 * ph).toFixed(1)}" fill="none" stroke="${col}" stroke-width="2" opacity="${((1 - ph) * 0.55).toFixed(2)}"/>`;
-  g += `<circle cx="${live.pos.x.toFixed(1)}" cy="${live.pos.y.toFixed(1)}" r="12" fill="${col}" stroke="#fff" stroke-width="1.5"/>`;
-  g += `<text x="${live.pos.x.toFixed(1)}" y="${(live.pos.y + 3.6).toFixed(1)}" fill="#0a0a0a" font-size="10" font-weight="700" text-anchor="middle" font-family="Barlow">${currentSet().name(near)}</text></g>`;
+  let g = `<g opacity="${fade.toFixed(2)}">`;
+  cands.forEach(c => {
+    const x = fbGeom.cx(c.f).toFixed(1), y = fbGeom.Y(c.s);
+    g += `<circle cx="${x}" cy="${y}" r="${(11 + 9 * ph).toFixed(1)}" fill="none" stroke="#8c4dff" stroke-width="1.6" opacity="${((1 - ph) * 0.5).toFixed(2)}"/>`;
+    g += `<circle cx="${x}" cy="${y}" r="11" fill="#8c4dff" fill-opacity=".38" stroke="#8c4dff" stroke-width="2" stroke-dasharray="3.5 3"/>`;
+  });
+  g += '</g>';
   layer.innerHTML = g;
 }
 async function tunerStart() {
@@ -438,9 +412,9 @@ async function tunerStart() {
     $('tn-device').innerHTML = '<option value="">既定の入力</option>' + devs.map(d => `<option value="${d.deviceId}">${(d.label || '入力デバイス').replace(/</g, '&lt;')}</option>`).join('');
     $('tn-device').value = devs.some(d => d.deviceId === cur) ? cur : '';
   } catch (e) {}
-  live.on = true; live.gap = false; live.hist = []; live.midi = null; live.near = null; live.pend = null; live.hand = null; live.prim = null; live.pos = null; live.trail = []; live.lastT = -1e9;
+  live.on = true; live.hist = []; live.sincePitch = null; live.midi = null; live.near = null; live.pend = null; live.hand = null; live.prim = null; live.pos = null; live.trail = []; live.lastT = -1e9;
   $('tn-toggle').textContent = '■ 停止'; $('tn-toggle').classList.add('on');
-  msg.textContent = '音を弾いてください。指板の紫の点が、いま鳴っている音の位置です（同じ高さの音が出せるほかの位置は点線で出ます。実際の位置とずれたら、その位置を押すと覚えさせられます）。±5セント以内で緑になります。';
+  msg.textContent = '音を弾いてください。指板の紫の点線が、いま鳴っている高さの音が出せる位置です（同じ高さの音は複数の場所で出せるので、すべて同じ強さで光ります）。±5セント以内で、音名の表示が緑になります。';
   cancelAnimationFrame(live.raf); live.prevT = 0; live.raf = requestAnimationFrame(liveFrame);
 }
 async function tunerStop() {
@@ -787,11 +761,6 @@ function bind() {
   // sound
   $('fretboard').addEventListener('click', e => {
     const h = e.target.closest('.fb-hit'); if (!h) return;
-    // while the tuner is listening, pressing a place with the sounding pitch tells it where you really are
-    if (live.on && fbAction === 'play' && live.near !== null && +h.dataset.m === live.near) {
-      const [cs, cf] = h.dataset.c.split(':').map(Number);
-      live.prim = { s: cs, f: cf }; live.hand = cf; live.since = performance.now(); return;
-    }
     if (fbAction === 'pick') {
       const c = h.dataset.c;
       picks = picks.includes(c) ? picks.filter(x => x !== c) : [...picks, c];
