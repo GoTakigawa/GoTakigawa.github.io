@@ -23,9 +23,44 @@ export function yin(buf, sr, minF = 30, maxF = 1400, thr = 0.15) {
 
 export const rms = buf => { let s = 0; for (let i = 0; i < buf.length; i++) s += buf[i] * buf[i]; return Math.sqrt(s / buf.length); };
 
+// ── Several notes at once (a chord): harmonic-sum salience + greedy cancellation on a magnitude spectrum ──
+// mag: linear magnitudes of an FFT of size fftSize. Returns MIDI numbers (low → high).
+const HW = [0, 1, .8, .62, .5, .4, .32];
+export function detectNotes(mag, sr, fftSize, o = {}) {
+  const lo = o.lo || 38, hi = o.hi || 88, maxN = o.maxNotes || 6; o = { rel: 0.3, ...o };
+  const binHz = sr / fftSize, sp = Float32Array.from(mag), top = Math.min(sp.length - 1, Math.floor(4200 / binHz));
+  const peak = (f) => {
+    const c = f / binHz, w = Math.max(1, Math.round(f * 0.02 / binHz)); let v = 0, k = -1;
+    for (let i = Math.max(1, Math.round(c) - w); i <= Math.min(top, Math.round(c) + w); i++) if (sp[i] > v) { v = sp[i]; k = i; }
+    return { v, k, w };
+  };
+  // noise floor: median level in the playing range
+  const seg = Array.from(sp.subarray(Math.floor(70 / binHz), Math.floor(2500 / binHz))).sort((x, y) => x - y);
+  const floor = (seg[seg.length >> 1] || 0) * 4;
+  const out = []; let first = 0;
+  for (let it = 0; it < maxN; it++) {
+    let best = null;
+    for (let m = lo; m <= hi; m++) {
+      if (out.includes(m)) continue;
+      const f0 = 440 * Math.pow(2, (m - 69) / 12); let sSum = 0, wSum = 0;
+      for (let h = 1; h <= 6; h++) { if (f0 * h > 4000) break; sSum += HW[h] * peak(f0 * h).v; wSum += HW[h]; }
+      const sal = sSum / (wSum ? 1 : 1);
+      if (!best || sal > best.sal) best = { m, sal, f0, wSum };
+    }
+    if (!best) break;
+    if (it === 0) first = best.sal;
+    const amp = best.sal / best.wSum, fund = peak(best.f0).v;
+    if (best.sal < first * o.rel || best.sal < floor * 3 || fund < amp * 0.25) { if (it === 0 && best.sal < floor * 3) break; if (it > 0) break; }
+    out.push(best.m);
+    // take this note's harmonics out of the spectrum so they are not read as other notes
+    for (let h = 1; h <= 6; h++) { if (best.f0 * h > 4000) break; const pk = peak(best.f0 * h); if (pk.k > 0) { const sub = amp * HW[h]; for (let i = pk.k - 1; i <= pk.k + 1; i++) if (i > 0 && i <= top) sp[i] = Math.max(0, sp[i] - sub * (i === pk.k ? 1 : 0.5)); } }
+  }
+  return out.sort((x, y) => x - y);
+}
+
 // Streams detections to onFrame({ freq, clarity, level }) about every 20 ms.
 export class PitchListener {
-  constructor(onFrame) { this.onFrame = onFrame; this.ctx = null; this.stream = null; this.timer = 0; }
+  constructor(onFrame, onChord) { this.onFrame = onFrame; this.onChord = onChord; this.mode = 'single'; this.n = 0; this.ctx = null; this.stream = null; this.timer = 0; }
   async start(deviceId) {
     await this.stop();
     const audio = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
@@ -37,6 +72,8 @@ export class PitchListener {
     const src = this.ctx.createMediaStreamSource(this.stream);
     this.an = this.ctx.createAnalyser(); this.an.fftSize = 4096; this.an.smoothingTimeConstant = 0;
     const mute = this.ctx.createGain(); mute.gain.value = 0;      // keep the graph pulled without any playback
+    this.sp = this.ctx.createAnalyser(); this.sp.fftSize = 16384; this.sp.smoothingTimeConstant = 0.3; src.connect(this.sp);   // spectrum for chords
+    this.db = new Float32Array(this.sp.frequencyBinCount); this.mag = new Float32Array(this.sp.frequencyBinCount);
     src.connect(this.an); this.an.connect(mute); mute.connect(this.ctx.destination);
     this.buf = new Float32Array(this.an.fftSize);
     this.timer = setInterval(() => this.tick(), 20);
@@ -45,6 +82,14 @@ export class PitchListener {
     if (!this.an) return;
     this.an.getFloatTimeDomainData(this.buf);
     const level = rms(this.buf);
+    if (this.mode === 'chord') {
+      if (++this.n % 5) return;                                  // about every 100 ms
+      if (level < 0.006) { this.onChord && this.onChord({ notes: [], level }); return; }
+      this.sp.getFloatFrequencyData(this.db);
+      for (let i = 0; i < this.db.length; i++) this.mag[i] = Math.pow(10, this.db[i] / 20);
+      this.onChord && this.onChord({ notes: detectNotes(this.mag, this.ctx.sampleRate, this.sp.fftSize), level });
+      return;
+    }
     if (level < 0.006) { this.onFrame({ freq: null, clarity: 0, level }); return; }
     // fast path: the newest 2048 samples (~43 ms) answer for notes above ~100 Hz; low notes need the full window
     const sr = this.ctx.sampleRate, half = this.buf.length >> 1;
