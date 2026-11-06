@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=24">
+<link rel="stylesheet" href="style.css?v=25">
 </head>
 <body>
 
@@ -59,7 +59,7 @@
       </div>
       <div class="field" id="root-box" style="margin-top:10px"><label for="root">ルート（中心の音）</label>
         <div class="row" style="flex-wrap:nowrap"><select id="root"></select><button class="std small" id="root-to-low" title="最低弦の開放音をルートにする">最低弦に合わせる</button></div></div>
-      <div class="field" id="scale-box" style="margin-top:8px"><label for="scale">スケール</label><select id="scale"></select></div>
+      <div class="field" id="scale-box" style="margin-top:8px"><label for="scale">スケール</label><div class="row" style="flex-wrap:nowrap"><select id="scale"></select><button class="std small play-btn" id="scale-play" title="このスケールを再生（上って、戻る）" aria-label="スケールを再生">▶ 再生</button></div></div>
       <div class="field" id="chord-box" style="margin-top:8px"><label for="chord">コード</label><select id="chord"></select></div>
       <div id="notes-box" style="margin-top:8px">
         <div class="field"><label>探したい音（複数選べます）</label></div>
@@ -232,7 +232,7 @@
 
 <div class="status" id="status" role="status" aria-live="polite"></div>
 
-<script type="module" src="js/app.js?v=24"></script>
+<script type="module" src="js/app.js?v=25"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');

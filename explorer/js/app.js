@@ -1,7 +1,7 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=24';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=24';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=24';
-import { PianoEngine } from './audio.js?v=24';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=25';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=25';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=25';
+import { PianoEngine } from './audio.js?v=25';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -145,6 +145,16 @@ function visibility(set) {
 async function playNotes(list, gap = 0.16, dur = 0.5) {
   await audio.ready(); const t = audio.now + 0.03;
   list.forEach((m, i) => audio.play([m], t + i * gap, dur, 0.9));
+}
+
+// Preview a scale: up one octave plus one more note, then back down (do re mi fa so la ti do re do ti la so fa mi re do)
+function playScalePreview(root, ivNames) {
+  const semis = makeSet(root, ivNames).ivs.map(iv => iv.semis), n = semis.length;
+  let base = 60 + pc(root); if (base > 66) base -= 12;          // keep it in a comfortable middle range
+  const at = i => base + semis[i % n] + 12 * Math.floor(i / n);
+  const up = []; for (let i = 0; i <= n + 1; i++) up.push(at(i));
+  const down = []; for (let i = n; i >= 0; i--) down.push(at(i));
+  playNotes(up.concat(down), 0.26, 0.5);
 }
 
 // ── render ──
@@ -465,7 +475,7 @@ function renderScaleFinder(notes) {
   $('scale-results').innerHTML = shown.map((x, i) => `<div class="fd-item sc-item ${i === 0 ? 'top' : ''}"><b>${x.name}</b>
       <span class="sc-meta">${x.size}音中 ${x.picked}音が一致${x.exact ? '（すべて）' : ''} · ${SCALES[x.id].group}</span>
       ${x.missing.length ? `<span class="sc-miss">足りない音：<em>${x.missing.join(' ')}</em></span>` : ''}
-      <button class="std small sc-go" data-root="${x.root}" data-id="${x.id}">Show をこのスケールにする</button></div>`).join('')
+      <div class="row"><button class="std small sc-go" data-root="${x.root}" data-id="${x.id}">Show をこのスケールにする</button><button class="std small play-btn sc-play" data-root="${x.root}" data-id="${x.id}" title="このスケールを再生" aria-label="スケールを再生">▶ 再生</button></div></div>`).join('')
     + (list.length > shown.length ? `<p class="hint">ほか ${list.length - shown.length} 件。ルートを指定すると絞り込めます。</p>` : '');
 }
 
@@ -529,7 +539,8 @@ function bind() {
   document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => { shapeOverride = null; update(() => { st.mode = b.dataset.mode; }); }));
   $('shape-back').addEventListener('click', () => { shapeOverride = null; update(() => {}); });
   $('root').addEventListener('change', e => { shapeOverride = null; update(() => { st.root = +e.target.value; }); });
-  $('scale').addEventListener('change', e => (shapeOverride = null, update(() => { st.scale = e.target.value; st.emph = [0]; st.diat = -1; st.pattern = 0; })));
+  $('scale').addEventListener('change', e => (shapeOverride = null, update(() => { st.scale = e.target.value; st.emph = [0]; st.diat = -1; st.pattern = 0; }), playScalePreview(st.root, SCALES[st.scale].iv)));
+  $('scale-play').addEventListener('click', () => playScalePreview(st.root, SCALES[st.scale].iv));
   $('chord').addEventListener('change', e => { shapeOverride = null; update(() => { st.chord = e.target.value; }); });
   $('note-picks').addEventListener('click', e => { const b = e.target.closest('.pick'); if (!b) return; const p = +b.dataset.p; update(() => { st.notes = st.notes.includes(p) ? st.notes.filter(x => x !== p) : [...st.notes, p]; }); playNotes([60 + p]); });
   $('notes-clear').addEventListener('click', () => update(() => { st.notes = []; }));
@@ -572,6 +583,8 @@ function bind() {
   }));
   $('sc-root').addEventListener('change', e => { scRoot = e.target.value === 'none' || e.target.value === 'bass' ? e.target.value : +e.target.value; renderShapes(); });
   $('scale-results').addEventListener('click', e => {
+    const pv = e.target.closest('.sc-play');
+    if (pv) { playScalePreview(+pv.dataset.root, SCALES[pv.dataset.id].iv); return; }
     const g = e.target.closest('.sc-go'); if (!g) return;
     shapeOverride = null;
     update(() => { st.mode = 'scale'; st.root = +g.dataset.root; st.scale = g.dataset.id; st.diat = -1; st.emph = [0]; st.pattern = 0; });
