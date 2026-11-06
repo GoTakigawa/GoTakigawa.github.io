@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=30';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=30';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=30';
-import { PianoEngine } from './audio.js?v=30';
-import { PitchListener } from './pitch.js?v=30';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=31';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=31';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=31';
+import { PianoEngine } from './audio.js?v=31';
+import { PitchListener } from './pitch.js?v=31';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -314,6 +314,27 @@ function renderFretboard() {
 // ── live tuner: pitch from the input → note, cents and a moving dot on the fretboard ──
 let fbGeom = null;
 const live = { gap: false, on: false, hist: [], midi: null, near: null, pend: null, hand: null, lastT: 0, prim: null, pos: null, since: 0, trail: [], raf: 0, prevT: 0 };
+const chordHist = []; let chordT = 0;
+function onChordFrame(fr) {
+  const now = performance.now();
+  if (!fr.notes.length) { if (now - chordT > 1500) $('tn-chord').classList.add('idle'); return; }
+  chordT = now; chordHist.push(fr.notes); if (chordHist.length > 5) chordHist.shift();
+  if (chordHist.length < 3) return;
+  const cnt = new Map(); chordHist.forEach(a => a.forEach(m => cnt.set(m, (cnt.get(m) || 0) + 1)));
+  const need = Math.ceil(chordHist.length * 0.6), stable = [...cnt].filter(([, c]) => c >= need).map(([m]) => m).sort((a, b) => a - b);
+  $('tn-chord').classList.remove('idle');
+  const res = identifyChord(stable), set = res.results[0] ? res.results[0].set : currentSet();
+  const seen = new Set();
+  $('tn-chord-notes').innerHTML = stable.map(m => `<span class="pick-note">${set.name(m)}<small>${Math.floor(m / 12) - 1}</small></span>`).join('') || '<span class="hint">音がはっきりしません</span>';
+  let html = '';
+  if (res.kind === 'single') html = '<p class="hint">1音だけ聞こえています。</p>';
+  else if (res.kind === 'dyad') html = `<p class="hint">2音（${res.interval || ''}）です。低い方をルートとして読んでいます。${res.results[0] ? '' : ''}</p>` + res.results.map(r => `<div class="fd-item top"><b>${r.name}</b><button class="std small fd-go" data-root="${r.root}" data-id="${r.id}">このコードの形を見る</button></div>`).join('');
+  else if (res.kind === 'chord') html = res.results.length
+    ? res.results.slice(0, 4).map((r, i) => { const uniq = stable.filter(m => { const k = pc(m); if (seen.has(k + ':' + i)) return false; seen.add(k + ':' + i); return true; });
+        return `<div class="fd-item ${i === 0 ? 'top' : ''}"><b>${r.name}</b><span>${uniq.map(x => `${r.set.name(x)}<small>${(r.set.intervalOf(x) || '?').replace(/^1$/, 'R')}</small>`).join(' ')}</span><button class="std small fd-go" data-root="${r.root}" data-id="${r.id}">このコードの形を見る</button></div>`; }).join('')
+    : '<p class="hint">登録しているコードの形には当てはまりませんでした。</p>';
+  $('tn-chord-res').innerHTML = html;
+}
 const listener = new PitchListener(fr => {
   const now = performance.now();
   if (fr.freq) {
@@ -321,7 +342,7 @@ const listener = new PitchListener(fr => {
     if (now - live.lastT > 300) live.gap = true;           // a fresh attack after a pause
     const h = live.hist.slice().sort((x, y) => x - y); live.midi = h[h.length >> 1]; live.lastT = now;
   } else if (now - live.lastT > 400) live.hist = [];
-});
+}, onChordFrame);
 function tnA4() { return +$('tn-a4').value || 440; }
 function renderTunerStrings() {
   const tun = tuning(), set = currentSet(), n = tun.length;
@@ -350,6 +371,7 @@ function liveFrame(t) {
   const active = live.midi !== null && t - live.lastT < 350;
   if (!active && t - live.lastT > 1500) { tunerReadout(false); }
   const layer = $('fb-live');
+  if (listener.mode === 'chord') { layer.innerHTML = ''; return; }
   if (!$('tn-show').checked || !fbGeom || live.midi === null) { layer.innerHTML = ''; return; }
   const tun = tuning(), n = tun.length;
   // commit a new note only when it has been steady for ~45 ms (skips pluck noise and half-way readings)
@@ -807,6 +829,19 @@ function bindTuner() {
   $('tn-a4').innerHTML = h; $('tn-a4').value = String(a4 >= 430 && a4 <= 450 ? a4 : 440);
   $('tn-a4').addEventListener('change', () => { try { localStorage.setItem('gti-explorer:a4', $('tn-a4').value); } catch (e) {} });
   $('tn-toggle').addEventListener('click', () => live.on ? tunerStop() : tunerStart());
+  document.querySelectorAll('.tn-mode').forEach(btn => btn.addEventListener('click', () => {
+    listener.mode = btn.dataset.m; chordHist.length = 0;
+    document.querySelectorAll('.tn-mode').forEach(b => b.classList.toggle('on', b === btn));
+    $('tn-single').hidden = btn.dataset.m === 'chord'; $('tn-chord').hidden = btn.dataset.m !== 'chord';
+    if (btn.dataset.m === 'chord') { $('fb-live').innerHTML = ''; $('tn-chord').classList.add('idle'); }
+    else { live.midi = null; live.near = null; live.pend = null; live.prim = null; live.pos = null; live.trail = []; }
+  }));
+  $('tn-chord-res').addEventListener('click', e => {
+    const g = e.target.closest('.fd-go'); if (!g) return;
+    fbAction = 'play'; shapeOverride = { root: +g.dataset.root, id: g.dataset.id };
+    update(() => { st.shapeTab = 'forms'; });
+    notify('Shapes だけをそのコードに切り替えました（Show の設定はそのままです）');
+  });
   $('tn-device').addEventListener('change', () => { if (live.on) tunerStart(); });
   window.addEventListener('pagehide', () => { if (live.on) tunerStop(); });
 }
