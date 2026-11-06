@@ -1,7 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=25';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=25';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=25';
-import { PianoEngine } from './audio.js?v=25';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=26';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=26';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=26';
+import { PianoEngine } from './audio.js?v=26';
+import { PitchListener } from './pitch.js?v=26';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -303,9 +304,104 @@ function renderFretboard() {
   if (sh) sh.muted.forEach(s => { const y = top + gap * (n - 1 - s); dots += `<text x="${X(padL - 13)}" y="${y + 4}" fill="#f87171" font-size="12" text-anchor="middle" font-family="Barlow" font-weight="700">×</text>`; });
   svg += dots + hits + '</svg>';
   $('fretboard').innerHTML = svg;
+  fbGeom = { cx, Y: s => top + gap * (n - 1 - s) };
+  $('fb-live').setAttribute('viewBox', `0 0 ${W} ${H + 18}`);
   $('fb-title').textContent = titleFor(set) + (sh ? ` ／ ${sh.name}・${sh.title}` : '');
   $('fretboard').classList.toggle('hide-mode', fbAction === 'hide');
   return count;
+}
+
+// ── live tuner: pitch from the input → note, cents and a moving dot on the fretboard ──
+let fbGeom = null;
+const live = { on: false, hist: [], midi: null, lastT: 0, prim: null, pos: null, since: 0, trail: [], raf: 0, prevT: 0 };
+const listener = new PitchListener(fr => {
+  const now = performance.now();
+  if (fr.freq) {
+    live.hist.push(69 + 12 * Math.log2(fr.freq / tnA4())); if (live.hist.length > 5) live.hist.shift();
+    const h = live.hist.slice().sort((x, y) => x - y); live.midi = h[h.length >> 1]; live.lastT = now;
+  } else if (now - live.lastT > 400) live.hist = [];
+});
+function tnA4() { return +$('tn-a4').value || 440; }
+function renderTunerStrings() {
+  const tun = tuning(), set = currentSet(), n = tun.length;
+  $('tn-strings').innerHTML = tun.map((m, s) => `<div class="tn-str" data-s="${s}"><small>${n - s}弦</small><b>${set.name(m)}</b><small class="tn-d"></small></div>`).join('');
+}
+function tunerReadout(active, m) {
+  const set = currentSet(), tun = tuning(), el = $('tn-note');
+  const strs = [...$('tn-strings').children];
+  if (!active) { $('tn-needle').classList.remove('on', 'ok'); el.classList.remove('ok'); strs.forEach(c => { c.classList.remove('near', 'ok'); c.querySelector('.tn-d').textContent = ''; }); return; }
+  const near = Math.round(m), cents = (m - near) * 100, ok = Math.abs(cents) <= 5;
+  el.innerHTML = `${set.name(near)}<small>${Math.floor(near / 12) - 1}</small>`; el.classList.toggle('ok', ok);
+  $('tn-hz').textContent = (tnA4() * Math.pow(2, (m - 69) / 12)).toFixed(1) + ' Hz';
+  $('tn-cents').textContent = (cents >= 0 ? '+' : '−') + Math.abs(cents).toFixed(0) + ' ¢';
+  const nd = $('tn-needle'); nd.classList.add('on'); nd.classList.toggle('ok', ok); nd.style.left = (50 + Math.max(-50, Math.min(50, cents))) + '%';
+  // which open string is being tuned: the closest one within a minor third
+  let best = -1, bd = 1e9; tun.forEach((t, s) => { const d = Math.abs(m - t); if (d < bd) { bd = d; best = s; } });
+  strs.forEach((c, s) => {
+    const d = (m - tun[s]) * 100, isNear = s === best && bd <= 1.5;
+    c.classList.toggle('near', isNear); c.classList.toggle('ok', isNear && Math.abs(d) <= 5);
+    c.querySelector('.tn-d').textContent = isNear ? (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(0) + '¢' : '';
+  });
+}
+function liveFrame(t) {
+  live.raf = requestAnimationFrame(liveFrame);
+  const dt = Math.min(100, t - (live.prevT || t)); live.prevT = t;
+  const active = live.midi !== null && t - live.lastT < 350;
+  if (!active && t - live.lastT > 1500) { tunerReadout(false); }
+  const layer = $('fb-live');
+  if (!$('tn-show').checked || !fbGeom || live.midi === null) { layer.innerHTML = ''; return; }
+  const tun = tuning(), n = tun.length, near = Math.round(live.midi);
+  if (active) tunerReadout(true, live.midi);
+  const fade = active ? 1 : Math.max(0, 1 - (t - live.lastT - 350) / 600);
+  if (fade <= 0) { layer.innerHTML = ''; return; }
+  const cands = []; for (let s = 0; s < n; s++) { const f = near - tun[s]; if (st.strOn[s] && f >= 0 && f <= st.frets) cands.push({ s, f }); }
+  if (!cands.length) { layer.innerHTML = ''; return; }
+  const same = (a, b) => a && b && a.s === b.s && a.f === b.f;
+  if (!cands.some(c => same(c, live.prim))) {
+    // a new note: follow from the previous position if there is one, otherwise the lowest fret
+    const old = live.prim;
+    const pick = old ? cands.slice().sort((a, b) => (2 * Math.abs(a.s - old.s) + Math.abs(a.f - old.f)) - (2 * Math.abs(b.s - old.s) + Math.abs(b.f - old.f)))[0] : cands.slice().sort((a, b) => a.f - b.f)[0];
+    if (live.pos) live.trail.push({ x: live.pos.x, y: live.pos.y, t });
+    live.prim = pick; live.since = t;
+  }
+  const tx = fbGeom.cx(live.prim.f), ty = fbGeom.Y(live.prim.s);
+  if (!live.pos) live.pos = { x: tx, y: ty };
+  const k = 1 - Math.exp(-dt / 55); live.pos.x += (tx - live.pos.x) * k; live.pos.y += (ty - live.pos.y) * k;
+  live.trail = live.trail.filter(p => t - p.t < 700);
+  const ok = Math.abs((live.midi - near) * 100) <= 5, col = ok ? '#86efac' : '#38bdf8';
+  let g = `<g opacity="${fade.toFixed(2)}">`;
+  live.trail.forEach(p => { const a = 1 - (t - p.t) / 700; g += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(4 + 5 * a).toFixed(1)}" fill="${col}" opacity="${(a * 0.4).toFixed(2)}"/>`; });
+  cands.filter(c => !same(c, live.prim)).forEach(c => g += `<circle cx="${fbGeom.cx(c.f).toFixed(1)}" cy="${fbGeom.Y(c.s)}" r="9" fill="none" stroke="#38bdf8" stroke-width="1.4" stroke-dasharray="3 3" opacity=".6"/>`);
+  const ph = ((t - live.since) % 900) / 900;
+  g += `<circle cx="${live.pos.x.toFixed(1)}" cy="${live.pos.y.toFixed(1)}" r="${(12 + 16 * ph).toFixed(1)}" fill="none" stroke="${col}" stroke-width="2" opacity="${((1 - ph) * 0.55).toFixed(2)}"/>`;
+  g += `<circle cx="${live.pos.x.toFixed(1)}" cy="${live.pos.y.toFixed(1)}" r="12" fill="${col}" stroke="#fff" stroke-width="1.5"/>`;
+  g += `<text x="${live.pos.x.toFixed(1)}" y="${(live.pos.y + 3.6).toFixed(1)}" fill="#0a0a0a" font-size="10" font-weight="700" text-anchor="middle" font-family="Barlow">${currentSet().name(near)}</text></g>`;
+  layer.innerHTML = g;
+}
+async function tunerStart() {
+  const msg = $('tn-msg');
+  try {
+    await listener.start($('tn-device').value);
+  } catch (e) {
+    msg.textContent = e && e.name === 'NotAllowedError' ? 'マイクの使用が許可されていません。ブラウザのアドレスバーの設定から、このページのマイクを許可してください。'
+      : e && e.name === 'NotFoundError' ? '入力デバイスが見つかりません。オーディオインターフェースやマイクの接続を確認してください。' : '入力を開始できませんでした：' + (e && e.message || e);
+    return;
+  }
+  try {
+    const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audioinput'), cur = $('tn-device').value;
+    $('tn-device').innerHTML = '<option value="">既定の入力</option>' + devs.map(d => `<option value="${d.deviceId}">${(d.label || '入力デバイス').replace(/</g, '&lt;')}</option>`).join('');
+    $('tn-device').value = devs.some(d => d.deviceId === cur) ? cur : '';
+  } catch (e) {}
+  live.on = true; live.hist = []; live.midi = null; live.prim = null; live.pos = null; live.trail = []; live.lastT = -1e9;
+  $('tn-toggle').textContent = '■ 停止'; $('tn-toggle').classList.add('on');
+  msg.textContent = '音を弾いてください。指板の青い点が、いま鳴っている音の位置です（同じ高さの音が出せるほかの位置は点線で出ます）。±5セント以内で緑になります。';
+  cancelAnimationFrame(live.raf); live.prevT = 0; live.raf = requestAnimationFrame(liveFrame);
+}
+async function tunerStop() {
+  cancelAnimationFrame(live.raf); live.on = false; live.midi = null;
+  await listener.stop(); $('fb-live').innerHTML = ''; tunerReadout(false);
+  $('tn-note').textContent = '—'; $('tn-hz').textContent = '— Hz'; $('tn-cents').textContent = '—';
+  $('tn-toggle').textContent = '● 入力を開始'; $('tn-toggle').classList.remove('on');
 }
 
 function renderMetrics(set, count) {
@@ -520,6 +616,7 @@ function render() {
   const count = renderFretboard();
   renderMetrics(set, count);
   renderShapes();
+  renderTunerStrings();
 }
 
 // ── events ──
@@ -675,8 +772,18 @@ function bind() {
   });
 }
 
+function bindTuner() {
+  let a4 = 440; try { a4 = +localStorage.getItem('gti-explorer:a4') || 440; } catch (e) {}
+  let h = ''; for (let v = 430; v <= 450; v++) h += `<option value="${v}">${v} Hz</option>`;
+  $('tn-a4').innerHTML = h; $('tn-a4').value = String(a4 >= 430 && a4 <= 450 ? a4 : 440);
+  $('tn-a4').addEventListener('change', () => { try { localStorage.setItem('gti-explorer:a4', $('tn-a4').value); } catch (e) {} });
+  $('tn-toggle').addEventListener('click', () => live.on ? tunerStop() : tunerStart());
+  $('tn-device').addEventListener('change', () => { if (live.on) tunerStart(); });
+  window.addEventListener('pagehide', () => { if (live.on) tunerStop(); });
+}
+
 async function boot() {
   try { const s = localStorage.getItem(STORE); st = sanitize(s ? JSON.parse(s) : null); } catch (e) { st = sanitize(null); }
-  bind(); render();
+  bind(); bindTuner(); render();
 }
 boot();
