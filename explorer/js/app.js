@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=33';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=33';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=33';
-import { PianoEngine } from './audio.js?v=33';
-import { PitchListener } from './pitch.js?v=33';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=34';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=34';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=34';
+import { PianoEngine } from './audio.js?v=34';
+import { PitchListener } from './pitch.js?v=34';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -386,14 +386,12 @@ function liveFrame(t) {
   if (fade <= 0) { layer.innerHTML = ''; return; }
   const cands = []; for (let s = 0; s < n; s++) { const f = near - tun[s]; if (st.strOn[s] && f >= 0 && f <= st.frets) cands.push({ s, f }); }
   if (!cands.length) { layer.innerHTML = ''; return; }
-  // The same pitch can sit at several places, so every place that gives it is lit equally
-  if (live.sincePitch !== near) { live.sincePitch = near; live.since = t; }
-  const ph = ((t - live.since) % 900) / 900;
+  // The same pitch can sit at several places, so every place that gives it gets the same quiet ring
   let g = `<g opacity="${fade.toFixed(2)}">`;
   cands.forEach(c => {
     const x = fbGeom.cx(c.f).toFixed(1), y = fbGeom.Y(c.s);
-    g += `<circle cx="${x}" cy="${y}" r="${(11 + 9 * ph).toFixed(1)}" fill="none" stroke="#8c4dff" stroke-width="1.6" opacity="${((1 - ph) * 0.5).toFixed(2)}"/>`;
-    g += `<circle cx="${x}" cy="${y}" r="11" fill="#8c4dff" fill-opacity=".38" stroke="#8c4dff" stroke-width="2" stroke-dasharray="3.5 3"/>`;
+    g += `<circle cx="${x}" cy="${y}" r="15.5" fill="none" stroke="#8c4dff" stroke-width="4" opacity=".22"/>`;
+    g += `<circle cx="${x}" cy="${y}" r="14" fill="none" stroke="#b894ff" stroke-width="1.8"/>`;
   });
   g += '</g>';
   layer.innerHTML = g;
@@ -414,7 +412,7 @@ async function tunerStart() {
   } catch (e) {}
   live.on = true; live.hist = []; live.sincePitch = null; live.midi = null; live.near = null; live.pend = null; live.hand = null; live.prim = null; live.pos = null; live.trail = []; live.lastT = -1e9;
   $('tn-toggle').textContent = '■ 停止'; $('tn-toggle').classList.add('on');
-  msg.textContent = '音を弾いてください。指板の紫の点線が、いま鳴っている高さの音が出せる位置です（同じ高さの音は複数の場所で出せるので、すべて同じ強さで光ります）。±5セント以内で、音名の表示が緑になります。';
+  msg.textContent = '音を弾いてください。指板の紫の輪が、いま鳴っている高さの音が出せる位置です（同じ高さの音は複数の場所で出せるので、すべて同じ強さで囲みます）。±5セント以内で、音名の表示が緑になります。';
   cancelAnimationFrame(live.raf); live.prevT = 0; live.raf = requestAnimationFrame(liveFrame);
 }
 async function tunerStop() {
