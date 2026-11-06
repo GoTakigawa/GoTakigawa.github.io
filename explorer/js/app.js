@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=31';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=31';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=31';
-import { PianoEngine } from './audio.js?v=31';
-import { PitchListener } from './pitch.js?v=31';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=32';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=32';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=32';
+import { PianoEngine } from './audio.js?v=32';
+import { PitchListener } from './pitch.js?v=32';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -414,10 +414,10 @@ function liveFrame(t) {
   if (!live.pos) live.pos = { x: tx, y: ty };
   const k = 1 - Math.exp(-dt / 28); live.pos.x += (tx - live.pos.x) * k; live.pos.y += (ty - live.pos.y) * k;
   live.trail = live.trail.filter(p => t - p.t < 700);
-  const ok = Math.abs((live.midi - near) * 100) <= 5, col = ok ? '#86efac' : '#38bdf8';
+  const col = '#8c4dff';
   let g = `<g opacity="${fade.toFixed(2)}">`;
   live.trail.forEach(p => { const a = 1 - (t - p.t) / 700; g += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(4 + 5 * a).toFixed(1)}" fill="${col}" opacity="${(a * 0.4).toFixed(2)}"/>`; });
-  cands.filter(c => !same(c, live.prim)).forEach(c => g += `<circle cx="${fbGeom.cx(c.f).toFixed(1)}" cy="${fbGeom.Y(c.s)}" r="9" fill="none" stroke="#38bdf8" stroke-width="1.4" stroke-dasharray="3 3" opacity=".6"/>`);
+  cands.filter(c => !same(c, live.prim)).forEach(c => g += `<circle cx="${fbGeom.cx(c.f).toFixed(1)}" cy="${fbGeom.Y(c.s)}" r="9" fill="none" stroke="#8c4dff" stroke-width="1.6" stroke-dasharray="3 3" opacity=".6"/>`);
   const ph = ((t - live.since) % 900) / 900;
   g += `<circle cx="${live.pos.x.toFixed(1)}" cy="${live.pos.y.toFixed(1)}" r="${(12 + 16 * ph).toFixed(1)}" fill="none" stroke="${col}" stroke-width="2" opacity="${((1 - ph) * 0.55).toFixed(2)}"/>`;
   g += `<circle cx="${live.pos.x.toFixed(1)}" cy="${live.pos.y.toFixed(1)}" r="12" fill="${col}" stroke="#fff" stroke-width="1.5"/>`;
@@ -440,7 +440,7 @@ async function tunerStart() {
   } catch (e) {}
   live.on = true; live.gap = false; live.hist = []; live.midi = null; live.near = null; live.pend = null; live.hand = null; live.prim = null; live.pos = null; live.trail = []; live.lastT = -1e9;
   $('tn-toggle').textContent = '■ 停止'; $('tn-toggle').classList.add('on');
-  msg.textContent = '音を弾いてください。指板の青い点が、いま鳴っている音の位置です（同じ高さの音が出せるほかの位置は点線で出ます。実際の位置とずれたら、その位置を押すと覚えさせられます）。±5セント以内で緑になります。';
+  msg.textContent = '音を弾いてください。指板の紫の点が、いま鳴っている音の位置です（同じ高さの音が出せるほかの位置は点線で出ます。実際の位置とずれたら、その位置を押すと覚えさせられます）。±5セント以内で緑になります。';
   cancelAnimationFrame(live.raf); live.prevT = 0; live.raf = requestAnimationFrame(liveFrame);
 }
 async function tunerStop() {
