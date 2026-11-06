@@ -23,7 +23,7 @@ export function yin(buf, sr, minF = 30, maxF = 1400, thr = 0.15) {
 
 export const rms = buf => { let s = 0; for (let i = 0; i < buf.length; i++) s += buf[i] * buf[i]; return Math.sqrt(s / buf.length); };
 
-// Streams detections to onFrame({ freq, clarity, level }) about every 40 ms.
+// Streams detections to onFrame({ freq, clarity, level }) about every 20 ms.
 export class PitchListener {
   constructor(onFrame) { this.onFrame = onFrame; this.ctx = null; this.stream = null; this.timer = 0; }
   async start(deviceId) {
@@ -39,14 +39,17 @@ export class PitchListener {
     const mute = this.ctx.createGain(); mute.gain.value = 0;      // keep the graph pulled without any playback
     src.connect(this.an); this.an.connect(mute); mute.connect(this.ctx.destination);
     this.buf = new Float32Array(this.an.fftSize);
-    this.timer = setInterval(() => this.tick(), 40);
+    this.timer = setInterval(() => this.tick(), 20);
   }
   tick() {
     if (!this.an) return;
     this.an.getFloatTimeDomainData(this.buf);
     const level = rms(this.buf);
     if (level < 0.006) { this.onFrame({ freq: null, clarity: 0, level }); return; }
-    const r = yin(this.buf, this.ctx.sampleRate);
+    // fast path: the newest 2048 samples (~43 ms) answer for notes above ~100 Hz; low notes need the full window
+    const sr = this.ctx.sampleRate, half = this.buf.length >> 1;
+    let r = yin(this.buf.subarray(half), sr, sr / (half - 2));
+    if (!r || r.freq < 100) r = yin(this.buf, sr);
     this.onFrame(r && r.clarity > 0.8 ? { freq: r.freq, clarity: r.clarity, level } : { freq: null, clarity: 0, level });
   }
   async stop() {

@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=27';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=27';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=27';
-import { PianoEngine } from './audio.js?v=27';
-import { PitchListener } from './pitch.js?v=27';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=28';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=28';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=28';
+import { PianoEngine } from './audio.js?v=28';
+import { PitchListener } from './pitch.js?v=28';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -317,7 +317,7 @@ const live = { on: false, hist: [], midi: null, near: null, pend: null, hand: nu
 const listener = new PitchListener(fr => {
   const now = performance.now();
   if (fr.freq) {
-    live.hist.push(69 + 12 * Math.log2(fr.freq / tnA4())); if (live.hist.length > 5) live.hist.shift();
+    live.hist.push(69 + 12 * Math.log2(fr.freq / tnA4())); if (live.hist.length > 3) live.hist.shift();
     const h = live.hist.slice().sort((x, y) => x - y); live.midi = h[h.length >> 1]; live.lastT = now;
   } else if (now - live.lastT > 400) live.hist = [];
 });
@@ -351,12 +351,12 @@ function liveFrame(t) {
   const layer = $('fb-live');
   if (!$('tn-show').checked || !fbGeom || live.midi === null) { layer.innerHTML = ''; return; }
   const tun = tuning(), n = tun.length;
-  // commit a new note only when it has been steady for ~100 ms (skips pluck noise and half-way readings)
+  // commit a new note only when it has been steady for ~45 ms (skips pluck noise and half-way readings)
   const rnd = Math.round(live.midi);
   if (live.near === null) live.near = rnd;
   else if (rnd !== live.near && Math.abs(live.midi - live.near) > 0.65) {
     if (!live.pend || live.pend.n !== rnd) live.pend = { n: rnd, t };
-    else if (t - live.pend.t >= 100) { live.near = rnd; live.pend = null; }
+    else if (t - live.pend.t >= 45) { live.near = rnd; live.pend = null; }
   } else live.pend = null;
   const near = live.near;
   if (active) tunerReadout(true, live.midi);
@@ -369,15 +369,21 @@ function liveFrame(t) {
     // a new note: keep the hand where it already is (nearest fret to the recent hand position),
     // moving across strings only as a small extra cost. The first note starts from the lowest fret.
     const old = live.prim;
-    const cost = c => Math.abs((c.f === 0 ? 0 : c.f) - (live.hand ?? 0)) + (old ? 0.5 * Math.abs(c.s - old.s) : 0) + (c.f === 0 ? 0.5 : 0);
+    // cost in "frets": distance from the hand, a small price for changing string (so a near fret on another
+    // string beats a long slide on the same one), and a penalty for the low strings far up the neck
+    const cost = c => {
+      const pos = n > 1 ? c.s / (n - 1) : 1, low = Math.max(0, 1 - 2 * pos);   // 1 on the lowest string, 0 from the middle up
+      const dist = c.f === 0 ? Math.min(live.hand ?? 0, 4) + 0.5 : Math.abs(c.f - (live.hand ?? 0));
+      return dist + (old ? 0.2 * Math.abs(c.s - old.s) : 0) + low * Math.max(0, c.f - 5) * 0.45;
+    };
     const pick = cands.slice().sort((a, b) => live.hand === null && !old ? a.f - b.f : cost(a) - cost(b))[0];
     if (live.pos) live.trail.push({ x: live.pos.x, y: live.pos.y, t });
     live.prim = pick; live.since = t;
-    if (pick.f > 0) live.hand = live.hand === null ? pick.f : live.hand * 0.6 + pick.f * 0.4;
+    if (pick.f > 0) live.hand = live.hand === null ? pick.f : live.hand * 0.5 + pick.f * 0.5;
   }
   const tx = fbGeom.cx(live.prim.f), ty = fbGeom.Y(live.prim.s);
   if (!live.pos) live.pos = { x: tx, y: ty };
-  const k = 1 - Math.exp(-dt / 55); live.pos.x += (tx - live.pos.x) * k; live.pos.y += (ty - live.pos.y) * k;
+  const k = 1 - Math.exp(-dt / 28); live.pos.x += (tx - live.pos.x) * k; live.pos.y += (ty - live.pos.y) * k;
   live.trail = live.trail.filter(p => t - p.t < 700);
   const ok = Math.abs((live.midi - near) * 100) <= 5, col = ok ? '#86efac' : '#38bdf8';
   let g = `<g opacity="${fade.toFixed(2)}">`;
