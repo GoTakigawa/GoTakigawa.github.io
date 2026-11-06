@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=36';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=36';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=36';
-import { PianoEngine } from './audio.js?v=36';
-import { PitchListener } from './pitch.js?v=36';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=37';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=37';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=37';
+import { PianoEngine } from './audio.js?v=37';
+import { PitchListener } from './pitch.js?v=37';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -386,14 +386,17 @@ function liveFrame(t) {
   if (fade <= 0) { layer.innerHTML = ''; return; }
   const cands = []; for (let s = 0; s < n; s++) { const f = near - tun[s]; if (st.strOn[s] && f >= 0 && f <= st.frets) cands.push({ s, f }); }
   if (!cands.length) { layer.innerHTML = ''; return; }
-  // The same pitch can sit at several places, so every place that gives it glows the same way (site green + sky blue)
+  // The same pitch can sit at several places, so every place that gives it glows the same way:
+  // green when the pitch is the root of what is shown, sky blue otherwise
   const breathe = 0.65 + 0.35 * Math.sin(t / 260);
+  const isRoot = st.mode !== 'notes' && pc(near) === pc(st.root);
+  const hi = isRoot ? '#86efac' : '#38bdf8', core = isRoot ? '#c9f9dc' : '#bfe9fb';
   let g = `<defs><filter id="lv-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="4.5"/></filter><filter id="lv-glow2" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><g opacity="${fade.toFixed(2)}">`;
   cands.forEach(c => {
     const x = fbGeom.cx(c.f).toFixed(1), y = fbGeom.Y(c.s);
-    g += `<circle cx="${x}" cy="${y}" r="14" fill="none" stroke="#38bdf8" stroke-width="7" filter="url(#lv-glow)" opacity="${(0.55 + 0.4 * breathe).toFixed(2)}"/>`;
-    g += `<circle cx="${x}" cy="${y}" r="14" fill="none" stroke="#86efac" stroke-width="3" filter="url(#lv-glow2)" opacity="${(0.5 + 0.4 * breathe).toFixed(2)}"/>`;
-    g += `<circle cx="${x}" cy="${y}" r="14" fill="none" stroke="#c9f9dc" stroke-width="1.6"/>`;
+    g += `<circle cx="${x}" cy="${y}" r="14" fill="none" stroke="${hi}" stroke-width="7" filter="url(#lv-glow)" opacity="${(0.55 + 0.4 * breathe).toFixed(2)}"/>`;
+    g += `<circle cx="${x}" cy="${y}" r="14" fill="none" stroke="${hi}" stroke-width="3" filter="url(#lv-glow2)" opacity="${(0.5 + 0.4 * breathe).toFixed(2)}"/>`;
+    g += `<circle cx="${x}" cy="${y}" r="14" fill="none" stroke="${core}" stroke-width="1.6"/>`;
   });
   g += '</g>';
   layer.innerHTML = g;
