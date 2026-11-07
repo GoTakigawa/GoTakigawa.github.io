@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=44';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=44';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=44';
-import { PianoEngine } from './audio.js?v=44';
-import { PitchListener } from './pitch.js?v=44';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=45';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=45';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=45';
+import { PianoEngine } from './audio.js?v=45';
+import { PitchListener } from './pitch.js?v=45';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -10,7 +10,7 @@ const audio = new PianoEngine();
 
 const DEFAULT = {
   v: 1, strings: 6, tuning: 'e-std', custom: [40,45,50,55,59,64], frets: 24, lefty: false,
-  mode: 'scale', root: 9, scale: 'minorPent', chord: 'm7', notes: [0, 4, 7],
+  mode: 'scale', root: 4, scale: 'ionian', chord: 'm7', notes: [0, 4, 7],
   emph: [0], diat: -1, seventh: false,
   range: 'all', from: 5, to: 8, pattern: 0, ghost: true,
   strOn: [], label: 'name',
