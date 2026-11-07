@@ -37,7 +37,7 @@ export function detectNotes(mag, sr, fftSize, o = {}) {
   // noise floor: median level in the playing range
   const seg = Array.from(sp.subarray(Math.floor(70 / binHz), Math.floor(2500 / binHz))).sort((x, y) => x - y);
   const floor = (seg[seg.length >> 1] || 0) * 4;
-  const out = []; let first = 0;
+  const out = [], sals = []; let first = 0;
   for (let it = 0; it < maxN; it++) {
     let best = null;
     for (let m = lo; m <= hi; m++) {
@@ -51,11 +51,14 @@ export function detectNotes(mag, sr, fftSize, o = {}) {
     if (it === 0) first = best.sal;
     const amp = best.sal / best.wSum, fund = peak(best.f0).v;
     if (best.sal < first * o.rel || best.sal < floor * 3 || fund < amp * 0.25) { if (it === 0 && best.sal < floor * 3) break; if (it > 0) break; }
-    out.push(best.m);
+    out.push(best.m); sals.push(best.sal);
     // take this note's harmonics out of the spectrum so they are not read as other notes
     for (let h = 1; h <= 6; h++) { if (best.f0 * h > 4000) break; const pk = peak(best.f0 * h); if (pk.k > 0) { const sub = amp * HW[h]; for (let i = pk.k - 1; i <= pk.k + 1; i++) if (i > 0 && i <= top) sp[i] = Math.max(0, sp[i] - sub * (i === pk.k ? 1 : 0.5)); } }
   }
-  return out.sort((x, y) => x - y);
+  // keep the relative strength of each note (1 = the strongest) alongside the sorted list
+  const order = out.map((m, i) => ({ m, w: first ? sals[i] / first : 1 })).sort((x, y) => x.m - y.m);
+  const res = order.map(o => o.m); res.weights = order.map(o => o.w);
+  return res;
 }
 
 // Streams detections to onFrame({ freq, clarity, level }) about every 20 ms.
@@ -116,10 +119,15 @@ export class PitchListener {
     const r = this.mode === 'chord' ? null : this.singleReading();
     let kind = this.mode;
     if (this.mode === 'auto') {
-      const poly = this.lastNotes && new Set(this.lastNotes.map(m => m % 12)).size >= 2;
+      // chord = a third pitch class that is clearly present, or a strong second one when the sound is not a clean
+      // single pitch. Weak extras (overtone ghosts, pick noise, hum) stay below these lines (single notes: second <= 0.40, third <= 0.35).
+      const ln = this.lastNotes, wt = ln && ln.weights || [], best = {};
+      if (ln) ln.forEach((m, i) => { best[m % 12] = Math.max(best[m % 12] || 0, wt[i] ?? 1); });
+      const w = Object.values(best).sort((x, y) => y - x);
+      const poly = (w[2] || 0) >= 0.38 || ((w[1] || 0) >= 0.5 && !(r && r.clarity > 0.9));
       const vote = poly ? 'chord' : (r ? 'single' : null);
       if (vote && vote !== this.kind) {
-        if (++this.cnt >= (now < this.attackUntil ? 4 : 15)) { this.kind = vote; this.cnt = 0; this.lastNotes = vote === 'single' ? null : this.lastNotes; this.onKind && this.onKind(vote); }
+        if (++this.cnt >= (now < this.attackUntil ? 6 : 20)) { this.kind = vote; this.cnt = 0; this.lastNotes = vote === 'single' ? null : this.lastNotes; this.onKind && this.onKind(vote); }
       } else this.cnt = 0;
       kind = this.kind;
     }

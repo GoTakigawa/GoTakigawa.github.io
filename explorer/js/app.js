@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=40';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=40';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=40';
-import { PianoEngine } from './audio.js?v=40';
-import { PitchListener } from './pitch.js?v=40';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=41';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=41';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=41';
+import { PianoEngine } from './audio.js?v=41';
+import { PitchListener } from './pitch.js?v=41';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
