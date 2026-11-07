@@ -2,14 +2,20 @@
 // Instrument interface: play(notes, when, dur, vel). Swap this class later for guitar/drum engines.
 
 export class PianoEngine {
-  constructor() { this.ctx = null; this.master = null; this.voices = new Set(); }
+  constructor() { this.ctx = null; this.master = null; this.voices = new Set(); this.vol = 0.8; this.muted = false; }
+
+  // volume 0..1 (squared for a natural feel) and mute, applied smoothly to the master gain
+  setLevel(vol, muted) {
+    this.vol = vol; this.muted = muted;
+    if (this.master) this.master.gain.setTargetAtTime(muted ? 0 : vol * vol, this.ctx.currentTime, 0.02);
+  }
 
   async ready() {
     if (!this.ctx) {
       this.ctx = new (window.AudioContext || window.webkitAudioContext)();
       const comp = this.ctx.createDynamicsCompressor();
       comp.threshold.value = -14; comp.ratio.value = 4;
-      this.master = this.ctx.createGain(); this.master.gain.value = 0.8;
+      this.master = this.ctx.createGain(); this.master.gain.value = this.muted ? 0 : this.vol * this.vol;
       this.master.connect(comp); comp.connect(this.ctx.destination);
     }
     if (this.ctx.state !== 'running') await this.ctx.resume();
