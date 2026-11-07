@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=43';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=43';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=43';
-import { PianoEngine } from './audio.js?v=43';
-import { PitchListener } from './pitch.js?v=43';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=44';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=44';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=44';
+import { PianoEngine } from './audio.js?v=44';
+import { PitchListener } from './pitch.js?v=44';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -443,7 +443,7 @@ async function tunerStart() {
   live.on = true; live.gap = false; live.hist = []; live.sincePitch = null; live.midi = null; live.near = null; live.pend = null; live.hand = null; live.prim = null; live.pos = null; live.trail = []; live.lastT = -1e9;
   $('tn-toggle').classList.add('on'); $('tn-toggle').setAttribute('aria-pressed', 'true'); $('tn-toggle-label').textContent = 'ギター入力をオフにする';
   $('tn-status').classList.add('on'); $('tn-state').textContent = '入力中';
-  msg.textContent = '音を弾いてください。指板の光る輪が、いま鳴っている高さの音が出せる位置です（同じ高さの音は複数の場所で出せるので、すべて同じように光ります）。±5セント以内で、音名の表示が緑になります。';
+  msg.textContent = '';
   cancelAnimationFrame(live.raf); live.prevT = 0; live.raf = requestAnimationFrame(liveFrame);
 }
 async function tunerStop() {
