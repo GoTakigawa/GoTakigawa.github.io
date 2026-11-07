@@ -301,3 +301,30 @@ button.small{font-size:11px;padding:6px 10px;}
 
 #tn-single,#tn-chord{min-height:264px;}
 #tn-single{align-content:center;}
+.tn-stage .tn-chord{display:grid;gap:10px;}
+
+/* tuner controls and layout */
+.tn-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px;}
+.tn-start{display:inline-flex;align-items:center;gap:9px;height:42px;padding:0 20px 0 16px;border-radius:12px;border:1.5px solid #38bdf8;background:#38bdf8;color:#04121b;font:700 14px/1 Barlow,sans-serif;cursor:pointer;transition:background .15s,color .15s,border-color .15s,box-shadow .15s;}
+.tn-start:hover{box-shadow:0 0 0 4px rgba(56,189,248,.2);}
+.tn-start.on{background:rgba(134,239,172,.1);border-color:#86efac;color:#86efac;}
+.tn-start.on:hover{box-shadow:0 0 0 4px rgba(134,239,172,.18);}
+.tn-status{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--text3);min-width:68px;}
+.tn-dot{width:9px;height:9px;border-radius:50%;background:#444;display:inline-block;}
+.tn-status.on{color:#86efac;}
+.tn-status.on .tn-dot{background:#86efac;box-shadow:0 0 8px #86efac;animation:tn-pulse 1.4s ease-in-out infinite;}
+@keyframes tn-pulse{50%{opacity:.35;}}
+.tn-level{width:140px;height:8px;border-radius:4px;background:#1a1a1a;overflow:hidden;border:1px solid #2a2a2a;}
+.tn-level i{display:block;height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#86efac);transition:width .06s linear;}
+.tn-bar-sp{flex:1;}
+.tn-modewrap{display:flex;align-items:center;gap:8px;}
+.tn-modelabel{font-size:11px;color:var(--text3);letter-spacing:.04em;}
+.tn-msg{margin:0 0 12px;min-height:18px;}
+.tn-stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:stretch;}
+.tn-stage .tn-body{grid-template-columns:minmax(110px,150px) minmax(0,1fr);}
+.tn-stage .tn-strings{gap:5px;}
+.tn-stage .tn-str{min-width:42px;padding:5px 6px;}
+.tn-stage .tn-chord{border-left:1px solid var(--border);padding-left:20px;align-content:start;}
+.tn-sub-title{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);font-weight:600;}
+.tn-stage #tn-chord-res{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));}
+@media(max-width:900px){.tn-stage{grid-template-columns:1fr;}.tn-stage .tn-chord{border-left:none;padding-left:0;border-top:1px solid var(--border);padding-top:14px;}}

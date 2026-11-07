@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=41';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=41';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=41';
-import { PianoEngine } from './audio.js?v=41';
-import { PitchListener } from './pitch.js?v=41';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=42';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=42';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=42';
+import { PianoEngine } from './audio.js?v=42';
+import { PitchListener } from './pitch.js?v=42';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -313,7 +313,7 @@ function renderFretboard() {
 
 // ── live tuner: pitch from the input → note, cents and a moving dot on the fretboard ──
 let fbGeom = null;
-const live = { gap: false, on: false, hist: [], midi: null, near: null, pend: null, hand: null, lastT: 0, prim: null, pos: null, since: 0, trail: [], raf: 0, prevT: 0 };
+const live = { level: 0, gap: false, on: false, hist: [], midi: null, near: null, pend: null, hand: null, lastT: 0, prim: null, pos: null, since: 0, trail: [], raf: 0, prevT: 0 };
 const chordHist = []; let chordT = 0; const chordLive = { notes: [], root: null, t: -1e9 };
 function onChordFrame(fr) {
   const now = performance.now();
@@ -337,7 +337,7 @@ function onChordFrame(fr) {
   $('tn-chord-res').innerHTML = html;
 }
 const listener = new PitchListener(fr => {
-  const now = performance.now();
+  const now = performance.now(); live.level = fr.level || 0;
   if (fr.freq) {
     if (now - live.lastT > 250) { live.hist = []; live.gap = true; }   // a fresh attack: do not mix it with the old note
     live.hist.push(69 + 12 * Math.log2(fr.freq / tnA4())); if (live.hist.length > 3) live.hist.shift();
@@ -382,10 +382,13 @@ function glowSvg(items, fade, t) {
 const effKind = () => listener.mode === 'auto' ? listener.kind : listener.mode;
 // show the block that matches what is being heard; both blocks have the same height so nothing jumps
 function showKind(kind) {
-  $('tn-single').hidden = kind === 'chord'; $('tn-chord').hidden = kind !== 'chord';
+  const m = listener.mode;
   chordHist.length = 0; chordLive.notes = [];
-  if (kind === 'chord') { $('fb-live').innerHTML = ''; $('tn-chord').classList.add('idle'); live.midi = null; live.near = null; live.prim = null; }
-  else { live.midi = null; live.near = null; live.pend = null; live.prim = null; live.pos = null; live.trail = []; live.hist = []; tunerReadout(false); }
+  $('tn-chord').classList.toggle('idle', kind !== 'chord');
+  $('tn-chord-res').innerHTML = '';
+  $('tn-chord-notes').innerHTML = m === 'single' ? '<span class="hint">コードの認識はオフです。</span>' : '<span class="hint">コードを鳴らすと、聞こえた音とコード名の候補を出します。</span>';
+  $('fb-live').innerHTML = '';
+  live.near = null; live.pend = null; live.prim = null; live.pos = null; live.trail = []; live.sincePitch = null;
 }
 
 function liveFrame(t) {
@@ -394,6 +397,8 @@ function liveFrame(t) {
   const active = live.midi !== null && t - live.lastT < 350;
   if (!active && t - live.lastT > 1500) { tunerReadout(false); }
   const layer = $('fb-live');
+  if (active) tunerReadout(true, live.midi);
+  $('tn-level').style.width = (live.on ? Math.max(0, Math.min(100, (20 * Math.log10(Math.max(live.level || 0, 1e-5)) + 60) / 60 * 100)) : 0).toFixed(0) + '%';
   if (effKind() === 'chord') {
     // every place that gives any of the heard notes; the root of the best reading is green
     const age = t - chordLive.t, fadeC = age < 2000 ? 1 : Math.max(0, 1 - (age - 2000) / 800);
@@ -412,7 +417,6 @@ function liveFrame(t) {
     else if (t - live.pend.t >= 45) { live.near = rnd; live.pend = null; }
   } else live.pend = null;
   const near = live.near;
-  if (active) tunerReadout(true, live.midi);
   const fade = active ? 1 : Math.max(0, 1 - (t - live.lastT - 350) / 600);
   if (fade <= 0) { layer.innerHTML = ''; return; }
   const cands = []; for (let s = 0; s < n; s++) { const f = near - tun[s]; if (st.strOn[s] && f >= 0 && f <= st.frets) cands.push({ s, f }); }
@@ -437,7 +441,8 @@ async function tunerStart() {
     $('tn-device').value = devs.some(d => d.deviceId === cur) ? cur : '';
   } catch (e) {}
   live.on = true; live.gap = false; live.hist = []; live.sincePitch = null; live.midi = null; live.near = null; live.pend = null; live.hand = null; live.prim = null; live.pos = null; live.trail = []; live.lastT = -1e9;
-  $('tn-toggle').textContent = '■ 停止'; $('tn-toggle').classList.add('on');
+  $('tn-toggle').classList.add('on'); $('tn-toggle').setAttribute('aria-pressed', 'true'); $('tn-toggle-label').textContent = 'マイクをオフにする';
+  $('tn-status').classList.add('on'); $('tn-state').textContent = '入力中';
   msg.textContent = '音を弾いてください。指板の光る輪が、いま鳴っている高さの音が出せる位置です（同じ高さの音は複数の場所で出せるので、すべて同じように光ります）。±5セント以内で、音名の表示が緑になります。';
   cancelAnimationFrame(live.raf); live.prevT = 0; live.raf = requestAnimationFrame(liveFrame);
 }
@@ -445,7 +450,10 @@ async function tunerStop() {
   cancelAnimationFrame(live.raf); live.on = false; live.midi = null;
   await listener.stop(); $('fb-live').innerHTML = ''; tunerReadout(false);
   $('tn-note').textContent = '—'; $('tn-hz').textContent = '— Hz'; $('tn-cents').textContent = '—';
-  $('tn-toggle').textContent = '● 入力を開始'; $('tn-toggle').classList.remove('on');
+  $('tn-toggle').classList.remove('on'); $('tn-toggle').setAttribute('aria-pressed', 'false'); $('tn-toggle-label').textContent = 'マイクをオンにする';
+  $('tn-status').classList.remove('on'); $('tn-state').textContent = '停止中'; $('tn-level').style.width = '0%';
+  $('tn-msg').textContent = 'マイクをオンにして、ギターを弾いてください。音声はこのページの中で処理するだけで、どこにも送られません。';
+  $('tn-chord').classList.add('idle');
 }
 
 function renderMetrics(set, count) {
