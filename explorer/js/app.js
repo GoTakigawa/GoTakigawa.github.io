@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=45';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=45';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=45';
-import { PianoEngine } from './audio.js?v=45';
-import { PitchListener } from './pitch.js?v=45';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=46';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=46';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=46';
+import { PianoEngine } from './audio.js?v=46';
+import { PitchListener } from './pitch.js?v=46';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -824,6 +824,21 @@ function bind() {
   });
 }
 
+function bindVolume() {
+  let vol = 80, muted = false;
+  try { const o = JSON.parse(localStorage.getItem('gti-explorer:vol') || 'null'); if (o) { vol = Math.min(100, Math.max(0, +o.vol || 0)); muted = !!o.muted; } } catch (e) {}
+  const rng = $('vol-range');
+  const apply = () => {
+    rng.value = vol; $('vol-num').textContent = muted ? 'M' : vol; rng.style.setProperty('--p', vol + '%');
+    $('vol').classList.toggle('muted', muted); $('vol-mute').setAttribute('aria-pressed', String(muted));
+    $('vol-wave').style.display = muted || vol === 0 ? 'none' : ''; $('vol-x').style.display = muted || vol === 0 ? '' : 'none';
+    audio.setLevel(vol / 100, muted);
+    try { localStorage.setItem('gti-explorer:vol', JSON.stringify({ vol, muted })); } catch (e) {}
+  };
+  rng.addEventListener('input', () => { vol = +rng.value; if (vol > 0) muted = false; apply(); });
+  $('vol-mute').addEventListener('click', () => { if (vol === 0) vol = 80; else muted = !muted; apply(); });
+  apply();
+}
 function bindTuner() {
   let a4 = 440; try { a4 = +localStorage.getItem('gti-explorer:a4') || 440; } catch (e) {}
   let h = ''; for (let v = 430; v <= 450; v++) h += `<option value="${v}">${v} Hz</option>`;
@@ -848,6 +863,6 @@ function bindTuner() {
 
 async function boot() {
   try { const s = localStorage.getItem(STORE); st = sanitize(s ? JSON.parse(s) : null); } catch (e) { st = sanitize(null); }
-  bind(); bindTuner(); render();
+  bind(); bindTuner(); bindVolume(); render();
 }
 boot();
