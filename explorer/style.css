@@ -298,3 +298,6 @@ button.small{font-size:11px;padding:6px 10px;}
 #tn-chord-res .hint{grid-column:1/-1;}
 #tn-chord-notes{min-height:40px;align-content:flex-start;}
 @media(max-width:700px){#tn-chord-res{height:310px;}}
+
+#tn-single,#tn-chord{min-height:264px;}
+#tn-single{align-content:center;}

@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=39';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=39';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=39';
-import { PianoEngine } from './audio.js?v=39';
-import { PitchListener } from './pitch.js?v=39';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=40';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=40';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=40';
+import { PianoEngine } from './audio.js?v=40';
+import { PitchListener } from './pitch.js?v=40';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -379,13 +379,22 @@ function glowSvg(items, fade, t) {
   return g + '</g>';
 }
 
+const effKind = () => listener.mode === 'auto' ? listener.kind : listener.mode;
+// show the block that matches what is being heard; both blocks have the same height so nothing jumps
+function showKind(kind) {
+  $('tn-single').hidden = kind === 'chord'; $('tn-chord').hidden = kind !== 'chord';
+  chordHist.length = 0; chordLive.notes = [];
+  if (kind === 'chord') { $('fb-live').innerHTML = ''; $('tn-chord').classList.add('idle'); live.midi = null; live.near = null; live.prim = null; }
+  else { live.midi = null; live.near = null; live.pend = null; live.prim = null; live.pos = null; live.trail = []; live.hist = []; tunerReadout(false); }
+}
+
 function liveFrame(t) {
   live.raf = requestAnimationFrame(liveFrame);
   const dt = Math.min(100, t - (live.prevT || t)); live.prevT = t;
   const active = live.midi !== null && t - live.lastT < 350;
   if (!active && t - live.lastT > 1500) { tunerReadout(false); }
   const layer = $('fb-live');
-  if (listener.mode === 'chord') {
+  if (effKind() === 'chord') {
     // every place that gives any of the heard notes; the root of the best reading is green
     const age = t - chordLive.t, fadeC = age < 2000 ? 1 : Math.max(0, 1 - (age - 2000) / 800);
     if (!$('tn-show').checked || !fbGeom || !chordLive.notes.length || fadeC <= 0) { layer.innerHTML = ''; return; }
@@ -814,12 +823,11 @@ function bindTuner() {
   $('tn-a4').addEventListener('change', () => { try { localStorage.setItem('gti-explorer:a4', $('tn-a4').value); } catch (e) {} });
   $('tn-toggle').addEventListener('click', () => live.on ? tunerStop() : tunerStart());
   document.querySelectorAll('.tn-mode').forEach(btn => btn.addEventListener('click', () => {
-    listener.mode = btn.dataset.m; chordHist.length = 0; chordLive.notes = [];
+    listener.mode = btn.dataset.m; listener.kind = btn.dataset.m === 'chord' ? 'chord' : 'single'; listener.cnt = 0;
     document.querySelectorAll('.tn-mode').forEach(b => b.classList.toggle('on', b === btn));
-    $('tn-single').hidden = btn.dataset.m === 'chord'; $('tn-chord').hidden = btn.dataset.m !== 'chord';
-    if (btn.dataset.m === 'chord') { $('fb-live').innerHTML = ''; $('tn-chord').classList.add('idle'); }
-    else { live.midi = null; live.near = null; live.pend = null; live.prim = null; live.pos = null; live.trail = []; }
+    showKind(listener.kind);
   }));
+  listener.onKind = kind => showKind(kind);
   $('tn-chord-res').addEventListener('click', e => {
     const g = e.target.closest('.fd-go'); if (!g) return;
     fbAction = 'play'; shapeOverride = { root: +g.dataset.root, id: g.dataset.id };
