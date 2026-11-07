@@ -93,9 +93,9 @@ export class PitchListener {
     let r = yin(this.buf.subarray(n - 1024), sr, sr / 510);
     if (!r || r.freq < 250) {
       r = yin(this.buf.subarray(n - 2048), sr, sr / 1022);
-      if (!r || r.freq < 100) r = yin(this.buf, sr);
+      if (!r || r.freq < 100) r = yin(this.buf, sr, 40);
     }
-    return r && r.clarity > 0.8 ? r : null;
+    return r && r.clarity > 0.8 && r.freq >= 40 ? r : null;
   }
   // mode: 'single' | 'chord' | 'auto'. In auto the kind follows what is heard: two or more pitch classes in the
   // spectrum = chord, one clear pitch = single note. It changes at the start of a new sound (quickly) or after
@@ -107,16 +107,15 @@ export class PitchListener {
     if (level < 0.006) {
       if (!this.wasSilent) { this.wasSilent = true; this.silentSince = now; }
       this.env = (this.env || 0) * 0.9;
-      if (this.mode !== 'chord' && !(this.mode === 'auto' && this.kind === 'chord')) this.onFrame({ freq: null, clarity: 0, level });
+      this.onFrame({ freq: null, clarity: 0, level });
       if (this.mode !== 'single' && tickNo % 5 === 0 && this.onChord) this.onChord({ notes: [], level });
       return;
     }
     const attack = (this.wasSilent && now - this.silentSince > 250) || (level > (this.env || 0) * 1.8 && level > 0.02 && now - (this.lastAttack || 0) > 150);
     this.wasSilent = false; this.env = (this.env || 0) * 0.9 + level * 0.1;
     if (attack) { this.lastAttack = now; this.attackUntil = now + 300; this.cnt = 0; }
-    const needSpec = this.mode === 'chord' || (this.mode === 'auto' && tickNo % 2 === 0);
-    if (needSpec) this.lastNotes = this.spectrumNotes();
-    const r = this.mode === 'chord' ? null : this.singleReading();
+    if (this.mode !== 'single' && tickNo % 2 === 0) this.lastNotes = this.spectrumNotes();
+    const r = this.singleReading();
     let kind = this.mode;
     if (this.mode === 'auto') {
       // chord = a third pitch class that is clearly present, or a strong second one when the sound is not a clean
@@ -131,8 +130,10 @@ export class PitchListener {
       } else this.cnt = 0;
       kind = this.kind;
     }
-    if (kind === 'chord') { if (tickNo % 5 === 0 && this.onChord) this.onChord({ notes: this.lastNotes || [], level }); }
-    else this.onFrame(r ? { freq: r.freq, clarity: r.clarity, level } : { freq: null, clarity: 0, level });
+    if (kind === 'chord' && tickNo % 5 === 0 && this.onChord) this.onChord({ notes: this.lastNotes || [], level });
+    // while a chord is ringing, YIN reports the "virtual pitch" of the whole chord (often far below the bass note): show it only when it is clean
+    const rr = kind === 'chord' && r && r.clarity < 0.97 ? null : r;
+    this.onFrame(rr ? { freq: rr.freq, clarity: rr.clarity, level } : { freq: null, clarity: 0, level });   // the tuner reading stays on in every mode
   }
   async stop() {
     clearInterval(this.timer); this.timer = 0;
