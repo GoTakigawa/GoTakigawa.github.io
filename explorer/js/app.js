@@ -1,8 +1,8 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=42';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=42';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=42';
-import { PianoEngine } from './audio.js?v=42';
-import { PitchListener } from './pitch.js?v=42';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=43';
+import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=43';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=43';
+import { PianoEngine } from './audio.js?v=43';
+import { PitchListener } from './pitch.js?v=43';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -340,7 +340,7 @@ const listener = new PitchListener(fr => {
   const now = performance.now(); live.level = fr.level || 0;
   if (fr.freq) {
     if (now - live.lastT > 250) { live.hist = []; live.gap = true; }   // a fresh attack: do not mix it with the old note
-    live.hist.push(69 + 12 * Math.log2(fr.freq / tnA4())); if (live.hist.length > 3) live.hist.shift();
+    live.hist.push(69 + 12 * Math.log2(fr.freq / tnA4())); if (live.hist.length > 5) live.hist.shift();
     const h = live.hist.slice().sort((x, y) => x - y); live.midi = h[h.length >> 1]; live.lastT = now;
   } else if (now - live.lastT > 400) live.hist = [];
 }, onChordFrame);
@@ -386,7 +386,7 @@ function showKind(kind) {
   chordHist.length = 0; chordLive.notes = [];
   $('tn-chord').classList.toggle('idle', kind !== 'chord');
   $('tn-chord-res').innerHTML = '';
-  $('tn-chord-notes').innerHTML = m === 'single' ? '<span class="hint">コードの認識はオフです。</span>' : '<span class="hint">コードを鳴らすと、聞こえた音とコード名の候補を出します。</span>';
+  $('tn-chord-notes').innerHTML = m === 'single' ? '<span class="hint">単音モードです。コードは認識しません。</span>' : '<span class="hint">コードを鳴らすと、聞こえた音とコード名の候補を出します。</span>';
   $('fb-live').innerHTML = '';
   live.near = null; live.pend = null; live.prim = null; live.pos = null; live.trail = []; live.sincePitch = null;
 }
@@ -409,12 +409,12 @@ function liveFrame(t) {
   }
   if (!$('tn-show').checked || !fbGeom || live.midi === null) { layer.innerHTML = ''; return; }
   const tun = tuning(), n = tun.length;
-  // commit a new note only when it has been steady for ~45 ms (skips pluck noise and half-way readings)
+  // commit a new note only when it has been steady for ~40 ms (skips pluck noise and half-way readings)
   const rnd = Math.round(live.midi);
   if (live.near === null || live.gap) { live.near = rnd; live.pend = null; live.gap = false; }   // first reading of a new attack shows at once; later readings still have to hold
   else if (rnd !== live.near && Math.abs(live.midi - live.near) > 0.65) {
     if (!live.pend || live.pend.n !== rnd) live.pend = { n: rnd, t };
-    else if (t - live.pend.t >= 45) { live.near = rnd; live.pend = null; }
+    else if (t - live.pend.t >= 40) { live.near = rnd; live.pend = null; }
   } else live.pend = null;
   const near = live.near;
   const fade = active ? 1 : Math.max(0, 1 - (t - live.lastT - 350) / 600);
@@ -431,7 +431,7 @@ async function tunerStart() {
   try {
     await listener.start($('tn-device').value);
   } catch (e) {
-    msg.textContent = e && e.name === 'NotAllowedError' ? 'マイクの使用が許可されていません。ブラウザのアドレスバーの設定から、このページのマイクを許可してください。'
+    msg.textContent = e && e.name === 'NotAllowedError' ? '入力（マイク）の使用が許可されていません。ブラウザのアドレスバーの設定から、このページのマイク入力を許可してください。'
       : e && e.name === 'NotFoundError' ? '入力デバイスが見つかりません。オーディオインターフェースやマイクの接続を確認してください。' : '入力を開始できませんでした：' + (e && e.message || e);
     return;
   }
@@ -441,7 +441,7 @@ async function tunerStart() {
     $('tn-device').value = devs.some(d => d.deviceId === cur) ? cur : '';
   } catch (e) {}
   live.on = true; live.gap = false; live.hist = []; live.sincePitch = null; live.midi = null; live.near = null; live.pend = null; live.hand = null; live.prim = null; live.pos = null; live.trail = []; live.lastT = -1e9;
-  $('tn-toggle').classList.add('on'); $('tn-toggle').setAttribute('aria-pressed', 'true'); $('tn-toggle-label').textContent = 'マイクをオフにする';
+  $('tn-toggle').classList.add('on'); $('tn-toggle').setAttribute('aria-pressed', 'true'); $('tn-toggle-label').textContent = 'ギター入力をオフにする';
   $('tn-status').classList.add('on'); $('tn-state').textContent = '入力中';
   msg.textContent = '音を弾いてください。指板の光る輪が、いま鳴っている高さの音が出せる位置です（同じ高さの音は複数の場所で出せるので、すべて同じように光ります）。±5セント以内で、音名の表示が緑になります。';
   cancelAnimationFrame(live.raf); live.prevT = 0; live.raf = requestAnimationFrame(liveFrame);
@@ -450,9 +450,9 @@ async function tunerStop() {
   cancelAnimationFrame(live.raf); live.on = false; live.midi = null;
   await listener.stop(); $('fb-live').innerHTML = ''; tunerReadout(false);
   $('tn-note').textContent = '—'; $('tn-hz').textContent = '— Hz'; $('tn-cents').textContent = '—';
-  $('tn-toggle').classList.remove('on'); $('tn-toggle').setAttribute('aria-pressed', 'false'); $('tn-toggle-label').textContent = 'マイクをオンにする';
+  $('tn-toggle').classList.remove('on'); $('tn-toggle').setAttribute('aria-pressed', 'false'); $('tn-toggle-label').textContent = 'ギター入力をオンにする';
   $('tn-status').classList.remove('on'); $('tn-state').textContent = '停止中'; $('tn-level').style.width = '0%';
-  $('tn-msg').textContent = 'マイクをオンにして、ギターを弾いてください。音声はこのページの中で処理するだけで、どこにも送られません。';
+  $('tn-msg').textContent = 'ギター入力をオンにして、ギターを弾いてください。音声はこのページの中で処理するだけで、どこにも送られません。';
   $('tn-chord').classList.add('idle');
 }
 

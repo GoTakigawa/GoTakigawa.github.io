@@ -79,7 +79,7 @@ export class PitchListener {
     this.db = new Float32Array(this.sp.frequencyBinCount); this.mag = new Float32Array(this.sp.frequencyBinCount);
     src.connect(this.an); this.an.connect(mute); mute.connect(this.ctx.destination);
     this.buf = new Float32Array(this.an.fftSize); this.kind = 'single'; this.cnt = 0; this.lastNotes = null;
-    this.timer = setInterval(() => this.tick(), 20);
+    this.timer = setInterval(() => this.tick(), 10);
   }
   spectrumNotes() {
     this.sp.getFloatFrequencyData(this.db);
@@ -87,13 +87,16 @@ export class PitchListener {
     return detectNotes(this.mag, this.ctx.sampleRate, this.sp.fftSize);
   }
   singleReading() {
-    // three window lengths: notes from B3 up are answered from the newest 1024 samples (~21 ms), notes down to ~100 Hz
-    // from 2048 (~43 ms), and only the low strings wait for the full 4096 (~85 ms)
+    // four window lengths: notes from C5 up are answered from the newest 512 samples (~11 ms), notes down to ~150 Hz
+    // from 1024 (~21 ms), down to ~75 Hz from 2048 (~43 ms), and only the lowest notes wait for the full 4096 (~85 ms)
     const sr = this.ctx.sampleRate, n = this.buf.length;
-    let r = yin(this.buf.subarray(n - 1024), sr, sr / 510);
-    if (!r || r.freq < 250) {
-      r = yin(this.buf.subarray(n - 2048), sr, sr / 1022);
-      if (!r || r.freq < 100) r = yin(this.buf, sr, 40);
+    let r = yin(this.buf.subarray(n - 512), sr, sr / 254);
+    if (!r || r.freq < 500) {
+      r = yin(this.buf.subarray(n - 1024), sr, sr / 510);
+      if (!r || r.freq < 150) {
+        r = yin(this.buf.subarray(n - 2048), sr, sr / 1022);
+        if (!r || r.freq < 75) r = yin(this.buf, sr, 40);
+      }
     }
     return r && r.clarity > 0.8 && r.freq >= 40 ? r : null;
   }
@@ -108,13 +111,13 @@ export class PitchListener {
       if (!this.wasSilent) { this.wasSilent = true; this.silentSince = now; }
       this.env = (this.env || 0) * 0.9;
       this.onFrame({ freq: null, clarity: 0, level });
-      if (this.mode !== 'single' && tickNo % 5 === 0 && this.onChord) this.onChord({ notes: [], level });
+      if (this.mode !== 'single' && tickNo % 10 === 0 && this.onChord) this.onChord({ notes: [], level });
       return;
     }
     const attack = (this.wasSilent && now - this.silentSince > 250) || (level > (this.env || 0) * 1.8 && level > 0.02 && now - (this.lastAttack || 0) > 150);
     this.wasSilent = false; this.env = (this.env || 0) * 0.9 + level * 0.1;
     if (attack) { this.lastAttack = now; this.attackUntil = now + 300; this.cnt = 0; }
-    if (this.mode !== 'single' && tickNo % 2 === 0) this.lastNotes = this.spectrumNotes();
+    if (this.mode !== 'single' && tickNo % 4 === 0) this.lastNotes = this.spectrumNotes();
     const r = this.singleReading();
     let kind = this.mode;
     if (this.mode === 'auto') {
@@ -126,11 +129,11 @@ export class PitchListener {
       const poly = (w[2] || 0) >= 0.38 || ((w[1] || 0) >= 0.5 && !(r && r.clarity > 0.9));
       const vote = poly ? 'chord' : (r ? 'single' : null);
       if (vote && vote !== this.kind) {
-        if (++this.cnt >= (now < this.attackUntil ? 6 : 20)) { this.kind = vote; this.cnt = 0; this.lastNotes = vote === 'single' ? null : this.lastNotes; this.onKind && this.onKind(vote); }
+        if (++this.cnt >= (now < this.attackUntil ? 12 : 40)) { this.kind = vote; this.cnt = 0; this.lastNotes = vote === 'single' ? null : this.lastNotes; this.onKind && this.onKind(vote); }
       } else this.cnt = 0;
       kind = this.kind;
     }
-    if (kind === 'chord' && tickNo % 5 === 0 && this.onChord) this.onChord({ notes: this.lastNotes || [], level });
+    if (kind === 'chord' && tickNo % 10 === 0 && this.onChord) this.onChord({ notes: this.lastNotes || [], level });
     // while a chord is ringing, YIN reports the "virtual pitch" of the whole chord (often far below the bass note): show it only when it is clean
     const rr = kind === 'chord' && r && r.clarity < 0.97 ? null : r;
     this.onFrame(rr ? { freq: rr.freq, clarity: rr.clarity, level } : { freq: null, clarity: 0, level });   // the tuner reading stays on in every mode
