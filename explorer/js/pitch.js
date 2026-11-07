@@ -60,7 +60,7 @@ export function detectNotes(mag, sr, fftSize, o = {}) {
 
 // Streams detections to onFrame({ freq, clarity, level }) about every 20 ms.
 export class PitchListener {
-  constructor(onFrame, onChord) { this.onFrame = onFrame; this.onChord = onChord; this.mode = 'single'; this.n = 0; this.ctx = null; this.stream = null; this.timer = 0; }
+  constructor(onFrame, onChord) { this.onFrame = onFrame; this.onChord = onChord; this.mode = 'auto'; this.kind = 'single'; this.cnt = 0; this.n = 0; this.ctx = null; this.stream = null; this.timer = 0; }
   async start(deviceId) {
     await this.stop();
     const audio = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
@@ -75,22 +75,15 @@ export class PitchListener {
     this.sp = this.ctx.createAnalyser(); this.sp.fftSize = 16384; this.sp.smoothingTimeConstant = 0.3; src.connect(this.sp);   // spectrum for chords
     this.db = new Float32Array(this.sp.frequencyBinCount); this.mag = new Float32Array(this.sp.frequencyBinCount);
     src.connect(this.an); this.an.connect(mute); mute.connect(this.ctx.destination);
-    this.buf = new Float32Array(this.an.fftSize);
+    this.buf = new Float32Array(this.an.fftSize); this.kind = 'single'; this.cnt = 0; this.lastNotes = null;
     this.timer = setInterval(() => this.tick(), 20);
   }
-  tick() {
-    if (!this.an) return;
-    this.an.getFloatTimeDomainData(this.buf);
-    const level = rms(this.buf);
-    if (this.mode === 'chord') {
-      if (++this.n % 5) return;                                  // about every 100 ms
-      if (level < 0.006) { this.onChord && this.onChord({ notes: [], level }); return; }
-      this.sp.getFloatFrequencyData(this.db);
-      for (let i = 0; i < this.db.length; i++) this.mag[i] = Math.pow(10, this.db[i] / 20);
-      this.onChord && this.onChord({ notes: detectNotes(this.mag, this.ctx.sampleRate, this.sp.fftSize), level });
-      return;
-    }
-    if (level < 0.006) { this.onFrame({ freq: null, clarity: 0, level }); return; }
+  spectrumNotes() {
+    this.sp.getFloatFrequencyData(this.db);
+    for (let i = 0; i < this.db.length; i++) this.mag[i] = Math.pow(10, this.db[i] / 20);
+    return detectNotes(this.mag, this.ctx.sampleRate, this.sp.fftSize);
+  }
+  singleReading() {
     // three window lengths: notes from B3 up are answered from the newest 1024 samples (~21 ms), notes down to ~100 Hz
     // from 2048 (~43 ms), and only the low strings wait for the full 4096 (~85 ms)
     const sr = this.ctx.sampleRate, n = this.buf.length;
@@ -99,7 +92,39 @@ export class PitchListener {
       r = yin(this.buf.subarray(n - 2048), sr, sr / 1022);
       if (!r || r.freq < 100) r = yin(this.buf, sr);
     }
-    this.onFrame(r && r.clarity > 0.8 ? { freq: r.freq, clarity: r.clarity, level } : { freq: null, clarity: 0, level });
+    return r && r.clarity > 0.8 ? r : null;
+  }
+  // mode: 'single' | 'chord' | 'auto'. In auto the kind follows what is heard: two or more pitch classes in the
+  // spectrum = chord, one clear pitch = single note. It changes at the start of a new sound (quickly) or after
+  // ~300 ms of steady evidence, so a ringing chord is not flipped to a single note as it decays.
+  tick() {
+    if (!this.an) return;
+    this.an.getFloatTimeDomainData(this.buf);
+    const level = rms(this.buf), now = performance.now(), tickNo = ++this.n;
+    if (level < 0.006) {
+      if (!this.wasSilent) { this.wasSilent = true; this.silentSince = now; }
+      this.env = (this.env || 0) * 0.9;
+      if (this.mode !== 'chord' && !(this.mode === 'auto' && this.kind === 'chord')) this.onFrame({ freq: null, clarity: 0, level });
+      if (this.mode !== 'single' && tickNo % 5 === 0 && this.onChord) this.onChord({ notes: [], level });
+      return;
+    }
+    const attack = (this.wasSilent && now - this.silentSince > 250) || (level > (this.env || 0) * 1.8 && level > 0.02 && now - (this.lastAttack || 0) > 150);
+    this.wasSilent = false; this.env = (this.env || 0) * 0.9 + level * 0.1;
+    if (attack) { this.lastAttack = now; this.attackUntil = now + 300; this.cnt = 0; }
+    const needSpec = this.mode === 'chord' || (this.mode === 'auto' && tickNo % 2 === 0);
+    if (needSpec) this.lastNotes = this.spectrumNotes();
+    const r = this.mode === 'chord' ? null : this.singleReading();
+    let kind = this.mode;
+    if (this.mode === 'auto') {
+      const poly = this.lastNotes && new Set(this.lastNotes.map(m => m % 12)).size >= 2;
+      const vote = poly ? 'chord' : (r ? 'single' : null);
+      if (vote && vote !== this.kind) {
+        if (++this.cnt >= (now < this.attackUntil ? 4 : 15)) { this.kind = vote; this.cnt = 0; this.lastNotes = vote === 'single' ? null : this.lastNotes; this.onKind && this.onKind(vote); }
+      } else this.cnt = 0;
+      kind = this.kind;
+    }
+    if (kind === 'chord') { if (tickNo % 5 === 0 && this.onChord) this.onChord({ notes: this.lastNotes || [], level }); }
+    else this.onFrame(r ? { freq: r.freq, clarity: r.clarity, level } : { freq: null, clarity: 0, level });
   }
   async stop() {
     clearInterval(this.timer); this.timer = 0;
