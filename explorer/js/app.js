@@ -1,10 +1,11 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=48';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=48';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=48';
-import { PianoEngine, VOICE_NAMES, CLICK_NAMES } from './audio.js?v=48';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=48';
-import { Player } from './player.js?v=48';
-import { PitchListener } from './pitch.js?v=48';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=49';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=49';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=49';
+import { PianoEngine, VOICE_NAMES, CLICK_NAMES } from './audio.js?v=49';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=49';
+import { Player } from './player.js?v=49';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=49';
+import { PitchListener } from './pitch.js?v=49';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -962,25 +963,30 @@ function markBar(bi, beats, beatDur) {
     if (on) { void bb.offsetWidth; bb.style.transition = `width ${(beats * beatDur).toFixed(3)}s linear`; bb.style.width = '100%'; }
   });
 }
-function schedBar(bi, t, beatDur, beats) {
-  const bar = pb.bars[bi]; if (!bar) return;
-  const bassInst = st.inst === 'bass', P = st.prog, k = Math.max(1, bar.chords.length), per = beats / k;
+// the notes of one bar, in beats from the bar start: { b, d, n: [midi], v } (used for playback and for the MIDI file)
+function barEvents(bar, beats, bassInst) {
+  const P = st.prog, ev = [], k = Math.max(1, bar.chords.length), per = beats / k;
   bar.chords.forEach((c, j) => {
-    const tj = t + j * per * beatDur, len = per * beatDur, m = chordMidi(c, bassInst);
-    if (j > 0) player.at(tj, () => applyBar(bi, j));
+    const b0 = j * per, m = chordMidi(c, bassInst);
     if (P.style === 'off') return;
     if (bassInst) {
-      const nb = Math.max(1, Math.round(per));
-      if (P.style === 'root') audio.play([m.bass], tj, len * 0.95, 0.9);
-      else for (let b = 0; b < nb; b++) audio.play([P.style === 'arp' && b % 2 ? m.body[0] : m.bass], tj + b * beatDur, beatDur * 0.9, 0.9);
-    } else if (P.style === 'root') audio.play([m.bass], tj, len * 0.95, 0.9);
-    else if (P.style === 'strum') audio.play(m.all, tj, len * 0.95, 0.9);
+      if (P.style === 'root') ev.push({ b: b0, d: per * 0.95, n: [m.bass], v: 0.9 });
+      else for (let b = 0; b < Math.max(1, Math.round(per)); b++) ev.push({ b: b0 + b, d: 0.9, n: [P.style === 'arp' && b % 2 ? m.body[0] : m.bass], v: 0.9 });
+    } else if (P.style === 'root') ev.push({ b: b0, d: per * 0.95, n: [m.bass], v: 0.9 });
+    else if (P.style === 'strum') ev.push({ b: b0, d: per * 0.95, n: m.all, v: 0.9 });
     else {
-      const step = beatDur / 2, cnt = Math.max(1, Math.floor(len / step)), seq = m.all.concat(m.all.slice(1, -1).reverse());
-      for (let i = 0; i < cnt; i++) audio.play([seq[i % seq.length]], tj + i * step, step * 2.2, 0.85);
+      const cnt = Math.max(1, Math.floor(per / 0.5)), seq = m.all.concat(m.all.slice(1, -1).reverse());
+      for (let i = 0; i < cnt; i++) ev.push({ b: b0 + i * 0.5, d: 1.1, n: [seq[i % seq.length]], v: 0.85 });
     }
   });
-  if (P.guide === 'root' && bar.scales.length) audio.play([guideNote(bar.scales[0].root, bassInst)], t, beatDur * 0.8, 0.6);
+  if (P.guide === 'root' && bar.scales.length) ev.push({ b: 0, d: 0.8, n: [guideNote(bar.scales[0].root, bassInst)], v: 0.6 });
+  return ev;
+}
+function schedBar(bi, t, beatDur, beats) {
+  const bar = pb.bars[bi]; if (!bar) return;
+  const per = beats / Math.max(1, bar.chords.length);
+  bar.chords.forEach((c, j) => { if (j > 0) player.at(t + j * per * beatDur, () => applyBar(bi, j)); });
+  barEvents(bar, beats, st.inst === 'bass').forEach(e => audio.play(e.n, t + e.b * beatDur, e.d * beatDur, e.v));
 }
 const player = new Player(audio, {
   bars: () => pb.bars.length,
@@ -1038,6 +1044,45 @@ function bindProg() {
   $('pg-play').addEventListener('click', () => pb.on ? stopProg() : startProg(0));
   $('pg-bars').addEventListener('click', e => { const b = e.target.closest('.pg-bar'); if (!b) return; const i = +b.dataset.i; if (pb.on) player.jump(i); else startProg(i); });
   window.addEventListener('pagehide', () => { if (pb.on) stopProg(); });
+  $('pg-midi').addEventListener('click', exportMidi);
+  $('pg-share').addEventListener('click', copyShare);
+  $('pg-png').addEventListener('click', () => exportBoard('png'));
+  $('pg-pdf').addEventListener('click', () => exportBoard('pdf'));
+}
+const MIDI_PROGRAM = { piano: 0, guitar: 25, organ: 16, pad: 89, bass: 33 };
+function exportMidi() {
+  const r = progBars(); if (!r.bars.length) return notify('進行が空です。コード進行かスケール進行を入力してください');
+  const P = st.prog, bassInst = st.inst === 'bass', TPB = 480, notes = [];
+  r.bars.forEach((bar, i) => barEvents(bar, P.beats, bassInst).forEach(e => e.n.forEach((m, k) => notes.push({ tick: (i * P.beats + e.b) * TPB + (e.n.length > 1 ? k * 6 : 0), dur: e.d * TPB, midi: m, vel: e.v }))));
+  const data = buildMidi({ bpm: P.bpm, beats: P.beats, program: bassInst ? 33 : MIDI_PROGRAM[P.voice] ?? 0, title: 'GTI Fretboard Explorer', notes });
+  download(new Blob([data], { type: 'audio/midi' }), 'progression.mid');
+  notify(`MIDI を書き出しました（${r.bars.length}小節・${P.bpm} BPM）`);
+}
+function shareUrl() {
+  const P = st.prog, base = pb.on && pb.snap ? pb.snap : st;
+  const obj = { v: 1, p: { chords: P.chords, scales: P.scales, bpm: P.bpm, beats: P.beats, loop: P.loop, count: P.count, click: P.click, ckind: P.ckind, voice: P.voice, style: P.style, guide: P.guide, follow: P.follow }, r: base.root, i: st.inst, c: { strings: st.strings, tuning: st.tuning, custom: st.custom, frets: st.frets, minus: st.minus } };
+  return location.origin + location.pathname + '#s=' + encodeShare(obj);
+}
+async function copyShare() {
+  const url = shareUrl();
+  try { await navigator.clipboard.writeText(url); notify('共有リンクをコピーしました（進行・テンポ・楽器の設定が入っています）'); }
+  catch (e) { history.replaceState(null, '', url.slice(url.indexOf('#'))); notify('アドレスバーのリンクをコピーしてください'); }
+}
+function applyShared(obj) {
+  if (!obj || typeof obj !== 'object' || !obj.p) return false;
+  const inst = INSTRUMENTS[obj.i] ? obj.i : 'guitar', raw = { ...st, inst, ...cleanCfg(inst, obj.c), prog: obj.p, root: obj.r, cfg: {} };
+  st = sanitize(raw); return true;
+}
+async function exportBoard(kind) {
+  const svg = $('fretboard').querySelector('svg'); if (!svg) return;
+  const set = currentSet(), tn = (st.tuning === 'custom' ? 'カスタム' : (findTuning(st.inst, st.strings, st.tuning) || {}).name) + ` ・ ${st.strings}弦`;
+  const rng = $('m-range').textContent, title = $('fb-title').textContent || titleFor(set);
+  try {
+    const c = await fretboardCanvas(svg, title, `${INSTRUMENTS[st.inst].name} ・ ${tn} ・ ${rng}`);
+    const base = 'fretboard-' + title.replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 40);
+    if (kind === 'png') download(await canvasBlob(c), base + '.png'); else download(await pdfFromCanvas(c), base + '.pdf');
+    notify(kind === 'png' ? '指板図を PNG で保存しました' : '指板図を PDF で保存しました');
+  } catch (e) { notify('書き出しに失敗しました'); }
 }
 
 function bindVolume() {
@@ -1079,6 +1124,9 @@ function bindTuner() {
 
 async function boot() {
   try { const s = localStorage.getItem(STORE); st = sanitize(s ? JSON.parse(s) : null); } catch (e) { st = sanitize(null); }
+  let shared = false;
+  try { const m = /[#&]s=([A-Za-z0-9_-]+)/.exec(location.hash); if (m) { shared = applyShared(decodeShare(m[1])); history.replaceState(null, '', location.pathname + location.search); } } catch (e) {}
   bind(); bindTuner(); bindVolume(); bindProg(); render();
+  if (shared) { save(); notify('共有された進行と設定を読み込みました'); }
 }
 boot();
