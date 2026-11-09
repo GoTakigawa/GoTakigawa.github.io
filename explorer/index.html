@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=49">
+<link rel="stylesheet" href="style.css?v=50">
 </head>
 <body>
 
@@ -153,6 +153,7 @@
       <p class="hint tn-msg" id="tn-msg">ギター入力をオンにして、ギターを弾いてください。音声はこのページの中で処理するだけで、どこにも送られません。</p>
       <div class="tn-stage">
         <div class="tn-body" id="tn-single">
+          <div class="tn-viewseg seg small-seg" role="group" aria-label="チューナーの表示"><button class="tn-view on" data-v="meter">メーター</button><button class="tn-view" data-v="strobe">ストロボ</button></div>
           <div class="tn-read">
             <div class="tn-note" id="tn-note">—</div>
             <div class="tn-sub"><span id="tn-hz">— Hz</span><span id="tn-cents">—</span></div>
@@ -161,6 +162,7 @@
             <span class="tn-tick" style="left:0">−50</span><span class="tn-tick" style="left:25%"></span><span class="tn-tick mid" style="left:50%">0</span><span class="tn-tick" style="left:75%"></span><span class="tn-tick" style="left:100%">+50</span>
             <i class="tn-needle" id="tn-needle"></i>
           </div>
+          <canvas class="tn-strobe" id="tn-strobe" hidden aria-label="ストロボ表示"></canvas>
           <div class="tn-strings" id="tn-strings"></div>
         </div>
         <div class="tn-chord idle" id="tn-chord">
@@ -168,6 +170,12 @@
           <div class="pick-notes" id="tn-chord-notes"><span class="hint">コードを鳴らすと、聞こえた音とコード名の候補を出します。</span></div>
           <div class="finder-results" id="tn-chord-res"></div>
         </div>
+      </div>
+      <div class="tn-hist" id="tn-hist">
+        <div class="tn-hist-hd"><span class="tn-sub-title">弾いた音の履歴</span><span class="hint" id="tn-hist-n"></span>
+          <div class="tn-hist-btns"><button class="std small play-btn" id="th-play" type="button">▶ 再生</button><button class="std small" id="th-est" type="button">スケールを推定</button><button class="std small" id="th-clear" type="button">クリア</button></div></div>
+        <div class="pick-notes" id="tn-hist-notes"><span class="hint">ギター入力をオンにして弾くと、音名が順に並びます。</span></div>
+        <div class="finder-results" id="tn-scales"></div>
       </div>
       <div class="tn-opts">
         <div class="field"><label for="tn-device">入力デバイス（オーディオインターフェースはここで選びます）</label><select id="tn-device"><option value="">既定の入力</option></select></div>
@@ -328,7 +336,7 @@
   <input type="range" id="vol-range" min="0" max="100" step="1" value="80" aria-label="音量">
   <span class="vol-num" id="vol-num">80</span>
 </div>
-<script type="module" src="js/app.js?v=49"></script>
+<script type="module" src="js/app.js?v=50"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
