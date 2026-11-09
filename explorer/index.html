@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=47">
+<link rel="stylesheet" href="style.css?v=48">
 </head>
 <body>
 
@@ -209,6 +209,37 @@
       </div>
     </section>
 
+    <section class="panel" id="prog-panel">
+      <div class="panel-hd">
+        <div class="panel-title">Progression<b id="pg-title">コード進行・スケール進行を流して、指板を追従させる</b></div>
+      </div>
+      <div class="pg-grid">
+        <div class="field"><label for="pg-chords">コード進行</label>
+          <div class="row" style="flex-wrap:nowrap"><input type="text" id="pg-chords" class="txt pg-text" spellcheck="false" autocomplete="off" placeholder="例: Am7 D7 Gmaj7 Cmaj7　／　I V vi IV　／　Am7 D7 | Gmaj7 Cmaj7"><select id="pg-chords-pre" class="pg-pre" aria-label="コード進行のプリセット"></select></div></div>
+        <div class="field"><label for="pg-scales">スケール進行</label>
+          <div class="row" style="flex-wrap:nowrap"><input type="text" id="pg-scales" class="txt pg-text" spellcheck="false" autocomplete="off" placeholder="例: A Dorian | D Mixolydian | G Lydian | C Ionian"><select id="pg-scales-pre" class="pg-pre" aria-label="スケール進行のプリセット"></select></div></div>
+      </div>
+      <p class="hint" id="pg-msg"></p>
+      <div class="pg-bars" id="pg-bars" aria-label="小節"></div>
+      <div class="pg-ctl">
+        <button class="tn-start pg-play" id="pg-play" type="button" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true" id="pg-play-ico"><path d="M7 4.5v15l13-7.5z"/></svg><span id="pg-play-label">再生</span>
+        </button>
+        <label class="pg-f">テンポ<span class="num-wrap"><input type="number" id="pg-bpm" min="40" max="220" step="1" inputmode="numeric"><span class="num-btns"><button type="button" class="num-btn" data-dir="up" aria-label="テンポを上げる">▲</button><button type="button" class="num-btn" data-dir="down" aria-label="テンポを下げる">▼</button></span></span></label>
+        <label class="pg-f">拍子<select id="pg-beats"><option value="2">2拍</option><option value="3">3拍</option><option value="4">4拍</option><option value="5">5拍</option><option value="6">6拍</option><option value="7">7拍</option></select></label>
+        <label class="pg-f chk"><input type="checkbox" id="pg-loop"> ループ</label>
+        <label class="pg-f chk"><input type="checkbox" id="pg-count"> カウントイン</label>
+        <label class="pg-f chk"><input type="checkbox" id="pg-click"> クリック</label>
+      </div>
+      <div class="pg-ctl pg-opts">
+        <label class="pg-f">クリック音<select id="pg-ckind"></select></label>
+        <label class="pg-f">音色<select id="pg-voice"></select></label>
+        <label class="pg-f">コードの鳴らし方<select id="pg-style"><option value="strum">ストラム</option><option value="arp">アルペジオ</option><option value="root">ルートのみ</option><option value="off">鳴らさない</option></select></label>
+        <label class="pg-f">スケールのガイド音<select id="pg-guide"><option value="off">なし</option><option value="root">ルートを鳴らす</option></select></label>
+        <label class="pg-f chk"><input type="checkbox" id="pg-follow"> ポジションも追従</label>
+      </div>
+    </section>
+
     <section class="panel">
       <div class="panel-hd">
         <div class="panel-title">Notes &amp; Intervals</div>
@@ -293,7 +324,7 @@
   <input type="range" id="vol-range" min="0" max="100" step="1" value="80" aria-label="音量">
   <span class="vol-num" id="vol-num">80</span>
 </div>
-<script type="module" src="js/app.js?v=47"></script>
+<script type="module" src="js/app.js?v=48"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
