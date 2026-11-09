@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=50">
+<link rel="stylesheet" href="style.css?v=51">
 </head>
 <body>
 
@@ -189,7 +189,7 @@
         <div class="panel-title">Fretboard<b id="fb-title"></b></div>
         <div class="row" style="gap:6px;flex-wrap:nowrap"><button class="std small" id="pg-png" title="指板図を PNG 画像で保存">PNG</button><button class="std small" id="pg-pdf" title="指板図を PDF で保存">PDF</button><button class="std small" id="play-set">▶ 表示中の音を鳴らす</button></div>
       </div>
-      <div class="fb-scroll"><div class="fb-stack"><div id="fretboard"></div><svg id="fb-live" aria-hidden="true"></svg></div></div>
+      <div class="fb-scroll"><div class="fb-stack"><div id="fretboard"></div><svg id="fb-live" aria-hidden="true"></svg><svg id="fb-quiz" aria-hidden="true"></svg></div></div>
 
       <div class="tool-bar" role="toolbar" aria-label="指板の操作">
         <div class="tool-group">
@@ -249,6 +249,31 @@
       <div class="pg-ctl pg-opts">
         <button class="std small" id="pg-midi" type="button" title="いまの進行を MIDI ファイルで保存">MIDI を書き出す</button>
         <button class="std small" id="pg-share" type="button" title="進行・テンポ・楽器の設定を含むリンクをコピー">共有リンクをコピー</button>
+      </div>
+    </section>
+
+    <section class="panel" id="quiz-panel">
+      <div class="panel-hd">
+        <div class="panel-title">Quiz<b>指板を覚えるクイズ</b></div>
+      </div>
+      <div class="qz-bar">
+        <div class="seg small-seg" role="group" aria-label="出題の種類">
+          <button class="qz-mode on" data-m="name" title="光っている位置の音名を答えます">音名当て</button>
+          <button class="qz-mode" data-m="pos" title="指定された弦と音名の位置を、指板で押して答えます">位置当て</button>
+          <button class="qz-mode" data-m="play" title="光っている位置の音を、ギター入力で実際に弾いて答えます">弾いて当てる</button>
+        </div>
+        <label class="pg-f">範囲<select id="qz-upto"><option value="5">0〜5フレット</option><option value="7">0〜7フレット</option><option value="12">0〜12フレット</option><option value="15">0〜15フレット</option><option value="24">全フレット</option></select></label>
+        <label class="pg-f">問題数<select id="qz-count"><option value="10">10問</option><option value="20">20問</option><option value="30">30問</option></select></label>
+        <label class="pg-f chk"><input type="checkbox" id="qz-acc"> ♯・♭の音も出す</label>
+        <div class="tn-bar-sp"></div>
+        <button class="tn-start" id="qz-start" type="button"><span id="qz-start-label">クイズを始める</span></button>
+      </div>
+      <div class="qz-stage" id="qz-stage">
+        <div class="qz-prompt" id="qz-prompt">「クイズを始める」を押すと、指板の音が隠れて出題が始まります。</div>
+        <div class="qz-info" id="qz-info"></div>
+        <div class="qz-choices" id="qz-choices" hidden></div>
+        <div class="qz-fb" id="qz-fb"></div>
+        <div class="qz-skip"><button class="std small" id="qz-skip" type="button" hidden>わからない（答えを見る）</button></div>
       </div>
     </section>
 
@@ -336,7 +361,7 @@
   <input type="range" id="vol-range" min="0" max="100" step="1" value="80" aria-label="音量">
   <span class="vol-num" id="vol-num">80</span>
 </div>
-<script type="module" src="js/app.js?v=50"></script>
+<script type="module" src="js/app.js?v=51"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
