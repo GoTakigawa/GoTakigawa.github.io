@@ -1,8 +1,10 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=47';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=47';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=47';
-import { PianoEngine } from './audio.js?v=47';
-import { PitchListener } from './pitch.js?v=47';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=48';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=48';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=48';
+import { PianoEngine, VOICE_NAMES, CLICK_NAMES } from './audio.js?v=48';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=48';
+import { Player } from './player.js?v=48';
+import { PitchListener } from './pitch.js?v=48';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -16,6 +18,7 @@ const DEFAULT = {
   strOn: [], label: 'name',
   vo: { span: 4, minStrings: 3, rootBass: false, allowOpen: true, omit5: false, kind: 'all', count: 0, easy: false, range: '' },
   hideIv: [], hideCells: [],
+  prog: { chords: 'I V vi IV', scales: '', bpm: 100, beats: 4, loop: true, count: true, click: true, ckind: 'click', voice: 'piano', style: 'strum', guide: 'off', follow: true },
   shapeTab: 'forms', sw: { size: 0, notes: 0, span: 5, rootStart: false, allowOpen: false, topOnly: true, common: true }
 };
 let st = structuredClone(DEFAULT);
@@ -73,6 +76,15 @@ function sanitize(s) {
   }
   d.hideIv = Array.isArray(s.hideIv) ? s.hideIv.filter(x => typeof x === 'string' && /^(bb|b|##|#)?\d{1,2}$/.test(x)) : [];
   d.hideCells = Array.isArray(s.hideCells) ? s.hideCells.filter(x => typeof x === 'string' && /^\d{1,2}:-?\d{1,2}$/.test(x)).slice(0, 1500) : [];
+  if (s.prog && typeof s.prog === 'object') {
+    const q = s.prog, P = d.prog;
+    if (typeof q.chords === 'string') P.chords = q.chords.slice(0, 400);
+    if (typeof q.scales === 'string') P.scales = q.scales.slice(0, 600);
+    P.bpm = int(q.bpm, 40, 220, 100); P.beats = int(q.beats, 2, 7, 4);
+    ['loop', 'count', 'click', 'follow'].forEach(k => { if (k in q) P[k] = !!q[k]; });
+    P.ckind = CLICK_NAMES[q.ckind] ? q.ckind : 'click'; P.voice = VOICE_NAMES[q.voice] ? q.voice : 'piano';
+    P.style = ['strum', 'arp', 'root', 'off'].includes(q.style) ? q.style : 'strum'; P.guide = q.guide === 'root' ? 'root' : 'off';
+  }
   // the search tab is a temporary picking mode, so a reload starts from chord forms
   d.shapeTab = ['forms', 'sets', 'sweep'].includes(s.shapeTab) ? s.shapeTab : 'forms';
   if (s.sw && typeof s.sw === 'object') {
@@ -93,7 +105,14 @@ function setInstrument(inst) {
   Object.assign(st, cleanCfg(inst, st.cfg[inst])); st.inst = inst;
   st.strOn = Array(st.strings).fill(true); st.hideCells = []; picks = []; shapeOverride = null;
 }
-function save() { try { localStorage.setItem(STORE, JSON.stringify(st)); } catch (e) {} }
+// while a progression is playing, the screen follows the bars: what is saved is the setting from before it started
+const pb = { on: false, snap: null, bars: [], chord: null, scale: null, prevCenter: 5, sig: '' };
+function save() {
+  try {
+    const o = pb.on && pb.snap ? { ...st, mode: pb.snap.mode, root: pb.snap.root, scale: pb.snap.scale, chord: pb.snap.chord, emph: pb.snap.emph, diat: pb.snap.diat, range: pb.snap.range, from: pb.snap.from, to: pb.snap.to, pattern: pb.snap.pattern } : st;
+    localStorage.setItem(STORE, JSON.stringify(o));
+  } catch (e) {}
+}
 function update(fn, keepShape) { fn(); if (!keepShape) { ssel = -1; shapes = null; } save(); render(); }
 function notify(msg) {
   const el = $('status'); el.textContent = msg; el.classList.add('visible');
@@ -142,6 +161,7 @@ const toneOf = (c, m) => { const iv = c.cset.intervalOf(m); return iv === '1' ? 
 
 // Which pitch classes get the filled (purple) emphasis
 function emphasisPcs(set) {
+  if (pb.on && pb.chord && st.mode === 'scale') return makeSet(pb.chord.root, CHORDS[pb.chord.id].iv).pcs;   // chord tones over the scale
   if (selectedShape()) { const c = shapeChord(); if (c) return c.pcs; }
   if (st.mode === 'chord' || st.mode === 'notes') return set.pcs;
   if (st.diat >= 0 && scaleLen() === 7) return diatonic(st.root, SCALES[st.scale].iv, st.diat, st.seventh).pcs;
@@ -278,6 +298,7 @@ function renderFretboard() {
   const emph = emphasisPcs(set), vis = visibility(set), sh = selectedShape();
   const order = {}, inShape = new Set(); if (sh) sh.cells.forEach(c => { inShape.add(c.s + ':' + c.f); if (c.order) order[c.s + ':' + c.f] = c.order; });
   const shC = sh ? shapeChord() : null;
+  const rootNow = pb.on && pb.chord && st.mode === 'scale' ? pb.chord.root : st.root;
   const W = 1180, padL = 40, padR = 14, top = 22, gap = 28, H = top * 2 + gap * (n - 1);
   // minus frets stretch the board to the left; K counts the extra wires (the nut region needs one more)
   const M = minusMax(), K = M > 0 ? M + 1 : 0, p2 = Math.pow(2, K / 12);
@@ -322,7 +343,7 @@ function renderFretboard() {
       if (hidden) { if (showHidden && vis(s, f)) dots += `<circle cx="${x}" cy="${y}" r="9.5" fill="none" stroke="#555" stroke-width="1.2" stroke-dasharray="2.5 2.5"/>`; continue; }
       if (!visible && !(st.ghost && on)) continue;
       if (visible) count++;
-      const isRoot = sh ? p === pc(shC.root) : st.mode !== 'notes' && p === pc(st.root), isEm = emph.includes(p);
+      const isRoot = sh ? p === pc(shC.root) : st.mode !== 'notes' && p === pc(rootNow), isEm = emph.includes(p);
       const op = visible ? 1 : 0.16;
       const lbl = st.label === 'none' ? '' : shC && inShape.has(s + ':' + f) ? toneOf(shC, m) : st.label === 'interval' ? (set.intervalOf(p) || '') : st.label === 'degree' ? String(set.info(p) ? set.info(p).index + 1 : '') : set.name(p);
       const fs = lbl.length > 2 ? 8 : 10;
@@ -344,7 +365,7 @@ function renderFretboard() {
   $('fretboard').innerHTML = svg;
   fbGeom = { cx, Y: s => top + gap * (n - 1 - s) };
   $('fb-live').setAttribute('viewBox', `0 0 ${W} ${H + 18}`);
-  $('fb-title').textContent = titleFor(set) + (sh ? ` ／ ${sh.name}・${sh.title}` : '');
+  $('fb-title').textContent = titleFor(set) + (pb.on && pb.chord && st.mode === 'scale' ? ` ／ ${pb.chord.label}` : '') + (sh ? ` ／ ${sh.name}・${sh.title}` : '');
   $('fretboard').classList.toggle('hide-mode', fbAction === 'hide');
   return count;
 }
@@ -618,8 +639,8 @@ function renderShapes() {
   }
   $('finder-results').innerHTML = ''; $('scale-finder').hidden = true;
   if (!shapes) shapes = computeShapes();
-  $('shape-back').hidden = !c.override;
-  $('shape-target').textContent = c.label + (c.override ? '（検索から選んだコード）' : '') + '　構成音：' + c.cset.ivs.map(iv => `${c.cset.name(c.root + iv.semis)}(${iv.label === '1' ? 'R' : iv.label})`).join(' ') + (c.fromScale && st.diat < 0 && !c.override ? '　※ダイアトニックで選んだコードに切り替わります' : '');
+  $('shape-back').hidden = !c.override || pb.on;
+  $('shape-target').textContent = c.label + (c.override && !pb.on ? '（検索から選んだコード）' : '') + '　構成音：' + c.cset.ivs.map(iv => `${c.cset.name(c.root + iv.semis)}(${iv.label === '1' ? 'R' : iv.label})`).join(' ') + (c.fromScale && st.diat < 0 && !c.override ? '　※ダイアトニックで選んだコードに切り替わります' : '');
   $('sets-span').value = st.vo.span; $('sets-open').checked = st.vo.allowOpen; $('sets-easy').checked = st.vo.easy;
   $('sets-kind').value = st.vo.kind; $('sets-count').value = String(st.vo.count);
   $('sets-range').innerHTML = '<option value="">すべて</option>' + voSets.map(x => `<option value="${x}">${x}</option>`).join('');
@@ -713,6 +734,7 @@ function render() {
   renderMetrics(set, count);
   renderShapes();
   renderTunerStrings();
+  renderProg();
 }
 
 // ── events ──
@@ -869,6 +891,155 @@ function bind() {
   });
 }
 
+// ── progression: chords / scales bar by bar, the fretboard follows ──
+const progKey = () => pb.on && pb.snap ? pb.snap.root : st.root;
+function progBars() {
+  const key = progKey(), c = parseChordText(st.prog.chords, key), sc = parseScaleText(st.prog.scales, key);
+  const longest = Math.max(c.bars.length, sc.bars.length), n = Math.min(16, longest);
+  const bars = Array.from({ length: n }, (_, i) => ({ chords: c.bars.length ? c.bars[i % c.bars.length] : [], scales: sc.bars.length ? sc.bars[i % sc.bars.length] : [] }));
+  return { bars, errors: [...c.errors, ...sc.errors], cut: longest > 16, key };
+}
+const ROMAN_RE = /(^|[\s|｜,、])[b#♭♯]?(VII|VI|IV|V|III|II|I|vii|vi|iv|v|iii|ii|i)(?![A-Za-z]{3,})/;
+function renderProg() {
+  const P = st.prog, r = progBars();
+  if (!pb.on) pb.bars = r.bars;
+  [['pg-chords', P.chords], ['pg-scales', P.scales]].forEach(([id, v]) => { if (document.activeElement !== $(id) && $(id).value !== v) $(id).value = v; });
+  $('pg-bpm').value = P.bpm; $('pg-beats').value = P.beats; $('pg-loop').checked = P.loop; $('pg-count').checked = P.count; $('pg-click').checked = P.click;
+  $('pg-ckind').value = P.ckind; $('pg-voice').value = P.voice; $('pg-style').value = P.style; $('pg-guide').value = P.guide; $('pg-follow').checked = P.follow;
+  const sig = JSON.stringify([r.bars.map(b => [b.chords.map(c => c.label), b.scales.map(x => x.label)]), r.key]);
+  if (sig !== pb.sig) {
+    pb.sig = sig;
+    $('pg-bars').innerHTML = r.bars.map((b, i) => `<button class="pg-bar" data-i="${i}" title="この小節から再生"><small>${i + 1}</small><b>${b.chords.map(c => c.label).join(' ') || '—'}</b><em>${b.scales.map(x => x.label).join(' / ')}</em><i class="beatbar"></i></button>`).join('')
+      || '<span class="hint">コード進行かスケール進行を入力してください。</span>';
+  }
+  const keyName = currentSet().name(r.key);
+  const msg = $('pg-msg');
+  msg.classList.toggle('err', !!r.errors.length);
+  msg.textContent = r.errors.length ? `読み取れなかった表記：${r.errors.join('  ')}`
+    : r.cut ? '16小節までを使います。'
+    : ROMAN_RE.test(P.chords + ' ' + P.scales) ? `度数（I、V、vi など）は、キー ${keyName}（Show のルート）として読み取っています。` : '';
+  $('pg-play').disabled = !r.bars.length && !pb.on;
+  $('pg-play').classList.toggle('on', pb.on); $('pg-play').setAttribute('aria-pressed', String(pb.on));
+  $('pg-play-label').textContent = pb.on ? '停止' : '再生';
+  $('pg-play-ico').innerHTML = pb.on ? '<rect x="6" y="6" width="12" height="12" rx="1.5"/>' : '<path d="M7 4.5v15l13-7.5z"/>';
+}
+// the window of frets that fits the chord (nearest to where the hand was) or, with scales only, around the root
+function pickWindow(ch, sc) {
+  const tun = tuning(), F = st.frets, cands = [];
+  const add = (lo, hi, bonus) => { lo = Math.max(0, lo); hi = Math.min(F, Math.max(hi, lo + 4)); lo = Math.max(0, Math.min(lo, hi - 4)); cands.push({ lo, hi, bonus }); };
+  if (ch) {
+    const pcs = makeSet(ch.root, CHORDS[ch.id].iv).pcs;
+    const forms = (FORMS[ch.id] ? chordForms(tun, ch.id, ch.root, F, pcs) : []).concat(derivedForms(tun, pcs, ch.root, F));
+    forms.forEach(f => add(f.low ? f.low - 1 : 0, f.high + 1, 0));
+  }
+  const rp = pc((ch || sc).root);
+  tun.forEach((open, s) => { for (let f = 0; f <= F; f++) if (pc(open + f) === rp) add(f - 1, f + 3, 2); });
+  let best = null;
+  cands.forEach(c => { const sc2 = Math.abs((c.lo + c.hi) / 2 - pb.prevCenter) + c.bonus; if (!best || sc2 < best.s) best = { s: sc2, c }; });
+  if (!best) return [0, Math.min(F, 4)];
+  pb.prevCenter = (best.c.lo + best.c.hi) / 2;
+  return [best.c.lo, best.c.hi];
+}
+function applyBar(bi, ci) {
+  if (!pb.on || !pb.snap) return;
+  const bar = pb.bars[bi]; if (!bar) return;
+  const ch = bar.chords.length ? bar.chords[Math.min(ci, bar.chords.length - 1)] : null;
+  const sc = bar.scales.length ? bar.scales[Math.min(ci, bar.scales.length - 1)] : null;
+  if (!ch && !sc) return;
+  pb.chord = ch; pb.scale = sc;
+  if (sc) { st.mode = 'scale'; st.root = sc.root; st.scale = sc.id; st.diat = -1; st.emph = ch ? [] : [0]; }
+  else { st.mode = 'chord'; st.root = ch.root; st.chord = ch.id; }
+  shapeOverride = ch ? { root: ch.root, id: ch.id } : null; shapes = null; ssel = -1;
+  if (st.prog.follow) { const w = pickWindow(ch, sc); st.range = 'frets'; st.from = w[0]; st.to = w[1]; }
+  else { st.range = pb.snap.range; st.from = pb.snap.from; st.to = pb.snap.to; }
+  render();
+}
+function markBar(bi, beats, beatDur) {
+  document.querySelectorAll('#pg-bars .pg-bar').forEach(b => {
+    const on = +b.dataset.i === bi; b.classList.toggle('on', on);
+    const bb = b.querySelector('.beatbar'); if (!bb) return;
+    bb.style.transition = 'none'; bb.style.width = '0';
+    if (on) { void bb.offsetWidth; bb.style.transition = `width ${(beats * beatDur).toFixed(3)}s linear`; bb.style.width = '100%'; }
+  });
+}
+function schedBar(bi, t, beatDur, beats) {
+  const bar = pb.bars[bi]; if (!bar) return;
+  const bassInst = st.inst === 'bass', P = st.prog, k = Math.max(1, bar.chords.length), per = beats / k;
+  bar.chords.forEach((c, j) => {
+    const tj = t + j * per * beatDur, len = per * beatDur, m = chordMidi(c, bassInst);
+    if (j > 0) player.at(tj, () => applyBar(bi, j));
+    if (P.style === 'off') return;
+    if (bassInst) {
+      const nb = Math.max(1, Math.round(per));
+      if (P.style === 'root') audio.play([m.bass], tj, len * 0.95, 0.9);
+      else for (let b = 0; b < nb; b++) audio.play([P.style === 'arp' && b % 2 ? m.body[0] : m.bass], tj + b * beatDur, beatDur * 0.9, 0.9);
+    } else if (P.style === 'root') audio.play([m.bass], tj, len * 0.95, 0.9);
+    else if (P.style === 'strum') audio.play(m.all, tj, len * 0.95, 0.9);
+    else {
+      const step = beatDur / 2, cnt = Math.max(1, Math.floor(len / step)), seq = m.all.concat(m.all.slice(1, -1).reverse());
+      for (let i = 0; i < cnt; i++) audio.play([seq[i % seq.length]], tj + i * step, step * 2.2, 0.85);
+    }
+  });
+  if (P.guide === 'root' && bar.scales.length) audio.play([guideNote(bar.scales[0].root, bassInst)], t, beatDur * 0.8, 0.6);
+}
+const player = new Player(audio, {
+  bars: () => pb.bars.length,
+  opts: () => ({ bpm: st.prog.bpm, beats: st.prog.beats, clickOn: st.prog.click, countIn: st.prog.count, loop: st.prog.loop }),
+  sched: schedBar,
+  onBar: (bi, countIn) => {
+    if (!pb.on) return;
+    if (countIn) { markBar(-1, 0, 0); $('pg-msg').classList.remove('err'); $('pg-msg').textContent = 'カウントイン…'; return; }
+    $('pg-msg').textContent = '';
+    applyBar(bi, 0); markBar(bi, st.prog.beats, 60 / st.prog.bpm);
+  },
+  onEnd: () => stopProg()
+});
+async function startProg(from = 0) {
+  const r = progBars(); if (!r.bars.length) return;
+  if (!pb.on) {
+    pb.snap = { mode: st.mode, root: st.root, scale: st.scale, chord: st.chord, emph: st.emph.slice(), diat: st.diat, range: st.range, from: st.from, to: st.to, pattern: st.pattern, shape: shapeOverride, ssel };
+    pb.prevCenter = st.range === 'frets' ? (st.from + st.to) / 2 : 5;
+    pb.on = true;
+  }
+  pb.bars = r.bars;
+  await player.start(from);
+  renderProg();
+}
+function stopProg() {
+  player.stop();
+  if (pb.on && pb.snap) {
+    const sn = pb.snap; Object.assign(st, { mode: sn.mode, root: sn.root, scale: sn.scale, chord: sn.chord, emph: sn.emph, diat: sn.diat, range: sn.range, from: sn.from, to: sn.to, pattern: sn.pattern });
+    shapeOverride = sn.shape; shapes = null; ssel = -1;
+  }
+  pb.on = false; pb.snap = null; pb.chord = pb.scale = null;
+  document.querySelectorAll('#pg-bars .pg-bar').forEach(b => { b.classList.remove('on'); const bb = b.querySelector('.beatbar'); if (bb) { bb.style.transition = 'none'; bb.style.width = '0'; } });
+  save(); render();
+}
+function bindProg() {
+  const P = st.prog;
+  $('pg-chords-pre').innerHTML = '<option value="">プリセット</option>' + CHORD_PRESETS.map((x, i) => `<option value="${i}">${x.name}</option>`).join('');
+  $('pg-scales-pre').innerHTML = '<option value="">プリセット</option>' + SCALE_PRESETS.map((x, i) => `<option value="${i}">${x.name}</option>`).join('');
+  $('pg-voice').innerHTML = Object.entries(VOICE_NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+  $('pg-ckind').innerHTML = Object.entries(CLICK_NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+  audio.setVoice(P.voice); audio.clickKind = P.ckind;
+  const set = (fn, redraw = true) => { fn(); save(); if (redraw) renderProg(); };
+  const live2 = () => { if (pb.on) { const r = progBars(); if (r.bars.length) pb.bars = r.bars; else stopProg(); } };
+  $('pg-chords').addEventListener('input', e => set(() => { st.prog.chords = e.target.value; live2(); }));
+  $('pg-scales').addEventListener('input', e => set(() => { st.prog.scales = e.target.value; live2(); }));
+  $('pg-chords-pre').addEventListener('change', e => { const x = CHORD_PRESETS[+e.target.value]; e.target.value = ''; if (x) set(() => { st.prog.chords = x.text; live2(); }); });
+  $('pg-scales-pre').addEventListener('change', e => { const x = SCALE_PRESETS[+e.target.value]; e.target.value = ''; if (x) set(() => { st.prog.scales = x.text; live2(); }); });
+  $('pg-bpm').addEventListener('change', e => set(() => { st.prog.bpm = intIn(parseInt(e.target.value), 40, 220, st.prog.bpm); }));
+  $('pg-beats').addEventListener('change', e => set(() => { st.prog.beats = +e.target.value; }));
+  [['pg-loop', 'loop'], ['pg-count', 'count'], ['pg-click', 'click'], ['pg-follow', 'follow']].forEach(([id, k]) => $(id).addEventListener('change', e => set(() => { st.prog[k] = e.target.checked; })));
+  $('pg-ckind').addEventListener('change', e => { set(() => { st.prog.ckind = e.target.value; audio.clickKind = e.target.value; }); audio.ready().then(() => { audio.click(audio.now + 0.03, true); audio.click(audio.now + 0.33, false); }); });
+  $('pg-voice').addEventListener('change', e => { set(() => { st.prog.voice = e.target.value; audio.setVoice(e.target.value); }); playNotes([52, 59, 64, 67], 0.05, 1.0); });
+  $('pg-style').addEventListener('change', e => set(() => { st.prog.style = e.target.value; }));
+  $('pg-guide').addEventListener('change', e => set(() => { st.prog.guide = e.target.value; }));
+  $('pg-play').addEventListener('click', () => pb.on ? stopProg() : startProg(0));
+  $('pg-bars').addEventListener('click', e => { const b = e.target.closest('.pg-bar'); if (!b) return; const i = +b.dataset.i; if (pb.on) player.jump(i); else startProg(i); });
+  window.addEventListener('pagehide', () => { if (pb.on) stopProg(); });
+}
+
 function bindVolume() {
   let vol = 80, muted = false;
   try { const o = JSON.parse(localStorage.getItem('gti-explorer:vol') || 'null'); if (o) { vol = Math.min(100, Math.max(0, +o.vol || 0)); muted = !!o.muted; } } catch (e) {}
@@ -908,6 +1079,6 @@ function bindTuner() {
 
 async function boot() {
   try { const s = localStorage.getItem(STORE); st = sanitize(s ? JSON.parse(s) : null); } catch (e) { st = sanitize(null); }
-  bind(); bindTuner(); bindVolume(); render();
+  bind(); bindTuner(); bindVolume(); bindProg(); render();
 }
 boot();
