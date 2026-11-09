@@ -370,3 +370,16 @@ button.small{font-size:11px;padding:6px 10px;}
 .pg-f.chk{flex-direction:row;align-items:center;gap:6px;font-size:12px;color:var(--text2);letter-spacing:0;padding-bottom:8px;}
 .pg-play.on{background:transparent;color:var(--accent3);border:1px solid var(--accent3);}
 #pg-bpm{width:70px;}
+
+/* ── strobe view / input history ── */
+#tn-single{position:relative;}
+.tn-viewseg{position:absolute;top:0;right:0;z-index:2;}
+.tn-viewseg button{padding:4px 9px;font-size:11px;}
+.tn-strobe{display:block;width:100%;height:60px;border-radius:var(--r);background:#050505;border:1px solid var(--border);margin:0 0 4px;}
+.tn-strobe[hidden]{display:none;}
+#tn-single.strobe .tn-meter{display:none;}
+.tn-hist{margin-top:14px;border-top:1px solid var(--border);padding-top:12px;}
+.tn-hist-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+.tn-hist-btns{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;}
+#tn-hist-notes{max-height:112px;overflow:auto;}
+#tn-scales{margin-top:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;}

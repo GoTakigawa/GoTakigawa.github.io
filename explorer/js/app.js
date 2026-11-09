@@ -1,11 +1,11 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=49';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=49';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=49';
-import { PianoEngine, VOICE_NAMES, CLICK_NAMES } from './audio.js?v=49';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=49';
-import { Player } from './player.js?v=49';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=49';
-import { PitchListener } from './pitch.js?v=49';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=50';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=50';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=50';
+import { PianoEngine, VOICE_NAMES, CLICK_NAMES } from './audio.js?v=50';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=50';
+import { Player } from './player.js?v=50';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=50';
+import { PitchListener } from './pitch.js?v=50';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -398,12 +398,98 @@ function onChordFrame(fr) {
 }
 const listener = new PitchListener(fr => {
   const now = performance.now(); live.level = fr.level || 0;
+  recordFrame(fr, now);
   if (fr.freq) {
     if (now - live.lastT > 250) { live.hist = []; live.gap = true; }   // a fresh attack: do not mix it with the old note
     live.hist.push(69 + 12 * Math.log2(fr.freq / tnA4())); if (live.hist.length > 5) live.hist.shift();
     const h = live.hist.slice().sort((x, y) => x - y); live.midi = h[h.length >> 1]; live.lastT = now;
   } else if (now - live.lastT > 400) live.hist = [];
 }, onChordFrame);
+// ── played notes history + scale estimate ──
+const tnHist = []; const rec = { cand: null, n: 0, cur: null, silentAt: 0, gapped: false }; let histEst = false;
+function recordFrame(fr, now) {
+  if (!fr.freq) { rec.cand = null; rec.n = 0; if (!rec.silentAt) rec.silentAt = now; return; }
+  if (rec.silentAt) { if (now - rec.silentAt > 250) rec.gapped = true; rec.silentAt = 0; }
+  const r = Math.round(69 + 12 * Math.log2(fr.freq / tnA4()));
+  if (r === rec.cand) rec.n++; else { rec.cand = r; rec.n = 1; }
+  if (rec.n >= 5 && (r !== rec.cur || rec.gapped)) {      // steady for ~50 ms: a played note
+    rec.cur = r; rec.gapped = false;
+    tnHist.push(r); if (tnHist.length > 200) tnHist.shift();
+    renderHist();
+  }
+}
+function renderHist() {
+  const set = currentSet(), shown = tnHist.slice(-64);
+  $('tn-hist-notes').innerHTML = shown.map(m => `<span class="pick-note">${set.name(m)}<small>${Math.floor(m / 12) - 1}</small></span>`).join('') || '<span class="hint">ギター入力をオンにして弾くと、音名が順に並びます。</span>';
+  const box = $('tn-hist-notes'); box.scrollTop = box.scrollHeight;
+  $('tn-hist-n').textContent = tnHist.length ? `${tnHist.length}音` : '';
+  $('th-play').disabled = !tnHist.length; $('th-clear').disabled = !tnHist.length; $('th-est').disabled = tnHist.length < 3;
+  if (histEst) renderEstimate();
+}
+// how well each scale explains the played notes: share of notes inside it (outliers from detection errors are tolerated)
+function estimateScales() {
+  const cnt = Array(12).fill(0); tnHist.forEach(m => cnt[pc(m)]++);
+  const total = tnHist.length, top = cnt.indexOf(Math.max(...cnt)), first = pc(tnHist[0]);
+  const out = [];
+  for (let r = 0; r < 12; r++) for (const [id, sc] of Object.entries(SCALES)) {
+    const semis = sc.iv.map(n => pc(parseInterval(n).semis)), inSet = new Set(semis.map(x => pc(r + x)));
+    let inside = 0; for (let p = 0; p < 12; p++) if (inSet.has(p)) inside += cnt[p];
+    const fit = inside / total; if (fit < 0.85) continue;
+    const used = [...inSet].filter(p => cnt[p] > 0).length;
+    const score = fit * 100 - inSet.size * 1.2 + sc.pop * 2.2 + (r === top ? 5 : 0) + (r === first ? 2 : 0) + (cnt[r] > 0 ? 2 : 0) + used * 0.3;
+    out.push({ root: r, id, fit, score, size: inSet.size, used, miss: [...inSet].filter(p => !cnt[p]).length });
+  }
+  return out.sort((a, b) => b.score - a.score).slice(0, 8);
+}
+function renderEstimate() {
+  const box = $('tn-scales');
+  if (tnHist.length < 6) { box.innerHTML = `<p class="hint" style="grid-column:1/-1">あと ${6 - tnHist.length} 音以上弾くと、推定できます。</p>`; return; }
+  const res = estimateScales();
+  if (!res.length) { box.innerHTML = '<p class="hint" style="grid-column:1/-1">当てはまるスケールが見つかりませんでした。</p>'; return; }
+  box.innerHTML = res.map((x, i) => { const sp = makeSet(x.root, SCALES[x.id].iv); return `<div class="fd-item sc-item ${i === 0 ? 'top' : ''}"><b>${sp.name(x.root)} ${SCALES[x.id].name}</b>
+      <span class="sc-meta">弾いた音の ${Math.round(x.fit * 100)}% が一致 · ${x.size}音中 ${x.used}音を使用</span>
+      <div class="row"><button class="std small sc-go" data-root="${x.root}" data-id="${x.id}">Show をこのスケールにする</button><button class="std small play-btn sc-play" data-root="${x.root}" data-id="${x.id}" title="このスケールを再生" aria-label="スケールを再生">▶ 再生</button></div></div>`; }).join('');
+}
+function scaleResultClick(e) {
+  const pv = e.target.closest('.sc-play');
+  if (pv) { playScalePreview(+pv.dataset.root, SCALES[pv.dataset.id].iv); return; }
+  const g = e.target.closest('.sc-go'); if (!g) return;
+  shapeOverride = null;
+  update(() => { st.mode = 'scale'; st.root = +g.dataset.root; st.scale = g.dataset.id; st.diat = -1; st.emph = [0]; st.pattern = 0; });
+  notify('Show をそのスケールにしました');
+}
+function bindHist() {
+  $('th-play').addEventListener('click', () => playNotes(tnHist.slice(-48), 0.22, 0.42));
+  $('th-clear').addEventListener('click', () => { tnHist.length = 0; histEst = false; $('tn-scales').innerHTML = ''; renderHist(); });
+  $('th-est').addEventListener('click', () => { histEst = true; renderEstimate(); });
+  $('tn-scales').addEventListener('click', scaleResultClick);
+  renderHist();
+}
+// ── strobe view: bands drift right when sharp and left when flat, and stand still when in tune ──
+const strobe = { on: false, phase: 0, t: 0 };
+function drawStrobe(t, cents, active) {
+  const cv = $('tn-strobe'), dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+  if (!w) return;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+  const dt = Math.min(100, t - (strobe.t || t)); strobe.t = t;
+  if (active) strobe.phase += cents * 0.06 * dt / 1000;      // periods per second = 0.06 per cent
+  const ok = active && Math.abs(cents) <= 5, rows = [1, 2, 4], P = 36, rh = h / rows.length;
+  rows.forEach((mul, i) => {
+    g.fillStyle = active ? (ok ? '#86efac' : '#38bdf8') : '#2a2a2a'; g.globalAlpha = active ? 0.9 - i * 0.12 : 1;
+    const off = ((strobe.phase * mul) % 1 + 1) % 1 * P;
+    for (let x = -P + off; x < w; x += P) g.fillRect(x, i * rh + 3, P / 2, rh - 6);
+  });
+  g.globalAlpha = 1;
+  g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(w / 2 - 0.5, 0, 1, h);
+}
+function tnView(v) {
+  strobe.on = v === 'strobe';
+  $('tn-single').classList.toggle('strobe', strobe.on); $('tn-strobe').hidden = !strobe.on;
+  document.querySelectorAll('.tn-view').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  try { localStorage.setItem('gti-explorer:tnview', v); } catch (e) {}
+  if (strobe.on) drawStrobe(performance.now(), 0, false);
+}
 function tnA4() { return +$('tn-a4').value || 440; }
 function renderTunerStrings() {
   const tun = tuning(), set = currentSet(), n = tun.length;
@@ -458,6 +544,7 @@ function liveFrame(t) {
   if (!active && t - live.lastT > 1500) { tunerReadout(false); }
   const layer = $('fb-live');
   if (active) tunerReadout(true, live.midi);
+  if (strobe.on) drawStrobe(t, active ? (live.midi - Math.round(live.midi)) * 100 : 0, active);
   $('tn-level').style.width = (live.on ? Math.max(0, Math.min(100, (20 * Math.log10(Math.max(live.level || 0, 1e-5)) + 60) / 60 * 100)) : 0).toFixed(0) + '%';
   if (effKind() === 'chord') {
     // every place that gives any of the heard notes; the root of the best reading is green
@@ -799,14 +886,7 @@ function bind() {
     update(() => { st.shapeTab = t; });
   }));
   $('sc-root').addEventListener('change', e => { scRoot = e.target.value === 'none' || e.target.value === 'bass' ? e.target.value : +e.target.value; renderShapes(); });
-  $('scale-results').addEventListener('click', e => {
-    const pv = e.target.closest('.sc-play');
-    if (pv) { playScalePreview(+pv.dataset.root, SCALES[pv.dataset.id].iv); return; }
-    const g = e.target.closest('.sc-go'); if (!g) return;
-    shapeOverride = null;
-    update(() => { st.mode = 'scale'; st.root = +g.dataset.root; st.scale = g.dataset.id; st.diat = -1; st.emph = [0]; st.pattern = 0; });
-    notify('Show をそのスケールにしました（選んだ音はそのままです）');
-  });
+  $('scale-results').addEventListener('click', scaleResultClick);
   $('finder-results').addEventListener('click', e => {
     const g = e.target.closest('.fd-go'); if (!g) return;
     fbAction = 'play';
@@ -1118,6 +1198,9 @@ function bindTuner() {
     update(() => { st.shapeTab = 'forms'; });
     notify('Shapes だけをそのコードに切り替えました（Show の設定はそのままです）');
   });
+  document.querySelectorAll('.tn-view').forEach(b => b.addEventListener('click', () => tnView(b.dataset.v)));
+  let v = 'meter'; try { v = localStorage.getItem('gti-explorer:tnview') === 'strobe' ? 'strobe' : 'meter'; } catch (e) {}
+  tnView(v);
   $('tn-device').addEventListener('change', () => { if (live.on) tunerStart(); });
   window.addEventListener('pagehide', () => { if (live.on) tunerStop(); });
 }
@@ -1126,7 +1209,7 @@ async function boot() {
   try { const s = localStorage.getItem(STORE); st = sanitize(s ? JSON.parse(s) : null); } catch (e) { st = sanitize(null); }
   let shared = false;
   try { const m = /[#&]s=([A-Za-z0-9_-]+)/.exec(location.hash); if (m) { shared = applyShared(decodeShare(m[1])); history.replaceState(null, '', location.pathname + location.search); } } catch (e) {}
-  bind(); bindTuner(); bindVolume(); bindProg(); render();
+  bind(); bindTuner(); bindVolume(); bindProg(); bindHist(); render();
   if (shared) { save(); notify('共有された進行と設定を読み込みました'); }
 }
 boot();
