@@ -1,5 +1,5 @@
 // ── Position logic: N-notes-per-string patterns and chord voicing search ──
-import { pc } from './theory.js?v=50';
+import { pc } from './theory.js?v=51';
 
 // Scale pattern: starting on degree `start` on the lowest string, take `nps`
 // consecutive scale notes per string going up. Returns Set of "string:fret".
