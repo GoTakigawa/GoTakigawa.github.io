@@ -63,7 +63,9 @@ export function detectNotes(mag, sr, fftSize, o = {}) {
 
 // Streams detections to onFrame({ freq, clarity, level }) about every 20 ms.
 export class PitchListener {
-  constructor(onFrame, onChord) { this.onFrame = onFrame; this.onChord = onChord; this.mode = 'auto'; this.kind = 'single'; this.cnt = 0; this.n = 0; this.ctx = null; this.stream = null; this.timer = 0; }
+  constructor(onFrame, onChord) { this.onFrame = onFrame; this.onChord = onChord; this.mode = 'auto'; this.kind = 'single'; this.cnt = 0; this.n = 0; this.ctx = null; this.stream = null; this.timer = 0; this.minHz = 40; this.loMidi = 38; }
+  // lowest pitch to look for: Hz for the single-note search, MIDI number for the chord spectrum
+  setLow(hz, midi) { this.minHz = Math.max(24, Math.min(40, hz)); this.loMidi = Math.max(20, Math.min(38, Math.round(midi))); }
   async start(deviceId) {
     await this.stop();
     const audio = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
@@ -84,7 +86,7 @@ export class PitchListener {
   spectrumNotes() {
     this.sp.getFloatFrequencyData(this.db);
     for (let i = 0; i < this.db.length; i++) this.mag[i] = Math.pow(10, this.db[i] / 20);
-    return detectNotes(this.mag, this.ctx.sampleRate, this.sp.fftSize);
+    return detectNotes(this.mag, this.ctx.sampleRate, this.sp.fftSize, { lo: this.loMidi });
   }
   singleReading() {
     // four window lengths: notes from C5 up are answered from the newest 512 samples (~11 ms), notes down to ~150 Hz
@@ -95,10 +97,10 @@ export class PitchListener {
       r = yin(this.buf.subarray(n - 1024), sr, sr / 510);
       if (!r || r.freq < 150) {
         r = yin(this.buf.subarray(n - 2048), sr, sr / 1022);
-        if (!r || r.freq < 75) r = yin(this.buf, sr, 40);
+        if (!r || r.freq < 75) r = yin(this.buf, sr, this.minHz);
       }
     }
-    return r && r.clarity > 0.8 && r.freq >= 40 ? r : null;
+    return r && r.clarity > 0.8 && r.freq >= this.minHz ? r : null;
   }
   // mode: 'single' | 'chord' | 'auto'. In auto the kind follows what is heard: two or more pitch classes in the
   // spectrum = chord, one clear pitch = single note. It changes at the start of a new sound (quickly) or after

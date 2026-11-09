@@ -340,3 +340,9 @@ button.small{font-size:11px;padding:6px 10px;}
 .vol input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent2);border:0;}
 .vol-num{font-size:11px;color:var(--text3);width:22px;text-align:right;font-variant-numeric:tabular-nums;}
 @media(max-width:600px){.vol{right:10px;bottom:10px;}.vol input[type=range]{width:72px;}}
+
+/* ── minus frets ── */
+.minus-box{margin-top:10px;border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;background:var(--bg2);}
+.minus-box summary{cursor:pointer;font-size:12px;color:var(--text2);}
+.minus-box summary span{color:var(--accent2);margin-left:6px;}
+.minus-box .ct-grid{margin-top:8px;}

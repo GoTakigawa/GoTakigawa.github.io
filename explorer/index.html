@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=46">
+<link rel="stylesheet" href="style.css?v=47">
 </head>
 <body>
 
@@ -38,6 +38,10 @@
 
     <div class="sec">
       <div class="sec-title">Instrument</div>
+      <div class="seg" id="inst-seg" role="group" aria-label="楽器" style="margin-bottom:10px">
+        <button class="inst-btn" data-inst="guitar">ギター</button>
+        <button class="inst-btn" data-inst="bass">ベース</button>
+      </div>
       <div class="g2">
         <div class="field"><label for="strings">弦数</label><select id="strings"></select></div>
         <div class="field"><label for="tuning">チューニング</label><select id="tuning"></select></div>
@@ -45,9 +49,13 @@
       <div class="ct-grid" id="custom-tuning" hidden></div>
       <div class="g2" style="margin-top:8px">
         <div class="field"><label for="frets">フレット数</label>
-          <select id="frets"><option value="21">21</option><option value="22">22</option><option value="24">24</option><option value="27">27</option></select></div>
+          <select id="frets"><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="24">24</option><option value="27">27</option></select></div>
         <div class="field"><label>&nbsp;</label><div class="toggle-row" style="padding:6px 0"><span class="toggle-label">左利き表示</span><label class="toggle-switch"><input type="checkbox" id="lefty"><span class="toggle-slider"></span></label></div></div>
       </div>
+      <details class="minus-box"><summary>マイナスフレット（ロー側に伸ばしたフレット）<span id="minus-sum"></span></summary>
+        <p class="hint">開放弦より低い音を、ナットの手前（ヘッド側）に伸ばしたフレットとして表示します。弦ごとに本数を決められます。</p>
+        <div class="ct-grid" id="minus-grid"></div>
+      </details>
     </div>
 
     <div class="sec">
@@ -285,7 +293,7 @@
   <input type="range" id="vol-range" min="0" max="100" step="1" value="80" aria-label="音量">
   <span class="vol-num" id="vol-num">80</span>
 </div>
-<script type="module" src="js/app.js?v=46"></script>
+<script type="module" src="js/app.js?v=47"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');

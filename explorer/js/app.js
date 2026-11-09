@@ -1,15 +1,15 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=46';
-import { TUNINGS, STRING_COUNTS, findTuning, midiLabel } from './tunings.js?v=46';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=46';
-import { PianoEngine } from './audio.js?v=46';
-import { PitchListener } from './pitch.js?v=46';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=47';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=47';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=47';
+import { PianoEngine } from './audio.js?v=47';
+import { PitchListener } from './pitch.js?v=47';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
 const audio = new PianoEngine();
 
 const DEFAULT = {
-  v: 1, strings: 6, tuning: 'e-std', custom: [40,45,50,55,59,64], frets: 24, lefty: false,
+  v: 1, inst: 'guitar', cfg: {}, strings: 6, tuning: 'e-std', custom: [40,45,50,55,59,64], frets: 24, minus: [0,0,0,0,0,0], lefty: false,
   mode: 'scale', root: 4, scale: 'ionian', chord: 'm7', notes: [0, 4, 7],
   emph: [0], diat: -1, seventh: false,
   range: 'all', from: 5, to: 8, pattern: 0, ghost: true,
@@ -27,15 +27,30 @@ let shapeOverride = null;
 let scRoot = 'none';
 
 // ── state ──
+const intIn = (v, lo, hi, def) => Number.isInteger(v) && v >= lo && v <= hi ? v : def;
+// one instrument's setup (string count, tuning, frets, minus frets), checked
+function cleanCfg(inst, s) {
+  s = s && typeof s === 'object' ? s : {};
+  const strings = countsOf(inst).includes(s.strings) ? s.strings : INSTRUMENTS[inst].def, list = tuningsFor(inst, strings);
+  return {
+    strings,
+    tuning: s.tuning === 'custom' || findTuning(inst, strings, s.tuning) ? s.tuning : list[0].id,
+    custom: Array.isArray(s.custom) && s.custom.length === strings && s.custom.every(m => Number.isInteger(m) && m >= 16 && m <= 80) ? s.custom : list[0].notes.slice(),
+    frets: [20, 21, 22, 24, 27].includes(s.frets) ? s.frets : (inst === 'bass' ? 21 : 24),
+    minus: Array.isArray(s.minus) && s.minus.length === strings ? s.minus.map(v => intIn(v, 0, MAX_MINUS, 0)) : Array(strings).fill(0)
+  };
+}
+const cfgOfState = () => ({ strings: st.strings, tuning: st.tuning, custom: st.custom.slice(), frets: st.frets, minus: st.minus.slice() });
 function sanitize(s) {
   const d = structuredClone(DEFAULT);
   d.strOn = Array(d.strings).fill(true);
   if (!s || typeof s !== 'object') return d;
-  const int = (v, lo, hi, def) => Number.isInteger(v) && v >= lo && v <= hi ? v : def;
-  d.strings = STRING_COUNTS.includes(s.strings) ? s.strings : d.strings;
-  d.tuning = s.tuning === 'custom' || findTuning(d.strings, s.tuning) ? s.tuning : TUNINGS[d.strings][0].id;
-  d.custom = Array.isArray(s.custom) && s.custom.length === d.strings && s.custom.every(m => Number.isInteger(m) && m >= 16 && m <= 80) ? s.custom : TUNINGS[d.strings][0].notes.slice();
-  d.frets = [21, 22, 24, 27].includes(s.frets) ? s.frets : 24;
+  const int = intIn;
+  // older saves have no instrument: 4 / 5 strings were the basses
+  d.inst = INSTRUMENTS[s.inst] ? s.inst : (Number.isInteger(s.strings) && s.strings <= 5 ? 'bass' : 'guitar');
+  Object.assign(d, cleanCfg(d.inst, s));
+  d.cfg = {};
+  if (s.cfg && typeof s.cfg === 'object') Object.keys(INSTRUMENTS).forEach(k => { if (k !== d.inst && s.cfg[k]) d.cfg[k] = cleanCfg(k, s.cfg[k]); });
   d.lefty = !!s.lefty;
   d.mode = ['scale', 'chord', 'notes'].includes(s.mode) ? s.mode : 'scale';
   d.root = int(s.root, 0, 11, d.root);
@@ -50,25 +65,34 @@ function sanitize(s) {
   d.strOn = Array.isArray(s.strOn) && s.strOn.length === d.strings ? s.strOn.map(Boolean) : Array(d.strings).fill(true);
   d.label = ['name', 'interval', 'degree', 'none'].includes(s.label) ? s.label : 'name';
   if (s.vo && typeof s.vo === 'object') {
-    d.vo.span = int(s.vo.span, 3, 6, 4); d.vo.minStrings = int(s.vo.minStrings, 2, 8, 3);
+    d.vo.span = int(s.vo.span, 3, 6, 4); d.vo.minStrings = int(s.vo.minStrings, 2, 9, 3);
     ['rootBass', 'allowOpen', 'omit5', 'easy'].forEach(k => { if (k in s.vo) d.vo[k] = !!s.vo[k]; });
     d.vo.kind = s.vo.kind === 'power' ? 'power' : 'all';
     d.vo.count = [0, 2, 3, 4, 5, 6].includes(s.vo.count) ? s.vo.count : 0;
     d.vo.range = typeof s.vo.range === 'string' && /^\d{1,2}〜\d{1,2}弦$/.test(s.vo.range) ? s.vo.range : '';
   }
   d.hideIv = Array.isArray(s.hideIv) ? s.hideIv.filter(x => typeof x === 'string' && /^(bb|b|##|#)?\d{1,2}$/.test(x)) : [];
-  d.hideCells = Array.isArray(s.hideCells) ? s.hideCells.filter(x => typeof x === 'string' && /^\d{1,2}:\d{1,2}$/.test(x)).slice(0, 1500) : [];
+  d.hideCells = Array.isArray(s.hideCells) ? s.hideCells.filter(x => typeof x === 'string' && /^\d{1,2}:-?\d{1,2}$/.test(x)).slice(0, 1500) : [];
   // the search tab is a temporary picking mode, so a reload starts from chord forms
   d.shapeTab = ['forms', 'sets', 'sweep'].includes(s.shapeTab) ? s.shapeTab : 'forms';
   if (s.sw && typeof s.sw === 'object') {
-    d.sw.size = [0, 3, 4, 5, 6, 7, 8].includes(s.sw.size) ? s.sw.size : 0;
+    d.sw.size = [0, 3, 4, 5, 6, 7, 8, 9].includes(s.sw.size) ? s.sw.size : 0;
     d.sw.span = int(s.sw.span, 4, 7, 5);
     d.sw.notes = int(s.sw.notes, 0, 16, 0);
     d.sw.rootStart = !!s.sw.rootStart; d.sw.allowOpen = !!s.sw.allowOpen; d.sw.topOnly = s.sw.topOnly !== false; d.sw.common = s.sw.common !== false;
   }
   return d;
 }
-const tuning = () => st.tuning === 'custom' ? st.custom : (findTuning(st.strings, st.tuning) || TUNINGS[st.strings][0]).notes;
+const tuning = () => st.tuning === 'custom' ? st.custom : (findTuning(st.inst, st.strings, st.tuning) || tuningsFor(st.inst, st.strings)[0]).notes;
+const minusOf = s => st.minus[s] || 0;                                   // extended frets on the headstock side, per string
+const minusMax = () => Math.max(0, ...st.minus.slice(0, st.strings));
+// switch between guitar and bass: each instrument keeps its own string count, tuning, frets and minus frets
+function setInstrument(inst) {
+  if (inst === st.inst || !INSTRUMENTS[inst]) return;
+  st.cfg = st.cfg || {}; st.cfg[st.inst] = cfgOfState();
+  Object.assign(st, cleanCfg(inst, st.cfg[inst])); st.inst = inst;
+  st.strOn = Array(st.strings).fill(true); st.hideCells = []; picks = []; shapeOverride = null;
+}
 function save() { try { localStorage.setItem(STORE, JSON.stringify(st)); } catch (e) {} }
 function update(fn, keepShape) { fn(); if (!keepShape) { ssel = -1; shapes = null; } save(); render(); }
 function notify(msg) {
@@ -160,8 +184,10 @@ function playScalePreview(root, ivNames) {
 
 // ── render ──
 function renderControls() {
+  document.querySelectorAll('.inst-btn').forEach(b => b.classList.toggle('on', b.dataset.inst === st.inst));
+  $('strings').innerHTML = countsOf(st.inst).map(n => `<option value="${n}">${n}弦</option>`).join('');
   $('strings').value = st.strings;
-  $('tuning').innerHTML = TUNINGS[st.strings].map(t => `<option value="${t.id}">${t.name}</option>`).join('') + '<option value="custom">カスタム</option>';
+  $('tuning').innerHTML = tuningsFor(st.inst, st.strings).map(t => `<option value="${t.id}">${t.name}</option>`).join('') + '<option value="custom">カスタム</option>';
   $('tuning').value = st.tuning;
   $('custom-tuning').hidden = st.tuning !== 'custom';
   if (st.tuning === 'custom') {
@@ -171,6 +197,9 @@ function renderControls() {
     [...$('custom-tuning').querySelectorAll('.ct-cell span')].forEach((el, k) => el.textContent = (k + 1) + '弦');
   }
   $('frets').value = st.frets; $('lefty').checked = st.lefty;
+  // minus frets: one number per string, the 1st string first
+  $('minus-grid').innerHTML = tuning().map((m, s) => ({ s })).reverse().map(({ s }, k) => `<label class="ct-cell"><span>${k + 1}弦</span><select data-s="${s}" aria-label="${k + 1}弦のマイナスフレット">${Array.from({ length: MAX_MINUS + 1 }, (_, v) => `<option value="${v}" ${v === minusOf(s) ? 'selected' : ''}>${v ? '−' + v : '0'}</option>`).join('')}</select></label>`).join('');
+  $('minus-sum').textContent = minusMax() ? '（最大 −' + minusMax() + '）' : '';
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('on', b.dataset.mode === st.mode));
   $('root').value = st.root;
   $('scale-box').hidden = st.mode !== 'scale'; $('chord-box').hidden = st.mode !== 'chord'; $('notes-box').hidden = st.mode !== 'notes';
@@ -250,15 +279,21 @@ function renderFretboard() {
   const order = {}, inShape = new Set(); if (sh) sh.cells.forEach(c => { inShape.add(c.s + ':' + c.f); if (c.order) order[c.s + ':' + c.f] = c.order; });
   const shC = sh ? shapeChord() : null;
   const W = 1180, padL = 40, padR = 14, top = 22, gap = 28, H = top * 2 + gap * (n - 1);
-  const len = (W - padL - padR) / (1 - Math.pow(2, -F / 12));
-  const raw = f => padL + len * (1 - Math.pow(2, -f / 12));
+  // minus frets stretch the board to the left; K counts the extra wires (the nut region needs one more)
+  const M = minusMax(), K = M > 0 ? M + 1 : 0, p2 = Math.pow(2, K / 12);
+  const len = (W - padL - padR) / (p2 - Math.pow(2, -F / 12));
+  const raw = f => padL + len * (p2 - Math.pow(2, -f / 12));
   const X = x => st.lefty ? W - x : x;
   const fx = f => X(raw(f));
-  const cx = f => f === 0 ? X(padL - 13) : X((raw(f) + raw(f - 1)) / 2);
+  const cx = f => f === 0 && !K ? X(padL - 13) : X((raw(f) + raw(f - 1)) / 2);
   const midY = top + gap * (n - 1) / 2;
   let svg = `<svg viewBox="0 0 ${W} ${H + 18}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${titleFor(set)} の指板">`;
   svg += `<rect width="${W}" height="${H + 18}" fill="#0a0a0a"/>`;
   svg += `<rect x="${Math.min(X(padL), X(W - padR))}" y="${top - 10}" width="${W - padL - padR}" height="${gap * (n - 1) + 20}" fill="#121212"/>`;
+  if (K) for (let i = 0; i < n; i++) {   // strings without that many minus frets start further right
+    const x1 = raw(-(minusOf(n - 1 - i) + 1)); if (x1 - raw(-K) < 1) continue;
+    svg += `<rect x="${Math.min(X(raw(-K)), X(x1))}" y="${top + gap * i - gap / 2}" width="${x1 - raw(-K)}" height="${gap}" fill="#0a0a0a"/>`;
+  }
   if (st.range === 'frets' && !sh) {
     const lo = Math.min(st.from, st.to), hi = Math.max(st.from, st.to);
     const x0 = lo === 0 ? raw(0) - 26 : raw(lo - 1), x1 = raw(hi);
@@ -267,17 +302,20 @@ function renderFretboard() {
   [3, 5, 7, 9, 15, 17, 19, 21, 27].filter(f => f <= F).forEach(f => svg += `<circle cx="${cx(f)}" cy="${midY}" r="4" fill="#262626"/>`);
   [12, 24].filter(f => f <= F).forEach(f => svg += `<circle cx="${cx(f)}" cy="${midY - gap}" r="4" fill="#262626"/><circle cx="${cx(f)}" cy="${midY + gap}" r="4" fill="#262626"/>`);
   for (let f = 0; f <= F; f++) svg += `<line x1="${fx(f)}" y1="${top - 10}" x2="${fx(f)}" y2="${top + gap * (n - 1) + 10}" stroke="${f === 0 ? '#9a9a9a' : '#2c2c2c'}" stroke-width="${f === 0 ? 4 : 1.2}"/>`;
+  for (let f = 1; f <= M; f++) svg += `<text x="${cx(-f)}" y="${H + 12}" fill="#5a5a8a" font-size="10" text-anchor="middle" font-family="Barlow">−${f}</text>`;
   for (let f = 1; f <= F; f++) if ([1, 3, 5, 7, 9, 12, 15, 17, 19, 21, 24, 27].includes(f)) svg += `<text x="${cx(f)}" y="${H + 12}" fill="#666" font-size="10" text-anchor="middle" font-family="Barlow">${f}</text>`;
   let dots = '', hits = '', count = 0;
   const showHidden = fbAction === 'hide' || chipAction === 'hide';
   for (let i = 0; i < n; i++) {
     const s = n - 1 - i, y = top + gap * i, open = tun[s], on = st.strOn[s];
     // the 1st string (top) is the thinnest, the lowest string the thickest
-    svg += `<line x1="${fx(0)}" y1="${y}" x2="${X(W - padR)}" y2="${y}" stroke="${on ? '#5a5a5a' : '#262626'}" stroke-width="${(0.7 + i * 0.28).toFixed(2)}"/>`;
+    const mi = minusOf(s), xs = K ? fx(-(mi + 1)) : fx(0);
+    for (let f = 1; f <= mi + 1 && K; f++) svg += `<line x1="${fx(-f)}" y1="${y - gap / 2}" x2="${fx(-f)}" y2="${y + gap / 2}" stroke="#3a3a5a" stroke-width="1.2"/>`;
+    svg += `<line x1="${xs}" y1="${y}" x2="${X(W - padR)}" y2="${y}" stroke="${on ? '#5a5a5a' : '#262626'}" stroke-width="${(0.7 + i * 0.28).toFixed(2)}"/>`;
     svg += `<text x="${X(padL - 30)}" y="${y + 3.5}" fill="${on ? '#9a9a9a' : '#3a3a3a'}" font-size="11" text-anchor="middle" font-family="Barlow" font-weight="600">${set.name(open)}</text>`;
-    for (let f = 0; f <= F; f++) {
+    for (let f = -mi; f <= F; f++) {
       const m = open + f, p = pc(m), x = cx(f);
-      hits += `<rect class="fb-hit" data-m="${m}" data-c="${s}:${f}" x="${Math.min(f === 0 ? X(padL - 26) : fx(f - 1), f === 0 ? X(padL) : fx(f))}" y="${y - gap / 2}" width="${Math.abs((f === 0 ? 26 : raw(f) - raw(f - 1)))}" height="${gap}"><title>${set.note(m)}</title></rect>`;
+      hits += `<rect class="fb-hit" data-m="${m}" data-c="${s}:${f}" x="${Math.min(f === 0 && !K ? X(padL - 26) : fx(f - 1), f === 0 && !K ? X(padL) : fx(f))}" y="${y - gap / 2}" width="${Math.abs(f === 0 && !K ? 26 : raw(f) - raw(f - 1))}" height="${gap}"><title>${set.note(m)}</title></rect>`;
       if (!set.has(p) && !(sh && inShape.has(s + ':' + f))) continue;
       const hidden = isHiddenCell(s, f) || isHiddenIv(set, p);
       const visible = vis(s, f) && !hidden;
@@ -297,11 +335,11 @@ function renderFretboard() {
   }
   // picked notes for the chord finder (any pitch, drawn on top)
   picks.forEach(k => {
-    const [s, f] = k.split(':').map(Number); if (s >= n || f > F) return;
+    const [s, f] = k.split(':').map(Number); if (s >= n || f > F || f < -minusOf(s)) return;
     const x = cx(f), y = top + gap * (n - 1 - s);
     dots += `<circle cx="${x}" cy="${y}" r="11.5" fill="#f5f5f5" stroke="#fff" stroke-width="1.5"/><text x="${x}" y="${y + 3.6}" fill="#0a0a0a" font-size="9" font-weight="700" text-anchor="middle" font-family="Barlow">${set.name(tun[s] + f)}</text>`;
   });
-  if (sh) sh.muted.forEach(s => { const y = top + gap * (n - 1 - s); dots += `<text x="${X(padL - 13)}" y="${y + 4}" fill="#f87171" font-size="12" text-anchor="middle" font-family="Barlow" font-weight="700">×</text>`; });
+  if (sh) sh.muted.forEach(s => { const y = top + gap * (n - 1 - s); dots += `<text x="${cx(0)}" y="${y + 4}" fill="#f87171" font-size="12" text-anchor="middle" font-family="Barlow" font-weight="700">×</text>`; });
   svg += dots + hits + '</svg>';
   $('fretboard').innerHTML = svg;
   fbGeom = { cx, Y: s => top + gap * (n - 1 - s) };
@@ -404,7 +442,7 @@ function liveFrame(t) {
     const age = t - chordLive.t, fadeC = age < 2000 ? 1 : Math.max(0, 1 - (age - 2000) / 800);
     if (!$('tn-show').checked || !fbGeom || !chordLive.notes.length || fadeC <= 0) { layer.innerHTML = ''; return; }
     const tunC = tuning(), items = [];
-    chordLive.notes.forEach(m => tunC.forEach((open, s) => { const f = m - open; if (st.strOn[s] && f >= 0 && f <= st.frets) items.push({ x: fbGeom.cx(f), y: fbGeom.Y(s), root: chordLive.root !== null && pc(m) === chordLive.root }); }));
+    chordLive.notes.forEach(m => tunC.forEach((open, s) => { const f = m - open; if (st.strOn[s] && f >= -minusOf(s) && f <= st.frets) items.push({ x: fbGeom.cx(f), y: fbGeom.Y(s), root: chordLive.root !== null && pc(m) === chordLive.root }); }));
     layer.innerHTML = items.length ? glowSvg(items, fadeC, t) : ''; return;
   }
   if (!$('tn-show').checked || !fbGeom || live.midi === null) { layer.innerHTML = ''; return; }
@@ -419,7 +457,7 @@ function liveFrame(t) {
   const near = live.near;
   const fade = active ? 1 : Math.max(0, 1 - (t - live.lastT - 350) / 600);
   if (fade <= 0) { layer.innerHTML = ''; return; }
-  const cands = []; for (let s = 0; s < n; s++) { const f = near - tun[s]; if (st.strOn[s] && f >= 0 && f <= st.frets) cands.push({ s, f }); }
+  const cands = []; for (let s = 0; s < n; s++) { const f = near - tun[s]; if (st.strOn[s] && f >= -minusOf(s) && f <= st.frets) cands.push({ s, f }); }
   if (!cands.length) { layer.innerHTML = ''; return; }
   // The same pitch can sit at several places, so every place that gives it glows the same way
   const isRoot = st.mode !== 'notes' && pc(near) === pc(st.root);
@@ -460,10 +498,10 @@ function renderMetrics(set, count) {
   const tun = tuning();
   $('m-target').textContent = titleFor(set);
   $('m-notes').textContent = set.ivs.map(iv => set.name(set.root + iv.semis)).join(' ');
-  $('m-tuning').textContent = (st.tuning === 'custom' ? 'カスタム' : (findTuning(st.strings, st.tuning) || {}).name) + ` · ${st.strings}弦`;
+  $('m-tuning').textContent = (st.tuning === 'custom' ? 'カスタム' : (findTuning(st.inst, st.strings, st.tuning) || {}).name) + ` · ${st.strings}弦`;
   $('m-open').textContent = tun.slice().reverse().map(m => set.name(m)).join(' ');
   const lo = Math.min(st.from, st.to), hi = Math.max(st.from, st.to);
-  $('m-range').textContent = selectedShape() ? selectedShape().title : st.range === 'frets' ? `${lo}〜${hi}フレット` : st.range === 'pattern' ? `パターン ${st.pattern % scaleLen() + 1}` : `0〜${st.frets}フレット`;
+  $('m-range').textContent = selectedShape() ? selectedShape().title : st.range === 'frets' ? `${lo}〜${hi}フレット` : st.range === 'pattern' ? `パターン ${st.pattern % scaleLen() + 1}` : `${minusMax() ? '−' + minusMax() : 0}〜${st.frets}フレット`;
   $('m-count').innerHTML = `${count}<span class="metric-unit">か所</span>`;
 }
 
@@ -516,7 +554,7 @@ function computeShapes() {
       return f; });
   }
   if (st.shapeTab === 'sweep') {
-    const sizes = st.sw.size ? [st.sw.size] : [8, 7, 6, 5, 4, 3];
+    const sizes = st.sw.size ? [st.sw.size] : [9, 8, 7, 6, 5, 4, 3];
     let list = sweepShapes(tun, c.pcs, rootPc, Math.min(F, 24), { span: st.sw.span, sizes, rootStart: st.sw.rootStart, allowOpen: st.sw.allowOpen });
     if (st.sw.topOnly) list = list.filter(sw => sw.hi === n - 1);
     if (st.sw.notes) list = list.filter(sw => sw.notes.length === st.sw.notes);
@@ -586,7 +624,7 @@ function renderShapes() {
   $('sets-kind').value = st.vo.kind; $('sets-count').value = String(st.vo.count);
   $('sets-range').innerHTML = '<option value="">すべて</option>' + voSets.map(x => `<option value="${x}">${x}</option>`).join('');
   $('sets-range').value = voSets.includes(st.vo.range) ? st.vo.range : '';
-  $('sw-size').innerHTML = '<option value="0">すべて</option>' + [3, 4, 5, 6, 7, 8].filter(k => k <= st.strings).map(k => `<option value="${k}">${k}弦</option>`).join('');
+  $('sw-size').innerHTML = '<option value="0">すべて</option>' + [3, 4, 5, 6, 7, 8, 9].filter(k => k <= st.strings).map(k => `<option value="${k}">${k}弦</option>`).join('');
   $('sw-notes').value = st.sw.notes;
   $('sw-size').value = st.sw.size; $('sw-span').value = st.sw.span; $('sw-root').checked = st.sw.rootStart; $('sw-open').checked = st.sw.allowOpen; $('sw-top').checked = st.sw.topOnly; $('sw-common').checked = st.sw.common;
   const hints = {
@@ -661,8 +699,14 @@ function renderFinder() {
 }
 
 
+function syncListenerRange() {
+  // lowest sound the tuning (and its minus frets) can make; a few semitones below it is the floor of the pitch search
+  const tun = tuning(); let low = Infinity; tun.forEach((m, s) => { low = Math.min(low, m - minusOf(s)); });
+  listener.setLow(440 * Math.pow(2, (low - 5 - 69) / 12), low - 2);
+}
 function render() {
   renderControls();
+  syncListenerRange();
   const set = currentSet();
   renderSetInfo(set);
   const count = renderFretboard();
@@ -677,9 +721,10 @@ function bind() {
   const groups = {}; Object.entries(SCALES).forEach(([id, s]) => (groups[s.group] = groups[s.group] || []).push(`<option value="${id}">${s.name}</option>`));
   $('scale').innerHTML = Object.entries(groups).map(([g, o]) => `<optgroup label="${g}">${o.join('')}</optgroup>`).join('');
   $('chord').innerHTML = Object.entries(CHORDS).map(([id, c]) => `<option value="${id}">${c.name}</option>`).join('');
-  $('strings').innerHTML = STRING_COUNTS.map(n => `<option value="${n}">${n}弦${n <= 5 ? '（ベース）' : ''}</option>`).join('');
 
-  $('strings').addEventListener('change', e => update(() => { st.strings = +e.target.value; st.tuning = TUNINGS[st.strings][0].id; st.custom = TUNINGS[st.strings][0].notes.slice(); st.strOn = Array(st.strings).fill(true); st.hideCells = []; picks = []; }));
+  $('strings').addEventListener('change', e => update(() => { st.strings = +e.target.value; st.tuning = tuningsFor(st.inst, st.strings)[0].id; st.custom = tuningsFor(st.inst, st.strings)[0].notes.slice(); st.minus = Array(st.strings).fill(0); st.strOn = Array(st.strings).fill(true); st.hideCells = []; picks = []; }));
+  document.querySelectorAll('.inst-btn').forEach(b => b.addEventListener('click', () => update(() => setInstrument(b.dataset.inst))));
+  $('minus-grid').addEventListener('change', e => { const s = e.target.dataset.s; if (s === undefined) return; update(() => { st.minus[+s] = intIn(+e.target.value, 0, MAX_MINUS, 0); st.hideCells = st.hideCells.filter(c => +c.split(':')[1] >= 0); picks = picks.filter(c => +c.split(':')[1] >= -minusOf(+c.split(':')[0])); }, true); });
   $('tuning').addEventListener('change', e => update(() => { if (e.target.value === 'custom' && st.tuning !== 'custom') st.custom = tuning().slice(); st.tuning = e.target.value; }));
   $('custom-tuning').addEventListener('change', e => { const s = e.target.dataset.s; if (s === undefined) return; update(() => { st.custom[+s] = +e.target.value; }); });
   $('frets').addEventListener('change', e => update(() => { st.frets = +e.target.value; }));
@@ -782,7 +827,7 @@ function bind() {
   // fretboard-wide actions
   $('fb-hide-all').addEventListener('click', () => {
     const set = currentSet(), tun = tuning(), cells = new Set(st.hideCells);
-    tun.forEach((open, s) => { for (let f = 0; f <= st.frets; f++) if (set.has(open + f)) cells.add(s + ':' + f); });
+    tun.forEach((open, s) => { for (let f = -minusOf(s); f <= st.frets; f++) if (set.has(open + f)) cells.add(s + ':' + f); });
     fbAction = 'hide';
     update(() => { st.hideCells = [...cells]; }, true);
     notify('すべての音を隠しました。「押すと隠す」のまま、見せたい位置を押すと戻ります');
@@ -807,7 +852,7 @@ function bind() {
   });
   $('play-set').addEventListener('click', () => {
     const set = currentSet(), vis = visibility(set), tun = tuning(), list = new Set();
-    tun.forEach((open, s) => { for (let f = 0; f <= st.frets; f++) if (set.has(open + f) && vis(s, f) && !isHiddenCell(s, f) && !isHiddenIv(set, pc(open + f))) list.add(open + f); });
+    tun.forEach((open, s) => { for (let f = -minusOf(s); f <= st.frets; f++) if (set.has(open + f) && vis(s, f) && !isHiddenCell(s, f) && !isHiddenIv(set, pc(open + f))) list.add(open + f); });
     const up = [...list].sort((a, b) => a - b).slice(0, 48);
     if (!up.length) return notify('表示中の音がありません');
     playNotes(up.concat(up.slice(0, -1).reverse()), 0.17, 0.35);
