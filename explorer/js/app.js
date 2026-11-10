@@ -1,14 +1,24 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=58';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=58';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=58';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=58';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=58';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=58';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=58';
-import { PitchListener } from './pitch.js?v=58';
-import { initLayout } from './layout.js?v=58';
-import { initTheme, themeColors } from './theme.js?v=58';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=59';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=59';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=59';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=59';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=59';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=59';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=59';
+import { PitchListener } from './pitch.js?v=59';
+import { initLayout } from './layout.js?v=59';
+import { initTheme, themeColors } from './theme.js?v=59';
 const MAX_BARS = 120;
+// a preset is written per beat: f(beat index, position inside the beat 0..1) -> 0 off / 1 soft / 2 strong; it works at any resolution
+const PRESET_DEF = {
+  metro: { rows: { click: (b, x) => x === 0 ? (b === 0 ? 2 : 1) : 0 } },
+  rock8: { rows: { hat: (b, x) => x === 0 ? 2 : x === 0.5 ? 1 : 0, snare: (b, x) => x === 0 && b % 2 === 1 ? 2 : 0, kick: (b, x) => x === 0 && b % 2 === 0 ? 2 : 0 } },
+  four: { rows: { kick: (b, x) => x === 0 ? 2 : 0, hatO: (b, x) => x === 0.5 ? 2 : 0 } },
+  beat16: { rows: { hat: (b, x) => x === 0 ? 2 : 1, snare: (b, x) => x === 0 && b % 2 === 1 ? 2 : 0, kick: (b, x) => x === 0 && b % 2 === 0 ? 2 : b % 2 === 1 && x === 0.75 ? 1 : 0 } },
+  shuffle: { swing: { mode: '8', amt: 67 }, rows: { hat: (b, x) => x === 0 ? 2 : x === 0.5 ? 1 : 0, snare: (b, x) => x === 0 && b % 2 === 1 ? 2 : 0, kick: (b, x) => x === 0 && b % 2 === 0 ? 2 : 0 } },
+  none: { rows: {} }
+};
+
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -1307,18 +1317,20 @@ const DRUM_PRESETS = { metro: 'メトロノーム', rock8: '8ビート', four: '
 const DRUM_RES = { 2: '8分', 3: '8分3連', 4: '16分', 6: '16分3連', 8: '32分' };
 const DRUM_NEXT = [2, 0, 1];   // press: off -> strong -> soft -> off (levels: 0 off, 1 soft, 2 strong)
 function drumLen(D, beats) { return beats * D.res * D.bars; }
-function drumPreset(id, beats) {
-  const n = beats * 4, row = f => Array.from({ length: n }, (_, i) => f(i, Math.floor(i / 4), i % 4) | 0).join('');
-  const D = { v: 2, pre: id, res: 4, bars: 1, swing: { mode: 'off', amt: 67 }, rows: {} };
-  const kick = (i, b, q) => q === 0 && b % 2 === 0 ? 2 : 0, snare = (i, b, q) => q === 0 && b % 2 === 1 ? 2 : 0;
-  if (id === 'metro') D.rows.click = row((i, b, q) => q === 0 ? (b === 0 ? 2 : 1) : 0);
-  else if (id === 'rock8') { D.rows.hat = row((i, b, q) => q % 2 === 0 ? (q === 0 ? 2 : 1) : 0); D.rows.snare = row(snare); D.rows.kick = row(kick); }
-  else if (id === 'four') { D.rows.hatO = row((i, b, q) => q === 2 ? 2 : 0); D.rows.kick = row((i, b, q) => q === 0 ? 2 : 0); }
-  else if (id === 'beat16') { D.rows.hat = row((i, b, q) => q === 0 ? 2 : 1); D.rows.snare = row(snare); D.rows.kick = row(kick); }
-  else if (id === 'shuffle') { D.swing = { mode: '8', amt: 67 }; D.rows.hat = row((i, b, q) => q === 0 ? 2 : q === 2 ? 1 : 0); D.rows.snare = row(snare); D.rows.kick = row(kick); }
-  else D.pre = 'none';
+// writes the preset into D in place: the number of bars, the resolution and the instruments already there stay; only the instruments the preset needs are added,
+// the others are emptied
+function applyPreset(D, id, beats) {
+  const def = PRESET_DEF[id] || PRESET_DEF.none, per = beats * D.res;
+  const bar = f => Array.from({ length: per }, (_, i) => { const b = Math.floor(i / D.res), x = (i % D.res) / D.res; return String(f(b, Math.round(x * 1e6) / 1e6) | 0); }).join('');
+  const rows = {};
+  Object.keys(def.rows).forEach(k => { rows[k] = bar(def.rows[k]); });
+  Object.keys(D.rows).forEach(k => { if (!rows[k]) rows[k] = '0'.repeat(per); });
+  Object.keys(rows).forEach(k => { D.rows[k] = rows[k].repeat(D.bars); });
+  D.swing = def.swing && D.res % 2 === 0 ? { ...def.swing } : { mode: 'off', amt: D.swing.amt };
+  D.pre = id;
   return D;
 }
+function drumPreset(id, beats) { return applyPreset({ v: 2, pre: id, res: 4, bars: 1, swing: { mode: 'off', amt: 67 }, rows: {} }, id, beats); }
 function cleanDrum(d, beats) {
   if (!d || typeof d !== 'object') return drumPreset('metro', beats);
   if (d.v !== 2) {   // the earlier format: rows k s h c of 0/1, 4 steps per beat
@@ -1326,7 +1338,6 @@ function cleanDrum(d, beats) {
     const n = beats * 4, fix = v => (typeof v === 'string' && /^[01]*$/.test(v) ? v : '').slice(0, n).padEnd(n, '0').replace(/1/g, '2');
     return { v: 2, pre: 'custom', res: 4, bars: 1, swing: { mode: 'off', amt: 67 }, rows: { kick: fix(d.k), snare: fix(d.s), hat: fix(d.h), click: fix(d.c) } };
   }
-  if (DRUM_PRESETS[d.pre]) return drumPreset(d.pre, beats);   // presets follow the time signature
   const res = [2, 3, 4, 6, 8].includes(d.res) ? d.res : 4, bars = intIn(d.bars, 1, MAX_BARS, 1), sw = d.swing || {};
   const D = { v: 2, pre: 'custom', res, bars, swing: { mode: ['8', '16'].includes(sw.mode) ? sw.mode : 'off', amt: intIn(sw.amt, 50, 80, 67) }, rows: {} };
   const n = drumLen(D, beats);
@@ -1335,7 +1346,7 @@ function cleanDrum(d, beats) {
 }
 // the beats per bar changed: keep every bar's steps in place (cut or pad each bar)
 function drumBeats(D, oldBeats, newBeats) {
-  if (D.pre !== 'custom') return drumPreset(D.pre, newBeats);
+  if (D.pre !== 'custom') { const E = structuredClone(D); return applyPreset(E, D.pre, newBeats); }   // a preset follows the time signature
   const o = oldBeats * D.res, n = newBeats * D.res, E = { ...D, rows: {} };
   for (const id of Object.keys(D.rows)) { let r = ''; for (let b = 0; b < D.bars; b++) r += D.rows[id].slice(b * o, (b + 1) * o).slice(0, n).padEnd(n, '0'); E.rows[id] = r; }
   return E;
@@ -1351,6 +1362,7 @@ function renderDrum() {
   $('dr-pg-prev').disabled = drPage === 0; $('dr-pg-next').disabled = drPage >= pages - 1;
   $('dr-pre').value = D.pre; $('dr-res').value = D.res; $('dr-bars').value = D.bars; $('dr-swing').value = D.swing.mode; $('dr-amt').value = D.swing.amt;
   $('dr-amt-w').hidden = D.swing.mode === 'off';
+  { const m = D.swing.amt, near = x => Math.abs(m - x) <= 1; $('dr-amt-note').textContent = near(50) ? '＝ストレート' : near(67) ? '＝3連の中抜き' : near(75) ? '＝付点（強いハネ）' : ''; }
   const miss = DRUM_INSTR.filter(x => D.rows[x.id] == null);
   $('dr-add').innerHTML = '<option value="">＋ 楽器を追加</option>' + miss.map(x => `<option value="${x.id}">${x.label}</option>`).join(''); $('dr-add').disabled = !miss.length;
   $('dr-grid').innerHTML = have.length ? have.map(x => {
@@ -1363,7 +1375,7 @@ function bindDrum(set) {
   const edit = fn => set(() => { const D = st.prog.drum; fn(D); D.pre = 'custom'; });
   $('dr-pre').innerHTML = Object.entries(DRUM_PRESETS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('') + '<option value="custom">編集済み</option>';
   $('dr-res').innerHTML = Object.entries(DRUM_RES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
-  $('dr-pre').addEventListener('change', e => { if (e.target.value === 'custom') return; set(() => { st.prog.drum = drumPreset(e.target.value, st.prog.beats); }); drumAudition(); });
+  $('dr-pre').addEventListener('change', e => { if (e.target.value === 'custom') return; set(() => { applyPreset(st.prog.drum, e.target.value, st.prog.beats); }); drumAudition(); });
   $('dr-res').addEventListener('change', e => edit(D => {   // keep the notes that sit on both grids
     const nr = +e.target.value, old = D.res;
     for (const id of Object.keys(D.rows)) { const r = D.rows[id], out = Array(drumLen({ res: nr, bars: D.bars }, st.prog.beats)).fill('0'); for (let i = 0; i < r.length; i++) { const j = i * nr / old; if (r[i] !== '0' && Number.isInteger(j) && j < out.length) out[j] = r[i]; } D.rows[id] = out.join(''); }

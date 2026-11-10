@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=58">
+<link rel="stylesheet" href="style.css?v=59">
 <script>
 try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t){var _l=_t.mode==='light'||(_t.mode==='auto'&&matchMedia('(prefers-color-scheme: light)').matches),_r=document.documentElement;_r.dataset.theme=_l?'light':'dark';if(/^#[0-9a-fA-F]{6}$/.test(_t.accent))_r.style.setProperty('--accent1',_t.accent);}}catch(e){}
 </script>
@@ -288,10 +288,11 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
           <select id="dr-pre" aria-label="パターンのひな形"></select>
           <label class="pg-f">音価<select id="dr-res"></select></label>
           <label class="pg-f">パターンの長さ（小節）<span class="num-wrap"><input type="number" id="dr-bars" min="1" max="120" step="1" inputmode="numeric" aria-label="パターンの長さ（小節）"><span class="num-btns"><button type="button" class="num-btn" data-dir="up" aria-label="増やす">▲</button><button type="button" class="num-btn" data-dir="down" aria-label="減らす">▼</button></span></span></label>
-          <label class="pg-f">スウィング<select id="dr-swing"><option value="off">なし</option><option value="8">8分</option><option value="16">16分</option></select></label>
-          <label class="pg-f" id="dr-amt-w">強さ（％）<input type="number" class="txt" id="dr-amt" min="50" max="80" step="1" inputmode="numeric"></label>
+          <label class="pg-f">スウィング<select id="dr-swing"><option value="off">なし（ストレート）</option><option value="8">8分の裏を跳ねる</option><option value="16">16分の裏を跳ねる</option></select></label>
+          <label class="pg-f" id="dr-amt-w">強さ（％）<input type="number" class="txt" id="dr-amt" min="50" max="80" step="1" inputmode="numeric"><small id="dr-amt-note"></small></label>
           <select id="dr-add" aria-label="楽器を追加"></select></div>
         <p class="hint">マスを押すたびに「強→弱→休符」と変わります（クリックは強＝高い音、弱＝低い音）。</p>
+        <p class="hint">スウィングの強さは、裏拍を置く位置です。50％＝ストレート、67％＝3連の中抜き（シャッフル）、75％＝付点（強いハネ）。ひな形を選んでも、小節数・楽器の構成・音価は変わらず、足りない楽器だけ加わります。</p>
         
 <div class="dr-pager" id="dr-pager" hidden><button type="button" class="std small" id="dr-pg-prev" aria-label="前の小節へ">◀</button><span id="dr-pg-lbl"></span><button type="button" class="std small" id="dr-pg-next" aria-label="次の小節へ">▶</button></div>
 <div class="dr-grid" id="dr-grid"></div>
@@ -388,7 +389,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
   <input type="range" id="vol-range" min="0" max="100" step="1" value="80" aria-label="音量">
   <span class="vol-num" id="vol-num">80</span>
 </div>
-<script type="module" src="js/app.js?v=58"></script>
+<script type="module" src="js/app.js?v=59"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
