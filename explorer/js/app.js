@@ -1,13 +1,13 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=61';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=61';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=61';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=61';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=61';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=61';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=61';
-import { PitchListener } from './pitch.js?v=61';
-import { initLayout } from './layout.js?v=61';
-import { initTheme, themeColors } from './theme.js?v=61';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=62';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=62';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=62';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=62';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=62';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=62';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=62';
+import { PitchListener } from './pitch.js?v=62';
+import { initLayout } from './layout.js?v=62';
+import { initTheme, themeColors } from './theme.js?v=62';
 const MAX_BARS = 120;
 // a preset is written per beat: f(beat index, position inside the beat 0..1) -> 0 off / 1 soft / 2 strong; it works at any resolution
 const PRESET_DEF = {
@@ -1013,6 +1013,7 @@ function renderProg() {
   const sig = JSON.stringify([r.bars.map(b => [b.chords.map(c => c.label), b.scales.map(x => x.label)]), r.key]);
   if (sig !== pb.sig) {
     pb.sig = sig;
+    { const n = r.bars.length; $('pg-bars').style.setProperty('--cols', n <= 8 ? Math.max(1, n) : [8, 6, 4].find(c => n % c === 0) || 8); }
     $('pg-bars').innerHTML = r.bars.map((b, i) => `<button class="pg-bar" data-i="${i}" title="この小節から再生"><small>${i + 1}</small><b>${b.chords.map(c => c.label).join(' ') || '—'}</b><em>${b.scales.map(x => x.label).join(' / ')}</em><i class="beatbar"></i></button>`).join('')
       || '<span class="hint">コード進行かスケール進行を入力してください。</span>';
   }
