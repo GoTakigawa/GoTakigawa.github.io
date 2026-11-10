@@ -1,13 +1,13 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=55';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=55';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=55';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=55';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=55';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=55';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=55';
-import { PitchListener } from './pitch.js?v=55';
-import { initLayout } from './layout.js?v=55';
-import { initTheme, themeColors } from './theme.js?v=55';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=56';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=56';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=56';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=56';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=56';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=56';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=56';
+import { PitchListener } from './pitch.js?v=56';
+import { initLayout } from './layout.js?v=56';
+import { initTheme, themeColors } from './theme.js?v=56';
 const MAX_BARS = 120;
 
 const $ = id => document.getElementById(id);
@@ -1299,18 +1299,18 @@ function bindQuiz() {
   renderQuiz();
 }
 
-// ── drum / click pattern (see player.js): rows of 0..3 per step; any set of instruments, resolution, length and swing ──
+// ── drum / click pattern (see player.js): rows of 0..2 per step; any set of instruments, resolution, length and swing ──
 const DRUM_PRESETS = { metro: 'メトロノーム', rock8: '8ビート', four: '4つ打ち', beat16: '16ビート', shuffle: 'シャッフル', none: '空' };
 const DRUM_RES = { 2: '8分', 3: '8分3連', 4: '16分', 6: '16分3連', 8: '32分' };
-const DRUM_NEXT = [2, 0, 3, 1];   // press: off -> normal -> accent -> soft -> off
+const DRUM_NEXT = [2, 0, 1];   // press: off -> strong -> soft -> off (levels: 0 off, 1 soft, 2 strong)
 function drumLen(D, beats) { return beats * D.res * D.bars; }
 function drumPreset(id, beats) {
   const n = beats * 4, row = f => Array.from({ length: n }, (_, i) => f(i, Math.floor(i / 4), i % 4) | 0).join('');
   const D = { v: 2, pre: id, res: 4, bars: 1, swing: { mode: 'off', amt: 67 }, rows: {} };
-  const kick = (i, b, q) => q === 0 && b % 2 === 0 ? (b === 0 ? 3 : 2) : 0, snare = (i, b, q) => q === 0 && b % 2 === 1 ? 3 : 0;
-  if (id === 'metro') D.rows.click = row((i, b, q) => q === 0 ? (b === 0 ? 3 : 2) : 0);
+  const kick = (i, b, q) => q === 0 && b % 2 === 0 ? 2 : 0, snare = (i, b, q) => q === 0 && b % 2 === 1 ? 2 : 0;
+  if (id === 'metro') D.rows.click = row((i, b, q) => q === 0 ? (b === 0 ? 2 : 1) : 0);
   else if (id === 'rock8') { D.rows.hat = row((i, b, q) => q % 2 === 0 ? (q === 0 ? 2 : 1) : 0); D.rows.snare = row(snare); D.rows.kick = row(kick); }
-  else if (id === 'four') { D.rows.hatO = row((i, b, q) => q === 2 ? 2 : 0); D.rows.kick = row((i, b, q) => q === 0 ? (b === 0 ? 3 : 2) : 0); }
+  else if (id === 'four') { D.rows.hatO = row((i, b, q) => q === 2 ? 2 : 0); D.rows.kick = row((i, b, q) => q === 0 ? 2 : 0); }
   else if (id === 'beat16') { D.rows.hat = row((i, b, q) => q === 0 ? 2 : 1); D.rows.snare = row(snare); D.rows.kick = row(kick); }
   else if (id === 'shuffle') { D.swing = { mode: '8', amt: 67 }; D.rows.hat = row((i, b, q) => q === 0 ? 2 : q === 2 ? 1 : 0); D.rows.snare = row(snare); D.rows.kick = row(kick); }
   else D.pre = 'none';
@@ -1327,7 +1327,7 @@ function cleanDrum(d, beats) {
   const res = [2, 3, 4, 6, 8].includes(d.res) ? d.res : 4, bars = intIn(d.bars, 1, MAX_BARS, 1), sw = d.swing || {};
   const D = { v: 2, pre: 'custom', res, bars, swing: { mode: ['8', '16'].includes(sw.mode) ? sw.mode : 'off', amt: intIn(sw.amt, 50, 80, 67) }, rows: {} };
   const n = drumLen(D, beats);
-  DRUM_INSTR.forEach(x => { const v = d.rows && d.rows[x.id]; if (typeof v === 'string') D.rows[x.id] = v.replace(/[^0-3]/g, '0').slice(0, n).padEnd(n, '0'); });
+  DRUM_INSTR.forEach(x => { const v = d.rows && d.rows[x.id]; if (typeof v === 'string') D.rows[x.id] = v.replace(/[^0-3]/g, '0').replace(/3/g, '2').slice(0, n).padEnd(n, '0'); });
   return D;
 }
 // the beats per bar changed: keep every bar's steps in place (cut or pad each bar)
@@ -1381,7 +1381,7 @@ function bindDrum(set) {
     const c = e.target.closest('.dr-c'); if (!c) return;
     const id = c.dataset.r, i = +c.dataset.i; let lv = 0;
     edit(D => { const row = D.rows[id].split(''); lv = DRUM_NEXT[+row[i]]; row[i] = String(lv); D.rows[id] = row.join(''); });
-    if (lv) audio.ready().then(() => audio.click(audio.now + 0.01, lv === 3, id, DRUM_VEL[lv]));
+    if (lv) audio.ready().then(() => audio.click(audio.now + 0.01, lv === 2, id, DRUM_VEL[lv]));
   });
 }
 
