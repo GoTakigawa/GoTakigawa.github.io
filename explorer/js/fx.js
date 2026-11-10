@@ -369,7 +369,7 @@ export function initFx({ ensureInput } = {}) {
       }
       g.globalAlpha = 1; }
     // goniometer: L/R rotated 45 degrees (vertical = mono, horizontal = side), with a gentle auto-scale and the L/R correlation
-    { const [g, W, H] = prep(cg), L = E.gl || (E.gl = new Float32Array(1024)), R = E.gr || (E.gr = new Float32Array(1024)); E.anL.getFloatTimeDomainData(L); E.anR.getFloatTimeDomainData(R);
+    { try { const [g, W, H] = prep(cg), L = E.gbL || (E.gbL = new Float32Array(1024)), R = E.gbR || (E.gbR = new Float32Array(1024)); E.anL.getFloatTimeDomainData(L); E.anR.getFloatTimeDomainData(R);
       let pk = 0, ll = 0, rr = 0, lr = 0; for (let i = 0; i < 1024; i++) { pk = Math.max(pk, Math.abs(L[i]), Math.abs(R[i])); ll += L[i] * L[i]; rr += R[i] * R[i]; lr += L[i] * R[i]; }
       const cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - 10;
       g.strokeStyle = E.mc.l; g.fillStyle = E.mc.t; g.lineWidth = 1; g.font = '9px sans-serif';
@@ -388,7 +388,7 @@ export function initFx({ ensureInput } = {}) {
       }
       bg.fill(); bg.globalAlpha = 1;
       g.drawImage(E.gb, 0, 0, W, H);
-      const cr = q('fx-corr'); if (cr) cr.textContent = pk > 0.003 ? '相関 ' + (lr / Math.sqrt(ll * rr + 1e-12) >= 0 ? '+' : '') + (lr / Math.sqrt(ll * rr + 1e-12)).toFixed(2) : '相関 —'; }
+      const cr = q('fx-corr'); if (cr) cr.textContent = pk > 0.003 ? '相関 ' + (lr / Math.sqrt(ll * rr + 1e-12) >= 0 ? '+' : '') + (lr / Math.sqrt(ll * rr + 1e-12)).toFixed(2) : '相関 —'; } catch (e) { console.error('gonio', e); } }
   };
   const meter = () => {
     if (!E.ctx || document.hidden) return;
