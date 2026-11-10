@@ -1,16 +1,41 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=77';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=77';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=77';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=77';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=77';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=77';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=77';
-import { PitchListener } from './pitch.js?v=77';
-import { initLayout } from './layout.js?v=77';
-import { initTheme, themeColors } from './theme.js?v=77';
-import { initFx } from './fx.js?v=77';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=78';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=78';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=78';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=78';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=78';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=78';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=78';
+import { PitchListener } from './pitch.js?v=78';
+import { initLayout } from './layout.js?v=78';
+import { initTheme, themeColors } from './theme.js?v=78';
+import { initFx } from './fx.js?v=78';
 // the build number is the cache-busting ?v= of this file, shown next to BETA
 { const v = new URL(import.meta.url).searchParams.get('v'), el = document.getElementById('ver'); if (v && el) el.textContent = 'BETA ' + v; }
+// new-version check: index.html is re-read without cache and its app.js ?v= compared with the running one
+{
+  const cur = new URL(import.meta.url).searchParams.get('v');
+  const host = location.hostname;
+  const local = host === 'localhost' || host === '127.0.0.1';
+  let shown = false;
+  const check = async () => {
+    if (!cur || local || shown) return;
+    try {
+      const r = await fetch('index.html?_=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) return;
+      const m = (await r.text()).match(/js\/app\.js\?v=(\d+)/);
+      if (!m || m[1] === cur) return;
+      shown = true;
+      const bar = document.createElement('div');
+      bar.className = 'upd-bar';
+      bar.innerHTML = '新しいバージョン（BETA ' + m[1] + '）があります <button type="button">更新する</button><button type="button" class="upd-x" aria-label="閉じる">×</button>';
+      bar.querySelector('button').onclick = () => location.reload();
+      bar.querySelector('.upd-x').onclick = () => bar.remove();
+      document.body.appendChild(bar);
+    } catch (e) { /* offline: ignore */ }
+  };
+  setTimeout(check, 3000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
+}
 const MAX_BARS = 120;
 // a preset is written per beat: f(beat index, position inside the beat 0..1) -> 0 off / 1 soft / 2 strong; it works at any resolution
 const PRESET_DEF = {
