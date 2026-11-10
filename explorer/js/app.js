@@ -1,13 +1,15 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=64';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=64';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=64';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=64';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=64';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=64';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=64';
-import { PitchListener } from './pitch.js?v=64';
-import { initLayout } from './layout.js?v=64';
-import { initTheme, themeColors } from './theme.js?v=64';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=65';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=65';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=65';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=65';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=65';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=65';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=65';
+import { PitchListener } from './pitch.js?v=65';
+import { initLayout } from './layout.js?v=65';
+import { initTheme, themeColors } from './theme.js?v=65';
+// the build number is the cache-busting ?v= of this file, shown next to BETA
+{ const v = new URL(import.meta.url).searchParams.get('v'), el = document.getElementById('ver'); if (v && el) el.textContent = 'BETA ' + v; }
 const MAX_BARS = 120;
 // a preset is written per beat: f(beat index, position inside the beat 0..1) -> 0 off / 1 soft / 2 strong; it works at any resolution
 const PRESET_DEF = {
