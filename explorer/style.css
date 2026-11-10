@@ -305,7 +305,7 @@ button.small{font-size:11px;padding:6px 10px;}
 .tn-str small{font-size:10px;color:var(--text3);min-height:12px;}
 .tn-str.near{border-color:var(--accent2);color:var(--accent2-text);}
 .tn-str.ok{border-color:var(--accent3);background:color-mix(in srgb,var(--accent3) 8%,transparent);}
-.tn-opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 16px;margin-top:12px;align-items:end;}
+.tn-opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 16px;margin:12px 0 4px;align-items:end;}
 @media(max-width:700px){.tn-body{grid-template-columns:1fr}.tn-opts{grid-template-columns:1fr}}
 
 .tn-chord{display:grid;gap:10px;}
@@ -502,3 +502,4 @@ body.blk-dragging,body.blk-dragging *{cursor:grabbing !important;user-select:non
 .th-tpl-box>summary::before{content:"▸";color:var(--accent2);font-size:11px;transition:transform .15s;}
 .th-tpl-box[open]>summary::before{transform:rotate(90deg);}
 .th-tpl-box .th-tpls{margin-top:8px;}
+.tn-opts+.tn-msg{margin-top:10px;}
