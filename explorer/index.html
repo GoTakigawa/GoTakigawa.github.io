@@ -9,6 +9,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=51">
+<script>
+try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t){var _l=_t.mode==='light'||(_t.mode==='auto'&&matchMedia('(prefers-color-scheme: light)').matches),_r=document.documentElement;_r.dataset.theme=_l?'light':'dark';if(/^#[0-9a-fA-F]{6}$/.test(_t.accent))_r.style.setProperty('--accent1',_t.accent);}}catch(e){}
+</script>
 </head>
 <body>
 
@@ -35,6 +38,18 @@
     <div class="logo">GTI Tools</div>
     <h1 class="app-title">Fretboard Explorer<span class="badge">BETA</span></h1>
     <p class="app-sub">スケール・コード・単音のポジションを、チューニングや範囲の条件を変えながら確認できる指板ツールです。</p>
+
+    <details class="sec th-box">
+      <summary class="sec-title">Theme<span class="th-sum">テーマ・色</span></summary>
+      <div class="seg" role="group" aria-label="テーマ" style="margin:10px 0">
+        <button class="th-mode" data-m="dark">ダーク</button>
+        <button class="th-mode" data-m="light">ライト</button>
+        <button class="th-mode" data-m="auto">端末に合わせる</button>
+      </div>
+      <div class="th-lbl">アクセントカラー</div>
+      <div class="th-sws" id="th-swatches"></div>
+      <div class="th-custom"><label for="th-custom">自由に選ぶ</label><input type="color" id="th-custom" value="#8c4dff"><button class="th-link" id="th-reset" type="button">初期設定に戻す</button></div>
+    </details>
 
     <div class="sec">
       <div class="sec-title">Instrument</div>
@@ -232,11 +247,11 @@
       </div>
 
       <div class="legend">
-        <span class="lg"><span class="dot" style="background:#86efac"></span>ルート</span>
-        <span class="lg"><span class="dot" style="background:#8c4dff"></span>強調・コードの構成音</span>
-        <span class="lg"><span class="dot" style="border:1.5px solid #38bdf8"></span>スケール・対象の音</span>
-        <span class="lg"><span class="dot" style="border:1.5px dashed #555"></span>隠している位置</span>
-        <span class="lg"><span class="dot" style="background:#f5f5f5"></span>選んだ音</span>
+        <span class="lg"><span class="dot" style="background:var(--accent3)"></span>ルート</span>
+        <span class="lg"><span class="dot" style="background:var(--accent1)"></span>強調・コードの構成音</span>
+        <span class="lg"><span class="dot" style="border:1.5px solid var(--accent2)"></span>スケール・対象の音</span>
+        <span class="lg"><span class="dot" style="border:1.5px dashed var(--text3)"></span>隠している位置</span>
+        <span class="lg"><span class="dot" style="background:var(--note-bg)"></span>選んだ音</span>
       </div>
     </section>
 
