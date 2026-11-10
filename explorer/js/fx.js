@@ -375,14 +375,19 @@ export function initFx({ ensureInput } = {}) {
       g.strokeStyle = E.mc.l; g.fillStyle = E.mc.t; g.lineWidth = 1; g.font = '9px sans-serif';
       g.beginPath(); g.moveTo(cx, cy - r); g.lineTo(cx, cy + r); g.moveTo(cx - r, cy); g.lineTo(cx + r, cy); g.stroke(); g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.stroke();
       g.fillText('M', cx + 3, cy - r + 8); g.fillText('S', cx + r - 8, cy - 3); g.fillText('L', cx - r + 2, cy - r + 8); g.fillText('R', cx + r - 8, cy - r + 8);
-      g.fillStyle = E.mc.a; g.globalAlpha = 0.5; g.beginPath();   // one path for all points
+      // the trace is kept in an off-screen layer that fades slowly (like a phosphor screen), so notes leave a trail for about a second
+      const bw = cg.width, bh = cg.height; if (!E.gb || E.gb.width !== bw || E.gb.height !== bh) { E.gb = document.createElement('canvas'); E.gb.width = bw; E.gb.height = bh; }
+      const bg = E.gb.getContext('2d'); bg.setTransform(bw / W, 0, 0, bh / H, 0, 0);
+      bg.globalCompositeOperation = 'destination-out'; bg.fillStyle = 'rgba(0,0,0,0.12)'; bg.fillRect(0, 0, W, H); bg.globalCompositeOperation = 'source-over';
+      bg.fillStyle = E.mc.a; bg.globalAlpha = 0.7; bg.beginPath();   // one path for all points
       for (let i = 0; i < 1024; i += 2) {
         // the radius is shown on a dB scale (-60 dB at the centre, 0 dB at the ring) so quiet playing still moves visibly; the angle is kept
-        const x = (L[i] - R[i]) * 0.7071, y = (L[i] + R[i]) * 0.7071, m = Math.hypot(x, y); if (m < 0.001) continue;
+        const x = (L[i] - R[i]) * 0.7071, y = (L[i] + R[i]) * 0.7071, m = Math.hypot(x, y); if (m < 0.0005) continue;
         const k = Math.min(1, Math.max(0, (20 * Math.log10(m) + 60) / 60)) / m;
-        g.rect(cx + x * k * r - 0.75, cy - y * k * r - 0.75, 1.5, 1.5);
+        bg.rect(cx + x * k * r - 0.9, cy - y * k * r - 0.9, 1.8, 1.8);
       }
-      g.fill(); g.globalAlpha = 1;
+      bg.fill(); bg.globalAlpha = 1;
+      g.drawImage(E.gb, 0, 0, W, H);
       const cr = q('fx-corr'); if (cr) cr.textContent = pk > 0.003 ? '相関 ' + (lr / Math.sqrt(ll * rr + 1e-12) >= 0 ? '+' : '') + (lr / Math.sqrt(ll * rr + 1e-12)).toFixed(2) : '相関 —'; }
   };
   const meter = () => {
