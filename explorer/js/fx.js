@@ -129,25 +129,49 @@ registerProcessor('gti-comp', GtiComp);`;
 const gateReady = new WeakMap();
 const loadGate = ctx => { if (!gateReady.has(ctx)) gateReady.set(ctx, ctx.audioWorklet ? ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([GATE_SRC], { type: 'application/javascript' }))) : Promise.reject(new Error('no worklet'))); return gateReady.get(ctx); };
 
-// built-in cabinet impulse responses, synthesised at start-up: an impulse is run through a speaker-like filter cascade, then a short
-// mic-distance comb is added. 'drive' = closed-back 4x12 with a mid push, 'clean' = open-back 1x12 combo (brighter, a little boxy)
-const CAB = {
-  1: { hp: 78, comb: [0.00045, 0.28], f: [[110, 2, 4], [250, 1, -3], [800, 1, -2], [2000, 1.2, 4], [3400, 2, 5], [5000, 5, 2]], lp: 5200 },
-  0: { hp: 92, comb: [0.0003, 0.16], f: [[130, 2, 3], [400, 1, 2], [1500, 1, 1], [2300, 1.5, -2], [3000, 1.5, 3]], lp: 6800 }
-};
+// built-in cabinet impulse responses, synthesised at start-up (no sample data is stored). The magnitude curve below is a smoothed
+// tonal envelope (low-mid weighted, dark top end) read from a reference cab response; the impulse is built from it as a minimum-phase
+// filter, with a faint mic-distance comb added. 'drive' = that curve (closed-back 4x12 feel); 'clean' = the same curve shifted up a
+// quarter and with more presence (open-back 1x12 combo feel).
+const CAB_PTS = [[40, -24], [63, -15.5], [80, -10.5], [100, -5.5], [125, -2], [160, 0], [200, -0.5], [250, -1.5], [315, -2.5], [400, -4.5], [500, -5.5], [630, -5.5], [800, -6.5], [1000, -7.5], [1250, -8], [1600, -8], [2000, -7.5], [2500, -7.5], [3150, -8], [4000, -9], [5000, -11.5], [6300, -19], [8000, -29.5], [10000, -38], [12500, -44.5], [16000, -51.5], [20000, -56]];
+function cabDb(f, mode) {
+  const g = mode ? f : f / 1.25, P = CAB_PTS, l = Math.log2(Math.max(g, 1));
+  let d;
+  if (g <= P[0][0]) d = P[0][1] + 13 * (l - Math.log2(P[0][0]));
+  else if (g >= P[P.length - 1][0]) d = P[P.length - 1][1] - 4 * (l - Math.log2(P[P.length - 1][0]));
+  else { let k = 1; while (P[k][0] < g) k++; const a = Math.log2(P[k - 1][0]), b = Math.log2(P[k][0]); d = P[k - 1][1] + (P[k][1] - P[k - 1][1]) * (l - a) / (b - a); }
+  if (!mode) d += 4 * Math.exp(-0.5 * Math.pow((Math.log2(Math.max(f, 1) / 3000)) / 0.6, 2));
+  return Math.max(-60, d);
+}
+function fftInPlace(re, im, inv) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) { let bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = (inv ? 2 : -2) * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang), h = len >> 1;
+    for (let i = 0; i < n; i += len) {
+      let cr = 1, ci = 0;
+      for (let j = 0; j < h; j++) {
+        const a = i + j, b = a + h, vr = re[b] * cr - im[b] * ci, vi = re[b] * ci + im[b] * cr;
+        re[b] = re[a] - vr; im[b] = im[a] - vi; re[a] += vr; im[a] += vi;
+        const t = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = t;
+      }
+    }
+  }
+  if (inv) for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+}
 async function makeCabIr(ctx, mode) {
-  const sr = ctx.sampleRate, n = Math.floor(sr * 0.04), c = CAB[mode], oc = new OfflineAudioContext(1, n, sr);
-  const b = oc.createBuffer(1, n, sr); b.getChannelData(0)[0] = 1;
-  const src = oc.createBufferSource(); src.buffer = b;
-  let prev = src; const add = f => { prev.connect(f); prev = f; };
-  add(node(oc, 'highpass', { frequency: c.hp, Q: 0.9 })); add(node(oc, 'highpass', { frequency: c.hp * 0.6, Q: 0.7 }));
-  c.f.forEach(([fr, q, g]) => add(node(oc, 'peaking', { frequency: fr, Q: q, gain: g })));
-  add(node(oc, 'lowpass', { frequency: c.lp, Q: 0.8 })); add(node(oc, 'lowpass', { frequency: c.lp, Q: 0.6 }));
-  prev.connect(oc.destination); src.start();
-  const out = await oc.startRendering(), y = out.getChannelData(0), d = Math.max(1, Math.round(c.comb[0] * sr));
-  for (let i = n - 1; i >= d; i--) y[i] += c.comb[1] * y[i - d];
-  for (let i = Math.floor(n * 0.6); i < n; i++) y[i] *= 0.5 * (1 + Math.cos(Math.PI * (i - n * 0.6) / (n * 0.4)));   // fade the tail
-  return out;
+  const sr = ctx.sampleRate, N = 8192, re = new Float64Array(N), im = new Float64Array(N), L = 4096;
+  for (let k = 0; k <= N / 2; k++) { const lm = cabDb(k * sr / N, mode) * Math.LN10 / 20; re[k] = lm; if (k > 0 && k < N / 2) re[N - k] = lm; }
+  fftInPlace(re, im, true);                                            // real cepstrum
+  for (let n = 1; n < N / 2; n++) re[n] *= 2; for (let n = N / 2 + 1; n < N; n++) re[n] = 0; im.fill(0);   // fold to minimum phase
+  fftInPlace(re, im, false);
+  for (let k = 0; k < N; k++) { const m = Math.exp(re[k]), a = im[k]; re[k] = m * Math.cos(a); im[k] = m * Math.sin(a); }
+  fftInPlace(re, im, true);
+  const buf = ctx.createBuffer(1, L, sr), y = buf.getChannelData(0), d = Math.max(1, Math.round((mode ? 0.0007 : 0.0005) * sr)), cb = mode ? 0.12 : 0.1;
+  for (let i = 0; i < L; i++) y[i] = re[i];
+  for (let i = L - 1; i >= d; i--) y[i] += cb * y[i - d];
+  for (let i = Math.floor(L * 0.6); i < L; i++) y[i] *= 0.5 * (1 + Math.cos(Math.PI * (i - L * 0.6) / (L * 0.4)));   // fade the tail
+  return buf;
 }
 
 // the reverb tail per type: room (early reflections, short), hall (pre-delay, slow build, dark), plate (dense, bright), spring (echoing 'drip')
