@@ -19,7 +19,7 @@ const DEFAULT = {
   strOn: [], label: 'name',
   vo: { span: 4, minStrings: 3, rootBass: false, allowOpen: true, omit5: false, kind: 'all', count: 0, easy: false, range: '' },
   hideIv: [], hideCells: [],
-  quiz: { mode: 'name', upTo: 12, count: 10, acc: false },
+  quiz: { kind: 'note-scale', count: 10 },
   prog: { chords: 'I V vi IV', scales: '', bpm: 100, beats: 4, loop: true, count: true, click: true, ckind: 'click', voice: 'piano', style: 'strum', guide: 'off', follow: true },
   shapeTab: 'forms', sw: { size: 0, notes: 0, span: 5, rootStart: false, allowOpen: false, topOnly: true, common: true }
 };
@@ -79,8 +79,8 @@ function sanitize(s) {
   d.hideIv = Array.isArray(s.hideIv) ? s.hideIv.filter(x => typeof x === 'string' && /^(bb|b|##|#)?\d{1,2}$/.test(x)) : [];
   d.hideCells = Array.isArray(s.hideCells) ? s.hideCells.filter(x => typeof x === 'string' && /^\d{1,2}:-?\d{1,2}$/.test(x)).slice(0, 1500) : [];
   if (s.quiz && typeof s.quiz === 'object') {
-    d.quiz.mode = ['name', 'pos', 'play'].includes(s.quiz.mode) ? s.quiz.mode : 'name';
-    d.quiz.upTo = [5, 7, 12, 15, 24].includes(s.quiz.upTo) ? s.quiz.upTo : 12; d.quiz.count = [10, 20, 30].includes(s.quiz.count) ? s.quiz.count : 10; d.quiz.acc = !!s.quiz.acc;
+    d.quiz.kind = ['note-scale', 'note-all', 'degree', 'interval', 'chord'].includes(s.quiz.kind) ? s.quiz.kind : 'note-scale';
+    d.quiz.count = [10, 20, 30].includes(s.quiz.count) ? s.quiz.count : 10;
   }
   if (s.prog && typeof s.prog === 'object') {
     const q = s.prog, P = d.prog;
@@ -367,10 +367,10 @@ function renderFretboard() {
     dots += `<circle cx="${x}" cy="${y}" r="11.5" fill="#f5f5f5" stroke="#fff" stroke-width="1.5"/><text x="${x}" y="${y + 3.6}" fill="#0a0a0a" font-size="9" font-weight="700" text-anchor="middle" font-family="Barlow">${set.name(tun[s] + f)}</text>`;
   });
   if (sh) sh.muted.forEach(s => { const y = top + gap * (n - 1 - s); dots += `<text x="${cx(0)}" y="${y + 4}" fill="#f87171" font-size="12" text-anchor="middle" font-family="Barlow" font-weight="700">×</text>`; });
-  svg += (quiz.on ? '' : dots) + hits + '</svg>';   // the notes are hidden during the quiz
+  svg += dots + hits + '</svg>';
   $('fretboard').innerHTML = svg;
   fbGeom = { cx, Y: s => top + gap * (n - 1 - s) };
-  $('fb-live').setAttribute('viewBox', `0 0 ${W} ${H + 18}`); $('fb-quiz').setAttribute('viewBox', `0 0 ${W} ${H + 18}`);
+  $('fb-live').setAttribute('viewBox', `0 0 ${W} ${H + 18}`);
   $('fb-title').textContent = titleFor(set) + (pb.on && pb.chord && st.mode === 'scale' ? ` ／ ${pb.chord.label}` : '') + (sh ? ` ／ ${sh.name}・${sh.title}` : '');
   $('fretboard').classList.toggle('hide-mode', fbAction === 'hide');
   return count;
@@ -390,6 +390,7 @@ function onChordFrame(fr) {
   $('tn-chord').classList.remove('idle');
   const res = identifyChord(stable), set = res.results[0] ? res.results[0].set : currentSet();
   chordLive.notes = stable; chordLive.root = res.results[0] ? pc(res.results[0].root) : pc(stable[0]); chordLive.t = performance.now();
+  quizChord(stable);
   const seen = new Set();
   $('tn-chord-notes').innerHTML = stable.map(m => `<span class="pick-note">${set.name(m)}<small>${Math.floor(m / 12) - 1}</small></span>`).join('') || '<span class="hint">音がはっきりしません</span>';
   let html = '';
@@ -829,7 +830,6 @@ function render() {
   renderShapes();
   renderTunerStrings();
   renderProg();
-  drawQuizOverlay();
 }
 
 // ── events ──
@@ -948,7 +948,6 @@ function bind() {
   // sound
   $('fretboard').addEventListener('click', e => {
     const h = e.target.closest('.fb-hit'); if (!h) return;
-    if (quiz.on && quiz.q && quiz.q.mode === 'pos') { if (!quiz.lock) quizPos(h.dataset.c); playNotes([+h.dataset.m], 0, 0.5); return; }
     if (fbAction === 'pick') {
       const c = h.dataset.c;
       picks = picks.includes(c) ? picks.filter(x => x !== c) : [...picks, c];
@@ -1173,102 +1172,101 @@ async function exportBoard(kind) {
   } catch (e) { notify('書き出しに失敗しました'); }
 }
 
-// ── quiz: note names / positions / playing the note on the guitar ──
-const quiz = { on: false, q: null, n: 0, ok: 0, streak: 0, best: 0, times: [], t0: 0, lock: false, mark: null, result: null, timer: 0 };
-const pcName = p => ROOT_LABELS[p].split(' / ')[0];
-function quizPool() {
-  const tun = tuning(), up = Math.min(st.quiz.upTo, st.frets), out = [];
-  tun.forEach((open, s) => { if (!st.strOn[s]) return; for (let f = 0; f <= up; f++) { const p = pc(open + f); if (st.quiz.acc || [0, 2, 4, 5, 7, 9, 11].includes(p)) out.push({ s, f, midi: open + f, pc: p }); } });
-  return out;
-}
+// ── quiz: a note / degree / interval / chord is shown, and you play it on the guitar (right / wrong only) ──
+const quiz = { on: false, q: null, n: 0, ok: 0, streak: 0, best: 0, times: [], t0: 0, lock: false, missed: false, result: null, timer: 0, prevMode: null };
 const pickOne = a => a[Math.floor(Math.random() * a.length)];
-function startQuiz() {
-  if (!quizPool().length) { notify('出題できる位置がありません（弦のON/OFFや範囲を確認してください）'); return; }
-  if (pb.on) stopProg();
-  Object.assign(quiz, { on: true, n: 0, ok: 0, streak: 0, best: 0, times: [], result: null, lock: false, mark: null });
-  if (st.quiz.mode === 'play' && !live.on) tunerStart();
-  render(); nextQ();
+const SHARP_N = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'], FLAT_N = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'];
+const nameOf = p => ROOT_LABELS[p].includes('/') ? pickOne([SHARP_N[p], FLAT_N[p]]) : SHARP_N[p];
+const QZ_INTERVALS = [[1, '短2度'], [2, '長2度'], [3, '短3度'], [4, '長3度'], [5, '完全4度'], [6, '増4度（減5度）'], [7, '完全5度'], [8, '短6度'], [9, '長6度'], [10, '短7度'], [11, '長7度']];
+const QZ_CHORDS = ['maj', 'm', 'dim', 'aug', 'sus2', 'sus4', '6', '7', 'maj7', 'm7'].filter(k => CHORDS[k]);
+const QZ_HINT = { 'note-scale': 'いま選んでいるルートとスケールの構成音が出ます。', 'note-all': '12音すべてからランダムに出ます。', degree: 'いま選んでいるルートとスケールの、何度の音かを弾きます。', interval: '出された音から、指定のインターバルだけ上の音を弾きます。', chord: '出されたコードを、ストロークで弾いてください（構成音がそろえば正解）。' };
+const setTnMode = m => { const b = document.querySelector(`.tn-mode[data-m="${m}"]`); if (b && !b.classList.contains('on')) b.click(); };
+function makeQuestion() {
+  const kind = st.quiz.kind;
+  if (kind === 'note-scale' || kind === 'degree') {
+    const sc = SCALES[st.scale], set = makeSet(st.root, sc.iv);
+    if (kind === 'note-scale') { const i = Math.floor(Math.random() * sc.iv.length); return { kind, pcs: [pc(st.root + parseInterval(sc.iv[i]).semis)], text: set.name(st.root + parseInterval(sc.iv[i]).semis), ans: set.name(st.root + parseInterval(sc.iv[i]).semis) }; }
+    const i = Math.floor(Math.random() * sc.iv.length), iv = parseInterval(sc.iv[i]), t = pc(st.root + iv.semis);
+    return { kind, pcs: [t], text: `${set.name(st.root)} ${sc.name} の ${iv.label}度`, ans: set.name(t) };
+  }
+  if (kind === 'note-all') { const t = Math.floor(Math.random() * 12), n = nameOf(t); return { kind, pcs: [t], text: n, ans: n }; }
+  if (kind === 'interval') {
+    const r = Math.floor(Math.random() * 12), [semis, lbl] = pickOne(QZ_INTERVALS), t = pc(r + semis);
+    return { kind, pcs: [t], text: `${nameOf(r)} から ${lbl} 上`, ans: nameOf(t) };
+  }
+  const r = Math.floor(Math.random() * 12), id = pickOne(QZ_CHORDS), set = makeSet(r, CHORDS[id].iv);
+  return { kind: 'chord', pcs: set.pcs.slice(), text: set.name(r) + chordSymbol(id), ans: set.pcs.map(p => set.name(p)).join(' ') };
 }
-function stopQuiz() { clearTimeout(quiz.timer); Object.assign(quiz, { on: false, q: null, mark: null, lock: false }); render(); renderQuiz(); }
+function startQuiz() {
+  if (pb.on) stopProg();
+  Object.assign(quiz, { on: true, n: 0, ok: 0, streak: 0, best: 0, times: [], result: null, lock: false, missed: false });
+  const on = document.querySelector('.tn-mode.on'); quiz.prevMode = on ? on.dataset.m : null;
+  if (!live.on) tunerStart();
+  nextQ();
+}
+function endQuizMode() { if (quiz.prevMode) setTnMode(quiz.prevMode); quiz.prevMode = null; }
+function stopQuiz() { clearTimeout(quiz.timer); Object.assign(quiz, { on: false, q: null, lock: false }); endQuizMode(); renderQuiz(); }
 function nextQ() {
   clearTimeout(quiz.timer);
   if (quiz.n >= st.quiz.count) return finishQuiz();
-  const pool = quizPool(), m = st.quiz.mode;
-  if (m === 'pos') { const s = pickOne([...new Set(pool.map(c => c.s))]); quiz.q = { mode: m, s, pc: pickOne(pool.filter(c => c.s === s)).pc }; }
-  else { const c = pickOne(pool); quiz.q = { mode: m, s: c.s, f: c.f, midi: c.midi, pc: c.pc }; }
-  quiz.t0 = performance.now(); quiz.lock = false; quiz.mark = null;
-  renderQuiz(); drawQuizOverlay();
+  quiz.q = makeQuestion(); quiz.t0 = performance.now(); quiz.lock = false; quiz.missed = false;
+  setTnMode(quiz.q.kind === 'chord' ? 'chord' : 'single');
+  renderQuiz();
 }
-function quizAnswer(correct, extra) {
+function quizDone(correct, skipped) {
   if (quiz.lock || !quiz.q) return;
   quiz.lock = true; quiz.n++;
-  const sec = (performance.now() - quiz.t0) / 1000, q = quiz.q;
-  if (correct) { quiz.ok++; quiz.streak++; quiz.best = Math.max(quiz.best, quiz.streak); quiz.times.push(sec); } else quiz.streak = 0;
-  quiz.mark = { correct, extra };
-  $('qz-fb').className = 'qz-fb ' + (correct ? 'ok' : 'ng');
-  $('qz-fb').textContent = correct ? `正解！（${sec.toFixed(1)}秒）` : (q.mode === 'pos' ? `${st.strings - q.s}弦の ${pcName(q.pc)} は、緑の丸の位置です` : `答えは ${pcName(q.pc)}（${st.strings - q.s}弦 ${q.f}フレット）`);
-  $('qz-skip').hidden = true;
-  drawQuizOverlay(); renderQuizInfo();
-  quiz.timer = setTimeout(nextQ, correct ? 650 : 1800);
+  const sec = (performance.now() - quiz.t0) / 1000, first = correct && !quiz.missed;
+  if (first) { quiz.ok++; quiz.streak++; quiz.best = Math.max(quiz.best, quiz.streak); quiz.times.push(sec); } else quiz.streak = 0;
+  const fb = $('qz-fb');
+  fb.className = 'qz-fb ' + (first ? 'ok' : 'ng');
+  fb.textContent = skipped ? `答え：${quiz.q.ans}` : first ? `✓ 正解（${sec.toFixed(1)}秒）` : '✓ 正解（やり直し）';
+  $('qz-skip').hidden = true; renderQuizInfo();
+  quiz.timer = setTimeout(nextQ, first ? 700 : 1600);
 }
-function quizPos(cell) { const q = quiz.q, [s, f] = cell.split(':').map(Number); quizAnswer(s === q.s && pc(tuning()[s] + f) === q.pc, { cell }); }
+function quizWrong() {
+  if (quiz.lock || !quiz.q) return;
+  quiz.missed = true; const fb = $('qz-fb'); fb.className = 'qz-fb ng'; fb.textContent = '✗ 違います';
+}
 function quizPlayed(m) {
-  if (!quiz.on || !quiz.q || quiz.lock || quiz.q.mode !== 'play') return;
-  if (m === quiz.q.midi) quizAnswer(true);
-  else { $('qz-fb').className = 'qz-fb ng'; $('qz-fb').textContent = `${pcName(pc(m))} が聞こえました。もう一度どうぞ`; }
+  if (!quiz.on || !quiz.q || quiz.lock || quiz.q.kind === 'chord') return;
+  if (quiz.q.pcs.includes(pc(m))) quizDone(true); else quizWrong();
+}
+function quizChord(stable) {
+  if (!quiz.on || !quiz.q || quiz.lock || quiz.q.kind !== 'chord' || stable.length < 2) return;
+  const P = new Set(stable.map(pc)), T = new Set(quiz.q.pcs);
+  if ([...P].some(p => !T.has(p))) quizWrong();
+  else if ([...T].every(p => P.has(p))) quizDone(true);
 }
 function finishQuiz() {
   const avg = quiz.times.length ? quiz.times.reduce((a, b) => a + b, 0) / quiz.times.length : 0;
   quiz.result = { n: quiz.n, ok: quiz.ok, avg, best: quiz.best };
-  quiz.on = false; quiz.q = null; quiz.mark = null;
-  render(); renderQuiz();
+  quiz.on = false; quiz.q = null; endQuizMode(); renderQuiz();
 }
 function renderQuizInfo() {
-  $('qz-info').textContent = quiz.on && quiz.q ? `第 ${Math.min(quiz.n + (quiz.lock ? 0 : 1), st.quiz.count)} / ${st.quiz.count} 問 ・ 正解 ${quiz.ok} ・ 連続 ${quiz.streak}` : '';
+  $('qz-info').textContent = quiz.on && quiz.q ? `第 ${Math.min(quiz.n + (quiz.lock ? 0 : 1), st.quiz.count)} / ${st.quiz.count} 問 ・ 一発正解 ${quiz.ok} ・ 連続 ${quiz.streak}` : '';
 }
 function renderQuiz() {
   const Q = st.quiz, active = quiz.on && quiz.q;
-  document.querySelectorAll('.qz-mode').forEach(b => b.classList.toggle('on', b.dataset.m === Q.mode));
-  $('qz-upto').value = Q.upTo; $('qz-count').value = Q.count; $('qz-acc').checked = Q.acc;
+  $('qz-kind').value = Q.kind; $('qz-count').value = Q.count; $('qz-hint').textContent = QZ_HINT[Q.kind];
+  $('qz-kind').disabled = $('qz-count').disabled = quiz.on;
   $('qz-start-label').textContent = quiz.on ? 'やめる' : 'クイズを始める';
   $('qz-start').classList.toggle('on', quiz.on);
-  const pr = $('qz-prompt'), ch = $('qz-choices'), fb = $('qz-fb');
-  ch.hidden = !(active && Q.mode === 'name');
+  const pr = $('qz-prompt'), fb = $('qz-fb');
   $('qz-skip').hidden = !active || quiz.lock;
   fb.className = 'qz-fb'; fb.textContent = '';
-  if (active) {
-    const q = quiz.q;
-    pr.textContent = q.mode === 'name' ? '光っている位置の音名は？' : q.mode === 'pos' ? `${st.strings - q.s}弦の ${pcName(q.pc)} を、指板で押してください` : '光っている位置の音を、ギターで弾いてください';
-    if (q.mode === 'name') ch.innerHTML = ROOT_LABELS.map((n, i) => { const [a, b] = n.split(' / '); return `<button data-p="${i}">${a}${b ? `<small>${b}</small>` : ''}</button>`; }).join('');
-    if (q.mode === 'play' && !live.on) pr.textContent += '（ギター入力をオンにしてください）';
-  } else if (quiz.result) {
+  if (active) pr.textContent = quiz.q.text + '  を弾く';
+  else if (quiz.result) {
     const r = quiz.result; pr.textContent = '結果';
-    fb.innerHTML = `<div class="qz-result"><div><b>${r.ok} / ${r.n}</b>正解</div><div><b>${r.avg ? r.avg.toFixed(1) : '—'}</b>平均（秒）</div><div><b>${r.best}</b>連続正解</div></div>`;
-  } else pr.textContent = '「クイズを始める」を押すと、指板の音が隠れて出題が始まります。';
+    fb.innerHTML = `<div class="qz-result"><div><b>${r.ok} / ${r.n}</b>一発正解</div><div><b>${r.avg ? r.avg.toFixed(1) : '—'}</b>平均（秒）</div><div><b>${r.best}</b>連続正解</div></div>`;
+  } else pr.textContent = '「クイズを始める」を押すと、ギター入力が入って出題が始まります。';
   renderQuizInfo();
 }
-function drawQuizOverlay() {
-  const L = $('fb-quiz'); if (!L) return;
-  if (!quiz.on || !quiz.q || !fbGeom) { L.innerHTML = ''; return; }
-  const q = quiz.q, tun = tuning(), g = fbGeom;
-  const ring = (s, f, color, cls, fill) => `<circle class="${cls || ''}" cx="${g.cx(f).toFixed(1)}" cy="${g.Y(s)}" r="12" fill="${fill || 'none'}" stroke="${color}" stroke-width="3"/>`;
-  let h = '';
-  if (q.mode !== 'pos') h += quiz.mark ? ring(q.s, q.f, '#86efac', '', 'rgba(134,239,172,.18)') : ring(q.s, q.f, '#38bdf8', 'qz-pulse', 'rgba(56,189,248,.12)');
-  else if (quiz.mark) {
-    for (let f = 0; f <= st.frets; f++) if (pc(tun[q.s] + f) === q.pc) h += ring(q.s, f, '#86efac', '', 'rgba(134,239,172,.2)');
-    const c = quiz.mark.extra && quiz.mark.extra.cell;
-    if (c && !quiz.mark.correct) { const [s, f] = c.split(':').map(Number); h += ring(s, f, '#f87171'); }
-  } else { const y = g.Y(q.s); h += `<rect class="qz-pulse" x="${g.cx(0) - 24}" y="${y - 14}" width="${g.cx(st.frets) - g.cx(0) + 48}" height="28" rx="14" fill="none" stroke="#8c4dff" stroke-width="2"/>`; }
-  L.innerHTML = h;
-}
 function bindQuiz() {
-  document.querySelectorAll('.qz-mode').forEach(b => b.addEventListener('click', () => { if (quiz.on) stopQuiz(); quiz.result = null; update(() => { st.quiz.mode = b.dataset.m; }, true); renderQuiz(); }));
-  $('qz-upto').addEventListener('change', e => { update(() => { st.quiz.upTo = +e.target.value; }, true); });
+  $('qz-kind').addEventListener('change', e => { update(() => { st.quiz.kind = e.target.value; }, true); quiz.result = null; renderQuiz(); });
   $('qz-count').addEventListener('change', e => { update(() => { st.quiz.count = +e.target.value; }, true); });
-  $('qz-acc').addEventListener('change', e => { update(() => { st.quiz.acc = e.target.checked; }, true); });
   $('qz-start').addEventListener('click', () => quiz.on ? stopQuiz() : startQuiz());
-  $('qz-choices').addEventListener('click', e => { const b = e.target.closest('button'); if (b && !quiz.lock) quizAnswer(+b.dataset.p === quiz.q.pc); });
-  $('qz-skip').addEventListener('click', () => quizAnswer(false));
+  $('qz-skip').addEventListener('click', () => quizDone(false, true));
   renderQuiz();
 }
 
