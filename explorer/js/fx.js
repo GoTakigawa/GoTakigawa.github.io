@@ -24,7 +24,7 @@ export const FX_DEFS = {
     { k: 'drive', label: 'ドライブ', min: 0, max: 100, step: 1, def: 65, unit: '' },
     { k: 'tone', label: 'トーン', min: 0, max: 100, step: 1, def: 50, unit: '' },
     { k: 'level', label: 'レベル', min: -18, max: 12, step: 0.5, def: -6, unit: 'dB' }] },
-  amp: { name: 'アンプシミュ', rows: [['treble', 'mid', 'bass'], ['gain', 'level', 'width']], params: [
+  amp: { name: 'アンプシミュ', rows: [['bass', 'mid', 'treble'], ['gain', 'level', 'width']], params: [
     { k: 'treble', label: 'トレブル', min: -12, max: 12, step: 0.5, def: 0, unit: 'dB' },
     { k: 'mid', label: 'ミドル', min: -12, max: 12, step: 0.5, def: 0, unit: 'dB' },
     { k: 'bass', label: 'ベース', min: -12, max: 12, step: 0.5, def: 0, unit: 'dB' },
@@ -223,7 +223,7 @@ const BUILD = {
   od(ctx) {
     const hp = node(ctx, 'highpass', { frequency: 120 }), mid = node(ctx, 'peaking', { frequency: 720, gain: 4 }), pre = ctx.createGain(), sh = shaper(ctx, 2.2), lp = node(ctx, 'lowpass', { frequency: 3500 }), out = ctx.createGain();
     hp.connect(mid); mid.connect(pre); pre.connect(sh); sh.connect(lp); lp.connect(out);
-    return { in: hp, out, set(k, v) { if (k === 'drive') tc(pre.gain, 1 + Math.pow(v / 100, 1.5) * 9, ctx); else if (k === 'tone') tc(lp.frequency, v, ctx); else if (k === 'level') tc(out.gain, dbLin(v), ctx); } };
+    return { in: hp, out, set(k, v) { if (k === 'drive') tc(pre.gain, 1 + Math.pow(v / 100, 1.5) * 9, ctx); else if (k === 'tone') tc(lp.frequency, v, ctx); else if (k === 'level') tc(out.gain, dbLin(v) * 0.45, ctx); } };
   },
   // DS-1 style: bass-tight pre-filter, two clipping stages (gain -> soft clip -> gain -> harder clip) for deep sustain without a
   // square-wave buzz, then low-pass filters and a passive tilt tone control. Symmetric curves keep the lows from turning woolly.
@@ -236,7 +236,7 @@ const BUILD = {
     return { in: hp, out, set(k, v) {
       if (k === 'drive') { const d = v / 100; tc(g1.gain, 2 + Math.pow(d, 1.2) * 14, ctx); tc(g2.gain, 2.5 + d * 5, ctx); }
       else if (k === 'tone') { const t = (v - 50) / 50; tc(lo.gain, -t * 8, ctx); tc(hi.gain, t * 8, ctx); }
-      else if (k === 'level') tc(out.gain, dbLin(v) * 0.65, ctx);
+      else if (k === 'level') tc(out.gain, dbLin(v) * 0.4, ctx);
     } };
   },
   amp(ctx) {
