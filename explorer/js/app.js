@@ -1,13 +1,13 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=57';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=57';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=57';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=57';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=57';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=57';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=57';
-import { PitchListener } from './pitch.js?v=57';
-import { initLayout } from './layout.js?v=57';
-import { initTheme, themeColors } from './theme.js?v=57';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=58';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=58';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=58';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=58';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=58';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=58';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=58';
+import { PitchListener } from './pitch.js?v=58';
+import { initLayout } from './layout.js?v=58';
+import { initTheme, themeColors } from './theme.js?v=58';
 const MAX_BARS = 120;
 
 const $ = id => document.getElementById(id);
