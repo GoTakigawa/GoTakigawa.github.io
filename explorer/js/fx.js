@@ -371,13 +371,17 @@ export function initFx({ ensureInput } = {}) {
     // goniometer: L/R rotated 45 degrees (vertical = mono, horizontal = side), with a gentle auto-scale and the L/R correlation
     { const [g, W, H] = prep(cg), L = E.gl || (E.gl = new Float32Array(1024)), R = E.gr || (E.gr = new Float32Array(1024)); E.anL.getFloatTimeDomainData(L); E.anR.getFloatTimeDomainData(R);
       let pk = 0, ll = 0, rr = 0, lr = 0; for (let i = 0; i < 1024; i++) { pk = Math.max(pk, Math.abs(L[i]), Math.abs(R[i])); ll += L[i] * L[i]; rr += R[i] * R[i]; lr += L[i] * R[i]; }
-      E.gs = (E.gs || 4) * 0.9 + Math.min(20, 0.6 / Math.max(pk, 0.02)) * 0.1;
       const cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - 10;
       g.strokeStyle = E.mc.l; g.fillStyle = E.mc.t; g.lineWidth = 1; g.font = '9px sans-serif';
       g.beginPath(); g.moveTo(cx, cy - r); g.lineTo(cx, cy + r); g.moveTo(cx - r, cy); g.lineTo(cx + r, cy); g.stroke(); g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.stroke();
       g.fillText('M', cx + 3, cy - r + 8); g.fillText('S', cx + r - 8, cy - 3); g.fillText('L', cx - r + 2, cy - r + 8); g.fillText('R', cx + r - 8, cy - r + 8);
       g.fillStyle = E.mc.a; g.globalAlpha = 0.5; g.beginPath();   // one path for all points
-      for (let i = 0; i < 1024; i += 2) { const x = (L[i] - R[i]) * 0.7071 * E.gs, y = (L[i] + R[i]) * 0.7071 * E.gs, px = cx + Math.max(-1, Math.min(1, x)) * r, py = cy - Math.max(-1, Math.min(1, y)) * r; g.rect(px - 0.75, py - 0.75, 1.5, 1.5); }
+      for (let i = 0; i < 1024; i += 2) {
+        // the radius is shown on a dB scale (-60 dB at the centre, 0 dB at the ring) so quiet playing still moves visibly; the angle is kept
+        const x = (L[i] - R[i]) * 0.7071, y = (L[i] + R[i]) * 0.7071, m = Math.hypot(x, y); if (m < 0.001) continue;
+        const k = Math.min(1, Math.max(0, (20 * Math.log10(m) + 60) / 60)) / m;
+        g.rect(cx + x * k * r - 0.75, cy - y * k * r - 0.75, 1.5, 1.5);
+      }
       g.fill(); g.globalAlpha = 1;
       const cr = q('fx-corr'); if (cr) cr.textContent = pk > 0.003 ? '相関 ' + (lr / Math.sqrt(ll * rr + 1e-12) >= 0 ? '+' : '') + (lr / Math.sqrt(ll * rr + 1e-12)).toFixed(2) : '相関 —'; }
   };
