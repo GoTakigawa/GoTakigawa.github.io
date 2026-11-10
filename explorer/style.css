@@ -603,3 +603,8 @@ body.blk-dragging,body.blk-dragging *{cursor:grabbing !important;user-select:non
 .tn-stage #tn-chord-res{height:150px;}
 .tn-stage #tn-chord-notes{min-height:28px;}
 .tn-stage #tn-chord-res{height:130px;}
+/* fixed height so switching single / chord / strobe never shifts the blocks below */
+.tn-stage #tn-chord-notes{height:60px;min-height:0;overflow:auto;}
+#tn-single,#tn-chord{min-height:0;}
+.tn-stage #tn-single,.tn-stage #tn-chord{height:236px;box-sizing:border-box;}
+@media(max-width:900px){.tn-stage #tn-chord{height:252px;}}
