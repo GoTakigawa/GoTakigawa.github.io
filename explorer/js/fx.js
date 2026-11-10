@@ -229,10 +229,10 @@ const BUILD = {
   // square-wave buzz, then low-pass filters and a passive tilt tone control. Symmetric curves keep the lows from turning woolly.
   dist(ctx) {
     const clip = (k, os) => { const w = ctx.createWaveShaper(); w.oversample = os; const n = 2048, c = new Float32Array(n), d = Math.tanh(k); for (let i = 0; i < n; i++) c[i] = Math.tanh(k * (i / (n - 1) * 2 - 1)) / d; w.curve = c; return w; };
-    const hp = node(ctx, 'highpass', { frequency: 240, Q: 0.7 }), boost = node(ctx, 'peaking', { frequency: 1200, gain: 1.5, Q: 0.7 }), g1 = ctx.createGain(), c1 = clip(1.6, '4x'), mid = node(ctx, 'lowpass', { frequency: 3600, Q: 0.5 });
-    const hp2 = node(ctx, 'highpass', { frequency: 150, Q: 0.7 }), g2 = ctx.createGain(), c2 = clip(3, '2x'), lp = node(ctx, 'lowpass', { frequency: 4600, Q: 0.6 }), lp2 = node(ctx, 'lowpass', { frequency: 7000, Q: 0.5 });
-    const post = node(ctx, 'highpass', { frequency: 70, Q: 0.7 }), mud = node(ctx, 'peaking', { frequency: 280, gain: -5, Q: 0.9 }), lo = node(ctx, 'lowshelf', { frequency: 450 }), hi = node(ctx, 'highshelf', { frequency: 2200 }), out = ctx.createGain();
-    hp.connect(boost); boost.connect(g1); g1.connect(c1); c1.connect(mid); mid.connect(hp2); hp2.connect(g2); g2.connect(c2); c2.connect(lp); lp.connect(lp2); lp2.connect(post); post.connect(mud); mud.connect(lo); lo.connect(hi); hi.connect(out);
+    const hp = node(ctx, 'highpass', { frequency: 170, Q: 0.7 }), boost = node(ctx, 'peaking', { frequency: 1200, gain: 1.5, Q: 0.7 }), g1 = ctx.createGain(), c1 = clip(1.6, '4x'), mid = node(ctx, 'lowpass', { frequency: 3600, Q: 0.5 });
+    const hp2 = node(ctx, 'highpass', { frequency: 100, Q: 0.7 }), g2 = ctx.createGain(), c2 = clip(3, '2x'), lp = node(ctx, 'lowpass', { frequency: 4600, Q: 0.6 }), lp2 = node(ctx, 'lowpass', { frequency: 7000, Q: 0.5 });
+    const post = node(ctx, 'highpass', { frequency: 55, Q: 0.7 }), mud = node(ctx, 'peaking', { frequency: 300, gain: -3, Q: 0.9 }), lo = node(ctx, 'lowshelf', { frequency: 450 }), hi = node(ctx, 'highshelf', { frequency: 2200 }), body = node(ctx, 'lowshelf', { frequency: 150, gain: 3 }), out = ctx.createGain();
+    hp.connect(boost); boost.connect(g1); g1.connect(c1); c1.connect(mid); mid.connect(hp2); hp2.connect(g2); g2.connect(c2); c2.connect(lp); lp.connect(lp2); lp2.connect(post); post.connect(mud); mud.connect(body); body.connect(lo); lo.connect(hi); hi.connect(out);
     return { in: hp, out, set(k, v) {
       if (k === 'drive') { const d = v / 100; tc(g1.gain, 2 + Math.pow(d, 1.2) * 14, ctx); tc(g2.gain, 2.5 + d * 5, ctx); }
       else if (k === 'tone') { const t = (v - 50) / 50; tc(lo.gain, -t * 8, ctx); tc(hi.gain, t * 8, ctx); }
