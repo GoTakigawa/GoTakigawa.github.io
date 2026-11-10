@@ -5,13 +5,14 @@ export const ACCENTS = [
   { id: 'green', name: 'グリーン', c: '#22c55e' }, { id: 'amber', name: 'アンバー', c: '#f59e0b' }, { id: 'orange', name: 'オレンジ', c: '#f97316' },
   { id: 'red', name: 'レッド', c: '#ef4444' }, { id: 'pink', name: 'ピンク', c: '#ec4899' }
 ];
+// the first entry of each list is the theme's own default (c = null); the rest are 7 choices
 export const SKIES = [
-  { name: 'スカイ', c: '#38bdf8' }, { name: 'ブルー', c: '#60a5fa' }, { name: 'シアン', c: '#22d3ee' },
-  { name: 'ラベンダー', c: '#a78bfa' }, { name: 'ピンク', c: '#f472b6' }, { name: 'イエロー', c: '#fbbf24' }
+  { name: '既定', c: null, dark: '#38bdf8', light: '#0a8fd0' }, { name: 'ブルー', c: '#60a5fa' }, { name: 'シアン', c: '#22d3ee' }, { name: 'インディゴ', c: '#818cf8' },
+  { name: 'ラベンダー', c: '#c084fc' }, { name: 'ピンク', c: '#f472b6' }, { name: 'オレンジ', c: '#fb923c' }, { name: 'イエロー', c: '#fbbf24' }
 ];
 export const GREENS = [
-  { name: 'ミント', c: '#86efac' }, { name: 'グリーン', c: '#4ade80' }, { name: 'ライム', c: '#bef264' },
-  { name: 'ターコイズ', c: '#5eead4' }, { name: 'イエロー', c: '#fde047' }, { name: 'ローズ', c: '#fda4af' }
+  { name: '既定', c: null, dark: '#86efac', light: '#1fa55a' }, { name: 'グリーン', c: '#4ade80' }, { name: 'ライム', c: '#bef264' }, { name: 'ターコイズ', c: '#5eead4' },
+  { name: 'イエロー', c: '#fde047' }, { name: 'オレンジ', c: '#fdba74' }, { name: 'ローズ', c: '#fda4af' }, { name: 'ラベンダー', c: '#d8b4fe' }
 ];
 const DEFAULT = { mode: 'dark', accent: '#8c4dff', sky: null, green: null };
 const hex = c => typeof c === 'string' && /^#[0-9a-fA-F]{6}$/.test(c);
@@ -52,7 +53,11 @@ export function initTheme(onChange) {
     document.querySelectorAll('.th-sw').forEach(b => b.classList.toggle('on', b.dataset.c.toLowerCase() === t.accent.toLowerCase()));
     const ci = q('th-custom'); if (ci) ci.value = t.accent;
     [['sky', 'th-sky', '--accent2'], ['green', 'th-green', '--accent3']].forEach(([key, id, v]) => {
-      document.querySelectorAll('#' + id + '-swatches .th-sw').forEach(b => b.classList.toggle('on', !!t[key] && b.dataset.c.toLowerCase() === t[key].toLowerCase()));
+      const lst = key === 'sky' ? SKIES : GREENS, lightNow = document.documentElement.dataset.theme === 'light';
+      document.querySelectorAll('#' + id + '-swatches .th-sw').forEach(b => {
+        b.classList.toggle('on', t[key] ? b.dataset.c.toLowerCase() === t[key].toLowerCase() : !b.dataset.c);
+        if (!b.dataset.c) b.style.background = lightNow ? lst[0].light : lst[0].dark;
+      });
       const inp = q(id + '-custom'); if (inp) { const cur = t[key] || (getComputedStyle(document.documentElement).getPropertyValue(v).trim()); if (hex(cur)) inp.value = cur; }
       const d = q(id + '-def'); if (d) d.disabled = !t[key];
     });
@@ -66,8 +71,8 @@ export function initTheme(onChange) {
   // sky / green: swatches, a free picker and "default"
   [['sky', SKIES, 'th-sky'], ['green', GREENS, 'th-green']].forEach(([key, list, id]) => {
     const box = q(id + '-swatches'); if (!box) return;
-    box.innerHTML = list.map(a => `<button type="button" class="th-sw" data-k="${key}" data-c="${a.c}" title="${a.name}" aria-label="${a.name}" style="background:${a.c}"></button>`).join('');
-    box.addEventListener('click', e => { const b = e.target.closest('.th-sw'); if (b) { t[key] = b.dataset.c; set(); } });
+    box.innerHTML = list.map(a => `<button type="button" class="th-sw${a.c ? '' : ' def'}" data-k="${key}" data-c="${a.c || ''}" title="${a.name}" aria-label="${a.name}"${a.c ? ` style="background:${a.c}"` : ''}></button>`).join('');
+    box.addEventListener('click', e => { const b = e.target.closest('.th-sw'); if (b) { t[key] = b.dataset.c || null; set(); } });
     const inp = q(id + '-custom'); if (inp) inp.addEventListener('input', e => { if (hex(e.target.value)) { t[key] = e.target.value; set(); } });
     const rs2 = q(id + '-def'); if (rs2) rs2.addEventListener('click', () => { t[key] = null; set(); });
   });
