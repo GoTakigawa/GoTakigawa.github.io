@@ -1,14 +1,14 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=99';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=99';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=99';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=99';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=99';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=99';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=99';
-import { PitchListener } from './pitch.js?v=99';
-import { initLayout } from './layout.js?v=99';
-import { initTheme, themeColors } from './theme.js?v=99';
-import { initFx } from './fx.js?v=99';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=100';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=100';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=100';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=100';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=100';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=100';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=100';
+import { PitchListener } from './pitch.js?v=100';
+import { initLayout } from './layout.js?v=100';
+import { initTheme, themeColors } from './theme.js?v=100';
+import { initFx } from './fx.js?v=100';
 // the build number is the cache-busting ?v= of this file, shown next to BETA
 { const v = new URL(import.meta.url).searchParams.get('v'), el = document.getElementById('ver'); if (v && el) el.textContent = 'BETA ' + v; }
 // new-version check: index.html is re-read without cache and its app.js ?v= compared with the running one
