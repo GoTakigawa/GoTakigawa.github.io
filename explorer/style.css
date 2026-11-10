@@ -4,7 +4,7 @@
   --border:#1f1f1f;--border2:#2a2a2a;
   --text:#e8e8e8;--text2:#b0b0b0;--text3:#888;
   --accent1:#8c4dff;--accent2:#38bdf8;--accent3:#86efac;
-  --on-accent:#1a1a1a;--on-sky:#04121b;--err:#f9a8a8;
+  --on-accent:#1a1a1a;--on-sky:#04121b;--on-green:#0a0a0a;--err:#f9a8a8;
   --accent1-hi:color-mix(in srgb,var(--accent1) 55%,#fff);
   --accent2-text:#9fdcf9;--hover:rgba(255,255,255,.06);
   --note-bg:#f5f5f5;--note-fg:#0a0a0a;
@@ -200,7 +200,7 @@ button.small{font-size:11px;padding:6px 10px;}
 .iv-chip b{font-size:15px;}
 .iv-chip small{font-size:10px;opacity:.8;}
 .iv-chip.on{background:var(--accent1);border-color:var(--accent1);color:var(--on-accent);}
-.iv-chip.root{background:var(--accent3);border-color:var(--accent3);color:#0a0a0a;}
+.iv-chip.root{background:var(--accent3);border-color:var(--accent3);color:var(--on-green);}
 .iv-chip[data-ro]{cursor:default;}
 .deg-row{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;}
 .deg-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);border-radius:var(--r);padding:7px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1.2;min-width:0;}
@@ -276,7 +276,7 @@ button.small{font-size:11px;padding:6px 10px;}
 #finder-results:empty{display:none;}
 #finder-results{margin-top:12px;}
 
-.std-tag{font-style:normal;font-size:9px;font-weight:700;color:#0a0a0a;background:var(--accent3);border-radius:3px;padding:1px 5px;margin-left:6px;vertical-align:2px;letter-spacing:.04em;}
+.std-tag{font-style:normal;font-size:9px;font-weight:700;color:var(--on-green);background:var(--accent3);border-radius:3px;padding:1px 5px;margin-left:6px;vertical-align:2px;letter-spacing:.04em;}
 
 .inline-field{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
 .inline-field select{width:auto;font-size:13px;padding:5px 8px;}
@@ -483,3 +483,5 @@ body.blk-dragging,body.blk-dragging *{cursor:grabbing !important;user-select:non
 @media (prefers-reduced-motion:reduce){.fb-glow{animation:none;opacity:.5}}
 
 #dr-amt-note{font-size:10px;color:var(--accent2-text,var(--text2));letter-spacing:0;min-height:12px;}
+
+.th-link:disabled{opacity:.4;cursor:default;}
