@@ -616,8 +616,11 @@ a.tip-btn{display:flex;align-items:center;justify-content:center;gap:6px;font-si
 a.tip-btn:hover{color:#ffdd00;border-color:#ffdd00;}
 a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
 
-.logo-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-.logo-row .logo{margin-bottom:0;}
-.lang-sw{display:inline-flex;border:1px solid var(--border2);border-radius:8px;overflow:hidden;}
-.lang-sw button{font:inherit;font-size:11px;padding:3px 9px;border:0;background:none;color:var(--text3);cursor:pointer;}
-.lang-sw button.on{background:var(--accent1);color:#fff;}
+
+/* language toggle (same pill as Fretboard Generator) */
+.header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:12px;}
+.header-row .app-title{margin-bottom:0;font-size:18px;white-space:nowrap;}
+.header-row .badge{margin-left:4px;}
+.pill-toggle{display:flex;flex-shrink:0;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:2px;cursor:pointer;position:relative;user-select:none;}
+.pill-toggle div{font-size:10px;font-weight:700;padding:4px 8px;border-radius:12px;color:var(--text3);transition:color .2s,background .2s;z-index:1;}
+.pill-toggle div.active{color:#1a1a1a;background:var(--accent1);}

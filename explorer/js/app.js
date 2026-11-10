@@ -1,15 +1,15 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=117';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=117';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=117';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=117';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=117';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=117';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=117';
-import { PitchListener } from './pitch.js?v=117';
-import { initLayout } from './layout.js?v=117';
-import { initTheme, themeColors } from './theme.js?v=117';
-import { initFx } from './fx.js?v=117';
-import { initI18n, setLang, LANG, T } from './i18n.js?v=117';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=118';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=118';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=118';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=118';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=118';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=118';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=118';
+import { PitchListener } from './pitch.js?v=118';
+import { initLayout } from './layout.js?v=118';
+import { initTheme, themeColors } from './theme.js?v=118';
+import { initFx } from './fx.js?v=118';
+import { initI18n, setLang, LANG, T } from './i18n.js?v=118';
 // the build number is the cache-busting ?v= of this file, shown next to BETA
 { const v = new URL(import.meta.url).searchParams.get('v'), el = document.getElementById('ver'); if (v && el) el.textContent = 'BETA ' + v; }
 // new-version check: index.html is re-read without cache and its app.js ?v= compared with the running one
@@ -1480,7 +1480,7 @@ async function boot() {
   let shared = false;
   try { const m = /[#&]s=([A-Za-z0-9_-]+)/.exec(location.hash); if (m) { shared = applyShared(decodeShare(m[1])); history.replaceState(null, '', location.pathname + location.search); } } catch (e) {}
   initI18n();
-  { const sw = $('lang-sw'); if (sw) { sw.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b.dataset.l === LANG); b.addEventListener('click', () => { if (b.dataset.l !== LANG) setLang(b.dataset.l); }); }); } }
+  { const sw = $('lang-sw'); if (sw) { sw.querySelectorAll('div').forEach(d => d.classList.toggle('active', d.dataset.l === LANG)); sw.addEventListener('click', () => setLang(LANG === 'en' ? 'ja' : 'en')); } }
   initLayout(); initTheme(() => { try { render(); } catch (e) {} });
   bind(); bindTuner(); bindVolume(); bindProg(); bindHist(); bindQuiz(); render();
   if (shared) { save(); notify('共有された進行と設定を読み込みました'); }
