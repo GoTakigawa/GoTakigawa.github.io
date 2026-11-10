@@ -1,13 +1,13 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=60';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=60';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=60';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=60';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=60';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=60';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=60';
-import { PitchListener } from './pitch.js?v=60';
-import { initLayout } from './layout.js?v=60';
-import { initTheme, themeColors } from './theme.js?v=60';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=61';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=61';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=61';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=61';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=61';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=61';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=61';
+import { PitchListener } from './pitch.js?v=61';
+import { initLayout } from './layout.js?v=61';
+import { initTheme, themeColors } from './theme.js?v=61';
 const MAX_BARS = 120;
 // a preset is written per beat: f(beat index, position inside the beat 0..1) -> 0 off / 1 soft / 2 strong; it works at any resolution
 const PRESET_DEF = {
@@ -1062,11 +1062,12 @@ function drawNext() {
   const lo = win ? win[0] : 0, hi = win ? win[1] : F; let h = '';
   tun.forEach((open, sIdx) => { if (!st.strOn[sIdx]) return; for (let f = lo; f <= hi; f++) { const p = pc(open + f); if (!set.has(p)) continue;
     const col = p === pc(ch.root) ? 'var(--accent3)' : 'var(--accent2)';
-    h += `<circle cx="${g.cx(f).toFixed(1)}" cy="${g.Y(sIdx)}" r="15" fill="${col}" filter="url(#nx-glow)"/>`; } });
+    const cx = g.cx(f).toFixed(1), cy = g.Y(sIdx);
+    h += `<circle cx="${cx}" cy="${cy}" r="21" fill="${col}" opacity=".75" filter="url(#nx-glow)"/><circle cx="${cx}" cy="${cy}" r="14" fill="${col}" filter="url(#nx-glow2)"/>`; } });
   // behind the notes; starts faint and brightens as the next chord comes closer (the animation is set back by the time already elapsed)
   const dur = Math.max(0.2, pb.chDur || 2), el = Math.max(0, Math.min(dur, (performance.now() - (pb.chT0 || performance.now())) / 1000));
   L.setAttribute('style', `animation-duration:${dur.toFixed(3)}s;animation-delay:${(-el).toFixed(3)}s`);
-  L.innerHTML = '<defs><filter id="nx-glow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="6"/></filter></defs>' + h;
+  L.innerHTML = '<defs><filter id="nx-glow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="8"/></filter><filter id="nx-glow2" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="3.5"/></filter></defs>' + h;
 }
 function applyBar(bi, ci) {
   if (!pb.on || !pb.snap) return;
