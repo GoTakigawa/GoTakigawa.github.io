@@ -1,6 +1,7 @@
 // Blocks of the main column: collapsible (click the title) and re-orderable (drag the ⠿ handle, or ↑/↓ on it). Saved in this browser.
 const KEY = 'gti-explorer:layout';
-const DEFAULT_ORDER = ['quiz', 'tuner', 'fx', 'fretboard', 'progression', 'notes', 'shapes'];
+const DEFAULT_ORDER = ['tuner', 'fx', 'fretboard', 'notes', 'shapes', 'progression', 'quiz']
+const ORDER_VER = 2;   // bump to apply a new default order once to layouts saved earlier;
 const DEFAULT_COLLAPSED = ['quiz', 'fx'];
 
 export function initLayout() {
@@ -9,14 +10,14 @@ export function initLayout() {
   const byName = n => main.querySelector(`:scope > [data-blk="${n}"]`);
   const foot = main.querySelector(':scope > p.foot') || main.querySelector('.blk-foot');
   let saved = null; try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
-  const order = saved && Array.isArray(saved.order) ? saved.order.filter(n => byName(n)) : [];
+  const order = saved && saved.v === ORDER_VER && Array.isArray(saved.order) ? saved.order.filter(n => byName(n)) : [];
   // a block that is new to a saved layout goes after the block that precedes it by default, and starts folded if it is folded by default
   const added = [];
   DEFAULT_ORDER.forEach((n, i) => { if (order.includes(n)) return; added.push(n); const prev = DEFAULT_ORDER.slice(0, i).reverse().find(p => order.includes(p)); order.splice(prev ? order.indexOf(prev) + 1 : 0, 0, n); });
   const collapsed = new Set(saved && Array.isArray(saved.collapsed) ? saved.collapsed : DEFAULT_COLLAPSED);
-  if (saved) added.forEach(n => { if (DEFAULT_COLLAPSED.includes(n)) collapsed.add(n); });
+  if (saved && saved.v === ORDER_VER) added.forEach(n => { if (DEFAULT_COLLAPSED.includes(n)) collapsed.add(n); });
 
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ order: blocks().map(b => b.dataset.blk), collapsed: [...collapsed] })); } catch (e) {} };
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ v: ORDER_VER, order: blocks().map(b => b.dataset.blk), collapsed: [...collapsed] })); } catch (e) {} };
   const place = () => order.forEach(n => main.insertBefore(byName(n), foot || null));
   const applyCollapsed = () => blocks().forEach(b => {
     const c = collapsed.has(b.dataset.blk), t = b.querySelector(':scope > .panel-hd .panel-title');
