@@ -73,11 +73,11 @@ export class PitchListener {
   setLow(hz, midi) { this.minHz = Math.max(24, Math.min(40, hz)); this.loMidi = Math.max(20, Math.min(38, Math.round(midi))); }
   async start(deviceId) {
     await this.stop();
-    const audio = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
+    const audio = { echoCancellation: false, noiseSuppression: false, autoGainControl: false, latency: { ideal: 0 } };
     if (deviceId) audio.deviceId = { exact: deviceId };
     this.stream = await navigator.mediaDevices.getUserMedia({ audio });
     const Ctx = window.AudioContext || window.webkitAudioContext;
-    this.ctx = new Ctx();
+    this.ctx = new Ctx({ latencyHint: 'interactive' });
     if (this.ctx.state === 'suspended') await this.ctx.resume();
     const src = this.src = this.ctx.createMediaStreamSource(this.stream);
     this.an = this.ctx.createAnalyser(); this.an.fftSize = 4096; this.an.smoothingTimeConstant = 0;
