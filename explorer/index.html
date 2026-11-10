@@ -271,8 +271,14 @@
       <div class="dr-box">
         <div class="dr-hd"><span class="tn-sub-title">ドラム・クリック</span>
           <select id="dr-pre" aria-label="パターンのひな形"></select>
-          <span class="hint">マスを押して打ち込み（1拍＝4マス）</span></div>
-        <div class="dr-grid" id="dr-grid"></div>
+          <label class="pg-f">音価<select id="dr-res"></select></label>
+          <label class="pg-f">パターンの長さ<select id="dr-bars"></select></label>
+          <label class="pg-f">スウィング<select id="dr-swing"><option value="off">なし</option><option value="8">8分</option><option value="16">16分</option></select></label>
+          <label class="pg-f" id="dr-amt-w">強さ（％）<input type="number" class="txt" id="dr-amt" min="50" max="80" step="1" inputmode="numeric"></label>
+          <select id="dr-add" aria-label="楽器を追加"></select></div>
+        <p class="hint">マスを押すたびに「中→強→弱→オフ」と変わります（クリックは強＝高い音、弱＝低い音）。</p>
+        
+<div class="dr-grid" id="dr-grid"></div>
       </div>
       <div class="pg-ctl pg-opts">
         <button class="std small" id="pg-midi" type="button" title="いまの進行を MIDI ファイルで保存">MIDI を書き出す</button>
