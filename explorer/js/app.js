@@ -1,13 +1,14 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=51';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=51';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=51';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=51';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=51';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=51';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=51';
-import { PitchListener } from './pitch.js?v=51';
-import { initLayout } from './layout.js?v=51';
-import { initTheme, themeColors } from './theme.js?v=51';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=52';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=52';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=52';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=52';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=52';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=52';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=52';
+import { PitchListener } from './pitch.js?v=52';
+import { initLayout } from './layout.js?v=52';
+import { initTheme, themeColors } from './theme.js?v=52';
+const MAX_BARS = 120;
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -86,8 +87,8 @@ function sanitize(s) {
   }
   if (s.prog && typeof s.prog === 'object') {
     const q = s.prog, P = d.prog;
-    if (typeof q.chords === 'string') P.chords = q.chords.slice(0, 400);
-    if (typeof q.scales === 'string') P.scales = q.scales.slice(0, 600);
+    if (typeof q.chords === 'string') P.chords = q.chords.slice(0, 3000);
+    if (typeof q.scales === 'string') P.scales = q.scales.slice(0, 4000);
     P.bpm = int(q.bpm, 40, 220, 100); P.beats = int(q.beats, 2, 7, 4);
     ['loop', 'count', 'click', 'follow'].forEach(k => { if (k in q) P[k] = !!q[k]; });
     P.drum = cleanDrum(q.drum, P.beats); P.voice = VOICE_NAMES[q.voice] ? q.voice : 'piano';
@@ -987,9 +988,9 @@ function bind() {
 const progKey = () => pb.on && pb.snap ? pb.snap.root : st.root;
 function progBars() {
   const key = progKey(), c = parseChordText(st.prog.chords, key), sc = parseScaleText(st.prog.scales, key);
-  const longest = Math.max(c.bars.length, sc.bars.length), n = Math.min(16, longest);
+  const longest = Math.max(c.bars.length, sc.bars.length), n = Math.min(MAX_BARS, longest);
   const bars = Array.from({ length: n }, (_, i) => ({ chords: c.bars.length ? c.bars[i % c.bars.length] : [], scales: sc.bars.length ? sc.bars[i % sc.bars.length] : [] }));
-  return { bars, errors: [...c.errors, ...sc.errors], cut: longest > 16, key };
+  return { bars, errors: [...c.errors, ...sc.errors], cut: longest > MAX_BARS, key };
 }
 const ROMAN_RE = /(^|[\s|｜,、])[b#♭♯]?(VII|VI|IV|V|III|II|I|vii|vi|iv|v|iii|ii|i)(?![A-Za-z]{3,})/;
 function renderProg() {
@@ -1008,7 +1009,7 @@ function renderProg() {
   const msg = $('pg-msg');
   msg.classList.toggle('err', !!r.errors.length);
   msg.textContent = r.errors.length ? `読み取れなかった表記：${r.errors.join('  ')}`
-    : r.cut ? '16小節までを使います。'
+    : r.cut ? `${MAX_BARS}小節までを使います。`
     : ROMAN_RE.test(P.chords + ' ' + P.scales) ? `度数（I、V、vi など）は、キー ${keyName}（Show のルート）として読み取っています。` : '';
   $('pg-play').disabled = !r.bars.length && !pb.on;
   $('pg-play').classList.toggle('on', pb.on); $('pg-play').setAttribute('aria-pressed', String(pb.on));
@@ -1321,7 +1322,7 @@ function cleanDrum(d, beats) {
     return { v: 2, pre: 'custom', res: 4, bars: 1, swing: { mode: 'off', amt: 67 }, rows: { kick: fix(d.k), snare: fix(d.s), hat: fix(d.h), click: fix(d.c) } };
   }
   if (DRUM_PRESETS[d.pre]) return drumPreset(d.pre, beats);   // presets follow the time signature
-  const res = [2, 3, 4, 6, 8].includes(d.res) ? d.res : 4, bars = intIn(d.bars, 1, 8, 1), sw = d.swing || {};
+  const res = [2, 3, 4, 6, 8].includes(d.res) ? d.res : 4, bars = intIn(d.bars, 1, MAX_BARS, 1), sw = d.swing || {};
   const D = { v: 2, pre: 'custom', res, bars, swing: { mode: ['8', '16'].includes(sw.mode) ? sw.mode : 'off', amt: intIn(sw.amt, 50, 80, 67) }, rows: {} };
   const n = drumLen(D, beats);
   DRUM_INSTR.forEach(x => { const v = d.rows && d.rows[x.id]; if (typeof v === 'string') D.rows[x.id] = v.replace(/[^0-3]/g, '0').slice(0, n).padEnd(n, '0'); });
@@ -1350,7 +1351,7 @@ function bindDrum(set) {
   const edit = fn => set(() => { const D = st.prog.drum; fn(D); D.pre = 'custom'; });
   $('dr-pre').innerHTML = Object.entries(DRUM_PRESETS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('') + '<option value="custom">編集済み</option>';
   $('dr-res').innerHTML = Object.entries(DRUM_RES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
-  $('dr-bars').innerHTML = [1, 2, 3, 4, 5, 6, 7, 8].map(n => `<option value="${n}">${n}小節</option>`).join('');
+  $('dr-bars').innerHTML = Array.from({ length: MAX_BARS }, (_, i) => i + 1).map(n => `<option value="${n}">${n}小節</option>`).join('');
   $('dr-pre').addEventListener('change', e => { if (e.target.value === 'custom') return; set(() => { st.prog.drum = drumPreset(e.target.value, st.prog.beats); }); drumAudition(); });
   $('dr-res').addEventListener('change', e => edit(D => {   // keep the notes that sit on both grids
     const nr = +e.target.value, old = D.res;
