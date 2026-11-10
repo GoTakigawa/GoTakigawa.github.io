@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=71">
+<link rel="stylesheet" href="style.css?v=72">
 <script>
 try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t){var _l=_t.mode==='light'||(_t.mode==='auto'&&matchMedia('(prefers-color-scheme: light)').matches),_r=document.documentElement;_r.dataset.theme=_l?'light':'dark';if(/^#[0-9a-fA-F]{6}$/.test(_t.accent))_r.style.setProperty('--accent1',_t.accent);}}catch(e){}
 </script>
@@ -202,6 +202,11 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
           </div>
         </div>
       </div>
+      <div class="tn-opts">
+        <div class="field"><label for="tn-device">入力デバイス（オーディオインターフェースはここで選びます）</label><select id="tn-device"><option value="">既定の入力</option></select></div>
+        <div class="field"><label for="tn-a4">基準音 A4（Hz）</label><span class="num-wrap"><input type="number" id="tn-a4" min="400" max="480" step="1" inputmode="numeric"><span class="num-btns"><button type="button" class="num-btn" data-dir="up" aria-label="上げる">▲</button><button type="button" class="num-btn" data-dir="down" aria-label="下げる">▼</button></span></span></div>
+        <div class="toggle-row"><span class="toggle-label">指板に位置を表示</span><label class="toggle-switch"><input type="checkbox" id="tn-show" checked><span class="toggle-slider"></span></label></div>
+      </div>
       <p class="hint tn-msg" id="tn-msg">ギター入力をオンにして、ギターを弾いてください。音声はこのページの中で処理するだけで、どこにも送られません。</p>
       <div class="tn-stage">
         <div class="tn-body" id="tn-single">
@@ -228,11 +233,6 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
           <div class="tn-hist-btns"><button class="th-link" id="th-play" type="button">再生</button><button class="th-link" id="th-est" type="button">スケールを推定</button><button class="th-link" id="th-clear" type="button">クリア</button></div></div>
         <div class="th-line" id="tn-hist-notes">—</div>
         <div class="finder-results" id="tn-scales"></div>
-      </div>
-      <div class="tn-opts">
-        <div class="field"><label for="tn-device">入力デバイス（オーディオインターフェースはここで選びます）</label><select id="tn-device"><option value="">既定の入力</option></select></div>
-        <div class="field"><label for="tn-a4">基準音 A4（Hz）</label><span class="num-wrap"><input type="number" id="tn-a4" min="400" max="480" step="1" inputmode="numeric"><span class="num-btns"><button type="button" class="num-btn" data-dir="up" aria-label="上げる">▲</button><button type="button" class="num-btn" data-dir="down" aria-label="下げる">▼</button></span></span></div>
-        <div class="toggle-row"><span class="toggle-label">指板に位置を表示</span><label class="toggle-switch"><input type="checkbox" id="tn-show" checked><span class="toggle-slider"></span></label></div>
       </div>
     </section>
 
@@ -403,7 +403,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
   <input type="range" id="vol-range" min="0" max="100" step="1" value="80" aria-label="音量">
   <span class="vol-num" id="vol-num">80</span>
 </div>
-<script type="module" src="js/app.js?v=71"></script>
+<script type="module" src="js/app.js?v=72"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
