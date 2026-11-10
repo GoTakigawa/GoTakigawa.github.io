@@ -225,12 +225,16 @@ const BUILD = {
     hp.connect(mid); mid.connect(pre); pre.connect(sh); sh.connect(lp); lp.connect(out);
     return { in: hp, out, set(k, v) { if (k === 'drive') tc(pre.gain, 1 + Math.pow(v / 100, 1.5) * 9, ctx); else if (k === 'tone') tc(lp.frequency, v, ctx); else if (k === 'level') tc(out.gain, dbLin(v), ctx); } };
   },
-  // DS-1 style: bright transistor boost, op-amp gain into hard silicon clipping, then a passive tilt tone control
+  // DS-1 style: bright transistor boost, op-amp gain into diode-like clipping, then a passive tilt tone control.
+  // Kept tamer than a hard square clip: moderate gain range, a slightly asymmetric soft-knee curve, 4x oversampling and
+  // low-pass filters before and after the clipper, so it stays gritty without the buzzy, fizzy top end.
   dist(ctx) {
-    const hp = node(ctx, 'highpass', { frequency: 100 }), boost = node(ctx, 'peaking', { frequency: 1800, gain: 5, Q: 0.8 }), pre = ctx.createGain(), sh = shaper(ctx, 10), lp = node(ctx, 'lowpass', { frequency: 7500, Q: 0.7 });
-    const lo = node(ctx, 'lowshelf', { frequency: 450 }), hi = node(ctx, 'highshelf', { frequency: 2200 }), out = ctx.createGain();
-    hp.connect(boost); boost.connect(pre); pre.connect(sh); sh.connect(lp); lp.connect(lo); lo.connect(hi); hi.connect(out);
-    return { in: hp, out, set(k, v) { if (k === 'drive') tc(pre.gain, 2 + Math.pow(v / 100, 1.5) * 120, ctx); else if (k === 'tone') { const t = (v - 50) / 50; tc(lo.gain, -t * 9, ctx); tc(hi.gain, t * 9, ctx); } else if (k === 'level') tc(out.gain, dbLin(v), ctx); } };
+    const hp = node(ctx, 'highpass', { frequency: 140, Q: 0.7 }), boost = node(ctx, 'peaking', { frequency: 1500, gain: 4, Q: 0.8 }), pre = ctx.createGain(), lpPre = node(ctx, 'lowpass', { frequency: 7500, Q: 0.5 });
+    const sh = ctx.createWaveShaper(); sh.oversample = '4x';
+    { const n = 2048, c = new Float32Array(n), k = 2.4, b = 0.12, m = Math.tanh(k * (1 + b)) - Math.tanh(k * b), m2 = Math.tanh(k * (-1 + b)) - Math.tanh(k * b); for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; c[i] = (Math.tanh(k * (x + b)) - Math.tanh(k * b)) / Math.max(Math.abs(m), Math.abs(m2)); } sh.curve = c; }
+    const lp = node(ctx, 'lowpass', { frequency: 6200, Q: 0.6 }), lp2 = node(ctx, 'lowpass', { frequency: 9000, Q: 0.5 }), lo = node(ctx, 'lowshelf', { frequency: 450 }), hi = node(ctx, 'highshelf', { frequency: 2200 }), out = ctx.createGain();
+    hp.connect(boost); boost.connect(pre); pre.connect(lpPre); lpPre.connect(sh); sh.connect(lp); lp.connect(lp2); lp2.connect(lo); lo.connect(hi); hi.connect(out);
+    return { in: hp, out, set(k, v) { if (k === 'drive') tc(pre.gain, 2 + Math.pow(v / 100, 1.3) * 38, ctx); else if (k === 'tone') { const t = (v - 50) / 50; tc(lo.gain, -t * 8, ctx); tc(hi.gain, t * 8, ctx); } else if (k === 'level') tc(out.gain, dbLin(v) * 1.2, ctx); } };
   },
   amp(ctx) {
     const hp = node(ctx, 'highpass', { frequency: 80 }), pre = ctx.createGain(), sh = ctx.createWaveShaper(), post = node(ctx, 'highpass', { frequency: 60 });
