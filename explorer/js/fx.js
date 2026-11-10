@@ -313,6 +313,22 @@ export function initFx({ ensureInput } = {}) {
   const st = load(), q = id => document.getElementById(id);
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
   const E = { ctx: null, src: null, fx: {}, fxIn: null, master: null, limiter: null, outAn: null, inAn: null, on: false, timer: 0, hist: [], loud: 0 };
+  // user IR files kept per setting slot in this browser only (IndexedDB); nothing is sent anywhere
+  const idb = () => new Promise((res, rej) => { const r = indexedDB.open('gti-explorer-ir', 1); r.onupgradeneeded = () => r.result.createObjectStore('ir'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  const idbDo = async (mode, fn) => { const db = await idb(); try { return await new Promise((res, rej) => { const rq = fn(db.transaction('ir', mode).objectStore('ir')); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); }); } finally { db.close(); } };
+  const paintIr = () => { const s = q('fx-irseg'); if (!s) return; s.children[0].classList.toggle('on', !E.irName); s.children[1].classList.toggle('on', !!E.irName); s.title = E.userName || 'キャビネットIRの切り替え（ユーザーIRはファイルを読み込みます）'; };
+  const useUserIr = async (name, raw) => {   // decode and switch the amp to this IR (or keep it for later when the audio is not running yet)
+    E.userRaw = raw.slice(0); E.userName = name;
+    if (!E.ctx || !E.fx) { E.pend = { name, raw: raw.slice(0) }; return; }
+    const buf = await E.ctx.decodeAudioData(raw.slice(0)); E.userBuf = buf; E.fx.amp.core.setIr(buf); E.irName = name; paintIr();
+  };
+  const applyPendingIr = () => { const p = E.pend; if (!p || !E.ctx) return; E.pend = null; useUserIr(p.name, p.raw).catch(() => warn('IRファイルを読み込めませんでした。', 'err')); };
+  const restoreIr = async (slot, ir) => {   // ir: null = default IR, {name} = the user IR stored for this slot, undefined = leave as is
+    if (ir === undefined) return;
+    if (!ir) { E.pend = null; if (E.fx && E.irName) { E.fx.amp.core.setIr(null); E.irName = null; paintIr(); } return; }
+    try { const rec = await idbDo('readonly', s => s.get('slot' + slot)); if (!rec) { warn('このスロットに保存したIRが、ブラウザ内に見つかりません。', 'err'); return; } await useUserIr(rec.name, rec.data); }
+    catch (e) { warn('保存したIRを読み込めませんでした。', 'err'); }
+  };
   const warn = (t, cls = '') => { const w = q('fx-note'); if (!w) return; w.textContent = t || ''; w.className = 'fx-note hint ' + cls; w.hidden = !t; };
 
   // ── graph (built per audio context; the monitor connects it to the output) ──
@@ -338,7 +354,7 @@ export function initFx({ ensureInput } = {}) {
     E.gateOpen = false; E.fx.gate.core.onOpen = open => { E.gateOpen = open; setLed(); };
     E.fx.comp.core.onGr = gr => { E.gr = gr; setGr(); };
     src.connect(E.split);   // the input always flows through the chain; it is only audible once the monitor is on
-    wire();
+    wire(); applyPendingIr();
     E.master.connect(E.limiter); E.limiter.connect(E.outAn);   // the output analyser sits after the limiter
     clearInterval(E.mt); E.mt = setInterval(meter, 40);
   };
@@ -548,11 +564,10 @@ export function initFx({ ensureInput } = {}) {
         else { E.fx.amp.core.setIr(E.userBuf); E.irName = E.userName; paintIr(); }
       }
     });
-    const paintIr = () => { const s = q('fx-irseg'); if (!s) return; s.children[0].classList.toggle('on', !E.irName); s.children[1].classList.toggle('on', !!E.irName); s.title = E.userName || 'キャビネットIRの切り替え（ユーザーIRはファイルを読み込みます）'; };
     host.addEventListener('change', async e => {
       if (e.target.classList && e.target.classList.contains('fx-sel')) { setParam(e.target.dataset.fx, e.target.dataset.k, +e.target.value); return; }
       if (e.target.id !== 'fx-ir-file' || !e.target.files[0] || !E.ctx) return;
-      try { const buf = await E.ctx.decodeAudioData(await e.target.files[0].arrayBuffer()); E.userBuf = buf; E.userName = e.target.files[0].name; E.fx.amp.core.setIr(buf); E.irName = E.userName; paintIr(); }
+      try { await useUserIr(e.target.files[0].name, await e.target.files[0].arrayBuffer()); }
       catch (err) { warn('IRファイルを読み込めませんでした。', 'err'); }
     });
     if ('IntersectionObserver' in window && q('fx-spec')) new IntersectionObserver(es => { E.mvis = es.some(x => x.isIntersecting); }, { threshold: 0 }).observe(q('fx-spec').closest('.fx-meters')); else E.mvis = true;
@@ -563,7 +578,7 @@ export function initFx({ ensureInput } = {}) {
     });
     q('fx-flip').addEventListener('click', () => { st.flip = !st.flip; save(); renderChain(); });
     q('fx-out').addEventListener('change', e => { st.out = e.target.value; save(); applySink(); });
-    const paintSlots = () => { const h = q('fx-slots'); if (!h) return; h.querySelectorAll('button[data-slot]').forEach(b => { const i = +b.dataset.slot; b.classList.toggle('on', i === st.slot); b.classList.toggle('has', !!st.presets[i]); b.title = st.presets[i] ? '保存済み（クリックで呼び出し）' : '空き（クリックで選択）'; }); };
+    const paintSlots = () => { const h = q('fx-slots'); if (!h) return; h.querySelectorAll('button[data-slot]').forEach(b => { const i = +b.dataset.slot; b.classList.toggle('on', i === st.slot); b.classList.toggle('has', !!st.presets[i]); b.title = st.presets[i] ? '保存済み' + (st.presets[i].ir ? '（ユーザーIR：' + st.presets[i].ir.name + '）' : '') + '（クリックで呼び出し）' : '空き（クリックで選択）'; }); };
     const applyState = () => { save(); renderChain(); if (E.ctx) { ORDER.forEach(id => { if (id === 'delay' || id === 'reverb') rebuild(id); applyAll(id); }); rewire(); } };
     const loadSnapshot = p => {
       const o = JSON.parse(JSON.stringify(p)), d = defState();
@@ -572,12 +587,17 @@ export function initFx({ ensureInput } = {}) {
         if (id === 'amp') { st.fx.amp.mem = o.fx.amp.mem || ampMem(); if (!o.fx.amp.mem) AMP_KNOBS.forEach(k => { st.fx.amp.mem[st.fx.amp.p.mode ? 1 : 0][k] = st.fx.amp.p[k]; }); } });
       st.fx.amp.p.cab = 1; applyState(); paintSlots();
     };
-    q('fx-slots').addEventListener('click', e => {
+    q('fx-slots').addEventListener('click', async e => {
       const b = e.target.closest('button'); if (!b) return;
-      if (b.id === 'fx-slot-save') { st.presets[st.slot] = JSON.parse(JSON.stringify({ order: st.order, fx: st.fx })); save(); paintSlots(); return; }
+      if (b.id === 'fx-slot-save') {
+        const snap = JSON.parse(JSON.stringify({ order: st.order, fx: st.fx })), slot = st.slot;
+        try { if (E.irName && E.userRaw) { await idbDo('readwrite', s => s.put({ name: E.userName, data: E.userRaw.slice(0) }, 'slot' + slot)); snap.ir = { name: E.userName }; } else { await idbDo('readwrite', s => s.delete('slot' + slot)); snap.ir = null; } }
+        catch (err) { warn('ユーザーIRをブラウザに保存できませんでした（設定のみ保存しました）。', 'err'); }
+        st.presets[slot] = snap; save(); paintSlots(); return;
+      }
       if (b.id === 'fx-sample') { loadSnapshot(SAMPLE); return; }
       const i = +b.dataset.slot, p = st.presets[i]; st.slot = i;
-      if (p) loadSnapshot(p); else save();
+      if (p) { loadSnapshot(p); await restoreIr(i, p.ir); } else save();
       paintSlots();
     });
     paintSlots();
