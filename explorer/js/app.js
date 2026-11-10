@@ -6,6 +6,7 @@ import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi
 import { Player, drumBar } from './player.js?v=51';
 import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=51';
 import { PitchListener } from './pitch.js?v=51';
+import { initLayout } from './layout.js?v=51';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -1372,6 +1373,7 @@ async function boot() {
   try { const s = localStorage.getItem(STORE); st = sanitize(s ? JSON.parse(s) : null); } catch (e) { st = sanitize(null); }
   let shared = false;
   try { const m = /[#&]s=([A-Za-z0-9_-]+)/.exec(location.hash); if (m) { shared = applyShared(decodeShare(m[1])); history.replaceState(null, '', location.pathname + location.search); } } catch (e) {}
+  initLayout();
   bind(); bindTuner(); bindVolume(); bindProg(); bindHist(); bindQuiz(); render();
   if (shared) { save(); notify('共有された進行と設定を読み込みました'); }
 }
