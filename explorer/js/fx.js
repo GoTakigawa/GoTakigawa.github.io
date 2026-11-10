@@ -236,7 +236,7 @@ const BUILD = {
     return { in: hp, out, set(k, v) {
       if (k === 'drive') { const d = v / 100; tc(g1.gain, 2 + Math.pow(d, 1.2) * 14, ctx); tc(g2.gain, 2.5 + d * 5, ctx); }
       else if (k === 'tone') { const t = (v - 50) / 50; tc(lo.gain, -t * 8, ctx); tc(hi.gain, t * 8, ctx); }
-      else if (k === 'level') tc(out.gain, dbLin(v) * 1.3, ctx);
+      else if (k === 'level') tc(out.gain, dbLin(v) * 0.65, ctx);
     } };
   },
   amp(ctx) {
