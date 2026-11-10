@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=52">
+<link rel="stylesheet" href="style.css?v=54">
 <script>
 try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t){var _l=_t.mode==='light'||(_t.mode==='auto'&&matchMedia('(prefers-color-scheme: light)').matches),_r=document.documentElement;_r.dataset.theme=_l?'light':'dark';if(/^#[0-9a-fA-F]{6}$/.test(_t.accent))_r.style.setProperty('--accent1',_t.accent);}}catch(e){}
 </script>
@@ -155,7 +155,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
           <option value="interval">インターバル</option>
           <option value="chord">コード</option>
         </select></label>
-        <label class="pg-f">問題数<select id="qz-count"><option value="10">10問</option><option value="20">20問</option><option value="30">30問</option></select></label>
+        <label class="pg-f">問題数<span class="num-wrap"><input type="number" id="qz-count" min="1" max="100" step="1" inputmode="numeric" aria-label="問題数"><span class="num-btns"><button type="button" class="num-btn" data-dir="up" aria-label="増やす">▲</button><button type="button" class="num-btn" data-dir="down" aria-label="減らす">▼</button></span></span></label>
         <div class="tn-bar-sp"></div>
         <button class="tn-start" id="qz-start" type="button"><span id="qz-start-label">クイズを始める</span></button>
       </div>
@@ -217,7 +217,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
       </div>
       <div class="tn-opts">
         <div class="field"><label for="tn-device">入力デバイス（オーディオインターフェースはここで選びます）</label><select id="tn-device"><option value="">既定の入力</option></select></div>
-        <div class="field"><label for="tn-a4">基準音 A4</label><select id="tn-a4"></select></div>
+        <div class="field"><label for="tn-a4">基準音 A4（Hz）</label><span class="num-wrap"><input type="number" id="tn-a4" min="400" max="480" step="1" inputmode="numeric"><span class="num-btns"><button type="button" class="num-btn" data-dir="up" aria-label="上げる">▲</button><button type="button" class="num-btn" data-dir="down" aria-label="下げる">▼</button></span></span></div>
         <div class="toggle-row"><span class="toggle-label">指板に位置を表示</span><label class="toggle-switch"><input type="checkbox" id="tn-show" checked><span class="toggle-slider"></span></label></div>
       </div>
     </section>
@@ -272,7 +272,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
           <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true" id="pg-play-ico"><path d="M7 4.5v15l13-7.5z"/></svg><span id="pg-play-label">再生</span>
         </button>
         <label class="pg-f">テンポ<span class="num-wrap"><input type="number" id="pg-bpm" min="40" max="220" step="1" inputmode="numeric"><span class="num-btns"><button type="button" class="num-btn" data-dir="up" aria-label="テンポを上げる">▲</button><button type="button" class="num-btn" data-dir="down" aria-label="テンポを下げる">▼</button></span></span></label>
-        <label class="pg-f">拍子<select id="pg-beats"><option value="2">2拍</option><option value="3">3拍</option><option value="4">4拍</option><option value="5">5拍</option><option value="6">6拍</option><option value="7">7拍</option></select></label>
+        <label class="pg-f">拍子（拍）<span class="num-wrap"><input type="number" id="pg-beats" min="1" max="16" step="1" inputmode="numeric" aria-label="1小節の拍数"><span class="num-btns"><button type="button" class="num-btn" data-dir="up" aria-label="増やす">▲</button><button type="button" class="num-btn" data-dir="down" aria-label="減らす">▼</button></span></span></label>
         <label class="pg-f chk"><input type="checkbox" id="pg-loop"> ループ</label>
         <label class="pg-f chk"><input type="checkbox" id="pg-count"> カウントイン</label>
         <label class="pg-f chk"><input type="checkbox" id="pg-click"> ドラム・クリック</label>
@@ -287,12 +287,13 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
         <div class="dr-hd"><span class="tn-sub-title">ドラム・クリック</span>
           <select id="dr-pre" aria-label="パターンのひな形"></select>
           <label class="pg-f">音価<select id="dr-res"></select></label>
-          <label class="pg-f">パターンの長さ<select id="dr-bars"></select></label>
+          <label class="pg-f">パターンの長さ（小節）<span class="num-wrap"><input type="number" id="dr-bars" min="1" max="120" step="1" inputmode="numeric" aria-label="パターンの長さ（小節）"><span class="num-btns"><button type="button" class="num-btn" data-dir="up" aria-label="増やす">▲</button><button type="button" class="num-btn" data-dir="down" aria-label="減らす">▼</button></span></span></label>
           <label class="pg-f">スウィング<select id="dr-swing"><option value="off">なし</option><option value="8">8分</option><option value="16">16分</option></select></label>
           <label class="pg-f" id="dr-amt-w">強さ（％）<input type="number" class="txt" id="dr-amt" min="50" max="80" step="1" inputmode="numeric"></label>
           <select id="dr-add" aria-label="楽器を追加"></select></div>
         <p class="hint">マスを押すたびに「中→強→弱→オフ」と変わります（クリックは強＝高い音、弱＝低い音）。</p>
         
+<div class="dr-pager" id="dr-pager" hidden><button type="button" class="std small" id="dr-pg-prev" aria-label="前の小節へ">◀</button><span id="dr-pg-lbl"></span><button type="button" class="std small" id="dr-pg-next" aria-label="次の小節へ">▶</button></div>
 <div class="dr-grid" id="dr-grid"></div>
       </div>
       <div class="pg-ctl pg-opts">
@@ -387,7 +388,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
   <input type="range" id="vol-range" min="0" max="100" step="1" value="80" aria-label="音量">
   <span class="vol-num" id="vol-num">80</span>
 </div>
-<script type="module" src="js/app.js?v=52"></script>
+<script type="module" src="js/app.js?v=54"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');

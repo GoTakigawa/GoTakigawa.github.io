@@ -1,13 +1,13 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=52';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=52';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=52';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=52';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=52';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=52';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=52';
-import { PitchListener } from './pitch.js?v=52';
-import { initLayout } from './layout.js?v=52';
-import { initTheme, themeColors } from './theme.js?v=52';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=54';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=54';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=54';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=54';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=54';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=54';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=54';
+import { PitchListener } from './pitch.js?v=54';
+import { initLayout } from './layout.js?v=54';
+import { initTheme, themeColors } from './theme.js?v=54';
 const MAX_BARS = 120;
 
 const $ = id => document.getElementById(id);
@@ -35,6 +35,7 @@ let shapeOverride = null;
 let scRoot = 'none';
 
 // ── state ──
+const clampInt = (v, lo, hi, def) => Number.isFinite(v) ? Math.max(lo, Math.min(hi, Math.round(v))) : def;
 const intIn = (v, lo, hi, def) => Number.isInteger(v) && v >= lo && v <= hi ? v : def;
 // one instrument's setup (string count, tuning, frets, minus frets), checked
 function cleanCfg(inst, s) {
@@ -83,13 +84,13 @@ function sanitize(s) {
   d.hideCells = Array.isArray(s.hideCells) ? s.hideCells.filter(x => typeof x === 'string' && /^\d{1,2}:-?\d{1,2}$/.test(x)).slice(0, 1500) : [];
   if (s.quiz && typeof s.quiz === 'object') {
     d.quiz.kind = ['note-scale', 'note-all', 'degree', 'interval', 'chord'].includes(s.quiz.kind) ? s.quiz.kind : 'note-scale';
-    d.quiz.count = [10, 20, 30].includes(s.quiz.count) ? s.quiz.count : 10;
+    d.quiz.count = intIn(s.quiz.count, 1, 100, 10);
   }
   if (s.prog && typeof s.prog === 'object') {
     const q = s.prog, P = d.prog;
     if (typeof q.chords === 'string') P.chords = q.chords.slice(0, 3000);
     if (typeof q.scales === 'string') P.scales = q.scales.slice(0, 4000);
-    P.bpm = int(q.bpm, 40, 220, 100); P.beats = int(q.beats, 2, 7, 4);
+    P.bpm = int(q.bpm, 40, 220, 100); P.beats = int(q.beats, 1, 16, 4);
     ['loop', 'count', 'click', 'follow'].forEach(k => { if (k in q) P[k] = !!q[k]; });
     P.drum = cleanDrum(q.drum, P.beats); P.voice = VOICE_NAMES[q.voice] ? q.voice : 'piano';
     P.style = ['strum', 'arp', 'root', 'off'].includes(q.style) ? q.style : 'strum'; P.guide = q.guide === 'root' ? 'root' : 'off';
@@ -500,7 +501,7 @@ function tnView(v) {
   try { localStorage.setItem('gti-explorer:tnview', v); } catch (e) {}
   if (strobe.on) drawStrobe(performance.now(), 0, false);
 }
-function tnA4() { return +$('tn-a4').value || 440; }
+function tnA4() { return clampInt(parseFloat($('tn-a4').value), 400, 480, 440); }
 function renderTunerStrings() {
   const tun = tuning(), set = currentSet(), n = tun.length;
   $('tn-strings').innerHTML = tun.map((m, s) => `<div class="tn-str" data-s="${s}"><small>${n - s}弦</small><b>${set.name(m)}</b><small class="tn-d"></small></div>`).join('');
@@ -1149,7 +1150,7 @@ function bindProg() {
   $('pg-chords-pre').addEventListener('change', e => { const x = CHORD_PRESETS[+e.target.value]; e.target.value = ''; if (x) set(() => { st.prog.chords = x.text; live2(); }); });
   $('pg-scales-pre').addEventListener('change', e => { const x = SCALE_PRESETS[+e.target.value]; e.target.value = ''; if (x) set(() => { st.prog.scales = x.text; live2(); }); });
   $('pg-bpm').addEventListener('change', e => set(() => { st.prog.bpm = intIn(parseInt(e.target.value), 40, 220, st.prog.bpm); }));
-  $('pg-beats').addEventListener('change', e => set(() => { const old = st.prog.beats; st.prog.beats = +e.target.value; st.prog.drum = drumBeats(st.prog.drum, old, st.prog.beats); }));
+  $('pg-beats').addEventListener('change', e => set(() => { const old = st.prog.beats; st.prog.beats = clampInt(parseFloat(e.target.value), 1, 16, old); st.prog.drum = drumBeats(st.prog.drum, old, st.prog.beats); }));
   [['pg-loop', 'loop'], ['pg-count', 'count'], ['pg-click', 'click'], ['pg-follow', 'follow']].forEach(([id, k]) => $(id).addEventListener('change', e => set(() => { st.prog[k] = e.target.checked; })));
   bindDrum(set);
   $('pg-voice').addEventListener('change', e => { set(() => { st.prog.voice = e.target.value; audio.setVoice(e.target.value); }); playNotes([52, 59, 64, 67], 0.05, 1.0); });
@@ -1277,6 +1278,7 @@ function renderQuiz() {
   const Q = st.quiz, active = quiz.on && quiz.q;
   $('qz-kind').value = Q.kind; $('qz-count').value = Q.count; $('qz-hint').textContent = QZ_HINT[Q.kind];
   $('qz-kind').disabled = $('qz-count').disabled = quiz.on;
+  $('qz-count').closest('.num-wrap').querySelectorAll('.num-btn').forEach(b => { b.disabled = quiz.on; });
   $('qz-start-label').textContent = quiz.on ? 'やめる' : 'クイズを始める';
   $('qz-start').classList.toggle('on', quiz.on);
   const pr = $('qz-prompt'), fb = $('qz-fb');
@@ -1291,7 +1293,7 @@ function renderQuiz() {
 }
 function bindQuiz() {
   $('qz-kind').addEventListener('change', e => { update(() => { st.quiz.kind = e.target.value; }, true); quiz.result = null; renderQuiz(); });
-  $('qz-count').addEventListener('change', e => { update(() => { st.quiz.count = +e.target.value; }, true); });
+  $('qz-count').addEventListener('change', e => { update(() => { st.quiz.count = clampInt(parseFloat(e.target.value), 1, 100, st.quiz.count); }, true); e.target.value = st.quiz.count; });
   $('qz-start').addEventListener('click', () => quiz.on ? stopQuiz() : startQuiz());
   $('qz-skip').addEventListener('click', () => quizDone(false, true));
   renderQuiz();
@@ -1335,15 +1337,22 @@ function drumBeats(D, oldBeats, newBeats) {
   for (const id of Object.keys(D.rows)) { let r = ''; for (let b = 0; b < D.bars; b++) r += D.rows[id].slice(b * o, (b + 1) * o).slice(0, n).padEnd(n, '0'); E.rows[id] = r; }
   return E;
 }
+const DR_PAGE = 4;   // bars shown at once in the step grid
+let drPage = 0;
 function renderDrum() {
   const D = st.prog.drum, per = st.prog.beats * D.res, have = DRUM_INSTR.filter(x => D.rows[x.id] != null);
+  const pages = Math.ceil(D.bars / DR_PAGE); drPage = Math.max(0, Math.min(pages - 1, drPage));
+  const from = drPage * DR_PAGE * per, to = Math.min(D.bars, (drPage + 1) * DR_PAGE) * per;
+  $('dr-pager').hidden = pages < 2;
+  $('dr-pg-lbl').textContent = `${drPage * DR_PAGE + 1}–${Math.min(D.bars, (drPage + 1) * DR_PAGE)} 小節目 / 全${D.bars}小節`;
+  $('dr-pg-prev').disabled = drPage === 0; $('dr-pg-next').disabled = drPage >= pages - 1;
   $('dr-pre').value = D.pre; $('dr-res').value = D.res; $('dr-bars').value = D.bars; $('dr-swing').value = D.swing.mode; $('dr-amt').value = D.swing.amt;
   $('dr-amt-w').hidden = D.swing.mode === 'off';
   const miss = DRUM_INSTR.filter(x => D.rows[x.id] == null);
   $('dr-add').innerHTML = '<option value="">＋ 楽器を追加</option>' + miss.map(x => `<option value="${x.id}">${x.label}</option>`).join(''); $('dr-add').disabled = !miss.length;
   $('dr-grid').innerHTML = have.length ? have.map(x => {
     const row = D.rows[x.id];
-    return `<div class="dr-row"><span class="dr-lbl">${x.label}</span><button type="button" class="dr-rm" data-rm="${x.id}" aria-label="${x.label}を外す" title="この楽器を外す">×</button>${Array.from({ length: row.length }, (_, i) => `<button type="button" class="dr-c l${row[i]} ${i % D.res === 0 ? 'beat' : ''} ${i % per === 0 && i ? 'bar' : ''}" data-r="${x.id}" data-i="${i}" aria-label="${x.label} ${Math.floor(i / per) + 1}小節 ${Math.floor(i % per / D.res) + 1}拍 ${i % D.res + 1}"></button>`).join('')}</div>`;
+    return `<div class="dr-row"><span class="dr-lbl">${x.label}</span><button type="button" class="dr-rm" data-rm="${x.id}" aria-label="${x.label}を外す" title="この楽器を外す">×</button>${Array.from({ length: to - from }, (_, k) => { const i = from + k; return `<button type="button" class="dr-c l${row[i]} ${i % D.res === 0 ? 'beat' : ''} ${i % per === 0 && i ? 'bar' : ''}" data-r="${x.id}" data-i="${i}" aria-label="${x.label} ${Math.floor(i / per) + 1}小節 ${Math.floor(i % per / D.res) + 1}拍 ${i % D.res + 1}"></button>`; }).join('')}</div>`;
   }).join('') : '<p class="hint">楽器がありません。「＋ 楽器を追加」から選んでください。</p>';
 }
 function drumAudition() { audio.ready().then(() => drumBar(audio, audio.now + 0.05, 60 / Math.max(st.prog.bpm, 60), st.prog.beats, st.prog.drum, 0)); }
@@ -1351,7 +1360,6 @@ function bindDrum(set) {
   const edit = fn => set(() => { const D = st.prog.drum; fn(D); D.pre = 'custom'; });
   $('dr-pre').innerHTML = Object.entries(DRUM_PRESETS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('') + '<option value="custom">編集済み</option>';
   $('dr-res').innerHTML = Object.entries(DRUM_RES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
-  $('dr-bars').innerHTML = Array.from({ length: MAX_BARS }, (_, i) => i + 1).map(n => `<option value="${n}">${n}小節</option>`).join('');
   $('dr-pre').addEventListener('change', e => { if (e.target.value === 'custom') return; set(() => { st.prog.drum = drumPreset(e.target.value, st.prog.beats); }); drumAudition(); });
   $('dr-res').addEventListener('change', e => edit(D => {   // keep the notes that sit on both grids
     const nr = +e.target.value, old = D.res;
@@ -1359,13 +1367,15 @@ function bindDrum(set) {
     D.res = nr; if (D.swing.mode !== 'off' && nr % 2) D.swing.mode = 'off';
   }));
   $('dr-bars').addEventListener('change', e => edit(D => {   // a longer pattern repeats what is there; a shorter one is cut
-    const nb = +e.target.value, per = st.prog.beats * D.res;
+    const nb = clampInt(parseFloat(e.target.value), 1, MAX_BARS, D.bars), per = st.prog.beats * D.res;
     for (const id of Object.keys(D.rows)) { const base = D.rows[id].slice(0, per); let r = ''; for (let b = 0; b < nb; b++) r += D.rows[id].slice(b * per, (b + 1) * per) || base; D.rows[id] = r.padEnd(per * nb, '0'); }
     D.bars = nb;
   }));
   $('dr-swing').addEventListener('change', e => edit(D => { D.swing.mode = e.target.value; }));
   $('dr-amt').addEventListener('change', e => edit(D => { D.swing.amt = intIn(parseInt(e.target.value), 50, 80, D.swing.amt); }));
   $('dr-add').addEventListener('change', e => { const id = e.target.value; if (!id) return; edit(D => { D.rows[id] = '0'.repeat(drumLen(D, st.prog.beats)); }); });
+  $('dr-pg-prev').addEventListener('click', () => { drPage--; renderDrum(); });
+  $('dr-pg-next').addEventListener('click', () => { drPage++; renderDrum(); });
   $('dr-grid').addEventListener('click', e => {
     const rm = e.target.closest('.dr-rm'); if (rm) { edit(D => { delete D.rows[rm.dataset.rm]; }); return; }
     const c = e.target.closest('.dr-c'); if (!c) return;
@@ -1392,9 +1402,8 @@ function bindVolume() {
 }
 function bindTuner() {
   let a4 = 440; try { a4 = +localStorage.getItem('gti-explorer:a4') || 440; } catch (e) {}
-  let h = ''; for (let v = 430; v <= 450; v++) h += `<option value="${v}">${v} Hz</option>`;
-  $('tn-a4').innerHTML = h; $('tn-a4').value = String(a4 >= 430 && a4 <= 450 ? a4 : 440);
-  $('tn-a4').addEventListener('change', () => { try { localStorage.setItem('gti-explorer:a4', $('tn-a4').value); } catch (e) {} });
+  $('tn-a4').value = clampInt(a4, 400, 480, 440);
+  $('tn-a4').addEventListener('change', () => { $('tn-a4').value = clampInt(parseFloat($('tn-a4').value), 400, 480, 440); try { localStorage.setItem('gti-explorer:a4', $('tn-a4').value); } catch (e) {} });
   $('tn-toggle').addEventListener('click', () => live.on ? tunerStop() : tunerStart());
   document.querySelectorAll('.tn-mode').forEach(btn => btn.addEventListener('click', () => {
     listener.mode = btn.dataset.m; listener.kind = btn.dataset.m === 'chord' ? 'chord' : 'single'; listener.cnt = 0;
