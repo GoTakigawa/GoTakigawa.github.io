@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=69">
+<link rel="stylesheet" href="style.css?v=70">
 <script>
 try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t){var _l=_t.mode==='light'||(_t.mode==='auto'&&matchMedia('(prefers-color-scheme: light)').matches),_r=document.documentElement;_r.dataset.theme=_l?'light':'dark';if(/^#[0-9a-fA-F]{6}$/.test(_t.accent))_r.style.setProperty('--accent1',_t.accent);}}catch(e){}
 </script>
@@ -46,15 +46,20 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
         <button class="th-mode" data-m="light">ライト</button>
         <button class="th-mode" data-m="auto">端末に合わせる</button>
       </div>
-      <div class="th-lbl">アクセントカラー</div>
+      <div class="th-lbl">テンプレート（モード・色・背景をまとめて切り替え）</div>
+      <div class="th-tpls" id="th-templates"></div>
+      <div class="th-lbl" style="margin-top:12px">アクセントカラー（ボタン・選択中の表示）</div>
       <div class="th-sws" id="th-swatches"></div>
-      <div class="th-custom"><label for="th-custom">自由に選ぶ</label><input type="color" id="th-custom" value="#8c4dff"></div>
+      <div class="th-custom"><label for="th-custom">自由に選ぶ</label><input type="color" id="th-custom" value="#8c4dff"><button class="th-link" id="th-acc-def" type="button">既定に戻す</button></div>
       <div class="th-lbl" style="margin-top:12px">サブカラー（青系：見出し・枠・コードトーン）</div>
       <div class="th-sws" id="th-sky-swatches"></div>
       <div class="th-custom"><label for="th-sky-custom">自由に選ぶ</label><input type="color" id="th-sky-custom" value="#f2f2f2"><button class="th-link" id="th-sky-def" type="button">既定に戻す</button></div>
       <div class="th-lbl" style="margin-top:12px">サブカラー（緑系：ルート音・OK表示）</div>
       <div class="th-sws" id="th-green-swatches"></div>
       <div class="th-custom"><label for="th-green-custom">自由に選ぶ</label><input type="color" id="th-green-custom" value="#86efac"><button class="th-link" id="th-green-def" type="button">既定に戻す</button></div>
+      <div class="th-lbl" style="margin-top:12px">背景色（ダーク／ライトそれぞれに保存）</div>
+      <div class="th-sws" id="th-bg-swatches"></div>
+      <div class="th-custom"><label for="th-bg-custom">自由に選ぶ</label><input type="color" id="th-bg-custom" value="#000000"><button class="th-link" id="th-bg-def" type="button">既定に戻す</button></div>
       <div class="th-custom" style="margin-top:12px"><button class="th-link" id="th-reset" type="button" style="margin-left:0">すべて初期設定に戻す</button></div>
     </details>
 
@@ -396,7 +401,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
   <input type="range" id="vol-range" min="0" max="100" step="1" value="80" aria-label="音量">
   <span class="vol-num" id="vol-num">80</span>
 </div>
-<script type="module" src="js/app.js?v=69"></script>
+<script type="module" src="js/app.js?v=70"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
