@@ -128,6 +128,27 @@ registerProcessor('gti-comp', GtiComp);`;
 const gateReady = new WeakMap();
 const loadGate = ctx => { if (!gateReady.has(ctx)) gateReady.set(ctx, ctx.audioWorklet ? ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([GATE_SRC], { type: 'application/javascript' }))) : Promise.reject(new Error('no worklet'))); return gateReady.get(ctx); };
 
+// built-in cabinet impulse responses, synthesised at start-up: an impulse is run through a speaker-like filter cascade, then a short
+// mic-distance comb is added. 'drive' = closed-back 4x12 with a mid push, 'clean' = open-back 1x12 combo (brighter, a little boxy)
+const CAB = {
+  1: { hp: 78, comb: [0.00045, 0.28], f: [[110, 2, 4], [250, 1, -3], [800, 1, -2], [2000, 1.2, 4], [3400, 2, 5], [5000, 5, 2]], lp: 5200 },
+  0: { hp: 92, comb: [0.0003, 0.16], f: [[130, 2, 3], [400, 1, 2], [1500, 1, 1], [2300, 1.5, -2], [3000, 1.5, 3]], lp: 6800 }
+};
+async function makeCabIr(ctx, mode) {
+  const sr = ctx.sampleRate, n = Math.floor(sr * 0.04), c = CAB[mode], oc = new OfflineAudioContext(1, n, sr);
+  const b = oc.createBuffer(1, n, sr); b.getChannelData(0)[0] = 1;
+  const src = oc.createBufferSource(); src.buffer = b;
+  let prev = src; const add = f => { prev.connect(f); prev = f; };
+  add(node(oc, 'highpass', { frequency: c.hp, Q: 0.9 })); add(node(oc, 'highpass', { frequency: c.hp * 0.6, Q: 0.7 }));
+  c.f.forEach(([fr, q, g]) => add(node(oc, 'peaking', { frequency: fr, Q: q, gain: g })));
+  add(node(oc, 'lowpass', { frequency: c.lp, Q: 0.8 })); add(node(oc, 'lowpass', { frequency: c.lp, Q: 0.6 }));
+  prev.connect(oc.destination); src.start();
+  const out = await oc.startRendering(), y = out.getChannelData(0), d = Math.max(1, Math.round(c.comb[0] * sr));
+  for (let i = n - 1; i >= d; i--) y[i] += c.comb[1] * y[i - d];
+  for (let i = Math.floor(n * 0.6); i < n; i++) y[i] *= 0.5 * (1 + Math.cos(Math.PI * (i - n * 0.6) / (n * 0.4)));   // fade the tail
+  return out;
+}
+
 // the reverb tail per type: room (early reflections, short), hall (pre-delay, slow build, dark), plate (dense, bright), spring (echoing 'drip')
 function reverbIr(ctx, sec, type) {
   const sr = ctx.sampleRate, T = Math.max(0.2, sec * [0.5, 1.25, 1, 0.8][type]), len = Math.floor(sr * T), buf = ctx.createBuffer(2, len, sr);
@@ -197,17 +218,20 @@ const BUILD = {
     // cabinet: a few filters, or a loaded impulse response (see loadIr)
     const cabIn = ctx.createGain(), cabOff = ctx.createGain(), cabBiq = ctx.createGain(), cabConv = ctx.createGain(), cabOut = ctx.createGain(), level = ctx.createGain();
     const c1 = node(ctx, 'highpass', { frequency: 90 }), c2 = node(ctx, 'peaking', { frequency: 2200, Q: 1, gain: 3 }), c3 = node(ctx, 'lowpass', { frequency: 5200, Q: 0.7 }), c4 = node(ctx, 'lowpass', { frequency: 5200, Q: 0.7 });
-    const conv = ctx.createConvolver(); let cab = 1, hasIr = false;
+    const conv = ctx.createConvolver(); let cab = 1, hasIr = false, userIr = null; const gens = {};
     tre.connect(cabIn); cabIn.connect(cabOff); cabOff.connect(cabOut);
     cabIn.connect(c1); c1.connect(c2); c2.connect(c3); c3.connect(c4); c4.connect(cabBiq); cabBiq.connect(cabOut);
     cabIn.connect(conv); conv.connect(cabConv); cabConv.connect(cabOut); cabOut.connect(level);
     const wid = widener(ctx); level.connect(wid.in);
     const route = () => { tc(cabOff.gain, cab ? 0 : 1, ctx); tc(cabBiq.gain, cab && !hasIr ? 1 : 0, ctx); tc(cabConv.gain, cab && hasIr ? 1 : 0, ctx); };
+    // the built-in cabinet IR follows the mode; a loaded IR file overrides it. The filter version is used until the IRs are ready.
+    const pickIr = () => { const b = userIr || gens[mode]; if (b) { try { conv.buffer = b; hasIr = true; } catch (e) { hasIr = false; } } else hasIr = false; route(); };
+    [0, 1].forEach(m => makeCabIr(ctx, m).then(b => { gens[m] = b; pickIr(); }).catch(() => {}));
     route(); preamp();
     return {
       in: hp, out: wid.out,
-      set(k, v) { if (k === 'gain') { gainV = v; preamp(); } else if (k === 'mode') { mode = v ? 1 : 0; preamp(); } else if (k === 'bass') tc(bass.gain, v, ctx); else if (k === 'mid') tc(mid.gain, v, ctx); else if (k === 'treble') tc(tre.gain, v, ctx); else if (k === 'cab') { cab = v ? 1 : 0; route(); } else if (k === 'level') tc(level.gain, dbLin(v), ctx); else if (k === 'width') wid.set(v / 100); },
-      setIr(buf) { conv.buffer = buf; hasIr = !!buf; route(); }
+      set(k, v) { if (k === 'gain') { gainV = v; preamp(); } else if (k === 'mode') { mode = v ? 1 : 0; preamp(); pickIr(); } else if (k === 'bass') tc(bass.gain, v, ctx); else if (k === 'mid') tc(mid.gain, v, ctx); else if (k === 'treble') tc(tre.gain, v, ctx); else if (k === 'cab') { cab = v ? 1 : 0; route(); } else if (k === 'level') tc(level.gain, dbLin(v), ctx); else if (k === 'width') wid.set(v / 100); },
+      setIr(buf) { userIr = buf; pickIr(); }
     };
   },
   eq(ctx) {
@@ -357,7 +381,7 @@ export function initFx({ ensureInput } = {}) {
   const extraHtml = (id, s) => {
     if (id === 'gate') return '<div class="fx-extra"><span class="fx-gate-ind"><i></i><em>—</em></span></div>';
     if (id === 'comp') return '<div class="fx-extra"><span class="fx-gr-l">GR</span><span class="fx-gr"><i></i></span></div>';
-    if (id === 'amp') return `<div class="fx-extra"><span class="fx-seg"><button type="button" class="${s.p.mode ? '' : 'on'}" data-fx="amp" data-k="mode" data-v="0">クリーン</button><button type="button" class="${s.p.mode ? 'on' : ''}" data-fx="amp" data-k="mode" data-v="1">歪み</button></span><button type="button" class="fx-chip ${s.p.cab ? 'on' : ''}" data-fx="amp" data-k="cab">キャビ ${s.p.cab ? 'ON' : 'OFF'}</button><button type="button" class="fx-chip ${E.irName ? 'on' : ''}" id="fx-ir" title="${(E.irName || '').replace(/"/g, '')}">${E.irName ? 'IR ✓' : 'IR'}</button><input type="file" id="fx-ir-file" accept="audio/*,.wav" hidden></div>`;
+    if (id === 'amp') return `<div class="fx-extra"><span class="fx-seg"><button type="button" class="${s.p.mode ? '' : 'on'}" data-fx="amp" data-k="mode" data-v="0">クリーン</button><button type="button" class="${s.p.mode ? 'on' : ''}" data-fx="amp" data-k="mode" data-v="1">歪み</button></span><button type="button" class="fx-chip ${s.p.cab ? 'on' : ''}" data-fx="amp" data-k="cab">キャビ ${s.p.cab ? 'ON' : 'OFF'}</button><button type="button" class="fx-chip ${E.irName ? 'on' : ''}" id="fx-ir" title="${E.irName ? E.irName.replace(/"/g, '') + '（クリックで標準に戻す）' : '標準のIRを使用中（クリックでIRファイルを読み込み）'}">${E.irName ? 'IR ✓' : 'IR'}</button><input type="file" id="fx-ir-file" accept="audio/*,.wav" hidden></div>`;
     if (id === 'reverb') return `<div class="fx-extra"><select class="fx-sel" data-fx="reverb" data-k="type" aria-label="リバーブの種類">${REVERB_TYPES.map((t, i) => `<option value="${i}" ${Math.round(s.p.type) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`;
     return '<div class="fx-extra"></div>';
   };
@@ -430,12 +454,15 @@ export function initFx({ ensureInput } = {}) {
       const sg = e.target.closest('.fx-seg button'); if (sg) { switchAmpMode(+sg.dataset.v); return; }
       const sw = e.target.closest('.fx-foot-sw'); if (sw) { setOn(sw.dataset.fx, !st.fx[sw.dataset.fx].on); return; }
       const cab = e.target.closest('.fx-chip[data-k="cab"]'); if (cab) { const v = st.fx.amp.p.cab ? 0 : 1; setParam('amp', 'cab', v); cab.classList.toggle('on', !!v); cab.textContent = 'キャビ ' + (v ? 'ON' : 'OFF'); return; }
-      if (e.target.id === 'fx-ir') q('fx-ir-file').click();
+      if (e.target.id === 'fx-ir') {
+        if (E.irName) { E.fx.amp.core.setIr(null); E.irName = null; const c = q('fx-ir'); c.textContent = 'IR'; c.classList.remove('on'); c.title = '標準のIRを使用中（クリックでIRファイルを読み込み）'; }
+        else q('fx-ir-file').click();
+      }
     });
     host.addEventListener('change', async e => {
       if (e.target.classList && e.target.classList.contains('fx-sel')) { setParam(e.target.dataset.fx, e.target.dataset.k, +e.target.value); return; }
       if (e.target.id !== 'fx-ir-file' || !e.target.files[0] || !E.ctx) return;
-      try { const buf = await E.ctx.decodeAudioData(await e.target.files[0].arrayBuffer()); E.fx.amp.core.setIr(buf); E.irName = e.target.files[0].name; q('fx-ir').textContent = 'IR ✓'; q('fx-ir').classList.add('on'); q('fx-ir').title = E.irName; }
+      try { const buf = await E.ctx.decodeAudioData(await e.target.files[0].arrayBuffer()); E.fx.amp.core.setIr(buf); E.irName = e.target.files[0].name; q('fx-ir').textContent = 'IR ✓'; q('fx-ir').classList.add('on'); q('fx-ir').title = E.irName + '（クリックで標準に戻す）'; }
       catch (err) { warn('IRファイルを読み込めませんでした。', 'err'); }
     });
     q('fx-flip').addEventListener('click', () => { st.flip = !st.flip; save(); renderChain(); });
@@ -459,4 +486,4 @@ export function initFx({ ensureInput } = {}) {
     get monitoring() { return E.on; }
   };
 }
-export { BUILD as FX_BUILD, widener as fxWidener };
+export { BUILD as FX_BUILD, widener as fxWidener, makeCabIr as fxCabIr };
