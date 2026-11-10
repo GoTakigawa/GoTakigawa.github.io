@@ -370,7 +370,7 @@ function renderFretboard() {
   svg += dots + hits + '</svg>';
   $('fretboard').innerHTML = svg;
   fbGeom = { cx, Y: s => top + gap * (n - 1 - s) };
-  $('fb-live').setAttribute('viewBox', `0 0 ${W} ${H + 18}`);
+  $('fb-live').setAttribute('viewBox', `0 0 ${W} ${H + 18}`); $('fb-next').setAttribute('viewBox', `0 0 ${W} ${H + 18}`);
   $('fb-title').textContent = titleFor(set) + (pb.on && pb.chord && st.mode === 'scale' ? ` ／ ${pb.chord.label}` : '') + (sh ? ` ／ ${sh.name}・${sh.title}` : '');
   $('fretboard').classList.toggle('hide-mode', fbAction === 'hide');
   return count;
@@ -830,6 +830,7 @@ function render() {
   renderShapes();
   renderTunerStrings();
   renderProg();
+  drawNext();
 }
 
 // ── events ──
@@ -1012,7 +1013,7 @@ function renderProg() {
   $('pg-play-ico').innerHTML = pb.on ? '<rect x="6" y="6" width="12" height="12" rx="1.5"/>' : '<path d="M7 4.5v15l13-7.5z"/>';
 }
 // the window of frets that fits the chord (nearest to where the hand was) or, with scales only, around the root
-function pickWindow(ch, sc) {
+function pickWindow(ch, sc, dry) {
   const tun = tuning(), F = st.frets, cands = [];
   const add = (lo, hi, bonus) => { lo = Math.max(0, lo); hi = Math.min(F, Math.max(hi, lo + 4)); lo = Math.max(0, Math.min(lo, hi - 4)); cands.push({ lo, hi, bonus }); };
   if (ch) {
@@ -1025,8 +1026,29 @@ function pickWindow(ch, sc) {
   let best = null;
   cands.forEach(c => { const sc2 = Math.abs((c.lo + c.hi) / 2 - pb.prevCenter) + c.bonus; if (!best || sc2 < best.s) best = { s: sc2, c }; });
   if (!best) return [0, Math.min(F, 4)];
-  pb.prevCenter = (best.c.lo + best.c.hi) / 2;
+  if (!dry) pb.prevCenter = (best.c.lo + best.c.hi) / 2;
   return [best.c.lo, best.c.hi];
+}
+// the chord that comes next (the next chord of this bar, or the first of the next bar), for the dashed preview on the fretboard
+function nextChordAfter(bi, ci) {
+  const n = pb.bars.length, bar = pb.bars[bi]; if (!bar) return null;
+  let nb = bi, nc = ci + 1;
+  if (nc >= Math.max(1, bar.chords.length)) { nb = bi + 1; nc = 0; if (nb >= n) { if (!st.prog.loop) return null; nb = 0; } }
+  const b2 = pb.bars[nb]; if (!b2 || !b2.chords.length) return null;
+  const ch = b2.chords[Math.min(nc, b2.chords.length - 1)], cur = bar.chords[Math.min(ci, bar.chords.length - 1)];
+  if (cur && cur.root === ch.root && cur.id === ch.id) return null;
+  const sc = b2.scales.length ? b2.scales[Math.min(nc, b2.scales.length - 1)] : null;
+  return { ch, sc, win: null };
+}
+function drawNext() {
+  const L = $('fb-next'); if (!L) return;
+  if (!pb.on || !pb.next || !fbGeom) { L.innerHTML = ''; return; }
+  const { ch, win } = pb.next, tun = tuning(), g = fbGeom, set = makeSet(ch.root, CHORDS[ch.id].iv), F = st.frets;
+  const lo = win ? win[0] : 0, hi = win ? win[1] : F; let h = '';
+  tun.forEach((open, sIdx) => { if (!st.strOn[sIdx]) return; for (let f = lo; f <= hi; f++) { const p = pc(open + f); if (!set.has(p)) continue;
+    const root = p === pc(ch.root);
+    h += `<circle cx="${g.cx(f).toFixed(1)}" cy="${g.Y(sIdx)}" r="13" fill="none" stroke="${root ? '#86efac' : '#38bdf8'}" stroke-width="1.6" stroke-dasharray="3 3" opacity=".85"/>`; } });
+  L.innerHTML = h;
 }
 function applyBar(bi, ci) {
   if (!pb.on || !pb.snap) return;
@@ -1035,10 +1057,11 @@ function applyBar(bi, ci) {
   const sc = bar.scales.length ? bar.scales[Math.min(ci, bar.scales.length - 1)] : null;
   if (!ch && !sc) return;
   pb.chord = ch; pb.scale = sc;
+  pb.next = nextChordAfter(bi, ci);
   if (sc) { st.mode = 'scale'; st.root = sc.root; st.scale = sc.id; st.diat = -1; st.emph = ch ? [] : [0]; }
   else { st.mode = 'chord'; st.root = ch.root; st.chord = ch.id; }
   shapeOverride = ch ? { root: ch.root, id: ch.id } : null; shapes = null; ssel = -1;
-  if (st.prog.follow) { const w = pickWindow(ch, sc); st.range = 'frets'; st.from = w[0]; st.to = w[1]; }
+  if (st.prog.follow) { const w = pickWindow(ch, sc); st.range = 'frets'; st.from = w[0]; st.to = w[1]; if (pb.next) pb.next.win = pickWindow(pb.next.ch, pb.next.sc, true); }
   else { st.range = pb.snap.range; st.from = pb.snap.from; st.to = pb.snap.to; }
   render();
 }
@@ -1104,7 +1127,7 @@ function stopProg() {
     const sn = pb.snap; Object.assign(st, { mode: sn.mode, root: sn.root, scale: sn.scale, chord: sn.chord, emph: sn.emph, diat: sn.diat, range: sn.range, from: sn.from, to: sn.to, pattern: sn.pattern });
     shapeOverride = sn.shape; shapes = null; ssel = -1;
   }
-  pb.on = false; pb.snap = null; pb.chord = pb.scale = null;
+  pb.on = false; pb.snap = null; pb.chord = pb.scale = null; pb.next = null;
   document.querySelectorAll('#pg-bars .pg-bar').forEach(b => { b.classList.remove('on'); const bb = b.querySelector('.beatbar'); if (bb) { bb.style.transition = 'none'; bb.style.width = '0'; } });
   save(); render();
 }
