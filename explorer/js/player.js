@@ -1,11 +1,11 @@
 // Drum / click pattern. drum = { res: steps per beat, bars: pattern length in bars, swing: { mode: 'off'|'8'|'16', amt: 50..80 },
-// rows: { instrumentId: 'string of 0..3 per step' } } where 0 = off, 1 = soft, 2 = normal, 3 = accent
+// rows: { instrumentId: 'string of 0..2 per step' } } where 0 = off, 1 = soft, 2 = strong
 export const DRUM_INSTR = [
   { id: 'crash', label: 'クラッシュ' }, { id: 'ride', label: 'ライド' }, { id: 'hatO', label: 'ハット（オープン）' }, { id: 'hat', label: 'ハット' },
   { id: 'tomH', label: 'ハイタム' }, { id: 'tomL', label: 'ロータム' }, { id: 'tomF', label: 'フロアタム' },
   { id: 'snare', label: 'スネア' }, { id: 'kick', label: 'キック' }, { id: 'click', label: 'クリック' }
 ];
-export const DRUM_VEL = [0, 0.45, 0.8, 1];
+export const DRUM_VEL = [0, 0.5, 1];
 export function swingShift(pos, sw) {
   if (!sw || sw.mode === 'off') return 0;
   const frac = pos - Math.floor(pos), near = x => Math.abs(frac - x) < 1e-6, d = (sw.amt / 100 - 0.5);
@@ -19,7 +19,7 @@ export function drumBar(a, t, beatDur, beats, drum, barIdx = 0) {
     for (let i = 0; i < per; i++) {
       const c = +(row[off + i] || 0); if (!c) continue;
       const pos = i / res + swingShift(i / res, drum.swing);
-      a.click(t + pos * beatDur, c === 3, id, DRUM_VEL[c]);
+      a.click(t + pos * beatDur, c === 2, id, DRUM_VEL[c]);
     }
   }
 }
