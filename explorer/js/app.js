@@ -1,13 +1,13 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=65';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=65';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=65';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=65';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=65';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=65';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=65';
-import { PitchListener } from './pitch.js?v=65';
-import { initLayout } from './layout.js?v=65';
-import { initTheme, themeColors } from './theme.js?v=65';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=66';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=66';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=66';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=66';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=66';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=66';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=66';
+import { PitchListener } from './pitch.js?v=66';
+import { initLayout } from './layout.js?v=66';
+import { initTheme, themeColors } from './theme.js?v=66';
 // the build number is the cache-busting ?v= of this file, shown next to BETA
 { const v = new URL(import.meta.url).searchParams.get('v'), el = document.getElementById('ver'); if (v && el) el.textContent = 'BETA ' + v; }
 const MAX_BARS = 120;
