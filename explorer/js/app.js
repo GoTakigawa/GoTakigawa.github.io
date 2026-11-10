@@ -1,13 +1,13 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=67';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=67';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=67';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=67';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=67';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=67';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=67';
-import { PitchListener } from './pitch.js?v=67';
-import { initLayout } from './layout.js?v=67';
-import { initTheme, themeColors } from './theme.js?v=67';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=68';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=68';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=68';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=68';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=68';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=68';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=68';
+import { PitchListener } from './pitch.js?v=68';
+import { initLayout } from './layout.js?v=68';
+import { initTheme, themeColors } from './theme.js?v=68';
 // the build number is the cache-busting ?v= of this file, shown next to BETA
 { const v = new URL(import.meta.url).searchParams.get('v'), el = document.getElementById('ver'); if (v && el) el.textContent = 'BETA ' + v; }
 const MAX_BARS = 120;
@@ -1001,7 +1001,7 @@ function bind() {
 const progKey = () => pb.on && pb.snap ? pb.snap.root : st.root;
 function progBars() {
   const key = progKey(), c = parseChordText(st.prog.chords, key), sc = parseScaleText(st.prog.scales, key);
-  const longest = Math.max(c.bars.length, sc.bars.length), n = Math.min(MAX_BARS, longest);
+  const longest = c.bars.length || sc.bars.length, n = Math.min(MAX_BARS, longest);   // the chord progression sets the number of bars; the scale progression repeats to fit (it sets it only when there are no chords)
   const bars = Array.from({ length: n }, (_, i) => ({ chords: c.bars.length ? c.bars[i % c.bars.length] : [], scales: sc.bars.length ? sc.bars[i % sc.bars.length] : [] }));
   return { bars, errors: [...c.errors, ...sc.errors], cut: longest > MAX_BARS, key };
 }
