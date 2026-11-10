@@ -122,6 +122,14 @@
   </aside>
 
   <main class="main">
+    <div class="metrics">
+      <div class="metric"><div class="metric-lbl">Showing</div><div class="metric-val small" id="m-target"></div></div>
+      <div class="metric"><div class="metric-lbl">Notes</div><div class="metric-val small" id="m-notes"></div></div>
+      <div class="metric"><div class="metric-lbl">Tuning</div><div class="metric-val small" id="m-tuning"></div><div class="metric-sub" id="m-open"></div></div>
+      <div class="metric"><div class="metric-lbl">Range</div><div class="metric-val small" id="m-range"></div></div>
+      <div class="metric"><div class="metric-lbl">Positions</div><div class="metric-val" id="m-count"></div></div>
+    </div>
+
     <section class="panel" id="quiz-panel" data-blk="quiz">
       <div class="panel-hd"><div class="panel-title"><span class="blk-grip" role="button" tabindex="0" title="ドラッグで並べ替え（キーボードは↑↓）" aria-label="ブロックを移動">⠿</span>Quiz<b>出された音をギターで弾いて答える</b></div></div>
       <div class="qz-bar">
@@ -145,15 +153,7 @@
       </div>
     </section>
 
-    <div class="metrics" data-blk="metrics"><span class="blk-grip" role="button" tabindex="0" title="ドラッグで並べ替え（キーボードは↑↓）" aria-label="ブロックを移動">⠿</span>
-      <div class="metric"><div class="metric-lbl">Showing</div><div class="metric-val small" id="m-target"></div></div>
-      <div class="metric"><div class="metric-lbl">Notes</div><div class="metric-val small" id="m-notes"></div></div>
-      <div class="metric"><div class="metric-lbl">Tuning</div><div class="metric-val small" id="m-tuning"></div><div class="metric-sub" id="m-open"></div></div>
-      <div class="metric"><div class="metric-lbl">Range</div><div class="metric-val small" id="m-range"></div></div>
-      <div class="metric"><div class="metric-lbl">Positions</div><div class="metric-val" id="m-count"></div></div>
-    </div>
-
-    <section class="panel" id="tuner-panel" data-blk="tuner">
+        <section class="panel" id="tuner-panel" data-blk="tuner">
       <div class="panel-hd">
         <div class="panel-title"><span class="blk-grip" role="button" tabindex="0" title="ドラッグで並べ替え（キーボードは↑↓）" aria-label="ブロックを移動">⠿</span>Tuner<b>弾いている音と位置をリアルタイム表示</b></div>
       </div>
