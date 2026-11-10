@@ -7,8 +7,8 @@ export const ACCENTS = [
 ];
 // the first entry of each list is the theme's own default (c = null); the rest are 7 choices
 export const SKIES = [
-  { name: '既定', c: null, dark: '#38bdf8', light: '#0a8fd0' }, { name: 'ブルー', c: '#60a5fa' }, { name: 'シアン', c: '#22d3ee' }, { name: 'インディゴ', c: '#818cf8' },
-  { name: 'ラベンダー', c: '#c084fc' }, { name: 'ピンク', c: '#f472b6' }, { name: 'オレンジ', c: '#fb923c' }, { name: 'イエロー', c: '#fbbf24' }
+  { name: '既定', c: null, dark: '#f2f2f2', light: '#2b2a27' }, { name: 'スカイ', c: '#38bdf8' }, { name: 'シアン', c: '#22d3ee' }, { name: 'ラベンダー', c: '#a78bfa' },
+  { name: 'ピンク', c: '#f472b6' }, { name: 'オレンジ', c: '#fb923c' }, { name: 'イエロー', c: '#fbbf24' }
 ];
 export const GREENS = [
   { name: '既定', c: null, dark: '#86efac', light: '#1fa55a' }, { name: 'グリーン', c: '#4ade80' }, { name: 'ライム', c: '#bef264' }, { name: 'ターコイズ', c: '#5eead4' },
