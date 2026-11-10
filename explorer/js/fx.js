@@ -77,6 +77,7 @@ function load() {
       if (id === 'amp' && f.mem) [0, 1].forEach(m => AMP_KNOBS.forEach(k => { const pd = FX_DEFS.amp.params.find(x => x.k === k), v = f.mem[m] && f.mem[m][k]; if (typeof v === 'number' && v >= pd.min && v <= pd.max) s.fx.amp.mem[m][k] = v; }));
     });
   } catch (e) {}
+  s.fx.amp.p.cab = 1;   // the cabinet is always on
   return s;
 }
 
@@ -469,7 +470,7 @@ export function initFx({ ensureInput } = {}) {
   const faderHtml = (id, p, v) => `<div class="fx-fd"><div class="fx-fader" role="slider" tabindex="0" data-fx="${id}" data-k="${p.k}" aria-label="${p.label}Hz" aria-valuemin="${p.min}" aria-valuemax="${p.max}" aria-valuenow="${v}" style="--f:${(v - p.min) / (p.max - p.min)}"><i></i></div><span class="fx-fl">${p.label}</span><span class="fx-kv">${fmtF(v)}</span></div>`;
   const extraHtml = (id, s) => {
     if (id === 'gate') return '<div class="fx-extra"><span class="fx-gate-ind"><i></i><em>—</em></span></div>';
-    if (id === 'amp') return `<div class="fx-extra"><span class="fx-seg"><button type="button" class="${s.p.mode ? '' : 'on'}" data-fx="amp" data-k="mode" data-v="0">クリーン</button><button type="button" class="${s.p.mode ? 'on' : ''}" data-fx="amp" data-k="mode" data-v="1">歪み</button></span><button type="button" class="fx-chip ${s.p.cab ? 'on' : ''}" data-fx="amp" data-k="cab">キャビ ${s.p.cab ? 'ON' : 'OFF'}</button><button type="button" class="fx-chip ${E.irName ? 'on' : ''}" id="fx-ir" title="${E.irName ? E.irName.replace(/"/g, '') + '（クリックで標準に戻す）' : '標準のIRを使用中（クリックでIRファイルを読み込み）'}">${E.irName ? 'IR ✓' : 'IR'}</button><input type="file" id="fx-ir-file" accept="audio/*,.wav" hidden></div>`;
+    if (id === 'amp') return `<div class="fx-extra"><span class="fx-seg"><button type="button" class="${s.p.mode ? '' : 'on'}" data-fx="amp" data-k="mode" data-v="0">クリーン</button><button type="button" class="${s.p.mode ? 'on' : ''}" data-fx="amp" data-k="mode" data-v="1">歪み</button></span><button type="button" class="fx-chip ${E.irName ? 'on' : ''}" id="fx-ir" title="${E.irName ? E.irName.replace(/"/g, '') + '（クリックで標準に戻す）' : '標準のIRを使用中（クリックでIRファイルを読み込み）'}">${E.irName ? 'IR ✓' : 'IR'}</button><input type="file" id="fx-ir-file" accept="audio/*,.wav" hidden></div>`;
     if (id === 'reverb') return `<div class="fx-extra"><select class="fx-sel" data-fx="reverb" data-k="type" aria-label="リバーブの種類">${REVERB_TYPES.map((t, i) => `<option value="${i}" ${Math.round(s.p.type) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`;
     return '<div class="fx-extra"></div>';
   };
@@ -568,7 +569,7 @@ export function initFx({ ensureInput } = {}) {
       st.order = Array.isArray(o.order) && o.order.length === ORDER.length ? o.order : d.order;
       ORDER.forEach(id => { if (!o.fx[id]) return; st.fx[id].on = !!o.fx[id].on; FX_DEFS[id].params.forEach(pp => { const v = o.fx[id].p && o.fx[id].p[pp.k]; if (typeof v === 'number') st.fx[id].p[pp.k] = v; });
         if (id === 'amp') { st.fx.amp.mem = o.fx.amp.mem || ampMem(); if (!o.fx.amp.mem) AMP_KNOBS.forEach(k => { st.fx.amp.mem[st.fx.amp.p.mode ? 1 : 0][k] = st.fx.amp.p[k]; }); } });
-      applyState(); paintSlots();
+      st.fx.amp.p.cab = 1; applyState(); paintSlots();
     };
     q('fx-slots').addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
