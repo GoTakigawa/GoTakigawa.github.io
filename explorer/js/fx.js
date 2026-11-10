@@ -304,7 +304,7 @@ export function initFx({ ensureInput } = {}) {
 
   // ── graph (built per audio context; the monitor connects it to the output) ──
   const build = (ctx, src) => {
-    E.ctx = ctx; E.src = src; E.fx = {}; E.irName = null;
+    E.ctx = ctx; E.src = src; E.fx = {}; E.irName = null; E.mcn = 0; E.mc = null;
     // the input may be a 2-channel stream with the guitar on one side only: sum it to one channel, then send that to both ears
     E.split = ctx.createChannelSplitter(2); E.fxIn = ctx.createGain(); E.fxIn.channelCount = 1; E.fxIn.channelCountMode = 'explicit';
     E.split.connect(E.fxIn, 0); E.split.connect(E.fxIn, 1);
@@ -312,6 +312,11 @@ export function initFx({ ensureInput } = {}) {
     E.limiter = ctx.createWaveShaper(); E.limiter.curve = clipCurve();   // safety clipper (a compressor-style limiter would add ~6 ms of lookahead)
     E.outAn = ctx.createAnalyser(); E.outAn.fftSize = 4096; E.outAn.smoothingTimeConstant = 0;
     E.mute = ctx.createGain(); E.mute.gain.value = 0; E.mute.connect(ctx.destination);   // keeps the level taps pulled without any playback
+    // meters at the end of the chain: a spectrum analyser, and left / right taps for the goniometer (mono is spread to both sides first)
+    E.spec = ctx.createAnalyser(); E.spec.fftSize = 4096; E.spec.smoothingTimeConstant = 0.75; E.spec.minDecibels = -100; E.spec.maxDecibels = -10; E.spec.connect(E.mute);
+    E.tapUp = ctx.createGain(); E.tapUp.channelCount = 2; E.tapUp.channelCountMode = 'explicit'; E.tapUp.channelInterpretation = 'speakers';
+    E.tapSp = ctx.createChannelSplitter(2); E.anL = ctx.createAnalyser(); E.anR = ctx.createAnalyser();
+    [E.anL, E.anR].forEach(a => { a.fftSize = 1024; a.smoothingTimeConstant = 0; a.connect(E.mute); }); E.tapUp.connect(E.tapSp); E.tapSp.connect(E.anL, 0); E.tapSp.connect(E.anR, 1);
     ORDER.forEach(id => {
       E.fx[id] = { core: BUILD[id](ctx) }; applyAll(id);
       // input-level tap in front of the effect (works whether the effect is on or bypassed)
@@ -331,7 +336,7 @@ export function initFx({ ensureInput } = {}) {
     E.fxIn.disconnect(); ORDER.forEach(id => { try { E.fx[id].core.out.disconnect(); } catch (e) {} });
     let prev = E.fxIn;
     st.order.forEach(id => { const e = E.fx[id]; if (e.an) prev.connect(e.an); if (!st.fx[id].on) return; prev.connect(e.core.in); prev = e.core.out; });
-    prev.connect(E.master);
+    prev.connect(E.master); prev.connect(E.spec); prev.connect(E.tapUp);
   };
   // time-based effects start from a clean state when they are switched on
   const rebuild = id => { try { E.fx[id].core.out.disconnect(); } catch (e) {} E.fx[id].core = BUILD[id](E.ctx); applyAll(id); };
@@ -346,6 +351,36 @@ export function initFx({ ensureInput } = {}) {
   // ── level rings around the gate / comp threshold knobs, gate indicator, comp gain-reduction meter ──
   const setLed = () => { const el = q('fx-chain') && q('fx-chain').querySelector('.fx-gate-ind'); if (!el) return; const open = E.gateOpen && st.fx.gate.on; el.classList.toggle('open', open); el.lastElementChild.textContent = st.fx.gate.on ? (open ? '開' : '閉') : '—'; };
   const setGr = () => { const el = q('fx-chain') && q('fx-chain').querySelector('.fx-gr i'); if (el) el.style.width = (st.fx.comp.on ? Math.min(100, (E.gr || 0) / 18 * 100) : 0) + '%'; };
+  const prep = c => { const dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight; if (c.width !== Math.round(w * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); } const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h); return [g, w, h]; };
+  const drawMeters = () => {
+    const cs = q('fx-spec'), cg = q('fx-gonio'); if (!cs || !cg || !E.spec || !E.mvis) return;   // only while the meters are on screen
+    const now = performance.now(); if (now - (E.mt0 || 0) < 55) return; E.mt0 = now;   // about 18 fps
+    if (!E.mc || ++E.mcn % 25 === 0) { const cst = getComputedStyle(document.documentElement); E.mc = { a: cst.getPropertyValue('--accent1').trim() || '#8c4dff', t: cst.getPropertyValue('--text3').trim() || '#888', l: cst.getPropertyValue('--border2').trim() || '#333' }; E.mcn = 0; }
+    // spectrum: 30 Hz - 16 kHz on a log axis, -90 .. -10 dB
+    { const [g, W, H] = prep(cs), sr = E.ctx.sampleRate, db = E.sdb || (E.sdb = new Float32Array(E.spec.frequencyBinCount)), nb = Math.floor(W / 4), hz = i => 30 * Math.pow(16000 / 30, i / nb);
+      E.spec.getFloatFrequencyData(db);
+      g.strokeStyle = E.mc.l; g.fillStyle = E.mc.t; g.font = '9px sans-serif'; g.lineWidth = 1;
+      [100, 1000, 10000].forEach(f => { const x = Math.round(W * Math.log(f / 30) / Math.log(16000 / 30)) + 0.5; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H - 12); g.stroke(); g.fillText(f >= 1000 ? f / 1000 + 'k' : String(f), x + 2, H - 2); });
+      g.fillStyle = E.mc.a; g.globalAlpha = 0.85;
+      for (let i = 0; i < nb; i++) {
+        const p0 = hz(i) * E.spec.fftSize / sr, p1 = hz(i + 1) * E.spec.fftSize / sr; let m = -120;
+        if (p1 - p0 < 1) { const k = Math.floor(p0), f = p0 - k; m = db[k] * (1 - f) + db[k + 1] * f; } else for (let b = Math.floor(p0); b <= Math.ceil(p1) && b < db.length; b++) if (db[b] > m) m = db[b];   // bands narrower than a bin are interpolated
+        const h = Math.max(0, Math.min(1, (m + 90) / 80)) * (H - 12); g.fillRect(i * 4, H - 12 - h, 3, h);
+      }
+      g.globalAlpha = 1; }
+    // goniometer: L/R rotated 45 degrees (vertical = mono, horizontal = side), with a gentle auto-scale and the L/R correlation
+    { const [g, W, H] = prep(cg), L = E.gl || (E.gl = new Float32Array(1024)), R = E.gr || (E.gr = new Float32Array(1024)); E.anL.getFloatTimeDomainData(L); E.anR.getFloatTimeDomainData(R);
+      let pk = 0, ll = 0, rr = 0, lr = 0; for (let i = 0; i < 1024; i++) { pk = Math.max(pk, Math.abs(L[i]), Math.abs(R[i])); ll += L[i] * L[i]; rr += R[i] * R[i]; lr += L[i] * R[i]; }
+      E.gs = (E.gs || 4) * 0.9 + Math.min(20, 0.6 / Math.max(pk, 0.02)) * 0.1;
+      const cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - 10;
+      g.strokeStyle = E.mc.l; g.fillStyle = E.mc.t; g.lineWidth = 1; g.font = '9px sans-serif';
+      g.beginPath(); g.moveTo(cx, cy - r); g.lineTo(cx, cy + r); g.moveTo(cx - r, cy); g.lineTo(cx + r, cy); g.stroke(); g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.stroke();
+      g.fillText('M', cx + 3, cy - r + 8); g.fillText('S', cx + r - 8, cy - 3); g.fillText('L', cx - r + 2, cy - r + 8); g.fillText('R', cx + r - 8, cy - r + 8);
+      g.fillStyle = E.mc.a; g.globalAlpha = 0.5; g.beginPath();   // one path for all points
+      for (let i = 0; i < 1024; i += 2) { const x = (L[i] - R[i]) * 0.7071 * E.gs, y = (L[i] + R[i]) * 0.7071 * E.gs, px = cx + Math.max(-1, Math.min(1, x)) * r, py = cy - Math.max(-1, Math.min(1, y)) * r; g.rect(px - 0.75, py - 0.75, 1.5, 1.5); }
+      g.fill(); g.globalAlpha = 1;
+      const cr = q('fx-corr'); if (cr) cr.textContent = pk > 0.003 ? '相関 ' + (lr / Math.sqrt(ll * rr + 1e-12) >= 0 ? '+' : '') + (lr / Math.sqrt(ll * rr + 1e-12)).toFixed(2) : '相関 —'; }
+  };
   const meter = () => {
     if (!E.ctx || document.hidden) return;
     const pn = q('fx-panel'); if (pn && pn.classList.contains('collapsed')) return;
@@ -357,6 +392,7 @@ export function initFx({ ensureInput } = {}) {
       ring.querySelector('.lv').setAttribute('stroke-dasharray', `${(f * 100).toFixed(1)} 100`); ring.classList.toggle('hot', db > st.fx[id].p.thr);
     });
     if (!st.fx.comp.on) setGr();
+    drawMeters();
   };
 
   // ── howl guard: a tone that is stable in pitch, much stronger than the rest and still growing -> mute at once ──
@@ -500,6 +536,7 @@ export function initFx({ ensureInput } = {}) {
       try { const buf = await E.ctx.decodeAudioData(await e.target.files[0].arrayBuffer()); E.fx.amp.core.setIr(buf); E.irName = e.target.files[0].name; q('fx-ir').textContent = 'IR ✓'; q('fx-ir').classList.add('on'); q('fx-ir').title = E.irName + '（クリックで標準に戻す）'; }
       catch (err) { warn('IRファイルを読み込めませんでした。', 'err'); }
     });
+    if ('IntersectionObserver' in window && q('fx-spec')) new IntersectionObserver(es => { E.mvis = es.some(x => x.isIntersecting); }, { threshold: 0 }).observe(q('fx-spec').closest('.fx-meters')); else E.mvis = true;
     q('fx-guard').checked = st.guard;
     q('fx-guard').addEventListener('change', e => {
       st.guard = e.target.checked; save();
