@@ -481,3 +481,5 @@ body.blk-dragging,body.blk-dragging *{cursor:grabbing !important;user-select:non
 .fb-glow{animation:nxg 2s cubic-bezier(.35,0,.85,.55) forwards;animation-fill-mode:both;}
 @keyframes nxg{from{opacity:.14}to{opacity:.95}}
 @media (prefers-reduced-motion:reduce){.fb-glow{animation:none;opacity:.5}}
+
+#dr-amt-note{font-size:10px;color:var(--accent2-text,var(--text2));letter-spacing:0;min-height:12px;}
