@@ -48,7 +48,10 @@ export const FX_DEFS = {
 };
 const REVERB_TYPES = ['ルーム', 'ホール', 'プレート', 'スプリング'];
 const ORDER = ['gate', 'comp', 'od', 'dist', 'amp', 'eq', 'delay', 'reverb'];
-const defState = () => ({ order: ORDER.slice(), flip: false, master: 0.5, out: '', fx: Object.fromEntries(ORDER.map(id => [id, { on: false, p: Object.fromEntries(FX_DEFS[id].params.map(p => [p.k, p.def])) }])) });
+// the amp keeps separate knob settings for its clean and drive modes (mem[mode]; the active mode's values live in p)
+const AMP_KNOBS = ['treble', 'mid', 'bass', 'gain', 'level', 'width'];
+const ampMem = () => { const def = Object.fromEntries(FX_DEFS.amp.params.map(p => [p.k, p.def])), pick = o => Object.fromEntries(AMP_KNOBS.map(k => [k, o[k]])); return { 0: { ...pick(def), gain: 30 }, 1: pick(def) }; };
+const defState = () => { const s = { order: ORDER.slice(), flip: false, master: 0.5, out: '', fx: Object.fromEntries(ORDER.map(id => [id, { on: false, p: Object.fromEntries(FX_DEFS[id].params.map(p => [p.k, p.def])) }])) }; s.fx.amp.mem = ampMem(); return s; };
 function load() {
   const s = defState();
   try {
@@ -57,7 +60,9 @@ function load() {
     if (typeof o.master === 'number') s.master = Math.max(0, Math.min(1, o.master));
     if (typeof o.out === 'string') s.out = o.out;
     if (typeof o.flip === 'boolean') s.flip = o.flip;
-    ORDER.forEach(id => { const f = o.fx && o.fx[id]; if (!f) return; s.fx[id].on = !!f.on; FX_DEFS[id].params.forEach(p => { const v = f.p && f.p[p.k]; if (typeof v === 'number' && v >= (p.min ?? 0) && v <= (p.max ?? 1)) s.fx[id].p[p.k] = v; }); });
+    ORDER.forEach(id => { const f = o.fx && o.fx[id]; if (!f) return; s.fx[id].on = !!f.on; FX_DEFS[id].params.forEach(p => { const v = f.p && f.p[p.k]; if (typeof v === 'number' && v >= (p.min ?? 0) && v <= (p.max ?? 1)) s.fx[id].p[p.k] = v; });
+      if (id === 'amp' && f.mem) [0, 1].forEach(m => AMP_KNOBS.forEach(k => { const pd = FX_DEFS.amp.params.find(x => x.k === k), v = f.mem[m] && f.mem[m][k]; if (typeof v === 'number' && v >= pd.min && v <= pd.max) s.fx.amp.mem[m][k] = v; }));
+    });
   } catch (e) {}
   return s;
 }
@@ -241,7 +246,7 @@ export function initFx({ ensureInput } = {}) {
 
   // ── graph (built per audio context; the monitor connects it to the output) ──
   const build = (ctx, src) => {
-    E.ctx = ctx; E.src = src; E.fx = {};
+    E.ctx = ctx; E.src = src; E.fx = {}; E.irName = null;
     // the input may be a 2-channel stream with the guitar on one side only: sum it to one channel, then send that to both ears
     E.split = ctx.createChannelSplitter(2); E.fxIn = ctx.createGain(); E.fxIn.channelCount = 1; E.fxIn.channelCountMode = 'explicit';
     E.split.connect(E.fxIn, 0); E.split.connect(E.fxIn, 1);
@@ -352,7 +357,7 @@ export function initFx({ ensureInput } = {}) {
   const extraHtml = (id, s) => {
     if (id === 'gate') return '<div class="fx-extra"><span class="fx-gate-ind"><i></i><em>—</em></span></div>';
     if (id === 'comp') return '<div class="fx-extra"><span class="fx-gr-l">GR</span><span class="fx-gr"><i></i></span></div>';
-    if (id === 'amp') return `<div class="fx-extra"><span class="fx-seg"><button type="button" class="${s.p.mode ? '' : 'on'}" data-fx="amp" data-k="mode" data-v="0">クリーン</button><button type="button" class="${s.p.mode ? 'on' : ''}" data-fx="amp" data-k="mode" data-v="1">歪み</button></span><button type="button" class="fx-chip ${s.p.cab ? 'on' : ''}" data-fx="amp" data-k="cab">キャビ ${s.p.cab ? 'ON' : 'OFF'}</button><button type="button" class="fx-chip" id="fx-ir">IR</button><input type="file" id="fx-ir-file" accept="audio/*,.wav" hidden></div>`;
+    if (id === 'amp') return `<div class="fx-extra"><span class="fx-seg"><button type="button" class="${s.p.mode ? '' : 'on'}" data-fx="amp" data-k="mode" data-v="0">クリーン</button><button type="button" class="${s.p.mode ? 'on' : ''}" data-fx="amp" data-k="mode" data-v="1">歪み</button></span><button type="button" class="fx-chip ${s.p.cab ? 'on' : ''}" data-fx="amp" data-k="cab">キャビ ${s.p.cab ? 'ON' : 'OFF'}</button><button type="button" class="fx-chip ${E.irName ? 'on' : ''}" id="fx-ir" title="${(E.irName || '').replace(/"/g, '')}">${E.irName ? 'IR ✓' : 'IR'}</button><input type="file" id="fx-ir-file" accept="audio/*,.wav" hidden></div>`;
     if (id === 'reverb') return `<div class="fx-extra"><select class="fx-sel" data-fx="reverb" data-k="type" aria-label="リバーブの種類">${REVERB_TYPES.map((t, i) => `<option value="${i}" ${Math.round(s.p.type) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`;
     return '<div class="fx-extra"></div>';
   };
@@ -377,6 +382,11 @@ export function initFx({ ensureInput } = {}) {
       if (fader) el.style.setProperty('--f', (v - p.min) / (p.max - p.min)); else el.style.setProperty('--a', ang(p, v) + 'deg');
       el.setAttribute('aria-valuenow', v); el.closest('.fx-kn, .fx-fd').querySelector('.fx-kv').textContent = fader ? fmtF(v) : fmt(p, v);
     }
+  };
+  const switchAmpMode = v => {
+    const a = st.fx.amp, old = a.p.mode ? 1 : 0; if (old === v) return;
+    a.mem[old] = Object.fromEntries(AMP_KNOBS.map(k => [k, a.p[k]])); a.p.mode = v; Object.assign(a.p, a.mem[v]);
+    if (E.fx.amp) applyAll('amp'); save(); renderChain();
   };
   const setOn = (id, on) => { st.fx[id].on = on; if (E.fx[id]) { if (on && (id === 'delay' || id === 'reverb')) rebuild(id); rewire(); } const m = q('fx-chain').querySelector(`.fx-mod[data-id="${id}"]`); if (m) { m.classList.toggle('on', on); m.querySelector('.fx-foot-sw').setAttribute('aria-pressed', String(on)); } setLed(); setGr(); save(); };
   const fillOut = async () => {
@@ -417,7 +427,7 @@ export function initFx({ ensureInput } = {}) {
         if (j >= 0 && j < st.order.length) { [st.order[i], st.order[j]] = [st.order[j], st.order[i]]; save(); renderChain(); wire(); }
         return;
       }
-      const sg = e.target.closest('.fx-seg button'); if (sg) { setParam(sg.dataset.fx, sg.dataset.k, +sg.dataset.v); sg.parentElement.querySelectorAll('button').forEach(b2 => b2.classList.toggle('on', b2 === sg)); return; }
+      const sg = e.target.closest('.fx-seg button'); if (sg) { switchAmpMode(+sg.dataset.v); return; }
       const sw = e.target.closest('.fx-foot-sw'); if (sw) { setOn(sw.dataset.fx, !st.fx[sw.dataset.fx].on); return; }
       const cab = e.target.closest('.fx-chip[data-k="cab"]'); if (cab) { const v = st.fx.amp.p.cab ? 0 : 1; setParam('amp', 'cab', v); cab.classList.toggle('on', !!v); cab.textContent = 'キャビ ' + (v ? 'ON' : 'OFF'); return; }
       if (e.target.id === 'fx-ir') q('fx-ir-file').click();
@@ -425,7 +435,7 @@ export function initFx({ ensureInput } = {}) {
     host.addEventListener('change', async e => {
       if (e.target.classList && e.target.classList.contains('fx-sel')) { setParam(e.target.dataset.fx, e.target.dataset.k, +e.target.value); return; }
       if (e.target.id !== 'fx-ir-file' || !e.target.files[0] || !E.ctx) return;
-      try { const buf = await E.ctx.decodeAudioData(await e.target.files[0].arrayBuffer()); E.fx.amp.core.setIr(buf); q('fx-ir').textContent = 'IR ✓'; q('fx-ir').title = e.target.files[0].name; }
+      try { const buf = await E.ctx.decodeAudioData(await e.target.files[0].arrayBuffer()); E.fx.amp.core.setIr(buf); E.irName = e.target.files[0].name; q('fx-ir').textContent = 'IR ✓'; q('fx-ir').classList.add('on'); q('fx-ir').title = E.irName; }
       catch (err) { warn('IRファイルを読み込めませんでした。', 'err'); }
     });
     q('fx-flip').addEventListener('click', () => { st.flip = !st.flip; save(); renderChain(); });
