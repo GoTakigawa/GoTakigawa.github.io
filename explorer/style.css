@@ -630,5 +630,7 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
 .tn-sens output{font-size:11px;color:var(--text2);min-width:44px;text-align:right;font-variant-numeric:tabular-nums;}
 .tn-auto{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);white-space:nowrap;cursor:pointer;}
 .tn-sens.auto input[type=range]{opacity:.45;}
-.tool-sens .tn-sens{min-height:0;}
-.tool-sens input[type=range]{width:110px;flex:none;}
+.fb-sens{display:flex;align-items:center;gap:10px;margin:-2px 0 8px;}
+.fb-sens .tn-sens{min-height:0;}
+.fb-sens input[type=range]{width:140px;flex:none;}
+.fb-sens output{min-width:48px;text-align:left;}
