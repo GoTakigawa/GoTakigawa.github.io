@@ -27,7 +27,7 @@ export class PianoEngine {
       comp.threshold.value = -14; comp.ratio.value = 4;
       this.master = this.ctx.createGain(); this.master.gain.value = this.muted ? 0 : this.vol * this.vol;
       this.master.connect(comp); comp.connect(this.ctx.destination);
-      const nb = this.ctx.createBuffer(1, this.ctx.sampleRate, this.ctx.sampleRate), d = nb.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const nb = this.ctx.createBuffer(1, this.ctx.sampleRate * 2, this.ctx.sampleRate), d = nb.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
       this.noise = nb;
     }
     if (this.ctx.state !== 'running') await this.ctx.resume();
@@ -73,15 +73,33 @@ export class PianoEngine {
     });
   }
 
-  // metronome / count-in sound: a short synthesised click or drum hit; accent = first beat
-  click(when, accent, kind) {
+  // metronome / count-in / drum sounds, all synthesised. accent = the strong version (higher click, harder hit); vel = 0..1 loudness
+  click(when, accent, kind, vel) {
     const ctx = this.ctx; if (!ctx) return;
-    kind = kind || this.clickKind;
+    kind = kind || this.clickKind; const V = vel == null ? 1 : vel;
     const out = (node, stopAt) => { this.voices.add(node); node.onended = () => { this.voices.delete(node); node.disconnect(); }; node.start(when); node.stop(when + stopAt); };
-    const gainEnv = (peak, dec) => { const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, when); g.gain.exponentialRampToValueAtTime(peak, when + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, when + dec); g.connect(this.master); return g; };
+    const gainEnv = (peak, dec) => { const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, when); g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak * V), when + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, when + dec); g.connect(this.master); return g; };
     const noiseSrc = (filterType, freq, q) => { const n = ctx.createBufferSource(); n.buffer = this.noise; const fl = ctx.createBiquadFilter(); fl.type = filterType; fl.frequency.value = freq; fl.Q.value = q || 0.7; n.connect(fl); return { n, fl }; };
+    const tom = (f1, f2, dec, peak) => {
+      const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(f1, when); o.frequency.exponentialRampToValueAtTime(f2, when + dec * 0.45);
+      o.connect(gainEnv(peak, dec)); out(o, dec + 0.05);
+      const { n, fl } = noiseSrc('bandpass', 1800, 0.9); fl.connect(gainEnv(0.12, 0.03)); out(n, 0.05);
+    };
     if (kind === 'hat') {
       const { n, fl } = noiseSrc('highpass', 7500); fl.connect(gainEnv(accent ? 0.2 : 0.13, accent ? 0.09 : 0.05)); out(n, 0.12);
+    } else if (kind === 'hatO') {
+      const { n, fl } = noiseSrc('highpass', 6800); fl.connect(gainEnv(accent ? 0.2 : 0.14, 0.38)); out(n, 0.42);
+      const b = noiseSrc('bandpass', 9500, 1.4); b.fl.connect(gainEnv(0.07, 0.3)); out(b.n, 0.34);
+    } else if (kind === 'tomH') tom(accent ? 300 : 270, 175, 0.26, accent ? 0.5 : 0.42);
+    else if (kind === 'tomL') tom(accent ? 220 : 195, 125, 0.32, accent ? 0.52 : 0.44);
+    else if (kind === 'tomF') tom(accent ? 160 : 145, 88, 0.42, accent ? 0.56 : 0.48);
+    else if (kind === 'crash') {
+      const { n, fl } = noiseSrc('highpass', 4800); fl.connect(gainEnv(accent ? 0.3 : 0.22, 1.5)); out(n, 1.55);
+      const b = noiseSrc('bandpass', 8200, 0.9); b.fl.connect(gainEnv(0.13, 1.1)); out(b.n, 1.15);
+    } else if (kind === 'ride') {
+      // bow: a small cluster of inharmonic partials, a bright tick and a short shimmer
+      [3100, 4350, 5420, 6870].forEach((f, i) => { const o = ctx.createOscillator(); o.type = 'square'; o.frequency.value = f; const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 3500; o.connect(hp); hp.connect(gainEnv((accent ? 0.05 : 0.036) / (1 + i * 0.25), 0.55 - i * 0.04)); out(o, 0.6); });
+      const { n, fl } = noiseSrc('highpass', 9000); fl.connect(gainEnv(accent ? 0.09 : 0.06, 0.2)); out(n, 0.24);
     } else if (kind === 'rim') {
       const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = accent ? 1900 : 1500; o.connect(gainEnv(accent ? 0.22 : 0.15, 0.04)); out(o, 0.06);
       const { n, fl } = noiseSrc('bandpass', 3200, 1.2); fl.connect(gainEnv(0.1, 0.02)); out(n, 0.04);
@@ -94,7 +112,8 @@ export class PianoEngine {
     } else if (kind === 'wood') {
       const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = accent ? 1320 : 880; o.connect(gainEnv(accent ? 0.28 : 0.2, 0.07)); out(o, 0.09);
     } else {
-      const o = ctx.createOscillator(); o.type = 'square'; o.frequency.value = accent ? 1760 : 1180; o.connect(gainEnv(accent ? 0.09 : 0.05, 0.035)); out(o, 0.05);
+      // click: high (accent) / middle / low (soft)
+      const o = ctx.createOscillator(); o.type = 'square'; o.frequency.value = accent ? 1760 : (V < 0.6 ? 880 : 1180); o.connect(gainEnv(accent ? 0.09 : 0.05, 0.035)); out(o, 0.05);
     }
   }
 
