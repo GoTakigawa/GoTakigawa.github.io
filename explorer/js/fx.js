@@ -51,7 +51,7 @@ const ORDER = ['gate', 'comp', 'od', 'dist', 'amp', 'eq', 'delay', 'reverb'];
 // the amp keeps separate knob settings for its clean and drive modes (mem[mode]; the active mode's values live in p)
 const AMP_KNOBS = ['treble', 'mid', 'bass', 'gain', 'level', 'width'];
 const ampMem = () => { const def = Object.fromEntries(FX_DEFS.amp.params.map(p => [p.k, p.def])), pick = o => Object.fromEntries(AMP_KNOBS.map(k => [k, o[k]])); return { 0: { ...pick(def), gain: 30 }, 1: pick(def) }; };
-const defState = () => { const s = { order: ORDER.slice(), flip: false, master: 0.5, out: '', fx: Object.fromEntries(ORDER.map(id => [id, { on: false, p: Object.fromEntries(FX_DEFS[id].params.map(p => [p.k, p.def])) }])) }; s.fx.amp.mem = ampMem(); return s; };
+const defState = () => { const s = { order: ORDER.slice(), flip: false, guard: true, master: 0.5, out: '', fx: Object.fromEntries(ORDER.map(id => [id, { on: false, p: Object.fromEntries(FX_DEFS[id].params.map(p => [p.k, p.def])) }])) }; s.fx.amp.mem = ampMem(); return s; };
 function load() {
   const s = defState();
   try {
@@ -60,6 +60,7 @@ function load() {
     if (typeof o.master === 'number') s.master = Math.max(0, Math.min(1, o.master));
     if (typeof o.out === 'string') s.out = o.out;
     if (typeof o.flip === 'boolean') s.flip = o.flip;
+    if (typeof o.guard === 'boolean') s.guard = o.guard;
     ORDER.forEach(id => { const f = o.fx && o.fx[id]; if (!f) return; s.fx[id].on = !!f.on; FX_DEFS[id].params.forEach(p => { const v = f.p && f.p[p.k]; if (typeof v === 'number' && v >= (p.min ?? 0) && v <= (p.max ?? 1)) s.fx[id].p[p.k] = v; });
       if (id === 'amp' && f.mem) [0, 1].forEach(m => AMP_KNOBS.forEach(k => { const pd = FX_DEFS.amp.params.find(x => x.k === k), v = f.mem[m] && f.mem[m][k]; if (typeof v === 'number' && v >= pd.min && v <= pd.max) s.fx.amp.mem[m][k] = v; }));
     });
@@ -350,12 +351,13 @@ export function initFx({ ensureInput } = {}) {
     b.classList.toggle('on', E.on); b.setAttribute('aria-pressed', String(E.on)); q('fx-monitor-label').textContent = E.on ? 'モニターを止める' : 'モニターを始める';
     q('fx-state').textContent = E.on ? 'モニター中（ヘッドホン／モニタースピーカー推奨）' : '出力しない（入力のみ）'; q('fx-state').classList.toggle('on', E.on);
   };
+  const noteOn = () => warn(st.guard ? 'モニター中です。ヘッドホンか、モニタースピーカーでお使いください。ギターに近いスピーカーだと、音が回り込んでハウリングすることがあります。' : 'ハウリング検知をオフにしています。音量と、スピーカーの位置にご注意ください。');
   const startMonitor = () => {
     if (E.on || !E.ctx) return;
     E.on = true; E.hist = []; E.loud = 0; E.master.gain.value = 0;
     E.limiter.connect(E.ctx.destination);
-    setMaster(0.15); clearInterval(E.timer); E.timer = setInterval(guard, 100);
-    warn('モニター中です。ヘッドホンか、モニタースピーカーでお使いください。ギターに近いスピーカーだと、音が回り込んでハウリングすることがあります。');
+    setMaster(0.15); clearInterval(E.timer); E.timer = st.guard ? setInterval(guard, 100) : 0;
+    noteOn();
     refreshUi();
   };
   const stopMonitor = (quick) => {
@@ -464,6 +466,11 @@ export function initFx({ ensureInput } = {}) {
       if (e.target.id !== 'fx-ir-file' || !e.target.files[0] || !E.ctx) return;
       try { const buf = await E.ctx.decodeAudioData(await e.target.files[0].arrayBuffer()); E.fx.amp.core.setIr(buf); E.irName = e.target.files[0].name; q('fx-ir').textContent = 'IR ✓'; q('fx-ir').classList.add('on'); q('fx-ir').title = E.irName + '（クリックで標準に戻す）'; }
       catch (err) { warn('IRファイルを読み込めませんでした。', 'err'); }
+    });
+    q('fx-guard').checked = st.guard;
+    q('fx-guard').addEventListener('change', e => {
+      st.guard = e.target.checked; save();
+      if (E.on) { clearInterval(E.timer); E.hist = []; E.loud = 0; E.timer = st.guard ? setInterval(guard, 100) : 0; noteOn(); }
     });
     q('fx-flip').addEventListener('click', () => { st.flip = !st.flip; save(); renderChain(); });
     q('fx-out').addEventListener('change', e => { st.out = e.target.value; save(); applySink(); });
