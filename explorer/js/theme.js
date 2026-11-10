@@ -7,12 +7,12 @@ export const ACCENTS = [
 ];
 // the first entry of each list is the theme's own default (c = null); the rest are 7 choices
 export const SKIES = [
-  { name: '既定', c: null, dark: '#f2f2f2', light: '#2b2a27' }, { name: 'スカイ', c: '#38bdf8' }, { name: 'シアン', c: '#22d3ee' }, { name: 'ラベンダー', c: '#a78bfa' },
-  { name: 'ピンク', c: '#f472b6' }, { name: 'オレンジ', c: '#fb923c' }, { name: 'イエロー', c: '#fbbf24' }
+  { name: '既定', c: null, dark: '#f2f2f2', light: '#2b2a27' }, { name: 'レッド', c: '#f87171' }, { name: 'オレンジ', c: '#fb923c' }, { name: 'イエロー', c: '#facc15' },
+  { name: 'グリーン', c: '#4ade80' }, { name: 'シアン', c: '#22d3ee' }, { name: 'ブルー', c: '#60a5fa' }, { name: 'パープル', c: '#c084fc' }
 ];
 export const GREENS = [
-  { name: '既定', c: null, dark: '#86efac', light: '#1fa55a' }, { name: 'グリーン', c: '#4ade80' }, { name: 'ライム', c: '#bef264' }, { name: 'ターコイズ', c: '#5eead4' },
-  { name: 'イエロー', c: '#fde047' }, { name: 'オレンジ', c: '#fdba74' }, { name: 'ローズ', c: '#fda4af' }, { name: 'ラベンダー', c: '#d8b4fe' }
+  { name: '既定', c: null, dark: '#86efac', light: '#1fa55a' }, { name: 'レッド', c: '#fca5a5' }, { name: 'オレンジ', c: '#fdba74' }, { name: 'イエロー', c: '#fde047' },
+  { name: 'グリーン', c: '#4ade80' }, { name: 'シアン', c: '#67e8f9' }, { name: 'ブルー', c: '#93c5fd' }, { name: 'パープル', c: '#d8b4fe' }
 ];
 const DEFAULT = { mode: 'dark', accent: '#8c4dff', sky: null, green: null };
 const hex = c => typeof c === 'string' && /^#[0-9a-fA-F]{6}$/.test(c);
