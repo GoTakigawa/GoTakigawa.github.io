@@ -51,6 +51,16 @@ const ORDER = ['gate', 'comp', 'od', 'dist', 'amp', 'eq', 'delay', 'reverb'];
 // the amp keeps separate knob settings for its clean and drive modes (mem[mode]; the active mode's values live in p)
 const AMP_KNOBS = ['treble', 'mid', 'bass', 'gain', 'level', 'width'];
 const ampMem = () => { const def = Object.fromEntries(FX_DEFS.amp.params.map(p => [p.k, p.def])), pick = o => Object.fromEntries(AMP_KNOBS.map(k => [k, o[k]])); return { 0: { ...pick(def), gain: 30 }, 1: pick(def) }; };
+// built-in sample setting (separate from the defaults and from the user's 3 slots)
+const SAMPLE = { order: ORDER.slice(), fx: {
+  gate: { on: true, p: { thr: -53 } },
+  comp: { on: true, p: { thr: -28, ratio: 11, att: 10, rel: 250, gain: 6 } },
+  od: { on: true, p: { drive: 85, tone: 5800, level: -11 } },
+  dist: { on: false, p: { drive: 83, tone: 48, level: -11 } },
+  amp: { on: true, p: { bass: -0.5, mid: 1.5, treble: 2, gain: 100, level: -7.5, width: 29, mode: 1, cab: 1 } },
+  eq: { on: true, p: { b1: 2, b2: 2, b3: -1, b4: 0, b5: 2, b6: 3, b7: 3 } },
+  delay: { on: false, p: { time: 350, fb: 35, mix: 30 } },
+  reverb: { on: true, p: { decay: 2.8, bright: 54, mix: 35, width: 138, type: 1 } } } };
 const defState = () => { const s = { order: ORDER.slice(), flip: false, guard: true, master: 0.5, out: '', fx: Object.fromEntries(ORDER.map(id => [id, { on: false, p: Object.fromEntries(FX_DEFS[id].params.map(p => [p.k, p.def])) }])) }; s.fx.amp.mem = ampMem(); s.presets = [null, null, null]; s.slot = 0; return s; };
 function load() {
   const s = defState();
@@ -553,11 +563,19 @@ export function initFx({ ensureInput } = {}) {
     q('fx-out').addEventListener('change', e => { st.out = e.target.value; save(); applySink(); });
     const paintSlots = () => { const h = q('fx-slots'); if (!h) return; h.querySelectorAll('button[data-slot]').forEach(b => { const i = +b.dataset.slot; b.classList.toggle('on', i === st.slot); b.classList.toggle('has', !!st.presets[i]); b.title = st.presets[i] ? '保存済み（クリックで呼び出し）' : '空き（クリックで選択）'; }); };
     const applyState = () => { save(); renderChain(); if (E.ctx) { ORDER.forEach(id => { if (id === 'delay' || id === 'reverb') rebuild(id); applyAll(id); }); rewire(); } };
+    const loadSnapshot = p => {
+      const o = JSON.parse(JSON.stringify(p)), d = defState();
+      st.order = Array.isArray(o.order) && o.order.length === ORDER.length ? o.order : d.order;
+      ORDER.forEach(id => { if (!o.fx[id]) return; st.fx[id].on = !!o.fx[id].on; FX_DEFS[id].params.forEach(pp => { const v = o.fx[id].p && o.fx[id].p[pp.k]; if (typeof v === 'number') st.fx[id].p[pp.k] = v; });
+        if (id === 'amp') { st.fx.amp.mem = o.fx.amp.mem || ampMem(); if (!o.fx.amp.mem) AMP_KNOBS.forEach(k => { st.fx.amp.mem[st.fx.amp.p.mode ? 1 : 0][k] = st.fx.amp.p[k]; }); } });
+      applyState(); paintSlots();
+    };
     q('fx-slots').addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
       if (b.id === 'fx-slot-save') { st.presets[st.slot] = JSON.parse(JSON.stringify({ order: st.order, fx: st.fx })); save(); paintSlots(); return; }
+      if (b.id === 'fx-sample') { loadSnapshot(SAMPLE); return; }
       const i = +b.dataset.slot, p = st.presets[i]; st.slot = i;
-      if (p) { const o = JSON.parse(JSON.stringify(p)); const d = defState(); st.order = Array.isArray(o.order) && o.order.length === ORDER.length ? o.order : d.order; ORDER.forEach(id => { if (o.fx[id]) { st.fx[id].on = !!o.fx[id].on; FX_DEFS[id].params.forEach(pp => { const v = o.fx[id].p && o.fx[id].p[pp.k]; if (typeof v === 'number') st.fx[id].p[pp.k] = v; }); if (id === 'amp' && o.fx.amp.mem) st.fx.amp.mem = o.fx.amp.mem; } }); applyState(); } else save();
+      if (p) loadSnapshot(p); else save();
       paintSlots();
     });
     paintSlots();
