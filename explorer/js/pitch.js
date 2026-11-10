@@ -29,6 +29,9 @@ const HW = [0, 1, .8, .62, .5, .4, .32];
 export function detectNotes(mag, sr, fftSize, o = {}) {
   const lo = o.lo || 38, hi = o.hi || 88, maxN = o.maxNotes || 6; o = { rel: 0.3, ...o };
   const binHz = sr / fftSize, sp = Float32Array.from(mag), top = Math.min(sp.length - 1, Math.floor(4200 / binHz));
+  // high-cut: a guitar's upper harmonics (strong on bright pickups / distortion) look like other notes, so the spectrum is
+  // rolled off above ~2 kHz (2nd order) before looking for notes
+  const hc = o.legacy ? 0 : (o.hc ?? 2000); if (hc > 0) for (let i = 0; i < sp.length; i++) { const r = (i * binHz) / hc; sp[i] /= Math.sqrt(1 + r * r * r * r); }
   const peak = (f) => {
     const c = f / binHz, w = Math.max(1, Math.round(f * 0.02 / binHz)); let v = 0, k = -1;
     for (let i = Math.max(1, Math.round(c) - w); i <= Math.min(top, Math.round(c) + w); i++) if (sp[i] > v) { v = sp[i]; k = i; }
@@ -52,8 +55,10 @@ export function detectNotes(mag, sr, fftSize, o = {}) {
     const amp = best.sal / best.wSum, fund = peak(best.f0).v;
     if (best.sal < first * o.rel || best.sal < floor * 3 || fund < amp * 0.25) { if (it === 0 && best.sal < floor * 3) break; if (it > 0) break; }
     out.push(best.m); sals.push(best.sal);
-    // take this note's harmonics out of the spectrum so they are not read as other notes
-    for (let h = 1; h <= 6; h++) { if (best.f0 * h > 4000) break; const pk = peak(best.f0 * h); if (pk.k > 0) { const sub = amp * HW[h]; for (let i = pk.k - 1; i <= pk.k + 1; i++) if (i > 0 && i <= top) sp[i] = Math.max(0, sp[i] - sub * (i === pk.k ? 1 : 0.5)); } }
+    // take this note's harmonics out of the spectrum so they are not read as other notes: as measured, up to the 10th
+    // (legacy: a modelled amount, up to the 6th - kept for the single / chord decision, whose thresholds were tuned on it)
+    const CH = o.legacy ? 6 : 10;
+    for (let h = 1; h <= CH; h++) { if (best.f0 * h > 4000) break; const pk = peak(best.f0 * h); if (pk.k > 0) { const sub = o.legacy ? amp * HW[h] : pk.v; for (let i = pk.k - 1; i <= pk.k + 1; i++) if (i > 0 && i <= top) sp[i] = Math.max(0, sp[i] - sub * (i === pk.k ? 1 : 0.5)); } }
   }
   // keep the relative strength of each note (1 = the strongest) alongside the sorted list
   const order = out.map((m, i) => ({ m, w: first ? sals[i] / first : 1 })).sort((x, y) => x.m - y.m);
@@ -76,16 +81,24 @@ export class PitchListener {
     if (this.ctx.state === 'suspended') await this.ctx.resume();
     const src = this.ctx.createMediaStreamSource(this.stream);
     this.an = this.ctx.createAnalyser(); this.an.fftSize = 4096; this.an.smoothingTimeConstant = 0;
+    this.raw = this.ctx.createAnalyser(); this.raw.fftSize = 4096; this.raw.smoothingTimeConstant = 0; src.connect(this.raw);   // unfiltered, for the level
+    // high-cut for the pitch search (two 2nd-order low-pass stages): follows the note, ~3.5x its pitch (700 Hz - 3 kHz), so the
+    // overtones that pull the period estimate are cut while the fundamental passes
+    this.lp = [0, 1].map(() => { const f = this.ctx.createBiquadFilter(); f.type = 'lowpass'; f.Q.value = 0.7071; f.frequency.value = 2000; return f; });
+    this.lpHz = 2000; src.connect(this.lp[0]); this.lp[0].connect(this.lp[1]);
     const mute = this.ctx.createGain(); mute.gain.value = 0;      // keep the graph pulled without any playback
     this.sp = this.ctx.createAnalyser(); this.sp.fftSize = 16384; this.sp.smoothingTimeConstant = 0.3; src.connect(this.sp);   // spectrum for chords
     this.db = new Float32Array(this.sp.frequencyBinCount); this.mag = new Float32Array(this.sp.frequencyBinCount);
-    src.connect(this.an); this.an.connect(mute); mute.connect(this.ctx.destination);
-    this.buf = new Float32Array(this.an.fftSize); this.kind = 'single'; this.cnt = 0; this.lastNotes = null;
+    this.lp[1].connect(this.an); this.an.connect(mute); mute.connect(this.ctx.destination);
+    this.buf = new Float32Array(this.an.fftSize); this.rbuf = new Float32Array(this.raw.fftSize); this.kind = 'single'; this.cnt = 0; this.lastNotes = null;
     this.timer = setInterval(() => this.tick(), 10);
   }
   spectrumNotes() {
     this.sp.getFloatFrequencyData(this.db);
     for (let i = 0; i < this.db.length; i++) this.mag[i] = Math.pow(10, this.db[i] / 20);
+    // the notes shown: high-cut spectrum + measured harmonic removal; and, only in auto mode, a second reading in the earlier
+    // style that decides single note vs chord (its weights are what the thresholds below were tuned on)
+    if (this.mode === 'auto') this.kindNotes = detectNotes(this.mag, this.ctx.sampleRate, this.sp.fftSize, { lo: this.loMidi, legacy: true });
     return detectNotes(this.mag, this.ctx.sampleRate, this.sp.fftSize, { lo: this.loMidi });
   }
   singleReading() {
@@ -107,8 +120,8 @@ export class PitchListener {
   // ~300 ms of steady evidence, so a ringing chord is not flipped to a single note as it decays.
   tick() {
     if (!this.an) return;
-    this.an.getFloatTimeDomainData(this.buf);
-    const level = rms(this.buf), now = performance.now(), tickNo = ++this.n;
+    this.an.getFloatTimeDomainData(this.buf); this.raw.getFloatTimeDomainData(this.rbuf);
+    const level = rms(this.rbuf), now = performance.now(), tickNo = ++this.n;
     if (level < 0.006) {
       if (!this.wasSilent) { this.wasSilent = true; this.silentSince = now; }
       this.env = (this.env || 0) * 0.9;
@@ -125,26 +138,27 @@ export class PitchListener {
     if (this.mode === 'auto') {
       // chord = a third pitch class that is clearly present, or a strong second one when the sound is not a clean
       // single pitch. Weak extras (overtone ghosts, pick noise, hum) stay below these lines (single notes: second <= 0.40, third <= 0.35).
-      const ln = this.lastNotes, wt = ln && ln.weights || [], best = {};
+      const ln = this.kindNotes, wt = ln && ln.weights || [], best = {};
       if (ln) ln.forEach((m, i) => { best[m % 12] = Math.max(best[m % 12] || 0, wt[i] ?? 1); });
       const w = Object.values(best).sort((x, y) => y - x);
       const poly = (w[2] || 0) >= 0.38 || ((w[1] || 0) >= 0.5 && !(r && r.clarity > 0.9));
       const vote = poly ? 'chord' : (r ? 'single' : null);
       if (vote && vote !== this.kind) {
-        if (++this.cnt >= (now < this.attackUntil ? 12 : 40)) { this.kind = vote; this.cnt = 0; this.lastNotes = vote === 'single' ? null : this.lastNotes; this.onKind && this.onKind(vote); }
+        if (++this.cnt >= (now < this.attackUntil ? 12 : 40)) { this.kind = vote; this.cnt = 0; this.lastNotes = vote === 'single' ? null : this.lastNotes; if (vote === 'single') this.kindNotes = null; this.onKind && this.onKind(vote); }
       } else this.cnt = 0;
       kind = this.kind;
     }
     if (kind === 'chord' && tickNo % 10 === 0 && this.onChord) this.onChord({ notes: this.lastNotes || [], level });
     // while a chord is ringing, YIN reports the "virtual pitch" of the whole chord (often far below the bass note): show it only when it is clean
     const rr = kind === 'chord' && r && r.clarity < 0.97 ? null : r;
+    if (rr && tickNo % 5 === 0) { const hz = Math.max(700, Math.min(3000, rr.freq * 3.5)); if (Math.abs(hz - this.lpHz) > this.lpHz * 0.08) { this.lpHz = hz; this.lp.forEach(f => f.frequency.setTargetAtTime(hz, this.ctx.currentTime, 0.03)); } }
     this.onFrame(rr ? { freq: rr.freq, clarity: rr.clarity, level } : { freq: null, clarity: 0, level });   // the tuner reading stays on in every mode
   }
   async stop() {
     clearInterval(this.timer); this.timer = 0;
     if (this.stream) this.stream.getTracks().forEach(t => t.stop());
     if (this.ctx) { try { await this.ctx.close(); } catch (e) {} }
-    this.stream = this.ctx = this.an = null;
+    this.stream = this.ctx = this.an = this.raw = this.lp = null;
   }
   get running() { return !!this.stream; }
 }

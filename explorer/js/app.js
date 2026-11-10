@@ -1048,8 +1048,9 @@ function drawNext() {
   const lo = win ? win[0] : 0, hi = win ? win[1] : F; let h = '';
   tun.forEach((open, sIdx) => { if (!st.strOn[sIdx]) return; for (let f = lo; f <= hi; f++) { const p = pc(open + f); if (!set.has(p)) continue;
     const root = p === pc(ch.root);
-    h += `<circle cx="${g.cx(f).toFixed(1)}" cy="${g.Y(sIdx)}" r="13" fill="none" stroke="${root ? '#86efac' : '#38bdf8'}" stroke-width="1.6" stroke-dasharray="3 3" opacity=".85"/>`; } });
-  L.innerHTML = h;
+    const col = root ? '#86efac' : '#38bdf8', x = g.cx(f).toFixed(1), y = g.Y(sIdx);
+    h += `<circle cx="${x}" cy="${y}" r="17" fill="${col}" opacity=".6" filter="url(#nx-glow)"/><circle cx="${x}" cy="${y}" r="12" fill="${col}" opacity=".16"/><circle cx="${x}" cy="${y}" r="13" fill="none" stroke="${col}" stroke-width="2.6" stroke-dasharray="5 3.5" opacity="1"/>`; } });
+  L.innerHTML = '<defs><filter id="nx-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="5"/></filter></defs>' + h;
 }
 function applyBar(bi, ci) {
   if (!pb.on || !pb.snap) return;
