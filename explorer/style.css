@@ -454,7 +454,7 @@ body.blk-dragging,body.blk-dragging *{cursor:grabbing !important;user-select:non
 .dr-hd .pg-f input[type=number]{width:70px;}
 .pg-f .num-wrap{width:92px;}.pg-f .num-wrap input{font-size:13px;padding:6px 4px 6px 8px;}
 .dr-c{width:18px;}
-.dr-c.l1{background:color-mix(in srgb,var(--accent1) 28%,transparent);border-color:color-mix(in srgb,var(--accent1) 42%,transparent);}
+.dr-c.l1{background:color-mix(in srgb,var(--accent1) 42%,transparent);border-color:color-mix(in srgb,var(--accent1) 58%,transparent);}
 .dr-c.l2{background:var(--accent1);border-color:var(--accent1);box-shadow:0 0 6px color-mix(in srgb,var(--accent1) 60%,transparent);}
 .dr-c.bar{margin-left:14px;}
 .dr-rm{width:20px;height:20px;flex:none;padding:0;margin-right:4px;background:none;border:0;color:var(--text3);cursor:pointer;font-size:14px;line-height:1;}
