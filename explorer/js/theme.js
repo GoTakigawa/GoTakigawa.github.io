@@ -1,9 +1,9 @@
 // Appearance: dark / light / follow the device, and the accent colour. Saved in this browser.
 const KEY = 'gti-explorer:theme';
-export const ACCENTS = [
-  { id: 'purple', name: 'パープル', c: '#8c4dff' }, { id: 'blue', name: 'ブルー', c: '#4d7cff' }, { id: 'teal', name: 'ティール', c: '#14b8a6' },
-  { id: 'green', name: 'グリーン', c: '#22c55e' }, { id: 'amber', name: 'アンバー', c: '#f59e0b' }, { id: 'orange', name: 'オレンジ', c: '#f97316' },
-  { id: 'red', name: 'レッド', c: '#ef4444' }, { id: 'pink', name: 'ピンク', c: '#ec4899' }
+export const ACCENTS = [   // the default, then the rainbow in the same order as the sub colours
+  { id: 'purple', name: 'パープル（既定）', c: '#8c4dff' }, { id: 'red', name: 'レッド', c: '#ef4444' }, { id: 'orange', name: 'オレンジ', c: '#f97316' },
+  { id: 'yellow', name: 'イエロー', c: '#eab308' }, { id: 'green', name: 'グリーン', c: '#22c55e' }, { id: 'cyan', name: 'シアン', c: '#06b6d4' },
+  { id: 'blue', name: 'ブルー', c: '#4d7cff' }, { id: 'pink', name: 'ピンク', c: '#ec4899' }
 ];
 // the first entry of each list is the theme's own default (c = null); the rest are 7 choices
 export const SKIES = [
