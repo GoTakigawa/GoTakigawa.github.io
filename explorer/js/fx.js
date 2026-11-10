@@ -6,11 +6,11 @@ const ACK = 'gti-explorer:fx-ack';
 
 export const FX_DEFS = {
   comp: { name: 'コンプ', params: [
-    { k: 'thr', label: 'スレッショルド', min: -60, max: 0, step: 1, def: -24, unit: 'dB' },
+    { k: 'thr', label: 'しきい値', min: -60, max: 0, step: 1, def: -24, unit: 'dB' },
     { k: 'ratio', label: 'レシオ', min: 1, max: 20, step: 0.5, def: 4, unit: ':1' },
     { k: 'att', label: 'アタック', min: 1, max: 100, step: 1, def: 10, unit: 'ms' },
     { k: 'rel', label: 'リリース', min: 50, max: 1000, step: 10, def: 250, unit: 'ms' },
-    { k: 'gain', label: 'メイクアップ', min: 0, max: 24, step: 0.5, def: 6, unit: 'dB' }] },
+    { k: 'gain', label: '出力', min: 0, max: 24, step: 0.5, def: 6, unit: 'dB' }] },
   od: { name: 'オーバードライブ', params: [
     { k: 'drive', label: 'ドライブ', min: 0, max: 100, step: 1, def: 40, unit: '' },
     { k: 'tone', label: 'トーン', min: 1000, max: 8000, step: 100, def: 3500, unit: 'Hz' },
@@ -27,13 +27,13 @@ export const FX_DEFS = {
     { k: 'cab', label: 'キャビネット', toggle: true, def: 1 },
     { k: 'level', label: 'レベル', min: -18, max: 12, step: 0.5, def: -3, unit: 'dB' }] },
   eq: { name: 'EQ', params: [
-    { k: 'low', label: '低域 100Hz', min: -12, max: 12, step: 0.5, def: 0, unit: 'dB' },
-    { k: 'lmid', label: '中低域 400Hz', min: -12, max: 12, step: 0.5, def: 0, unit: 'dB' },
-    { k: 'hmid', label: '中高域 2kHz', min: -12, max: 12, step: 0.5, def: 0, unit: 'dB' },
-    { k: 'high', label: '高域 6kHz', min: -12, max: 12, step: 0.5, def: 0, unit: 'dB' }] },
+    { k: 'low', label: '100Hz', min: -12, max: 12, step: 0.5, def: 0, unit: 'dB' },
+    { k: 'lmid', label: '400Hz', min: -12, max: 12, step: 0.5, def: 0, unit: 'dB' },
+    { k: 'hmid', label: '2kHz', min: -12, max: 12, step: 0.5, def: 0, unit: 'dB' },
+    { k: 'high', label: '6kHz', min: -12, max: 12, step: 0.5, def: 0, unit: 'dB' }] },
   delay: { name: 'ディレイ', params: [
     { k: 'time', label: 'タイム', min: 50, max: 1000, step: 10, def: 350, unit: 'ms' },
-    { k: 'fb', label: 'フィードバック', min: 0, max: 85, step: 1, def: 35, unit: '%' },
+    { k: 'fb', label: 'リピート', min: 0, max: 85, step: 1, def: 35, unit: '%' },
     { k: 'mix', label: 'ミックス', min: 0, max: 100, step: 1, def: 30, unit: '%' }] },
   reverb: { name: 'リバーブ', params: [
     { k: 'decay', label: '長さ', min: 0.3, max: 6, step: 0.1, def: 2, unit: '秒' },
@@ -131,7 +131,10 @@ export function initFx({ ensureInput } = {}) {
   // ── graph (built per audio context; the monitor connects it to the output) ──
   const build = (ctx, src) => {
     E.ctx = ctx; E.src = src; E.fx = {};
-    E.fxIn = ctx.createGain(); E.master = ctx.createGain(); E.master.gain.value = 0;
+    // the input may be a 2-channel stream with the guitar on one side only: sum it to one channel, then send that to both ears
+    E.split = ctx.createChannelSplitter(2); E.fxIn = ctx.createGain(); E.fxIn.channelCount = 1; E.fxIn.channelCountMode = 'explicit';
+    E.split.connect(E.fxIn, 0); E.split.connect(E.fxIn, 1);
+    E.master = ctx.createGain(); E.master.gain.value = 0; E.master.channelCount = 2; E.master.channelCountMode = 'explicit'; E.master.channelInterpretation = 'speakers';
     E.limiter = ctx.createDynamicsCompressor(); E.limiter.threshold.value = -8; E.limiter.knee.value = 0; E.limiter.ratio.value = 20; E.limiter.attack.value = 0.003; E.limiter.release.value = 0.1;
     E.outAn = ctx.createAnalyser(); E.outAn.fftSize = 4096; E.outAn.smoothingTimeConstant = 0;
     ORDER.forEach(id => {
@@ -160,29 +163,29 @@ export function initFx({ ensureInput } = {}) {
     const lo = Math.floor(80 / (E.ctx.sampleRate / an.fftSize)), hi = Math.floor(6000 / (E.ctx.sampleRate / an.fftSize));
     pk = -200; for (let i = lo; i < hi; i++) { sum += db[i]; n++; if (db[i] > pk) { pk = db[i]; pi = i; } }
     const dom = pk - sum / Math.max(1, n);
-    E.hist.push({ pk, pi, dom, rms: rmsv }); if (E.hist.length > 8) E.hist.shift();
+    E.hist.push({ pk, pi, dom, rms: rmsv }); if (E.hist.length > 15) E.hist.shift();
     let bad = false;
-    if (E.hist.length >= 8) {
-      const a = E.hist[0], b = E.hist[E.hist.length - 1], stable = E.hist.every(h => Math.abs(h.pi - b.pi) <= 2), tonal = E.hist.every(h => h.dom > 30), grow = b.pk - a.pk > 8 && b.rms > a.rms * 1.8 && b.rms > 0.02;
+    if (E.hist.length >= 15) {   // ~1.5 s of one steady, dominant tone that keeps growing a lot
+      const a = E.hist[0], b = E.hist[E.hist.length - 1], stable = E.hist.every(h => Math.abs(h.pi - b.pi) <= 2), tonal = E.hist.every(h => h.dom > 35), grow = b.pk - a.pk > 15 && b.rms > a.rms * 3 && b.rms > 0.05;
       if (stable && tonal && grow) bad = true;
     }
-    E.loud = rmsv > 0.3 && dom > 28 ? E.loud + 1 : 0;       // loud and tonal for ~0.7 s
-    if (bad || E.loud >= 7) howl();
+    E.loud = rmsv > 0.45 && dom > 35 ? E.loud + 1 : 0;       // very loud and tonal for ~1.5 s
+    if (bad || E.loud >= 15) howl();
   };
-  const howl = () => { stopMonitor(true); warn('ハウリングの可能性があったため、モニターを止めました。ヘッドホンを使うか、音量を下げてからもう一度お試しください。', 'err'); };
+  const howl = () => { stopMonitor(true); warn('ハウリングの可能性があったため、モニターを止めました。ヘッドホンやモニタースピーカーの位置・音量を見直してから、もう一度お試しください。', 'err'); };
 
   const refreshUi = () => {
     const b = q('fx-monitor'); if (!b) return;
     b.classList.toggle('on', E.on); b.setAttribute('aria-pressed', String(E.on)); q('fx-monitor-label').textContent = E.on ? 'モニターを止める' : 'モニターを始める';
-    q('fx-state').textContent = E.on ? 'モニター中（ヘッドホン推奨）' : '出力しない（入力のみ）'; q('fx-state').classList.toggle('on', E.on);
+    q('fx-state').textContent = E.on ? 'モニター中（ヘッドホン／モニタースピーカー推奨）' : '出力しない（入力のみ）'; q('fx-state').classList.toggle('on', E.on);
     const lat = q('fx-lat'); if (lat) lat.textContent = E.on && E.ctx ? `遅延 約 ${Math.round(((E.ctx.baseLatency || 0) + (E.ctx.outputLatency || 0)) * 1000)} ms` : '';
   };
   const startMonitor = () => {
     if (E.on || !E.ctx) return;
     E.on = true; E.hist = []; E.loud = 0; E.master.gain.value = 0;
-    E.limiter.connect(E.ctx.destination); E.src.connect(E.fxIn);
+    E.limiter.connect(E.ctx.destination); E.src.connect(E.split);
     setMaster(0.15); clearInterval(E.timer); E.timer = setInterval(guard, 100);
-    warn('モニター中です。スピーカーから出すと音が回り込んでハウリングすることがあります。ヘッドホンをお使いください。');
+    warn('モニター中です。ヘッドホンか、モニタースピーカーでお使いください。ギターに近いスピーカーだと、音が回り込んでハウリングすることがあります。');
     refreshUi();
   };
   const stopMonitor = (quick) => {
@@ -191,23 +194,29 @@ export function initFx({ ensureInput } = {}) {
     if (E.on) {
       try { E.master.gain.cancelScheduledValues(E.ctx.currentTime); E.master.gain.setTargetAtTime(0, E.ctx.currentTime, quick ? 0.004 : 0.03); } catch (e) {}
       const c = E.ctx, s = E.src, lim = E.limiter;
-      setTimeout(() => { try { s.disconnect(E.fxIn); } catch (e) {} try { lim.disconnect(c.destination); } catch (e) {} }, quick ? 40 : 150);
+      setTimeout(() => { try { s.disconnect(E.split); } catch (e) {} try { lim.disconnect(c.destination); } catch (e) {} }, quick ? 40 : 150);
     }
     E.on = false; if (!quick) warn(''); refreshUi();
   };
 
   // ── UI ──
-  const fmt = (p, v) => (Number.isInteger(p.step) || p.step >= 1 ? Math.round(v) : v.toFixed(1)) + (p.unit || '');
+  const fmt = (p, v) => (p.step >= 1 ? Math.round(v) : v.toFixed(1)) + (p.unit || '');
+  const COLORS = { comp: '#5aa9ff', od: '#4ade80', dist: '#f97316', amp: '#c084fc', eq: '#facc15', delay: '#22d3ee', reverb: '#f472b6' };
+  const ang = (p, v) => -135 + 270 * (v - p.min) / (p.max - p.min);
+  const knobHtml = (id, p, v) => `<div class="fx-kn"><div class="fx-knob" role="slider" tabindex="0" data-fx="${id}" data-k="${p.k}" aria-label="${p.label}" aria-valuemin="${p.min}" aria-valuemax="${p.max}" aria-valuenow="${v}" style="--a:${ang(p, v)}deg"><i></i></div><span class="fx-kl">${p.label}</span><span class="fx-kv">${fmt(p, v)}</span></div>`;
   const renderChain = () => {
     const host = q('fx-chain'); if (!host) return;
     host.innerHTML = st.order.map((id, i) => {
-      const d = FX_DEFS[id], s = st.fx[id];
-      const ps = d.params.map(p => p.toggle
-        ? `<label class="fx-p fx-tg"><span>${p.label}</span><input type="checkbox" data-fx="${id}" data-k="${p.k}" ${s.p[p.k] ? 'checked' : ''}></label>`
-        : `<label class="fx-p"><span>${p.label}</span><input type="range" data-fx="${id}" data-k="${p.k}" min="${p.min}" max="${p.max}" step="${p.step}" value="${s.p[p.k]}"><output>${fmt(p, s.p[p.k])}</output></label>`).join('');
-      return `<div class="fx-mod ${s.on ? 'on' : ''}" data-id="${id}"><div class="fx-hd"><label class="toggle-switch"><input type="checkbox" class="fx-on" data-fx="${id}" ${s.on ? 'checked' : ''} aria-label="${d.name}のオン・オフ"><span class="toggle-slider"></span></label><b>${d.name}</b><span class="fx-mv"><button type="button" class="fx-up" data-fx="${id}" aria-label="前へ" ${i === 0 ? 'disabled' : ''}>◀</button><button type="button" class="fx-dn" data-fx="${id}" aria-label="後ろへ" ${i === st.order.length - 1 ? 'disabled' : ''}>▶</button></span>${id === 'amp' ? '<button type="button" class="th-link" id="fx-ir">IR</button><input type="file" id="fx-ir-file" accept="audio/*,.wav" hidden>' : ''}</div><div class="fx-ps">${ps}</div></div>`;
+      const d = FX_DEFS[id], s = st.fx[id], ks = d.params.filter(p => !p.toggle).map(p => knobHtml(id, p, s.p[p.k])).join(''), tg = d.params.find(p => p.toggle);
+      return `<div class="fx-mod ${s.on ? 'on' : ''}" data-id="${id}" style="--c:${COLORS[id]}"><div class="fx-top"><i class="fx-led"></i><b>${d.name}</b></div><div class="fx-knobs">${ks}</div>${id === 'amp' ? `<div class="fx-extra"><button type="button" class="fx-chip ${s.p[tg.k] ? 'on' : ''}" data-fx="amp" data-k="cab">キャビ ${s.p[tg.k] ? 'ON' : 'OFF'}</button><button type="button" class="fx-chip" id="fx-ir">IR</button><input type="file" id="fx-ir-file" accept="audio/*,.wav" hidden></div>` : ''}<button type="button" class="fx-foot-sw" data-fx="${id}" aria-pressed="${s.on}" aria-label="${d.name}のオン・オフ"><span></span></button><span class="fx-mv"><button type="button" class="fx-up" data-fx="${id}" aria-label="前へ" ${i === 0 ? 'disabled' : ''}>◀</button><button type="button" class="fx-dn" data-fx="${id}" aria-label="後ろへ" ${i === st.order.length - 1 ? 'disabled' : ''}>▶</button></span></div>`;
     }).join('');
   };
+  const setParam = (id, k, v) => {
+    st.fx[id].p[k] = v; if (E.fx[id]) E.fx[id].core.set(k, v); save();
+    const p = FX_DEFS[id].params.find(x => x.k === k), kn = q('fx-chain').querySelector(`.fx-knob[data-fx="${id}"][data-k="${k}"]`);
+    if (kn && !p.toggle) { kn.style.setProperty('--a', ang(p, v) + 'deg'); kn.setAttribute('aria-valuenow', v); kn.parentElement.querySelector('.fx-kv').textContent = fmt(p, v); }
+  };
+  const setOn = (id, on) => { st.fx[id].on = on; if (E.fx[id]) E.fx[id].setOn(on); const m = q('fx-chain').querySelector(`.fx-mod[data-id="${id}"]`); if (m) { m.classList.toggle('on', on); m.querySelector('.fx-foot-sw').setAttribute('aria-pressed', String(on)); } save(); };
   const fillOut = async () => {
     const sel = q('fx-out'); if (!sel) return;
     if (!E.ctx || typeof E.ctx.setSinkId !== 'function') { q('fx-out-w').hidden = true; return; }
@@ -225,28 +234,34 @@ export function initFx({ ensureInput } = {}) {
     q('fx-master').value = Math.round(st.master * 100); q('fx-master-v').textContent = Math.round(st.master * 100);
     q('fx-master').addEventListener('input', e => { st.master = e.target.value / 100; q('fx-master-v').textContent = e.target.value; setMaster(); save(); });
     const host = q('fx-chain');
-    host.addEventListener('input', e => {
-      const t = e.target, id = t.dataset.fx, k = t.dataset.k; if (!id || !k) return;
-      const p = FX_DEFS[id].params.find(x => x.k === k), v = t.type === 'checkbox' ? (t.checked ? 1 : 0) : +t.value;
-      st.fx[id].p[k] = v; if (E.fx[id]) E.fx[id].core.set(k, v);
-      if (t.type === 'range') t.nextElementSibling.textContent = fmt(p, v);
-      save();
+    // knobs: drag up/down (or wheel / arrow keys); double-click = default
+    let drag = null;
+    const knobStep = (kn, dir, fine) => { const id = kn.dataset.fx, p = FX_DEFS[id].params.find(x => x.k === kn.dataset.k), cur = st.fx[id].p[p.k]; setParam(id, p.k, Math.max(p.min, Math.min(p.max, Math.round((cur + dir * p.step * (fine ? 1 : Math.max(1, Math.round((p.max - p.min) / p.step / 40)))) / p.step) * p.step))); };
+    host.addEventListener('pointerdown', e => {
+      const kn = e.target.closest('.fx-knob'); if (!kn) return; e.preventDefault(); kn.focus();
+      const id = kn.dataset.fx, p = FX_DEFS[id].params.find(x => x.k === kn.dataset.k); drag = { kn, id, p, y: e.clientY, v: st.fx[id].p[p.k] }; kn.setPointerCapture(e.pointerId);
     });
-    host.addEventListener('change', e => {
-      const t = e.target; if (!t.classList.contains('fx-on')) return; const id = t.dataset.fx;
-      st.fx[id].on = t.checked; if (E.fx[id]) E.fx[id].setOn(t.checked); t.closest('.fx-mod').classList.toggle('on', t.checked); save();
+    host.addEventListener('pointermove', e => {
+      if (!drag) return; const { p } = drag, raw = drag.v + (drag.y - e.clientY) / (e.shiftKey ? 600 : 150) * (p.max - p.min);
+      setParam(drag.id, p.k, Math.max(p.min, Math.min(p.max, Math.round(raw / p.step) * p.step)));
     });
+    const end = () => { drag = null; }; host.addEventListener('pointerup', end); host.addEventListener('pointercancel', end);
+    host.addEventListener('dblclick', e => { const kn = e.target.closest('.fx-knob'); if (!kn) return; const p = FX_DEFS[kn.dataset.fx].params.find(x => x.k === kn.dataset.k); setParam(kn.dataset.fx, p.k, p.def); });
+    host.addEventListener('wheel', e => { const kn = e.target.closest('.fx-knob'); if (!kn || document.activeElement !== kn) return; e.preventDefault(); knobStep(kn, e.deltaY < 0 ? 1 : -1, true); }, { passive: false });
+    host.addEventListener('keydown', e => { const kn = e.target.closest('.fx-knob'); if (!kn) return; const dir = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1 }[e.key]; if (!dir) return; e.preventDefault(); knobStep(kn, dir, true); });
     host.addEventListener('click', e => {
       const b = e.target.closest('.fx-up, .fx-dn'); if (b) {
         const id = b.dataset.fx, i = st.order.indexOf(id), j = i + (b.classList.contains('fx-up') ? -1 : 1);
         if (j >= 0 && j < st.order.length) { [st.order[i], st.order[j]] = [st.order[j], st.order[i]]; save(); renderChain(); wire(); }
         return;
       }
+      const sw = e.target.closest('.fx-foot-sw'); if (sw) { setOn(sw.dataset.fx, !st.fx[sw.dataset.fx].on); return; }
+      const cab = e.target.closest('.fx-chip[data-k="cab"]'); if (cab) { const v = st.fx.amp.p.cab ? 0 : 1; setParam('amp', 'cab', v); cab.classList.toggle('on', !!v); cab.textContent = 'キャビ ' + (v ? 'ON' : 'OFF'); return; }
       if (e.target.id === 'fx-ir') q('fx-ir-file').click();
     });
     host.addEventListener('change', async e => {
       if (e.target.id !== 'fx-ir-file' || !e.target.files[0] || !E.ctx) return;
-      try { const buf = await E.ctx.decodeAudioData(await e.target.files[0].arrayBuffer()); E.fx.amp.core.setIr(buf); q('fx-ir').textContent = 'IR：' + e.target.files[0].name.slice(0, 18); }
+      try { const buf = await E.ctx.decodeAudioData(await e.target.files[0].arrayBuffer()); E.fx.amp.core.setIr(buf); q('fx-ir').textContent = 'IR ✓'; q('fx-ir').title = e.target.files[0].name; }
       catch (err) { warn('IRファイルを読み込めませんでした。', 'err'); }
     });
     q('fx-out').addEventListener('change', e => { st.out = e.target.value; save(); applySink(); });

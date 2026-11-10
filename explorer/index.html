@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=76">
+<link rel="stylesheet" href="style.css?v=77">
 <script>
 try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t){var _l=_t.mode==='light'||(_t.mode==='auto'&&matchMedia('(prefers-color-scheme: light)').matches),_r=document.documentElement;_r.dataset.theme=_l?'light':'dark';if(/^#[0-9a-fA-F]{6}$/.test(_t.accent))_r.style.setProperty('--accent1',_t.accent);}}catch(e){}
 </script>
@@ -252,11 +252,11 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
       <p class="fx-note hint" id="fx-note" hidden></p>
       <div class="fx-confirm" id="fx-confirm" hidden>
         <b>モニターを始める前に</b>
-        <p>スピーカーから音を出すと、その音をギターやマイクが拾って、「キーン」と鳴り続けること（ハウリング）があります。ヘッドホンまたはイヤホンでお使いください。最初は、出力レベルを低めにしておくと安心です。</p>
-        <div class="row"><button class="std" id="fx-go" type="button">ヘッドホンを使っています。始める</button><button class="std" id="fx-cancel" type="button">やめる</button></div>
+        <p>ギターやマイクの近くにあるスピーカーから音を出すと、その音を拾って「キーン」と鳴り続けること（ハウリング）があります。ヘッドホン、またはモニタースピーカー（ギターから離れた位置・向き）でお使いください。ノートPCの内蔵スピーカーは、おすすめしません。最初は、出力レベルを低めにしておくと安心です。</p>
+        <div class="row"><button class="std" id="fx-go" type="button">ヘッドホン／モニタースピーカーで始める</button><button class="std" id="fx-cancel" type="button">やめる</button></div>
       </div>
       <div class="fx-chain" id="fx-chain"></div>
-      <div class="fx-foot"><button class="th-link" id="fx-reset" type="button" style="margin-left:0">エフェクトの設定を初期化</button><span class="hint" style="margin:0">◀ ▶ で順番を入れ替えられます。上から順に通ります。</span></div>
+      <div class="fx-foot"><button class="th-link" id="fx-reset" type="button" style="margin-left:0">エフェクトの設定を初期化</button><span class="hint" style="margin:0">つまみは上下にドラッグ（ダブルクリックで初期値）。◀ ▶ で順番を入れ替えられ、左から順に通ります。</span></div>
     </section>
 
     <section class="panel" data-blk="fretboard">
@@ -426,7 +426,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
   <input type="range" id="vol-range" min="0" max="100" step="1" value="80" aria-label="音量">
   <span class="vol-num" id="vol-num">80</span>
 </div>
-<script type="module" src="js/app.js?v=76"></script>
+<script type="module" src="js/app.js?v=77"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
