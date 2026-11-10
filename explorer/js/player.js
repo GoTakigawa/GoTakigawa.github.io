@@ -1,3 +1,12 @@
+// one bar of the drum / click pattern: 4 steps per beat, rows k(ick) s(nare) h(at) c(lick)
+const ROW_KIND = { k: 'kick', s: 'snare', h: 'hat', c: 'click' };
+export function drumBar(a, t, beatDur, beats, drum) {
+  const step = beatDur / 4;
+  for (const r of Object.keys(ROW_KIND)) {
+    const row = drum[r] || '';
+    for (let i = 0; i < beats * 4 && i < row.length; i++) if (row[i] === '1') a.click(t + i * step, i % 4 === 0, ROW_KIND[r]);
+  }
+}
 // ── Bar-by-bar playback clock: schedules sound a little ahead on the audio clock and fires the screen updates on time ──
 export class Player {
   // hooks: bars() → number of bars, opts() → { bpm, beats, clickOn, countIn, loop }, sched(bar, t, beatDur, beats) schedules the sound
@@ -20,7 +29,7 @@ export class Player {
     while (this.next < a.now + 0.2) {
       const o = this.h.opts(), beatDur = 60 / o.bpm, t = this.next;
       if (this.countLeft > 0) {
-        for (let b = 0; b < o.beats; b++) a.click(t + b * beatDur, b === 0);
+        for (let b = 0; b < o.beats; b++) a.click(t + b * beatDur, b === 0, 'click');
         this.at(t, () => this.h.onBar(-1, true));
         this.countLeft--; this.next = t + o.beats * beatDur; continue;
       }
@@ -28,7 +37,7 @@ export class Player {
         if (o.loop) this.bar = 0;
         else { this.at(t, () => { this.stop(); this.h.onEnd(); }); this.next = Infinity; break; }
       }
-      if (o.clickOn) for (let b = 0; b < o.beats; b++) a.click(t + b * beatDur, b === 0);
+      if (o.clickOn && o.drum) drumBar(a, t, beatDur, o.beats, o.drum);
       const bar = this.bar;
       this.at(t, () => this.h.onBar(bar, false));
       this.h.sched(bar, t, beatDur, o.beats);

@@ -260,14 +260,20 @@
         <label class="pg-f">拍子<select id="pg-beats"><option value="2">2拍</option><option value="3">3拍</option><option value="4">4拍</option><option value="5">5拍</option><option value="6">6拍</option><option value="7">7拍</option></select></label>
         <label class="pg-f chk"><input type="checkbox" id="pg-loop"> ループ</label>
         <label class="pg-f chk"><input type="checkbox" id="pg-count"> カウントイン</label>
-        <label class="pg-f chk"><input type="checkbox" id="pg-click"> クリック</label>
+        <label class="pg-f chk"><input type="checkbox" id="pg-click"> ドラム・クリック</label>
       </div>
       <div class="pg-ctl pg-opts">
-        <label class="pg-f">クリック音<select id="pg-ckind"></select></label>
         <label class="pg-f">音色<select id="pg-voice"></select></label>
         <label class="pg-f">コードの鳴らし方<select id="pg-style"><option value="strum">ストラム</option><option value="arp">アルペジオ</option><option value="root">ルートのみ</option><option value="off">鳴らさない</option></select></label>
         <label class="pg-f">スケールのガイド音<select id="pg-guide"><option value="off">なし</option><option value="root">ルートを鳴らす</option></select></label>
         <label class="pg-f chk"><input type="checkbox" id="pg-follow"> ポジションも追従</label>
+      </div>
+      <div class="dr-box">
+        <div class="dr-hd"><span class="tn-sub-title">ドラム・クリック</span>
+          <select id="dr-pre" aria-label="パターンのひな形"></select>
+          <span class="hint">マスを押して打ち込み（1拍＝4マス）</span></div>
+        <div class="dr-grid" id="dr-grid"></div>
+      </div>
       </div>
       <div class="pg-ctl pg-opts">
         <button class="std small" id="pg-midi" type="button" title="いまの進行を MIDI ファイルで保存">MIDI を書き出す</button>

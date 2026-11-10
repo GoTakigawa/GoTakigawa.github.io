@@ -4,10 +4,9 @@ const VOICES = {
   piano:  { partials: [[1, 1], [2, 0.42], [3, 0.16], [4.01, 0.07], [5.02, 0.03]], first: 'triangle', a: 0.006, s: 0.35, br: 9, lp: 600 },
   guitar: { partials: [[1, 1], [2, 0.62], [3, 0.42], [4, 0.3], [5, 0.2], [6, 0.12], [7, 0.07]], first: 'triangle', a: 0.003, s: 0.14, br: 5, lp: 500 },
   organ:  { partials: [[1, 1], [2, 0.7], [3, 0.45], [4, 0.3], [6, 0.2], [8, 0.1]], first: 'sine', a: 0.02, s: 1, br: 14, lp: 2500, flat: true },
-  pad:    { partials: [[1, 1], [2, 0.35], [3, 0.2], [4.01, 0.1]], first: 'sawtooth', a: 0.18, s: 0.9, br: 3, lp: 400, flat: true, slow: true },
   bass:   { partials: [[1, 1], [2, 0.38], [3, 0.12]], first: 'triangle', a: 0.006, s: 0.45, br: 3, lp: 200 }
 };
-export const VOICE_NAMES = { piano: 'ピアノ', guitar: 'ギター', organ: 'オルガン', pad: 'パッド', bass: 'ベース' };
+export const VOICE_NAMES = { piano: 'ピアノ', guitar: 'ギター', organ: 'オルガン', bass: 'ベース' };
 export const CLICK_NAMES = { click: 'クリック', wood: 'ウッドブロック', hat: 'ハイハット', rim: 'リムショット', snare: 'スネア', kick: 'キック' };
 // Instrument interface: play(notes, when, dur, vel). Swap this class later for guitar/drum engines.
 

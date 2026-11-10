@@ -1,9 +1,9 @@
 import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=51';
 import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=51';
 import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=51';
-import { PianoEngine, VOICE_NAMES, CLICK_NAMES } from './audio.js?v=51';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=51';
 import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=51';
-import { Player } from './player.js?v=51';
+import { Player, drumBar } from './player.js?v=51';
 import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=51';
 import { PitchListener } from './pitch.js?v=51';
 
@@ -20,7 +20,7 @@ const DEFAULT = {
   vo: { span: 4, minStrings: 3, rootBass: false, allowOpen: true, omit5: false, kind: 'all', count: 0, easy: false, range: '' },
   hideIv: [], hideCells: [],
   quiz: { kind: 'note-scale', count: 10 },
-  prog: { chords: 'I V vi IV', scales: '', bpm: 100, beats: 4, loop: true, count: true, click: true, ckind: 'click', voice: 'piano', style: 'strum', guide: 'off', follow: true },
+  prog: { chords: 'I V vi IV', scales: '', bpm: 100, beats: 4, loop: true, count: true, click: true, drum: drumPreset('metro', 4), voice: 'piano', style: 'strum', guide: 'off', follow: true },
   shapeTab: 'forms', sw: { size: 0, notes: 0, span: 5, rootStart: false, allowOpen: false, topOnly: true, common: true }
 };
 let st = structuredClone(DEFAULT);
@@ -88,7 +88,7 @@ function sanitize(s) {
     if (typeof q.scales === 'string') P.scales = q.scales.slice(0, 600);
     P.bpm = int(q.bpm, 40, 220, 100); P.beats = int(q.beats, 2, 7, 4);
     ['loop', 'count', 'click', 'follow'].forEach(k => { if (k in q) P[k] = !!q[k]; });
-    P.ckind = CLICK_NAMES[q.ckind] ? q.ckind : 'click'; P.voice = VOICE_NAMES[q.voice] ? q.voice : 'piano';
+    P.drum = cleanDrum(q.drum, P.beats); P.voice = VOICE_NAMES[q.voice] ? q.voice : 'piano';
     P.style = ['strum', 'arp', 'root', 'off'].includes(q.style) ? q.style : 'strum'; P.guide = q.guide === 'root' ? 'root' : 'off';
   }
   // the search tab is a temporary picking mode, so a reload starts from chord forms
@@ -993,7 +993,7 @@ function renderProg() {
   if (!pb.on) pb.bars = r.bars;
   [['pg-chords', P.chords], ['pg-scales', P.scales]].forEach(([id, v]) => { if (document.activeElement !== $(id) && $(id).value !== v) $(id).value = v; });
   $('pg-bpm').value = P.bpm; $('pg-beats').value = P.beats; $('pg-loop').checked = P.loop; $('pg-count').checked = P.count; $('pg-click').checked = P.click;
-  $('pg-ckind').value = P.ckind; $('pg-voice').value = P.voice; $('pg-style').value = P.style; $('pg-guide').value = P.guide; $('pg-follow').checked = P.follow;
+  renderDrum(); $('pg-voice').value = P.voice; $('pg-style').value = P.style; $('pg-guide').value = P.guide; $('pg-follow').checked = P.follow;
   const sig = JSON.stringify([r.bars.map(b => [b.chords.map(c => c.label), b.scales.map(x => x.label)]), r.key]);
   if (sig !== pb.sig) {
     pb.sig = sig;
@@ -1077,7 +1077,7 @@ function schedBar(bi, t, beatDur, beats) {
 }
 const player = new Player(audio, {
   bars: () => pb.bars.length,
-  opts: () => ({ bpm: st.prog.bpm, beats: st.prog.beats, clickOn: st.prog.click, countIn: st.prog.count, loop: st.prog.loop }),
+  opts: () => ({ bpm: st.prog.bpm, beats: st.prog.beats, clickOn: st.prog.click, drum: st.prog.drum, countIn: st.prog.count, loop: st.prog.loop }),
   sched: schedBar,
   onBar: (bi, countIn) => {
     if (!pb.on) return;
@@ -1113,8 +1113,8 @@ function bindProg() {
   $('pg-chords-pre').innerHTML = '<option value="">プリセット</option>' + CHORD_PRESETS.map((x, i) => `<option value="${i}">${x.name}</option>`).join('');
   $('pg-scales-pre').innerHTML = '<option value="">プリセット</option>' + SCALE_PRESETS.map((x, i) => `<option value="${i}">${x.name}</option>`).join('');
   $('pg-voice').innerHTML = Object.entries(VOICE_NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
-  $('pg-ckind').innerHTML = Object.entries(CLICK_NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
-  audio.setVoice(P.voice); audio.clickKind = P.ckind;
+  audio.setVoice(P.voice);
+  $('dr-pre').innerHTML = Object.entries(DRUM_PRESETS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('') + '<option value="custom">編集済み</option>';
   const set = (fn, redraw = true) => { fn(); save(); if (redraw) renderProg(); };
   const live2 = () => { if (pb.on) { const r = progBars(); if (r.bars.length) pb.bars = r.bars; else stopProg(); } };
   $('pg-chords').addEventListener('input', e => set(() => { st.prog.chords = e.target.value; live2(); }));
@@ -1122,9 +1122,16 @@ function bindProg() {
   $('pg-chords-pre').addEventListener('change', e => { const x = CHORD_PRESETS[+e.target.value]; e.target.value = ''; if (x) set(() => { st.prog.chords = x.text; live2(); }); });
   $('pg-scales-pre').addEventListener('change', e => { const x = SCALE_PRESETS[+e.target.value]; e.target.value = ''; if (x) set(() => { st.prog.scales = x.text; live2(); }); });
   $('pg-bpm').addEventListener('change', e => set(() => { st.prog.bpm = intIn(parseInt(e.target.value), 40, 220, st.prog.bpm); }));
-  $('pg-beats').addEventListener('change', e => set(() => { st.prog.beats = +e.target.value; }));
+  $('pg-beats').addEventListener('change', e => set(() => { st.prog.beats = +e.target.value; st.prog.drum = cleanDrum(st.prog.drum, st.prog.beats); }));
   [['pg-loop', 'loop'], ['pg-count', 'count'], ['pg-click', 'click'], ['pg-follow', 'follow']].forEach(([id, k]) => $(id).addEventListener('change', e => set(() => { st.prog[k] = e.target.checked; })));
-  $('pg-ckind').addEventListener('change', e => { set(() => { st.prog.ckind = e.target.value; audio.clickKind = e.target.value; }); audio.ready().then(() => { audio.click(audio.now + 0.03, true); audio.click(audio.now + 0.33, false); }); });
+  $('dr-pre').addEventListener('change', e => { if (e.target.value === 'custom') return; set(() => { st.prog.drum = drumPreset(e.target.value, st.prog.beats); }); drumAudition(); });
+  $('dr-grid').addEventListener('click', e => {
+    const c = e.target.closest('.dr-c'); if (!c) return;
+    const r = c.dataset.r, i = +c.dataset.i, D = st.prog.drum, row = D[r].split('');
+    row[i] = row[i] === '1' ? '0' : '1';
+    set(() => { D[r] = row.join(''); D.pre = 'custom'; });
+    if (row[i] === '1') audio.ready().then(() => audio.click(audio.now + 0.01, i % 4 === 0, DRUM_KIND[r]));
+  });
   $('pg-voice').addEventListener('change', e => { set(() => { st.prog.voice = e.target.value; audio.setVoice(e.target.value); }); playNotes([52, 59, 64, 67], 0.05, 1.0); });
   $('pg-style').addEventListener('change', e => set(() => { st.prog.style = e.target.value; }));
   $('pg-guide').addEventListener('change', e => set(() => { st.prog.guide = e.target.value; }));
@@ -1147,7 +1154,7 @@ function exportMidi() {
 }
 function shareUrl() {
   const P = st.prog, base = pb.on && pb.snap ? pb.snap : st;
-  const obj = { v: 1, p: { chords: P.chords, scales: P.scales, bpm: P.bpm, beats: P.beats, loop: P.loop, count: P.count, click: P.click, ckind: P.ckind, voice: P.voice, style: P.style, guide: P.guide, follow: P.follow }, r: base.root, i: st.inst, c: { strings: st.strings, tuning: st.tuning, custom: st.custom, frets: st.frets, minus: st.minus } };
+  const obj = { v: 1, p: { chords: P.chords, scales: P.scales, bpm: P.bpm, beats: P.beats, loop: P.loop, count: P.count, click: P.click, drum: P.drum, voice: P.voice, style: P.style, guide: P.guide, follow: P.follow }, r: base.root, i: st.inst, c: { strings: st.strings, tuning: st.tuning, custom: st.custom, frets: st.frets, minus: st.minus } };
   return location.origin + location.pathname + '#s=' + encodeShare(obj);
 }
 async function copyShare() {
@@ -1269,6 +1276,34 @@ function bindQuiz() {
   $('qz-skip').addEventListener('click', () => quizDone(false, true));
   renderQuiz();
 }
+
+// ── drum / click pattern: 4 steps per beat; rows k(ick) s(nare) h(at) c(lick) as strings of 0/1 ──
+const DRUM_PRESETS = { metro: 'メトロノーム', rock8: '8ビート', four: '4つ打ち', beat16: '16ビート', none: '空' };
+const DRUM_KIND = { k: 'kick', s: 'snare', h: 'hat', c: 'click' }, DRUM_LABEL = { c: 'クリック', h: 'ハット', s: 'スネア', k: 'キック' };
+function drumPreset(id, beats) {
+  const n = beats * 4, row = f => Array.from({ length: n }, (_, i) => f(i, Math.floor(i / 4), i % 4) ? '1' : '0').join('');
+  const D = { pre: id, k: row(() => 0), s: row(() => 0), h: row(() => 0), c: row(() => 0) };
+  if (id === 'metro') D.c = row((i, b, q) => q === 0);
+  else if (id === 'rock8') { D.k = row((i, b, q) => q === 0 && b % 2 === 0); D.s = row((i, b, q) => q === 0 && b % 2 === 1); D.h = row((i, b, q) => q % 2 === 0); }
+  else if (id === 'four') { D.k = row((i, b, q) => q === 0); D.h = row((i, b, q) => q === 2); }
+  else if (id === 'beat16') { D.k = row((i, b, q) => q === 0 && b % 2 === 0); D.s = row((i, b, q) => q === 0 && b % 2 === 1); D.h = row(() => 1); }
+  else D.pre = 'none';
+  return D;
+}
+function cleanDrum(d, beats) {
+  const n = beats * 4;
+  if (!d || typeof d !== 'object') return drumPreset('metro', beats);
+  const pre = DRUM_PRESETS[d.pre] ? d.pre : 'custom';
+  if (pre !== 'custom') return drumPreset(pre, beats);   // presets follow the time signature
+  const fix = v => (typeof v === 'string' && /^[01]*$/.test(v) ? v : '').slice(0, n).padEnd(n, '0');
+  return { pre, k: fix(d.k), s: fix(d.s), h: fix(d.h), c: fix(d.c) };
+}
+function renderDrum() {
+  const D = st.prog.drum, n = st.prog.beats * 4;
+  $('dr-pre').value = D.pre;
+  $('dr-grid').innerHTML = ['c', 'h', 's', 'k'].map(r => `<div class="dr-row"><span class="dr-lbl">${DRUM_LABEL[r]}</span>${Array.from({ length: n }, (_, i) => `<button type="button" class="dr-c ${D[r][i] === '1' ? 'on' : ''} ${i % 4 === 0 ? 'beat' : ''}" data-r="${r}" data-i="${i}" aria-label="${DRUM_LABEL[r]} ${Math.floor(i / 4) + 1}拍 ${i % 4 + 1}" aria-pressed="${D[r][i] === '1'}"></button>`).join('')}</div>`).join('');
+}
+function drumAudition() { audio.ready().then(() => drumBar(audio, audio.now + 0.05, 60 / Math.max(st.prog.bpm, 60), Math.min(st.prog.beats, 4), st.prog.drum)); }
 
 function bindVolume() {
   let vol = 80, muted = false;
