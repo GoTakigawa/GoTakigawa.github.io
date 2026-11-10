@@ -590,3 +590,11 @@ body.blk-dragging,body.blk-dragging *{cursor:grabbing !important;user-select:non
 .fx-meters{display:flex;align-items:center;gap:8px;}
 #fx-spec{width:96px;height:40px;}
 #fx-gonio{width:40px;height:40px;border-radius:50%;}
+
+.fx-slots{display:flex;align-items:center;gap:6px;}
+.fx-sl{font-size:11px;color:var(--text3);margin-right:2px;}
+.fx-slots button{min-width:30px;height:28px;padding:0 8px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text3);font:inherit;font-size:12px;cursor:pointer;}
+.fx-slots button.has{color:var(--text);border-color:var(--text3);}
+.fx-slots button.on{border-color:var(--accent1);color:var(--accent1);box-shadow:0 0 0 1px var(--accent1) inset;}
+#fx-slot-save{margin-left:4px;}
+.fx-ring.gr .lv{opacity:.55;}

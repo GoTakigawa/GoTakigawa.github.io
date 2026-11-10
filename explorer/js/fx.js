@@ -10,7 +10,7 @@ export const FX_DEFS = {
     { k: 'thr', label: 'しきい値', min: -80, max: -20, step: 1, def: -55, unit: 'dB', gauge: true }] },
   comp: { name: 'コンプ', rows: [['thr', 'ratio'], ['att', 'rel', 'gain']], params: [
     { k: 'thr', label: 'しきい値', min: -60, max: 0, step: 1, def: -24, unit: 'dB', gauge: true },
-    { k: 'ratio', label: 'レシオ', min: 1, max: 20, step: 0.5, def: 4, unit: ':1' },
+    { k: 'ratio', label: 'レシオ', min: 1, max: 20, step: 0.5, def: 4, unit: ':1', gr: true },
     { k: 'att', label: 'アタック', min: 1, max: 100, step: 1, def: 10, unit: 'ms' },
     { k: 'rel', label: 'リリース', min: 50, max: 1000, step: 10, def: 250, unit: 'ms' },
     { k: 'gain', label: '出力', min: 0, max: 24, step: 0.5, def: 6, unit: 'dB' }] },
@@ -51,7 +51,7 @@ const ORDER = ['gate', 'comp', 'od', 'dist', 'amp', 'eq', 'delay', 'reverb'];
 // the amp keeps separate knob settings for its clean and drive modes (mem[mode]; the active mode's values live in p)
 const AMP_KNOBS = ['treble', 'mid', 'bass', 'gain', 'level', 'width'];
 const ampMem = () => { const def = Object.fromEntries(FX_DEFS.amp.params.map(p => [p.k, p.def])), pick = o => Object.fromEntries(AMP_KNOBS.map(k => [k, o[k]])); return { 0: { ...pick(def), gain: 30 }, 1: pick(def) }; };
-const defState = () => { const s = { order: ORDER.slice(), flip: false, guard: true, master: 0.5, out: '', fx: Object.fromEntries(ORDER.map(id => [id, { on: false, p: Object.fromEntries(FX_DEFS[id].params.map(p => [p.k, p.def])) }])) }; s.fx.amp.mem = ampMem(); return s; };
+const defState = () => { const s = { order: ORDER.slice(), flip: false, guard: true, master: 0.5, out: '', fx: Object.fromEntries(ORDER.map(id => [id, { on: false, p: Object.fromEntries(FX_DEFS[id].params.map(p => [p.k, p.def])) }])) }; s.fx.amp.mem = ampMem(); s.presets = [null, null, null]; s.slot = 0; return s; };
 function load() {
   const s = defState();
   try {
@@ -61,6 +61,8 @@ function load() {
     if (typeof o.out === 'string') s.out = o.out;
     if (typeof o.flip === 'boolean') s.flip = o.flip;
     if (typeof o.guard === 'boolean') s.guard = o.guard;
+    if (Array.isArray(o.presets)) s.presets = [0, 1, 2].map(i => o.presets[i] && typeof o.presets[i] === 'object' && o.presets[i].fx ? o.presets[i] : null);
+    if (o.slot === 0 || o.slot === 1 || o.slot === 2) s.slot = o.slot;
     ORDER.forEach(id => { const f = o.fx && o.fx[id]; if (!f) return; s.fx[id].on = !!f.on; FX_DEFS[id].params.forEach(p => { const v = f.p && f.p[p.k]; if (typeof v === 'number' && v >= (p.min ?? 0) && v <= (p.max ?? 1)) s.fx[id].p[p.k] = v; });
       if (id === 'amp' && f.mem) [0, 1].forEach(m => AMP_KNOBS.forEach(k => { const pd = FX_DEFS.amp.params.find(x => x.k === k), v = f.mem[m] && f.mem[m][k]; if (typeof v === 'number' && v >= pd.min && v <= pd.max) s.fx.amp.mem[m][k] = v; }));
     });
@@ -350,7 +352,7 @@ export function initFx({ ensureInput } = {}) {
 
   // ── level rings around the gate / comp threshold knobs, gate indicator, comp gain-reduction meter ──
   const setLed = () => { const el = q('fx-chain') && q('fx-chain').querySelector('.fx-gate-ind'); if (!el) return; const open = E.gateOpen && st.fx.gate.on; el.classList.toggle('open', open); el.lastElementChild.textContent = st.fx.gate.on ? (open ? '開' : '閉') : '—'; };
-  const setGr = () => { const el = q('fx-chain') && q('fx-chain').querySelector('.fx-gr i'); if (el) el.style.width = (st.fx.comp.on ? Math.min(100, (E.gr || 0) / 18 * 100) : 0) + '%'; };
+  const setGr = () => { const ch = q('fx-chain'), el = ch && ch.querySelector('.fx-ring.gr .lv'); if (el) { const f = st.fx.comp.on ? Math.min(1, (E.gr || 0) / 18) : 0; el.setAttribute('stroke-dasharray', `${(f * 100).toFixed(1)} 100`); el.parentNode.classList.toggle('hot', f > 0.02); } };
   const prep = c => { const dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight; if (c.width !== Math.round(w * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); } const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h); return [g, w, h]; };
   const drawMeters = () => {
     const cs = q('fx-spec'), cg = q('fx-gonio'); if (!cs || !cg || !E.spec || !E.mvis) return;   // only while the meters are on screen
@@ -391,7 +393,7 @@ export function initFx({ ensureInput } = {}) {
     const pn = q('fx-panel'); if (pn && pn.classList.contains('collapsed')) return;
     const buf = E.mb || (E.mb = new Float32Array(2048)), host = q('fx-chain');
     ['gate', 'comp'].forEach(id => {
-      const e = E.fx[id], ring = host.querySelector(`.fx-ring[data-fx="${id}"]`); if (!e || !e.an || !ring) return;
+      const e = E.fx[id], ring = host.querySelector(`.fx-ring[data-fx="${id}"]:not(.gr)`); if (!e || !e.an || !ring) return;
       e.an.getFloatTimeDomainData(buf); let pk = 0; for (let i = 0; i < buf.length; i++) { const a = Math.abs(buf[i]); if (a > pk) pk = a; }
       const db = pk > 1e-5 ? 20 * Math.log10(pk) : -100, p = FX_DEFS[id].params[0], f = Math.max(0, Math.min(1, (db - p.min) / (p.max - p.min)));
       ring.querySelector('.lv').setAttribute('stroke-dasharray', `${(f * 100).toFixed(1)} 100`); ring.classList.toggle('hot', db > st.fx[id].p.thr);
@@ -451,13 +453,13 @@ export function initFx({ ensureInput } = {}) {
   const COLORS = { gate: '#94a3b8', comp: '#5aa9ff', od: '#4ade80', dist: '#f97316', amp: '#c084fc', eq: '#facc15', delay: '#22d3ee', reverb: '#f472b6' };
   const ang = (p, v) => -135 + 270 * (v - p.min) / (p.max - p.min);
   const ARC = 'M 8.15 37.85 A 21 21 0 1 1 37.85 37.85';   // 8 o'clock to 4 o'clock, the same sweep as the knob
-  const ringHtml = id => `<svg class="fx-ring" data-fx="${id}" viewBox="0 0 46 46" aria-hidden="true"><path class="trk" d="${ARC}" pathLength="100"/><path class="lv" d="${ARC}" pathLength="100" stroke-dasharray="0 100"/></svg>`;
-  const knobHtml = (id, p, v) => `<div class="fx-kn"><div class="fx-kw">${p.gauge ? ringHtml(id) : ''}<div class="fx-knob" role="slider" tabindex="0" data-fx="${id}" data-k="${p.k}" aria-label="${p.label}" aria-valuemin="${p.min}" aria-valuemax="${p.max}" aria-valuenow="${v}" style="--a:${ang(p, v)}deg"><i></i></div></div><span class="fx-kl">${p.label}</span><span class="fx-kv">${fmt(p, v)}</span></div>`;
+  const ARC_R = 'M 37.85 37.85 A 21 21 0 1 0 8.15 37.85';   // 4 o'clock back to 8 o'clock: gain reduction grows from the right
+  const ringHtml = (id, gr) => `<svg class="fx-ring${gr ? ' gr' : ''}" data-fx="${id}" viewBox="0 0 46 46" aria-hidden="true"><path class="trk" d="${ARC}" pathLength="100"/><path class="lv" d="${gr ? ARC_R : ARC}" pathLength="100" stroke-dasharray="0 100"/></svg>`;
+  const knobHtml = (id, p, v) => `<div class="fx-kn"><div class="fx-kw">${p.gauge ? ringHtml(id) : p.gr ? ringHtml(id, true) : ''}<div class="fx-knob" role="slider" tabindex="0" data-fx="${id}" data-k="${p.k}" aria-label="${p.label}" aria-valuemin="${p.min}" aria-valuemax="${p.max}" aria-valuenow="${v}" style="--a:${ang(p, v)}deg"><i></i></div></div><span class="fx-kl">${p.label}</span><span class="fx-kv">${fmt(p, v)}</span></div>`;
   const faderHtml = (id, p, v) => `<div class="fx-fd"><div class="fx-fader" role="slider" tabindex="0" data-fx="${id}" data-k="${p.k}" aria-label="${p.label}Hz" aria-valuemin="${p.min}" aria-valuemax="${p.max}" aria-valuenow="${v}" style="--f:${(v - p.min) / (p.max - p.min)}"><i></i></div><span class="fx-fl">${p.label}</span><span class="fx-kv">${fmtF(v)}</span></div>`;
   const extraHtml = (id, s) => {
     if (id === 'gate') return '<div class="fx-extra"><span class="fx-gate-ind"><i></i><em>—</em></span></div>';
-    if (id === 'comp') return '<div class="fx-extra"><span class="fx-gr-l">GR</span><span class="fx-gr"><i></i></span></div>';
-    if (id === 'amp') return `<div class="fx-extra"><span class="fx-seg"><button type="button" class="${s.p.mode ? '' : 'on'}" data-fx="amp" data-k="mode" data-v="0">クリーン</button><button type="button" class="${s.p.mode ? 'on' : ''}" data-fx="amp" data-k="mode" data-v="1">歪み</button></span><button type="button" class="fx-chip ${s.p.cab ? 'on' : ''}" data-fx="amp" data-k="cab">キャビ ${s.p.cab ? 'ON' : 'OFF'}</button><button type="button" class="fx-chip ${E.irName ? 'on' : ''}" id="fx-ir" title="${E.irName ? E.irName.replace(/"/g, '') + '（クリックで標準に戻す）' : '標準のIRを使用中（クリックでIRファイルを読み込み）'}">${E.irName ? 'IR ✓' : 'IR'}</button><input type="file" id="fx-ir-file" accept="audio/*,.wav" hidden></div>`;
+    if (id === 'comp')     if (id === 'amp') return `<div class="fx-extra"><span class="fx-seg"><button type="button" class="${s.p.mode ? '' : 'on'}" data-fx="amp" data-k="mode" data-v="0">クリーン</button><button type="button" class="${s.p.mode ? 'on' : ''}" data-fx="amp" data-k="mode" data-v="1">歪み</button></span><button type="button" class="fx-chip ${s.p.cab ? 'on' : ''}" data-fx="amp" data-k="cab">キャビ ${s.p.cab ? 'ON' : 'OFF'}</button><button type="button" class="fx-chip ${E.irName ? 'on' : ''}" id="fx-ir" title="${E.irName ? E.irName.replace(/"/g, '') + '（クリックで標準に戻す）' : '標準のIRを使用中（クリックでIRファイルを読み込み）'}">${E.irName ? 'IR ✓' : 'IR'}</button><input type="file" id="fx-ir-file" accept="audio/*,.wav" hidden></div>`;
     if (id === 'reverb') return `<div class="fx-extra"><select class="fx-sel" data-fx="reverb" data-k="type" aria-label="リバーブの種類">${REVERB_TYPES.map((t, i) => `<option value="${i}" ${Math.round(s.p.type) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`;
     return '<div class="fx-extra"></div>';
   };
@@ -549,6 +551,16 @@ export function initFx({ ensureInput } = {}) {
     });
     q('fx-flip').addEventListener('click', () => { st.flip = !st.flip; save(); renderChain(); });
     q('fx-out').addEventListener('change', e => { st.out = e.target.value; save(); applySink(); });
+    const paintSlots = () => { const h = q('fx-slots'); if (!h) return; h.querySelectorAll('button[data-slot]').forEach(b => { const i = +b.dataset.slot; b.classList.toggle('on', i === st.slot); b.classList.toggle('has', !!st.presets[i]); b.title = st.presets[i] ? '保存済み（クリックで呼び出し）' : '空き（クリックで選択）'; }); };
+    const applyState = () => { save(); renderChain(); if (E.ctx) { ORDER.forEach(id => { if (id === 'delay' || id === 'reverb') rebuild(id); applyAll(id); }); rewire(); } };
+    q('fx-slots').addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.id === 'fx-slot-save') { st.presets[st.slot] = JSON.parse(JSON.stringify({ order: st.order, fx: st.fx })); save(); paintSlots(); return; }
+      const i = +b.dataset.slot, p = st.presets[i]; st.slot = i;
+      if (p) { const o = JSON.parse(JSON.stringify(p)); const d = defState(); st.order = Array.isArray(o.order) && o.order.length === ORDER.length ? o.order : d.order; ORDER.forEach(id => { if (o.fx[id]) { st.fx[id].on = !!o.fx[id].on; FX_DEFS[id].params.forEach(pp => { const v = o.fx[id].p && o.fx[id].p[pp.k]; if (typeof v === 'number') st.fx[id].p[pp.k] = v; }); if (id === 'amp' && o.fx.amp.mem) st.fx.amp.mem = o.fx.amp.mem; } }); applyState(); } else save();
+      paintSlots();
+    });
+    paintSlots();
     q('fx-reset').addEventListener('click', () => { const d = defState(); st.order = d.order; st.fx = d.fx; save(); renderChain(); if (E.ctx) { ORDER.forEach(applyAll); rewire(); } });
     const go = () => { sessionStorage.setItem(ACK, '1'); q('fx-confirm').hidden = true; startMonitor(); };
     q('fx-go').addEventListener('click', go);

@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=98">
+<link rel="stylesheet" href="style.css?v=99">
 <script>
 try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t){var _l=_t.mode==='light'||(_t.mode==='auto'&&matchMedia('(prefers-color-scheme: light)').matches),_r=document.documentElement;_r.dataset.theme=_l?'light':'dark';if(/^#[0-9a-fA-F]{6}$/.test(_t.accent))_r.style.setProperty('--accent1',_t.accent);}}catch(e){}
 </script>
@@ -257,7 +257,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
         <div class="row"><button class="std" id="fx-go" type="button">ヘッドホン／モニタースピーカーで始める</button><button class="std" id="fx-cancel" type="button">やめる</button></div>
       </div>
       <div class="fx-chain" id="fx-chain"></div>
-      <div class="fx-foot"><button class="th-link" id="fx-reset" type="button" style="margin-left:0">エフェクトの設定を初期化</button><button class="th-link" id="fx-flip" type="button" style="margin-left:0"></button><span class="hint" style="margin:0">つまみ・フェーダーは上下にドラッグ（ダブルクリックで初期値）。◀ ▶ で順番を入れ替えられ、IN側から順に通ります。</span></div>
+      <div class="fx-foot"><span class="fx-slots" id="fx-slots"><span class="fx-sl">セッティング</span><button type="button" data-slot="0">1</button><button type="button" data-slot="1">2</button><button type="button" data-slot="2">3</button><button type="button" id="fx-slot-save" title="選んでいるスロットに、今の設定（ペダルの順番・オンオフ・つまみ）を保存します">保存</button></span><button class="th-link" id="fx-reset" type="button" style="margin-left:0">エフェクトの設定を初期化</button><button class="th-link" id="fx-flip" type="button" style="margin-left:0"></button><span class="hint" style="margin:0">つまみ・フェーダーは上下にドラッグ（ダブルクリックで初期値）。◀ ▶ で順番を入れ替えられ、IN側から順に通ります。</span></div>
     </section>
 
     <section class="panel" data-blk="fretboard">
@@ -427,7 +427,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
   <input type="range" id="vol-range" min="0" max="100" step="1" value="80" aria-label="音量">
   <span class="vol-num" id="vol-num">80</span>
 </div>
-<script type="module" src="js/app.js?v=98"></script>
+<script type="module" src="js/app.js?v=99"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
