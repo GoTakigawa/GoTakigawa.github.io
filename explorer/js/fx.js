@@ -19,11 +19,11 @@ export const FX_DEFS = {
     { k: 'drive', label: 'ドライブ', min: 0, max: 100, step: 1, def: 40, unit: '' },
     { k: 'tone', label: 'トーン', min: 1000, max: 8000, step: 100, def: 3500, unit: 'Hz' },
     { k: 'level', label: 'レベル', min: -18, max: 12, step: 0.5, def: 0, unit: 'dB' }] },
-  // BOSS DS-1 style: TONE / LEVEL / DIST
-  dist: { name: 'ディストーション', rows: [['tone', 'level', 'drive']], params: [
+  // BOSS DS-1 style circuit; the knob row matches the overdrive: DRIVE / TONE / LEVEL
+  dist: { name: 'ディストーション', rows: [['drive', 'tone', 'level']], params: [
+    { k: 'drive', label: 'ドライブ', min: 0, max: 100, step: 1, def: 65, unit: '' },
     { k: 'tone', label: 'トーン', min: 0, max: 100, step: 1, def: 50, unit: '' },
-    { k: 'level', label: 'レベル', min: -18, max: 12, step: 0.5, def: -6, unit: 'dB' },
-    { k: 'drive', label: 'ディスト', min: 0, max: 100, step: 1, def: 65, unit: '' }] },
+    { k: 'level', label: 'レベル', min: -18, max: 12, step: 0.5, def: -6, unit: 'dB' }] },
   amp: { name: 'アンプシミュ', rows: [['treble', 'mid', 'bass'], ['gain', 'level', 'width']], params: [
     { k: 'treble', label: 'トレブル', min: -12, max: 12, step: 0.5, def: 0, unit: 'dB' },
     { k: 'mid', label: 'ミドル', min: -12, max: 12, step: 0.5, def: 0, unit: 'dB' },
@@ -238,7 +238,7 @@ const BUILD = {
     const bass = node(ctx, 'lowshelf', { frequency: 120 }), mid = node(ctx, 'peaking', { frequency: 700, Q: 0.8 }), tre = node(ctx, 'highshelf', { frequency: 3200 });
     hp.connect(pre); pre.connect(sh); sh.connect(post); post.connect(bass); bass.connect(mid); mid.connect(tre);
     // clean / drive: the preamp curve and gain range change with the mode
-    let mode = 1, gainV = 50; const curves = [tanhCurve(0.8), tanhCurve(4)];
+    let mode = 1, gainV = 50, lvDb = -3; const curves = [tanhCurve(0.8), tanhCurve(4)];
     const preamp = () => { sh.curve = curves[mode]; tc(pre.gain, mode ? 2 + Math.pow(gainV / 100, 1.6) * 38 : 0.7 + gainV / 100 * 3.5, ctx); };
     // cabinet: a few filters, or a loaded impulse response (see loadIr)
     const cabIn = ctx.createGain(), cabOff = ctx.createGain(), cabBiq = ctx.createGain(), cabConv = ctx.createGain(), cabOut = ctx.createGain(), level = ctx.createGain();
@@ -252,10 +252,12 @@ const BUILD = {
     // the built-in cabinet IR follows the mode; a loaded IR file overrides it. The filter version is used until the IRs are ready.
     const pickIr = () => { const b = userIr || gens[mode]; if (b) { try { conv.buffer = b; hasIr = true; } catch (e) { hasIr = false; } } else hasIr = false; route(); };
     [0, 1].forEach(m => makeCabIr(ctx, m).then(b => { gens[m] = b; pickIr(); }).catch(() => {}));
-    route(); preamp();
+    // fixed make-up gain per mode (the cabinet and the preamp curve leave the amp quieter than the other pedals)
+    const applyLevel = () => tc(level.gain, dbLin(lvDb) * (mode ? 1.3 : 3.6), ctx);
+    route(); preamp(); applyLevel();
     return {
       in: hp, out: wid.out,
-      set(k, v) { if (k === 'gain') { gainV = v; preamp(); } else if (k === 'mode') { mode = v ? 1 : 0; preamp(); pickIr(); } else if (k === 'bass') tc(bass.gain, v, ctx); else if (k === 'mid') tc(mid.gain, v, ctx); else if (k === 'treble') tc(tre.gain, v, ctx); else if (k === 'cab') { cab = v ? 1 : 0; route(); } else if (k === 'level') tc(level.gain, dbLin(v), ctx); else if (k === 'width') wid.set(v / 100); },
+      set(k, v) { if (k === 'gain') { gainV = v; preamp(); } else if (k === 'mode') { mode = v ? 1 : 0; preamp(); applyLevel(); pickIr(); } else if (k === 'bass') tc(bass.gain, v, ctx); else if (k === 'mid') tc(mid.gain, v, ctx); else if (k === 'treble') tc(tre.gain, v, ctx); else if (k === 'cab') { cab = v ? 1 : 0; route(); } else if (k === 'level') { lvDb = v; applyLevel(); } else if (k === 'width') wid.set(v / 100); },
       setIr(buf) { userIr = buf; pickIr(); }
     };
   },
