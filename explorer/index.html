@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=74">
+<link rel="stylesheet" href="style.css?v=76">
 <script>
 try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t){var _l=_t.mode==='light'||(_t.mode==='auto'&&matchMedia('(prefers-color-scheme: light)').matches),_r=document.documentElement;_r.dataset.theme=_l?'light':'dark';if(/^#[0-9a-fA-F]{6}$/.test(_t.accent))_r.style.setProperty('--accent1',_t.accent);}}catch(e){}
 </script>
@@ -237,6 +237,28 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
       </div>
     </section>
 
+    <section class="panel" id="fx-panel" data-blk="fx">
+      <div class="panel-hd">
+        <div class="panel-title"><span class="blk-grip" role="button" tabindex="0" title="ドラッグで並べ替え（キーボードは↑↓）" aria-label="ブロックを移動">⠿</span>Effects<b>ギター入力にエフェクトをかけて聞く</b></div>
+      </div>
+      <p class="hint">初期状態は「入力のみ」で、音は出ません。モニターを始めたときだけ、エフェクトを通した音が出ます（音程の認識には、エフェクト前の音を使います）。</p>
+      <div class="fx-bar">
+        <button class="tn-start fx-mon" id="fx-monitor" type="button" aria-pressed="false"><span id="fx-monitor-label">モニターを始める</span></button>
+        <div class="fx-state" id="fx-state">出力しない（入力のみ）</div>
+        <span class="fx-lat" id="fx-lat"></span>
+        <label class="fx-master">出力レベル<input type="range" id="fx-master" min="0" max="100" step="1" value="50"><output id="fx-master-v">50</output></label>
+        <label class="fx-out" id="fx-out-w" hidden>出力先<select id="fx-out"><option value="">既定の出力</option></select></label>
+      </div>
+      <p class="fx-note hint" id="fx-note" hidden></p>
+      <div class="fx-confirm" id="fx-confirm" hidden>
+        <b>モニターを始める前に</b>
+        <p>スピーカーから音を出すと、その音をギターやマイクが拾って、「キーン」と鳴り続けること（ハウリング）があります。ヘッドホンまたはイヤホンでお使いください。最初は、出力レベルを低めにしておくと安心です。</p>
+        <div class="row"><button class="std" id="fx-go" type="button">ヘッドホンを使っています。始める</button><button class="std" id="fx-cancel" type="button">やめる</button></div>
+      </div>
+      <div class="fx-chain" id="fx-chain"></div>
+      <div class="fx-foot"><button class="th-link" id="fx-reset" type="button" style="margin-left:0">エフェクトの設定を初期化</button><span class="hint" style="margin:0">◀ ▶ で順番を入れ替えられます。上から順に通ります。</span></div>
+    </section>
+
     <section class="panel" data-blk="fretboard">
       <div class="panel-hd">
         <div class="panel-title"><span class="blk-grip" role="button" tabindex="0" title="ドラッグで並べ替え（キーボードは↑↓）" aria-label="ブロックを移動">⠿</span>Fretboard<b id="fb-title"></b></div>
@@ -304,7 +326,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
           <label class="pg-f">音価<select id="dr-res"></select></label>
           <label class="pg-f">パターンの長さ（小節）<span class="num-wrap"><input type="number" id="dr-bars" min="1" max="120" step="1" inputmode="numeric" aria-label="パターンの長さ（小節）"><span class="num-btns"><button type="button" class="num-btn" data-dir="up" aria-label="増やす">▲</button><button type="button" class="num-btn" data-dir="down" aria-label="減らす">▼</button></span></span></label>
           <label class="pg-f">スウィング<select id="dr-swing"><option value="off">なし（ストレート）</option><option value="8">8分の裏を跳ねる</option><option value="16">16分の裏を跳ねる</option></select></label>
-          <label class="pg-f" id="dr-amt-w">強さ（％）<input type="number" class="txt" id="dr-amt" min="50" max="80" step="1" inputmode="numeric"><small id="dr-amt-note"></small></label>
+          <label class="pg-f" id="dr-amt-w">強さ（％）<span class="dr-amt-row"><input type="number" class="txt" id="dr-amt" min="50" max="80" step="1" inputmode="numeric"><small id="dr-amt-note"></small></span></label>
           <select id="dr-add" aria-label="楽器を追加"></select></div>
         <p class="hint">マスを押すたびに「強→弱→休符」と変わります（クリックは強＝高い音、弱＝低い音）。</p>
         <p class="hint">スウィングの強さは、裏拍を置く位置です。50％＝ストレート、67％＝3連の中抜き（シャッフル）、75％＝付点（強いハネ）。ひな形を選んでも、小節数・楽器の構成・音価は変わらず、足りない楽器だけ加わります。</p>
@@ -404,7 +426,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
   <input type="range" id="vol-range" min="0" max="100" step="1" value="80" aria-label="音量">
   <span class="vol-num" id="vol-num">80</span>
 </div>
-<script type="module" src="js/app.js?v=74"></script>
+<script type="module" src="js/app.js?v=76"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');

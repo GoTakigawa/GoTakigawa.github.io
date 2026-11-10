@@ -1,13 +1,14 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=74';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=74';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=74';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=74';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=74';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=74';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=74';
-import { PitchListener } from './pitch.js?v=74';
-import { initLayout } from './layout.js?v=74';
-import { initTheme, themeColors } from './theme.js?v=74';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=76';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=76';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=76';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=76';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=76';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=76';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=76';
+import { PitchListener } from './pitch.js?v=76';
+import { initLayout } from './layout.js?v=76';
+import { initTheme, themeColors } from './theme.js?v=76';
+import { initFx } from './fx.js?v=76';
 // the build number is the cache-busting ?v= of this file, shown next to BETA
 { const v = new URL(import.meta.url).searchParams.get('v'), el = document.getElementById('ver'); if (v && el) el.textContent = 'BETA ' + v; }
 const MAX_BARS = 120;
@@ -597,10 +598,13 @@ function liveFrame(t) {
   const g = glowSvg(cands.map(c => ({ x: fbGeom.cx(c.f), y: fbGeom.Y(c.s), root: isRoot })), fade, t);
   layer.innerHTML = g;
 }
+let fx = null;   // the effects for the monitor (see fx.js); set in bindTuner
 async function tunerStart() {
   const msg = $('tn-msg');
   try {
+    if (fx) fx.detach();
     await listener.start($('tn-device').value);
+    if (fx) fx.attach(listener.ctx, listener.src);
   } catch (e) {
     msg.textContent = e && e.name === 'NotAllowedError' ? '入力（マイク）の使用が許可されていません。ブラウザのアドレスバーの設定から、このページのマイク入力を許可してください。'
       : e && e.name === 'NotFoundError' ? '入力デバイスが見つかりません。オーディオインターフェースやマイクの接続を確認してください。' : '入力を開始できませんでした：' + (e && e.message || e);
@@ -619,6 +623,7 @@ async function tunerStart() {
 }
 async function tunerStop() {
   cancelAnimationFrame(live.raf); live.on = false; live.midi = null;
+  if (fx) fx.detach();
   await listener.stop(); $('fb-live').innerHTML = ''; tunerReadout(false);
   $('tn-note').textContent = '—'; $('tn-hz').textContent = '— Hz'; $('tn-cents').textContent = '—';
   $('tn-toggle').classList.remove('on'); $('tn-toggle').setAttribute('aria-pressed', 'false'); $('tn-toggle-label').textContent = 'ギター入力をオンにする';
@@ -1420,6 +1425,7 @@ function bindVolume() {
   apply();
 }
 function bindTuner() {
+  fx = initFx({ ensureInput: async () => { if (!live.on) await tunerStart(); } });
   let a4 = 440; try { a4 = +localStorage.getItem('gti-explorer:a4') || 440; } catch (e) {}
   $('tn-a4').value = clampInt(a4, 400, 480, 440);
   $('tn-a4').addEventListener('change', () => { $('tn-a4').value = clampInt(parseFloat($('tn-a4').value), 400, 480, 440); try { localStorage.setItem('gti-explorer:a4', $('tn-a4').value); } catch (e) {} });
