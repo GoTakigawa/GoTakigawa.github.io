@@ -357,24 +357,21 @@ export function initFx({ ensureInput } = {}) {
     const now = performance.now(); if (now - (E.mt0 || 0) < 55) return; E.mt0 = now;   // about 18 fps
     if (!E.mc || ++E.mcn % 25 === 0) { const cst = getComputedStyle(document.documentElement); E.mc = { a: cst.getPropertyValue('--accent1').trim() || '#8c4dff', t: cst.getPropertyValue('--text3').trim() || '#888', l: cst.getPropertyValue('--border2').trim() || '#333' }; E.mcn = 0; }
     // spectrum: 30 Hz - 16 kHz on a log axis, -90 .. -10 dB
-    { const [g, W, H] = prep(cs), sr = E.ctx.sampleRate, db = E.sdb || (E.sdb = new Float32Array(E.spec.frequencyBinCount)), nb = Math.floor(W / 4), hz = i => 30 * Math.pow(16000 / 30, i / nb);
+    { const [g, W, H] = prep(cs), sr = E.ctx.sampleRate, db = E.sdb || (E.sdb = new Float32Array(E.spec.frequencyBinCount)), nb = Math.floor(W / 3), hz = i => 30 * Math.pow(16000 / 30, i / nb);
       E.spec.getFloatFrequencyData(db);
-      g.strokeStyle = E.mc.l; g.fillStyle = E.mc.t; g.font = '9px sans-serif'; g.lineWidth = 1;
-      [100, 1000, 10000].forEach(f => { const x = Math.round(W * Math.log(f / 30) / Math.log(16000 / 30)) + 0.5; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H - 12); g.stroke(); g.fillText(f >= 1000 ? f / 1000 + 'k' : String(f), x + 2, H - 2); });
       g.fillStyle = E.mc.a; g.globalAlpha = 0.85;
       for (let i = 0; i < nb; i++) {
         const p0 = hz(i) * E.spec.fftSize / sr, p1 = hz(i + 1) * E.spec.fftSize / sr; let m = -120;
         if (p1 - p0 < 1) { const k = Math.floor(p0), f = p0 - k; m = db[k] * (1 - f) + db[k + 1] * f; } else for (let b = Math.floor(p0); b <= Math.ceil(p1) && b < db.length; b++) if (db[b] > m) m = db[b];   // bands narrower than a bin are interpolated
-        const h = Math.max(0, Math.min(1, (m + 90) / 80)) * (H - 12); g.fillRect(i * 4, H - 12 - h, 3, h);
+        const h = Math.max(0, Math.min(1, (m + 90) / 80)) * H; g.fillRect(i * 3, H - h, 2, h);
       }
       g.globalAlpha = 1; }
     // goniometer: L/R rotated 45 degrees (vertical = mono, horizontal = side), with a gentle auto-scale and the L/R correlation
     { try { const [g, W, H] = prep(cg), L = E.gbL || (E.gbL = new Float32Array(1024)), R = E.gbR || (E.gbR = new Float32Array(1024)); E.anL.getFloatTimeDomainData(L); E.anR.getFloatTimeDomainData(R);
       let pk = 0, ll = 0, rr = 0, lr = 0; for (let i = 0; i < 1024; i++) { pk = Math.max(pk, Math.abs(L[i]), Math.abs(R[i])); ll += L[i] * L[i]; rr += R[i] * R[i]; lr += L[i] * R[i]; }
-      const cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - 10;
+      const cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - 2;
       g.strokeStyle = E.mc.l; g.fillStyle = E.mc.t; g.lineWidth = 1; g.font = '9px sans-serif';
       g.beginPath(); g.moveTo(cx, cy - r); g.lineTo(cx, cy + r); g.moveTo(cx - r, cy); g.lineTo(cx + r, cy); g.stroke(); g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.stroke();
-      g.fillText('M', cx + 3, cy - r + 8); g.fillText('S', cx + r - 8, cy - 3); g.fillText('L', cx - r + 2, cy - r + 8); g.fillText('R', cx + r - 8, cy - r + 8);
       // the trace is kept in an off-screen layer that fades slowly (like a phosphor screen), so notes leave a trail for about a second
       const bw = cg.width, bh = cg.height; if (!E.gb || E.gb.width !== bw || E.gb.height !== bh) { E.gb = document.createElement('canvas'); E.gb.width = bw; E.gb.height = bh; }
       const bg = E.gb.getContext('2d'); bg.setTransform(bw / W, 0, 0, bh / H, 0, 0);
@@ -384,11 +381,10 @@ export function initFx({ ensureInput } = {}) {
         // the radius is shown on a dB scale (-60 dB at the centre, 0 dB at the ring) so quiet playing still moves visibly; the angle is kept
         const x = (L[i] - R[i]) * 0.7071, y = (L[i] + R[i]) * 0.7071, m = Math.hypot(x, y); if (m < 0.0005) continue;
         const k = Math.min(1, Math.max(0, (20 * Math.log10(m) + 60) / 60)) / m;
-        bg.rect(cx + x * k * r - 0.9, cy - y * k * r - 0.9, 1.8, 1.8);
+        bg.rect(cx + x * k * r - 0.7, cy - y * k * r - 0.7, 1.4, 1.4);
       }
       bg.fill(); bg.globalAlpha = 1;
-      g.drawImage(E.gb, 0, 0, W, H);
-      const cr = q('fx-corr'); if (cr) cr.textContent = pk > 0.003 ? '相関 ' + (lr / Math.sqrt(ll * rr + 1e-12) >= 0 ? '+' : '') + (lr / Math.sqrt(ll * rr + 1e-12)).toFixed(2) : '相関 —'; } catch (e) { console.error('gonio', e); } }
+      g.drawImage(E.gb, 0, 0, W, H); } catch (e) { console.error('gonio', e); } }
   };
   const meter = () => {
     if (!E.ctx || document.hidden) return;
