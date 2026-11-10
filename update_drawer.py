@@ -31,6 +31,7 @@ def update_file(file_path):
   <a href="{depth_str}about/index.html"><span class="d-name">About GTI</span><span class="d-arr">→</span></a>
   <a href="{depth_str}contact/index.html"><span class="d-name">Contact</span><span class="d-arr">→</span></a>
   <a href="{depth_str}generator/index.html"><span class="d-name">Generator</span><span class="d-arr">→</span></a>
+  <a href="{depth_str}explorer/index.html"><span class="d-name">Fretboard Explorer</span><span class="d-arr">→</span></a>
 </div>"""
 
     if drawer_pattern.search(content):
