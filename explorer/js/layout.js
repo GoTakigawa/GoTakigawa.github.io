@@ -1,6 +1,6 @@
 // Blocks of the main column: collapsible (click the title) and re-orderable (drag the ⠿ handle, or ↑/↓ on it). Saved in this browser.
 const KEY = 'gti-explorer:layout';
-const DEFAULT_ORDER = ['quiz', 'metrics', 'tuner', 'fretboard', 'progression', 'notes', 'shapes'];
+const DEFAULT_ORDER = ['quiz', 'tuner', 'fretboard', 'progression', 'notes', 'shapes'];
 const DEFAULT_COLLAPSED = ['quiz'];
 
 export function initLayout() {

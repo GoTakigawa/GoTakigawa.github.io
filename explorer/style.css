@@ -429,8 +429,6 @@ button.small{font-size:11px;padding:6px 10px;}
 .panel.collapsed>*:not(.panel-hd){display:none;}
 .panel.collapsed>.panel-hd{margin-bottom:0;}
 .panel.collapsed>.panel-hd>*:not(.panel-title){display:none;}
-.metrics{position:relative;}
-.metrics>.blk-grip{position:absolute;left:-2px;top:-14px;margin:0;width:auto;font-size:13px;opacity:.7;}
 [data-blk].dragging{opacity:.6;outline:1px dashed var(--accent1);outline-offset:3px;}
 body.blk-dragging,body.blk-dragging *{cursor:grabbing !important;user-select:none;}
 .blk-foot{display:flex;justify-content:center;padding:4px 0 12px;}
