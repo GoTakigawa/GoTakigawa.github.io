@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=56">
+<link rel="stylesheet" href="style.css?v=57">
 <script>
 try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t){var _l=_t.mode==='light'||(_t.mode==='auto'&&matchMedia('(prefers-color-scheme: light)').matches),_r=document.documentElement;_r.dataset.theme=_l?'light':'dark';if(/^#[0-9a-fA-F]{6}$/.test(_t.accent))_r.style.setProperty('--accent1',_t.accent);}}catch(e){}
 </script>
@@ -227,7 +227,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
         <div class="panel-title"><span class="blk-grip" role="button" tabindex="0" title="ドラッグで並べ替え（キーボードは↑↓）" aria-label="ブロックを移動">⠿</span>Fretboard<b id="fb-title"></b></div>
         <div class="row" style="gap:6px;flex-wrap:nowrap"><button class="std small" id="pg-png" title="指板図を PNG 画像で保存">PNG</button><button class="std small" id="pg-pdf" title="指板図を PDF で保存">PDF</button><button class="std small" id="play-set">▶ 表示中の音を鳴らす</button></div>
       </div>
-      <div class="fb-scroll"><div class="fb-stack"><div id="fretboard"></div><svg id="fb-live" aria-hidden="true"></svg><svg id="fb-next" aria-hidden="true"></svg></div></div>
+      <div class="fb-scroll"><div class="fb-stack"><div id="fretboard"></div><svg id="fb-live" aria-hidden="true"></svg></div></div>
 
       <div class="tool-bar" role="toolbar" aria-label="指板の操作">
         <div class="tool-group">
@@ -388,7 +388,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
   <input type="range" id="vol-range" min="0" max="100" step="1" value="80" aria-label="音量">
   <span class="vol-num" id="vol-num">80</span>
 </div>
-<script type="module" src="js/app.js?v=56"></script>
+<script type="module" src="js/app.js?v=57"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');

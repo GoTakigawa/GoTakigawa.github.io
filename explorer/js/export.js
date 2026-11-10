@@ -36,7 +36,7 @@ export async function fretboardCanvas(svgEl, title, sub) {
   const cs = getComputedStyle(document.documentElement), v = n => cs.getPropertyValue(n).trim();
   const vb = svgEl.viewBox.baseVal, w = Math.round(vb.width), h = Math.round(vb.height), S = 2, padX = 36, head = 96, foot = 44;
   // the clickable hit areas are transparent only through the page's CSS, so they must not go into the picture
-  const clone = svgEl.cloneNode(true); clone.querySelectorAll('.fb-hit').forEach(n => n.remove());
+  const clone = svgEl.cloneNode(true); clone.querySelectorAll('.fb-hit,.fb-glow').forEach(n => n.remove());
   const xml = new XMLSerializer().serializeToString(clone).replace(/color-mix\(in srgb, ?var\((--[\w-]+)\) (\d+)%, ?transparent\)/g, (m, n, p) => v(n)).replace(/var\((--[\w-]+)\)/g, (m, n) => v(n) || '#888');
   const img = new Image();
   await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml); });

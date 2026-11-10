@@ -1,13 +1,13 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=56';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=56';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=56';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=56';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=56';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=56';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=56';
-import { PitchListener } from './pitch.js?v=56';
-import { initLayout } from './layout.js?v=56';
-import { initTheme, themeColors } from './theme.js?v=56';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=57';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=57';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=57';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=57';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=57';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=57';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=57';
+import { PitchListener } from './pitch.js?v=57';
+import { initLayout } from './layout.js?v=57';
+import { initTheme, themeColors } from './theme.js?v=57';
 const MAX_BARS = 120;
 
 const $ = id => document.getElementById(id);
@@ -371,10 +371,10 @@ function renderFretboard() {
     dots += `<circle cx="${x}" cy="${y}" r="11.5" fill="var(--note-bg)" stroke="var(--note-bg)" stroke-width="1.5"/><text x="${x}" y="${y + 3.6}" fill="var(--note-fg)" font-size="9" font-weight="700" text-anchor="middle" font-family="Barlow">${set.name(tun[s] + f)}</text>`;
   });
   if (sh) sh.muted.forEach(s => { const y = top + gap * (n - 1 - s); dots += `<text x="${cx(0)}" y="${y + 4}" fill="#f87171" font-size="12" text-anchor="middle" font-family="Barlow" font-weight="700">×</text>`; });
-  svg += dots + hits + '</svg>';
+  svg += '<g id="fb-glow" class="fb-glow"></g>' + dots + hits + '</svg>';
   $('fretboard').innerHTML = svg;
   fbGeom = { cx, Y: s => top + gap * (n - 1 - s) };
-  $('fb-live').setAttribute('viewBox', `0 0 ${W} ${H + 18}`); $('fb-next').setAttribute('viewBox', `0 0 ${W} ${H + 18}`);
+  $('fb-live').setAttribute('viewBox', `0 0 ${W} ${H + 18}`);
   $('fb-title').textContent = titleFor(set) + (pb.on && pb.chord && st.mode === 'scale' ? ` ／ ${pb.chord.label}` : '') + (sh ? ` ／ ${sh.name}・${sh.title}` : '');
   $('fretboard').classList.toggle('hide-mode', fbAction === 'hide');
   return count;
@@ -1046,15 +1046,17 @@ function nextChordAfter(bi, ci) {
   return { ch, sc, win: null };
 }
 function drawNext() {
-  const L = $('fb-next'); if (!L) return;
+  const L = $('fb-glow'); if (!L) return;
   if (!pb.on || !pb.next || !fbGeom) { L.innerHTML = ''; return; }
   const { ch, win } = pb.next, tun = tuning(), g = fbGeom, set = makeSet(ch.root, CHORDS[ch.id].iv), F = st.frets;
   const lo = win ? win[0] : 0, hi = win ? win[1] : F; let h = '';
   tun.forEach((open, sIdx) => { if (!st.strOn[sIdx]) return; for (let f = lo; f <= hi; f++) { const p = pc(open + f); if (!set.has(p)) continue;
-    const root = p === pc(ch.root);
-    const col = root ? 'var(--accent3)' : 'var(--accent2)', x = g.cx(f).toFixed(1), y = g.Y(sIdx);
-    h += `<circle cx="${x}" cy="${y}" r="17" fill="${col}" opacity=".6" filter="url(#nx-glow)"/><circle cx="${x}" cy="${y}" r="12" fill="${col}" opacity=".16"/><circle cx="${x}" cy="${y}" r="13" fill="none" stroke="${col}" stroke-width="2.6" stroke-dasharray="5 3.5" opacity="1"/>`; } });
-  L.innerHTML = '<defs><filter id="nx-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="5"/></filter></defs>' + h;
+    const col = p === pc(ch.root) ? 'var(--accent3)' : 'var(--accent2)';
+    h += `<circle cx="${g.cx(f).toFixed(1)}" cy="${g.Y(sIdx)}" r="15" fill="${col}" filter="url(#nx-glow)"/>`; } });
+  // behind the notes; starts faint and brightens as the next chord comes closer (the animation is set back by the time already elapsed)
+  const dur = Math.max(0.2, pb.chDur || 2), el = Math.max(0, Math.min(dur, (performance.now() - (pb.chT0 || performance.now())) / 1000));
+  L.setAttribute('style', `animation-duration:${dur.toFixed(3)}s;animation-delay:${(-el).toFixed(3)}s`);
+  L.innerHTML = '<defs><filter id="nx-glow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="6"/></filter></defs>' + h;
 }
 function applyBar(bi, ci) {
   if (!pb.on || !pb.snap) return;
@@ -1063,6 +1065,7 @@ function applyBar(bi, ci) {
   const sc = bar.scales.length ? bar.scales[Math.min(ci, bar.scales.length - 1)] : null;
   if (!ch && !sc) return;
   pb.chord = ch; pb.scale = sc;
+  pb.chT0 = performance.now(); pb.chDur = (st.prog.beats / Math.max(1, bar.chords.length)) * 60 / st.prog.bpm;
   pb.next = nextChordAfter(bi, ci);
   if (sc) { st.mode = 'scale'; st.root = sc.root; st.scale = sc.id; st.diat = -1; st.emph = ch ? [] : [0]; }
   else { st.mode = 'chord'; st.root = ch.root; st.chord = ch.id; }
