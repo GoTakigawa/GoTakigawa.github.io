@@ -94,7 +94,27 @@ const GATE_SRC = `class GtiGate extends AudioWorkletProcessor {
     return true;
   }
 }
-registerProcessor('gti-gate', GtiGate);`;
+registerProcessor('gti-gate', GtiGate);
+// feed-forward compressor without lookahead (the built-in DynamicsCompressor delays the signal by ~6 ms)
+class GtiComp extends AudioWorkletProcessor {
+  static get parameterDescriptors() { return [['thr', -24], ['ratio', 4], ['att', 10], ['rel', 250]].map(([name, defaultValue]) => ({ name, defaultValue, automationRate: 'k-rate' })); }
+  constructor() { super(); this.gr = 0; }
+  process(inputs, outputs, p) {
+    const x = inputs[0], y = outputs[0]; if (!x || !x.length || !y || !y.length) return true;
+    const thr = p.thr[0], r = Math.max(1, p.ratio[0]), k = 8, sl = 1 - 1 / r, sr = sampleRate, n = x[0].length;
+    const ca = 1 - Math.exp(-1 / (Math.max(0.0005, p.att[0] / 1000) * sr)), cr = 1 - Math.exp(-1 / (Math.max(0.01, p.rel[0] / 1000) * sr));
+    for (let s = 0; s < n; s++) {
+      let a = 0; for (let c = 0; c < x.length; c++) { const v = Math.abs(x[c][s]); if (v > a) a = v; }
+      const over = 20 * Math.log10(Math.max(a, 1e-6)) - thr;
+      const tg = over <= -k / 2 ? 0 : over >= k / 2 ? over * sl : sl * (over + k / 2) * (over + k / 2) / (2 * k);
+      this.gr += (tg - this.gr) * (tg > this.gr ? ca : cr);
+      const g = Math.pow(10, -this.gr / 20);
+      for (let c = 0; c < y.length; c++) y[c][s] = x[Math.min(c, x.length - 1)][s] * g;
+    }
+    return true;
+  }
+}
+registerProcessor('gti-comp', GtiComp);`;
 const gateReady = new WeakMap();
 const loadGate = ctx => { if (!gateReady.has(ctx)) gateReady.set(ctx, ctx.audioWorklet ? ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([GATE_SRC], { type: 'application/javascript' }))) : Promise.reject(new Error('no worklet'))); return gateReady.get(ctx); };
 
@@ -118,8 +138,17 @@ const BUILD = {
     return { in: inn, out, set(k, v) { val[k] = v; if (wn) wn.parameters.get(k).value = v; } };
   },
   comp(ctx) {
-    const c = ctx.createDynamicsCompressor(), g = ctx.createGain(); c.knee.value = 12; c.connect(g);
-    return { in: c, out: g, set(k, v) { if (k === 'thr') tc(c.threshold, v, ctx); else if (k === 'ratio') tc(c.ratio, v, ctx); else if (k === 'att') tc(c.attack, v / 1000, ctx); else if (k === 'rel') tc(c.release, v / 1000, ctx); else if (k === 'gain') tc(g.gain, dbLin(v), ctx); } };
+    const inn = ctx.createGain(), g = ctx.createGain(), val = { thr: -24, ratio: 4, att: 10, rel: 250 }; let wn = null, fb = null;
+    // until the worklet has loaded (or if it is unavailable) the built-in compressor is used
+    fb = ctx.createDynamicsCompressor(); fb.knee.value = 12; inn.connect(fb); fb.connect(g);
+    const apply = () => { fb.threshold.value = val.thr; fb.ratio.value = val.ratio; fb.attack.value = val.att / 1000; fb.release.value = val.rel / 1000; };
+    loadGate(ctx).then(() => {
+      wn = new AudioWorkletNode(ctx, 'gti-comp', { numberOfInputs: 1, numberOfOutputs: 1, channelCount: 1, channelCountMode: 'explicit', outputChannelCount: [1] });
+      ['thr', 'ratio', 'att', 'rel'].forEach(k => { wn.parameters.get(k).value = val[k]; });
+      try { inn.disconnect(fb); fb.disconnect(g); } catch (e) {} fb = null; inn.connect(wn); wn.connect(g);
+    }).catch(() => {});
+    apply();
+    return { in: inn, out: g, set(k, v) { if (k === 'gain') tc(g.gain, dbLin(v), ctx); else { val[k] = v; if (wn) wn.parameters.get(k).value = v; else if (fb) apply(); } } };
   },
   od(ctx) {
     const hp = node(ctx, 'highpass', { frequency: 120 }), mid = node(ctx, 'peaking', { frequency: 720, gain: 4 }), pre = ctx.createGain(), sh = shaper(ctx, 2.2), lp = node(ctx, 'lowpass', { frequency: 3500 }), out = ctx.createGain();
@@ -177,7 +206,7 @@ const BUILD = {
 export function initFx({ ensureInput } = {}) {
   const st = load(), q = id => document.getElementById(id);
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
-  const E = { ctx: null, src: null, fx: {}, fxIn: null, master: null, limiter: null, outAn: null, inAn: null, on: false, timer: 0, hist: [], loud: 0 };
+  const E = { ctx: null, src: null, fx: {}, fxIn: null, master: null, limiter: null, outAn: null, inAn: null, on: false, timer: 0, hist: [], loud: 0, tick: 0 };
   const warn = (t, cls = '') => { const w = q('fx-note'); if (!w) return; w.textContent = t || ''; w.className = 'fx-note hint ' + cls; w.hidden = !t; };
 
   // ── graph (built per audio context; the monitor connects it to the output) ──
@@ -214,6 +243,7 @@ export function initFx({ ensureInput } = {}) {
   // ── howl guard: a tone that is stable in pitch, much stronger than the rest and still growing -> mute at once ──
   const guard = () => {
     if (!E.on || !E.outAn) return;
+    if (++E.tick % 10 === 0) refreshUi();   // the browser reports the output latency a little after starting
     const an = E.outAn, db = E.guardDb || (E.guardDb = new Float32Array(an.frequencyBinCount)), td = E.guardTd || (E.guardTd = new Float32Array(an.fftSize));
     an.getFloatFrequencyData(db); an.getFloatTimeDomainData(td);
     let pk = 0, pi = 0, sum = 0, n = 0, rmsv = 0; for (let i = 0; i < td.length; i++) rmsv += td[i] * td[i]; rmsv = Math.sqrt(rmsv / td.length);
@@ -235,7 +265,11 @@ export function initFx({ ensureInput } = {}) {
     const b = q('fx-monitor'); if (!b) return;
     b.classList.toggle('on', E.on); b.setAttribute('aria-pressed', String(E.on)); q('fx-monitor-label').textContent = E.on ? 'モニターを止める' : 'モニターを始める';
     q('fx-state').textContent = E.on ? 'モニター中（ヘッドホン／モニタースピーカー推奨）' : '出力しない（入力のみ）'; q('fx-state').classList.toggle('on', E.on);
-    const lat = q('fx-lat'); if (lat) lat.textContent = E.on && E.ctx ? `遅延 約 ${Math.round(((E.ctx.baseLatency || 0) + (E.ctx.outputLatency || 0)) * 1000)} ms` : '';
+    const lat = q('fx-lat'); if (lat) if (E.on && E.ctx) {
+      let inp = 0; try { inp = E.src.mediaStream.getAudioTracks()[0].getSettings().latency || 0; } catch (e) {}
+      const base = (E.ctx.baseLatency || 0) * 1000, out = (E.ctx.outputLatency || 0) * 1000, ms = x => Math.round(x);
+      lat.textContent = `遅延 約 ${ms(inp * 1000 + base + out)} ms（入力 ${ms(inp * 1000)}・処理 ${ms(base)}・出力 ${ms(out)}・${Math.round(E.ctx.sampleRate / 100) / 10}kHz）`;
+    } else lat.textContent = '';
   };
   const startMonitor = () => {
     if (E.on || !E.ctx) return;

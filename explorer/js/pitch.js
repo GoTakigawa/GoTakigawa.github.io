@@ -77,7 +77,10 @@ export class PitchListener {
     if (deviceId) audio.deviceId = { exact: deviceId };
     this.stream = await navigator.mediaDevices.getUserMedia({ audio });
     const Ctx = window.AudioContext || window.webkitAudioContext;
-    this.ctx = new Ctx({ latencyHint: 'interactive' });
+    // same sample rate as the input device (no resampling on the way in) and the smallest buffer the browser offers
+    let sr = 0; try { sr = this.stream.getAudioTracks()[0].getSettings().sampleRate || 0; } catch (e) {}
+    try { this.ctx = new Ctx(sr >= 8000 && sr <= 192000 ? { latencyHint: 'interactive', sampleRate: sr } : { latencyHint: 'interactive' }); }
+    catch (e) { this.ctx = new Ctx({ latencyHint: 'interactive' }); }
     if (this.ctx.state === 'suspended') await this.ctx.resume();
     const src = this.src = this.ctx.createMediaStreamSource(this.stream);
     this.an = this.ctx.createAnalyser(); this.an.fftSize = 4096; this.an.smoothingTimeConstant = 0;
