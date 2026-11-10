@@ -609,3 +609,9 @@ body.blk-dragging,body.blk-dragging *{cursor:grabbing !important;user-select:non
 .tn-stage #tn-single,.tn-stage #tn-chord{height:236px;box-sizing:border-box;}
 @media(max-width:900px){.tn-stage #tn-chord{height:252px;}}
 .fx-extra .fx-seg button{padding:2px 4px;letter-spacing:-.03em;}
+
+/* tip buttons in the sidebar (same links as the fretboard generator) */
+.side-tip{display:grid;gap:8px;}
+a.tip-btn{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);padding:9px 10px;text-decoration:none;transition:color .15s,border-color .15s;}
+a.tip-btn:hover{color:#ffdd00;border-color:#ffdd00;}
+a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
