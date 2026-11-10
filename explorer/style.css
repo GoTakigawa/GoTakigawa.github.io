@@ -608,3 +608,4 @@ body.blk-dragging,body.blk-dragging *{cursor:grabbing !important;user-select:non
 #tn-single,#tn-chord{min-height:0;}
 .tn-stage #tn-single,.tn-stage #tn-chord{height:236px;box-sizing:border-box;}
 @media(max-width:900px){.tn-stage #tn-chord{height:252px;}}
+.fx-extra .fx-seg button{padding:2px 4px;letter-spacing:-.03em;}

@@ -470,7 +470,7 @@ export function initFx({ ensureInput } = {}) {
   const faderHtml = (id, p, v) => `<div class="fx-fd"><div class="fx-fader" role="slider" tabindex="0" data-fx="${id}" data-k="${p.k}" aria-label="${p.label}Hz" aria-valuemin="${p.min}" aria-valuemax="${p.max}" aria-valuenow="${v}" style="--f:${(v - p.min) / (p.max - p.min)}"><i></i></div><span class="fx-fl">${p.label}</span><span class="fx-kv">${fmtF(v)}</span></div>`;
   const extraHtml = (id, s) => {
     if (id === 'gate') return '<div class="fx-extra"><span class="fx-gate-ind"><i></i><em>—</em></span></div>';
-    if (id === 'amp') return `<div class="fx-extra"><span class="fx-seg"><button type="button" class="${s.p.mode ? '' : 'on'}" data-fx="amp" data-k="mode" data-v="0">クリーン</button><button type="button" class="${s.p.mode ? 'on' : ''}" data-fx="amp" data-k="mode" data-v="1">歪み</button></span><button type="button" class="fx-chip ${E.irName ? 'on' : ''}" id="fx-ir" title="${E.irName ? E.irName.replace(/"/g, '') + '（クリックで標準に戻す）' : '標準のIRを使用中（クリックでIRファイルを読み込み）'}">${E.irName ? 'IR ✓' : 'IR'}</button><input type="file" id="fx-ir-file" accept="audio/*,.wav" hidden></div>`;
+    if (id === 'amp') return `<div class="fx-extra"><span class="fx-seg"><button type="button" class="${s.p.mode ? '' : 'on'}" data-fx="amp" data-k="mode" data-v="0">クリーン</button><button type="button" class="${s.p.mode ? 'on' : ''}" data-fx="amp" data-k="mode" data-v="1">歪み</button></span><span class="fx-seg" id="fx-irseg" title="${E.userName ? E.userName.replace(/"/g, '') : 'キャビネットIRの切り替え（ユーザーIRはファイルを読み込みます）'}"><button type="button" data-ir="0" class="${E.irName ? '' : 'on'}">既定IR</button><button type="button" data-ir="1" class="${E.irName ? 'on' : ''}">ユーザーIR</button></span><input type="file" id="fx-ir-file" accept="audio/*,.wav" hidden></div>`;
     if (id === 'reverb') return `<div class="fx-extra"><select class="fx-sel" data-fx="reverb" data-k="type" aria-label="リバーブの種類">${REVERB_TYPES.map((t, i) => `<option value="${i}" ${Math.round(s.p.type) === i ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`;
     return '<div class="fx-extra"></div>';
   };
@@ -540,18 +540,19 @@ export function initFx({ ensureInput } = {}) {
         if (j >= 0 && j < st.order.length) { [st.order[i], st.order[j]] = [st.order[j], st.order[i]]; save(); renderChain(); wire(); }
         return;
       }
-      const sg = e.target.closest('.fx-seg button'); if (sg) { switchAmpMode(+sg.dataset.v); return; }
+      const sg = e.target.closest('.fx-seg:not(#fx-irseg) button'); if (sg) { switchAmpMode(+sg.dataset.v); return; }
       const sw = e.target.closest('.fx-foot-sw'); if (sw) { setOn(sw.dataset.fx, !st.fx[sw.dataset.fx].on); return; }
-      const cab = e.target.closest('.fx-chip[data-k="cab"]'); if (cab) { const v = st.fx.amp.p.cab ? 0 : 1; setParam('amp', 'cab', v); cab.classList.toggle('on', !!v); cab.textContent = 'キャビ ' + (v ? 'ON' : 'OFF'); return; }
-      if (e.target.id === 'fx-ir') {
-        if (E.irName) { E.fx.amp.core.setIr(null); E.irName = null; const c = q('fx-ir'); c.textContent = 'IR'; c.classList.remove('on'); c.title = '標準のIRを使用中（クリックでIRファイルを読み込み）'; }
-        else q('fx-ir-file').click();
+      const irb = e.target.closest('#fx-irseg button'); if (irb && E.fx) {
+        if (irb.dataset.ir === '0') { if (E.irName) { E.fx.amp.core.setIr(null); E.irName = null; paintIr(); } }
+        else if (!E.userBuf || E.irName) q('fx-ir-file').click();   // nothing loaded yet, or already using it: choose a (new) file
+        else { E.fx.amp.core.setIr(E.userBuf); E.irName = E.userName; paintIr(); }
       }
     });
+    const paintIr = () => { const s = q('fx-irseg'); if (!s) return; s.children[0].classList.toggle('on', !E.irName); s.children[1].classList.toggle('on', !!E.irName); s.title = E.userName || 'キャビネットIRの切り替え（ユーザーIRはファイルを読み込みます）'; };
     host.addEventListener('change', async e => {
       if (e.target.classList && e.target.classList.contains('fx-sel')) { setParam(e.target.dataset.fx, e.target.dataset.k, +e.target.value); return; }
       if (e.target.id !== 'fx-ir-file' || !e.target.files[0] || !E.ctx) return;
-      try { const buf = await E.ctx.decodeAudioData(await e.target.files[0].arrayBuffer()); E.fx.amp.core.setIr(buf); E.irName = e.target.files[0].name; q('fx-ir').textContent = 'IR ✓'; q('fx-ir').classList.add('on'); q('fx-ir').title = E.irName + '（クリックで標準に戻す）'; }
+      try { const buf = await E.ctx.decodeAudioData(await e.target.files[0].arrayBuffer()); E.userBuf = buf; E.userName = e.target.files[0].name; E.fx.amp.core.setIr(buf); E.irName = E.userName; paintIr(); }
       catch (err) { warn('IRファイルを読み込めませんでした。', 'err'); }
     });
     if ('IntersectionObserver' in window && q('fx-spec')) new IntersectionObserver(es => { E.mvis = es.some(x => x.isIntersecting); }, { threshold: 0 }).observe(q('fx-spec').closest('.fx-meters')); else E.mvis = true;
