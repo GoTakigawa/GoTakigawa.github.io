@@ -1,5 +1,5 @@
 // ── Chord / scale progressions: text parsing, presets, chord voicing for playback ──
-import { pc, SCALES, CHORDS, chordSymbol, parseInterval, makeSet } from './theory.js?v=119';
+import { pc, SCALES, CHORDS, chordSymbol, parseInterval, makeSet } from './theory.js?v=120';
 
 const LETTER_PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const MAJOR = [0, 2, 4, 5, 7, 9, 11];

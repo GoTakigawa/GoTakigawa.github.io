@@ -128,7 +128,7 @@ const EX = {
   '楽器を追加': 'Add instrument', '前の小節へ': 'Previous bars', '次の小節へ': 'Next bars', 'この楽器を外す': 'Remove this instrument', 'クリックを外す': 'Remove click',
   'いまの進行を MIDI ファイルで保存': 'Save the progression as a MIDI file', '進行・テンポ・楽器の設定を含むリンクをコピー': 'Copy a link that includes progression, tempo and instrument settings',
   '音量': 'Volume', 'ミュート': 'Mute', '更新する': 'Update', '新しいバージョンがあります': 'A new version is available',
-  '入力感度（エフェクトには影響しません）': 'Input sensitivity (does not affect the effects)',
+  'ラベル': 'Labels', '入力感度': 'Input sensitivity', 'ギター入力の感度です。指板に出る音程の認識だけに効き、エフェクトの音には影響しません': 'Sensitivity of the guitar input. It only affects the pitch recognition shown on the fretboard, not the sound of the effects',
   '2.0秒': '2.0 s', '日本語': '日本語', '指定なし': 'Not set', '最低音': 'Lowest note', '指板で選んだ音': 'Notes picked on the fretboard', '開放': 'open',
   '3種類以上の音を選ぶと、それを含むスケールを推測します。': 'Pick 3 or more different notes to estimate scales that contain them.',
   '押した音を指板から隠します（もう一度押すと戻ります）。点線の丸は隠している位置です。': 'Click a note to hide it from the fretboard (click again to restore). Dotted circles are hidden positions.',

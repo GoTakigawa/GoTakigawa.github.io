@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed&family=Barlow:wght@400;500;600;700&family=Libre+Baskerville&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=119">
+<link rel="stylesheet" href="style.css?v=120">
 <script>
 try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t){var _l=_t.mode==='light'||(_t.mode==='auto'&&matchMedia('(prefers-color-scheme: light)').matches),_r=document.documentElement;_r.dataset.theme=_l?'light':'dark';if(/^#[0-9a-fA-F]{6}$/.test(_t.accent))_r.style.setProperty('--accent1',_t.accent);}}catch(e){}
 </script>
@@ -136,16 +136,6 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
     </div>
 
     <div class="sec">
-      <div class="sec-title">Labels</div>
-      <div class="seg" role="group" aria-label="丸の中に表示する文字">
-        <button class="label-btn" data-label="name">音名</button>
-        <button class="label-btn" data-label="interval">音程</button>
-        <button class="label-btn" data-label="degree">番号</button>
-        <button class="label-btn" data-label="none">なし</button>
-      </div>
-    </div>
-
-    <div class="sec">
       <button class="dash" id="reset">初期状態に戻す</button>
     </div>
 
@@ -210,7 +200,6 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
       <div class="tn-opts">
         <div class="field"><label for="tn-device">入力デバイス（オーディオインターフェースはここで選びます）</label><select id="tn-device"><option value="">既定の入力</option></select></div>
         <div class="field"><label for="tn-a4">基準音 A4（Hz）</label><span class="num-wrap"><input type="number" id="tn-a4" min="400" max="480" step="1" inputmode="numeric"><span class="num-btns"><button type="button" class="num-btn" data-dir="up" aria-label="上げる">▲</button><button type="button" class="num-btn" data-dir="down" aria-label="下げる">▼</button></span></span></div>
-        <div class="field"><label for="tn-sens">入力感度（エフェクトには影響しません）</label><div class="tn-sens"><input type="range" id="tn-sens" min="-6" max="30" step="1" value="0"><output id="tn-sens-v">0 dB</output><label class="tn-auto"><input type="checkbox" id="tn-sens-auto" checked>自動</label></div></div>
         <div class="toggle-row"><span class="toggle-label">指板に位置を表示</span><label class="toggle-switch"><input type="checkbox" id="tn-show" checked><span class="toggle-slider"></span></label></div>
       </div>
       <p class="hint tn-msg" id="tn-msg">ギター入力をオンにして、ギターを弾いてください。音声はこのページの中で処理するだけで、どこにも送られません。</p>
@@ -277,6 +266,14 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
         <div class="tool-group">
           <span class="tool-label">押したとき</span>
           <div class="seg small-seg" role="group" aria-label="指板を押したときの動作"><button class="fb-act" data-act="play">鳴らす</button><button class="fb-act" data-act="hide">隠す</button><button class="fb-act" data-act="pick">選ぶ</button></div>
+        </div>
+        <div class="tool-group">
+          <span class="tool-label">ラベル</span>
+          <div class="seg small-seg" role="group" aria-label="丸の中に表示する文字"><button class="label-btn" data-label="name">音名</button><button class="label-btn" data-label="interval">音程</button><button class="label-btn" data-label="degree">番号</button><button class="label-btn" data-label="none">なし</button></div>
+        </div>
+        <div class="tool-group tool-sens" title="ギター入力の感度です。指板に出る音程の認識だけに効き、エフェクトの音には影響しません">
+          <label class="tool-label" for="tn-sens">入力感度</label>
+          <div class="tn-sens"><input type="range" id="tn-sens" min="-6" max="30" step="1" value="0"><output id="tn-sens-v">0 dB</output><label class="tn-auto"><input type="checkbox" id="tn-sens-auto" checked>自動</label></div>
         </div>
         <div class="tool-group">
           <span class="tool-label">表示</span>
@@ -431,7 +428,7 @@ try{var _t=JSON.parse(localStorage.getItem('gti-explorer:theme')||'null');if(_t)
   <input type="range" id="vol-range" min="0" max="100" step="1" value="80" aria-label="音量">
   <span class="vol-num" id="vol-num">80</span>
 </div>
-<script type="module" src="js/app.js?v=119"></script>
+<script type="module" src="js/app.js?v=120"></script>
 <script>
 (function(){
   const hamWrap=document.getElementById('hamWrap'), ham=document.getElementById('ham'), drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
