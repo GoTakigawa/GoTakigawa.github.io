@@ -624,3 +624,9 @@ a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
 .pill-toggle{display:flex;flex-shrink:0;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:2px;cursor:pointer;position:relative;user-select:none;}
 .pill-toggle div{font-size:10px;font-weight:700;padding:4px 8px;border-radius:12px;color:var(--text3);transition:color .2s,background .2s;z-index:1;}
 .pill-toggle div.active{color:#1a1a1a;background:var(--accent1);}
+
+.tn-sens{display:flex;align-items:center;gap:8px;min-height:34px;}
+.tn-sens input[type=range]{flex:1;min-width:0;accent-color:var(--accent1);}
+.tn-sens output{font-size:11px;color:var(--text2);min-width:44px;text-align:right;font-variant-numeric:tabular-nums;}
+.tn-auto{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);white-space:nowrap;cursor:pointer;}
+.tn-sens.auto input[type=range]{opacity:.45;}

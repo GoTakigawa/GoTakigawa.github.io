@@ -1,15 +1,15 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=118';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=118';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=118';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=118';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=118';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=118';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=118';
-import { PitchListener } from './pitch.js?v=118';
-import { initLayout } from './layout.js?v=118';
-import { initTheme, themeColors } from './theme.js?v=118';
-import { initFx } from './fx.js?v=118';
-import { initI18n, setLang, LANG, T } from './i18n.js?v=118';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=119';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=119';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=119';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=119';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=119';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=119';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=119';
+import { PitchListener } from './pitch.js?v=119';
+import { initLayout } from './layout.js?v=119';
+import { initTheme, themeColors } from './theme.js?v=119';
+import { initFx } from './fx.js?v=119';
+import { initI18n, setLang, LANG, T } from './i18n.js?v=119';
 // the build number is the cache-busting ?v= of this file, shown next to BETA
 { const v = new URL(import.meta.url).searchParams.get('v'), el = document.getElementById('ver'); if (v && el) el.textContent = 'BETA ' + v; }
 // new-version check: index.html is re-read without cache and its app.js ?v= compared with the running one
@@ -1455,6 +1455,15 @@ function bindTuner() {
   let a4 = 440; try { a4 = +localStorage.getItem('gti-explorer:a4') || 440; } catch (e) {}
   $('tn-a4').value = clampInt(a4, 400, 480, 440);
   $('tn-a4').addEventListener('change', () => { $('tn-a4').value = clampInt(parseFloat($('tn-a4').value), 400, 480, 440); try { localStorage.setItem('gti-explorer:a4', $('tn-a4').value); } catch (e) {} });
+  { // input sensitivity (manual dB or automatic), remembered in this browser
+    let sn = { auto: true, db: 0 }; try { const o = JSON.parse(localStorage.getItem('gti-explorer:sens') || 'null'); if (o) sn = { auto: o.auto !== false, db: Math.max(-6, Math.min(30, +o.db || 0)) }; } catch (e) {}
+    const rg = $('tn-sens'), au = $('tn-sens-auto'), ov = $('tn-sens-v');
+    const paint = () => { rg.value = sn.db; au.checked = sn.auto; rg.disabled = sn.auto; rg.parentNode.classList.toggle('auto', sn.auto); ov.textContent = sn.auto ? (listener.autoDb ? '+' + Math.round(listener.autoDb) + ' dB' : '—') : (sn.db > 0 ? '+' : '') + sn.db + ' dB'; };
+    const push = () => { listener.sens = sn; if (listener.gain) listener.setSens(sn); try { localStorage.setItem('gti-explorer:sens', JSON.stringify(sn)); } catch (e) {} paint(); };
+    rg.addEventListener('input', () => { sn = { auto: false, db: +rg.value }; push(); });
+    au.addEventListener('change', () => { sn = { auto: au.checked, db: sn.db }; push(); });
+    listener.sens = sn; paint(); setInterval(() => { if (sn.auto && live.on) paint(); }, 500);
+  }
   $('tn-toggle').addEventListener('click', () => live.on ? tunerStop() : tunerStart());
   document.querySelectorAll('.tn-mode').forEach(btn => btn.addEventListener('click', () => {
     listener.mode = btn.dataset.m; listener.kind = btn.dataset.m === 'chord' ? 'chord' : 'single'; listener.cnt = 0;

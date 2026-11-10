@@ -83,18 +83,35 @@ export class PitchListener {
     catch (e) { this.ctx = new Ctx({ latencyHint: 'interactive' }); }
     if (this.ctx.state === 'suspended') await this.ctx.resume();
     const src = this.src = this.ctx.createMediaStreamSource(this.stream);
+    // input sensitivity: a gain in front of the analysers only (the effects take the source before it, so they are not affected)
+    const gn = this.gain = this.ctx.createGain(); src.connect(gn); this.pk = 0; this.applySens(true);
     this.an = this.ctx.createAnalyser(); this.an.fftSize = 4096; this.an.smoothingTimeConstant = 0;
-    this.raw = this.ctx.createAnalyser(); this.raw.fftSize = 4096; this.raw.smoothingTimeConstant = 0; src.connect(this.raw);   // unfiltered, for the level
+    this.raw = this.ctx.createAnalyser(); this.raw.fftSize = 4096; this.raw.smoothingTimeConstant = 0; gn.connect(this.raw);   // unfiltered, for the level
     // high-cut for the pitch search (two 2nd-order low-pass stages): follows the note, ~3.5x its pitch (700 Hz - 3 kHz), so the
     // overtones that pull the period estimate are cut while the fundamental passes
     this.lp = [0, 1].map(() => { const f = this.ctx.createBiquadFilter(); f.type = 'lowpass'; f.Q.value = 0.7071; f.frequency.value = 2000; return f; });
-    this.lpHz = 2000; src.connect(this.lp[0]); this.lp[0].connect(this.lp[1]);
+    this.lpHz = 2000; gn.connect(this.lp[0]); this.lp[0].connect(this.lp[1]);
     const mute = this.ctx.createGain(); mute.gain.value = 0;      // keep the graph pulled without any playback
-    this.sp = this.ctx.createAnalyser(); this.sp.fftSize = 16384; this.sp.smoothingTimeConstant = 0.3; src.connect(this.sp);   // spectrum for chords
+    this.sp = this.ctx.createAnalyser(); this.sp.fftSize = 16384; this.sp.smoothingTimeConstant = 0.3; gn.connect(this.sp);   // spectrum for chords
     this.db = new Float32Array(this.sp.frequencyBinCount); this.mag = new Float32Array(this.sp.frequencyBinCount);
     this.lp[1].connect(this.an); this.an.connect(mute); mute.connect(this.ctx.destination);
     this.buf = new Float32Array(this.an.fftSize); this.rbuf = new Float32Array(this.raw.fftSize); this.kind = 'single'; this.cnt = 0; this.lastNotes = null;
     this.timer = setInterval(() => this.tick(), 10);
+  }
+  // sensitivity: { auto, db }. Manual: db (-6..+30) of gain. Auto: the gain follows the loudest recent playing so that it
+  // reaches a steady working level (only ever raised, never above +32 dB; quiet noise below the floor does not move it).
+  setSens(o) { this.sens = { auto: !!o.auto, db: Math.max(-6, Math.min(30, +o.db || 0)) }; this.applySens(true); }
+  applySens(now) {
+    if (!this.gain) return; const sn = this.sens || { auto: true, db: 0 };
+    if (!sn.auto) { this.autoDb = 0; this.gain.gain.setTargetAtTime(Math.pow(10, sn.db / 20), this.ctx.currentTime, now ? 0.01 : 0.1); }
+    else if (now) this.gain.gain.setTargetAtTime(Math.pow(10, (this.autoDb || 0) / 20), this.ctx.currentTime, 0.01);
+  }
+  autoTick(level) {   // level = the level after the gain; called every tick
+    const g = Math.max(this.gain.gain.value, 1e-3), pre = level / g;
+    this.pk = Math.max(pre, (this.pk || 0) * 0.997);   // slow fall: ~3 s memory of the loudest playing
+    if (pre < 0.0008) return;                            // below the noise floor: leave the gain alone
+    const want = Math.max(0, Math.min(32, 20 * Math.log10(0.1 / this.pk)));
+    this.autoDb = want; this.gain.gain.setTargetAtTime(Math.pow(10, want / 20), this.ctx.currentTime, 0.25);
   }
   spectrumNotes() {
     this.sp.getFloatFrequencyData(this.db);
@@ -125,6 +142,7 @@ export class PitchListener {
     if (!this.an) return;
     this.an.getFloatTimeDomainData(this.buf); this.raw.getFloatTimeDomainData(this.rbuf);
     const level = rms(this.rbuf), now = performance.now(), tickNo = ++this.n;
+    if (this.sens && this.sens.auto && tickNo % 2 === 0) this.autoTick(level);
     if (level < 0.006) {
       if (!this.wasSilent) { this.wasSilent = true; this.silentSince = now; }
       this.env = (this.env || 0) * 0.9;
@@ -161,7 +179,7 @@ export class PitchListener {
     clearInterval(this.timer); this.timer = 0;
     if (this.stream) this.stream.getTracks().forEach(t => t.stop());
     if (this.ctx) { try { await this.ctx.close(); } catch (e) {} }
-    this.stream = this.ctx = this.an = this.raw = this.lp = this.src = null;
+    this.stream = this.ctx = this.an = this.raw = this.lp = this.src = this.gain = null;
   }
   get running() { return !!this.stream; }
 }
