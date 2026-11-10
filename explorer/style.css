@@ -503,3 +503,4 @@ body.blk-dragging,body.blk-dragging *{cursor:grabbing !important;user-select:non
 .th-tpl-box[open]>summary::before{transform:rotate(90deg);}
 .th-tpl-box .th-tpls{margin-top:8px;}
 .tn-opts+.tn-msg{margin-top:10px;}
+.tn-tip{margin-top:2px;}
