@@ -122,6 +122,29 @@
   </aside>
 
   <main class="main">
+    <details class="panel qz-details" id="quiz-panel">
+      <summary class="qz-sum"><span class="panel-title">Quiz<b>指板を覚えるクイズ</b></span></summary>
+      <div class="qz-bar">
+        <div class="seg small-seg" role="group" aria-label="出題の種類">
+          <button class="qz-mode on" data-m="name" title="光っている位置の音名を答えます">音名当て</button>
+          <button class="qz-mode" data-m="pos" title="指定された弦と音名の位置を、指板で押して答えます">位置当て</button>
+          <button class="qz-mode" data-m="play" title="光っている位置の音を、ギター入力で実際に弾いて答えます">弾いて当てる</button>
+        </div>
+        <label class="pg-f">範囲<select id="qz-upto"><option value="5">0〜5フレット</option><option value="7">0〜7フレット</option><option value="12">0〜12フレット</option><option value="15">0〜15フレット</option><option value="24">全フレット</option></select></label>
+        <label class="pg-f">問題数<select id="qz-count"><option value="10">10問</option><option value="20">20問</option><option value="30">30問</option></select></label>
+        <label class="pg-f chk"><input type="checkbox" id="qz-acc"> ♯・♭の音も出す</label>
+        <div class="tn-bar-sp"></div>
+        <button class="tn-start" id="qz-start" type="button"><span id="qz-start-label">クイズを始める</span></button>
+      </div>
+      <div class="qz-stage" id="qz-stage">
+        <div class="qz-prompt" id="qz-prompt">「クイズを始める」を押すと、指板の音が隠れて出題が始まります。</div>
+        <div class="qz-info" id="qz-info"></div>
+        <div class="qz-choices" id="qz-choices" hidden></div>
+        <div class="qz-fb" id="qz-fb"></div>
+        <div class="qz-skip"><button class="std small" id="qz-skip" type="button" hidden>わからない（答えを見る）</button></div>
+      </div>
+    </details>
+
     <div class="metrics">
       <div class="metric"><div class="metric-lbl">Showing</div><div class="metric-val small" id="m-target"></div></div>
       <div class="metric"><div class="metric-lbl">Notes</div><div class="metric-val small" id="m-notes"></div></div>
@@ -252,30 +275,6 @@
       </div>
     </section>
 
-    <section class="panel" id="quiz-panel">
-      <div class="panel-hd">
-        <div class="panel-title">Quiz<b>指板を覚えるクイズ</b></div>
-      </div>
-      <div class="qz-bar">
-        <div class="seg small-seg" role="group" aria-label="出題の種類">
-          <button class="qz-mode on" data-m="name" title="光っている位置の音名を答えます">音名当て</button>
-          <button class="qz-mode" data-m="pos" title="指定された弦と音名の位置を、指板で押して答えます">位置当て</button>
-          <button class="qz-mode" data-m="play" title="光っている位置の音を、ギター入力で実際に弾いて答えます">弾いて当てる</button>
-        </div>
-        <label class="pg-f">範囲<select id="qz-upto"><option value="5">0〜5フレット</option><option value="7">0〜7フレット</option><option value="12">0〜12フレット</option><option value="15">0〜15フレット</option><option value="24">全フレット</option></select></label>
-        <label class="pg-f">問題数<select id="qz-count"><option value="10">10問</option><option value="20">20問</option><option value="30">30問</option></select></label>
-        <label class="pg-f chk"><input type="checkbox" id="qz-acc"> ♯・♭の音も出す</label>
-        <div class="tn-bar-sp"></div>
-        <button class="tn-start" id="qz-start" type="button"><span id="qz-start-label">クイズを始める</span></button>
-      </div>
-      <div class="qz-stage" id="qz-stage">
-        <div class="qz-prompt" id="qz-prompt">「クイズを始める」を押すと、指板の音が隠れて出題が始まります。</div>
-        <div class="qz-info" id="qz-info"></div>
-        <div class="qz-choices" id="qz-choices" hidden></div>
-        <div class="qz-fb" id="qz-fb"></div>
-        <div class="qz-skip"><button class="std small" id="qz-skip" type="button" hidden>わからない（答えを見る）</button></div>
-      </div>
-    </section>
 
     <section class="panel">
       <div class="panel-hd">

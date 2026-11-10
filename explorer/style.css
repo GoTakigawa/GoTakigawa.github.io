@@ -400,3 +400,8 @@ button.small{font-size:11px;padding:6px 10px;}
 @keyframes qzpulse{0%,100%{opacity:.55}50%{opacity:1}}
 .qz-pulse{animation:qzpulse 1s ease-in-out infinite;}
 @media(max-width:600px){.qz-choices{grid-template-columns:repeat(4,minmax(0,1fr));}}
+.qz-details>summary{cursor:pointer;list-style:none;display:flex;align-items:center;}
+.qz-details>summary::-webkit-details-marker{display:none;}
+.qz-details>summary::before{content:"▸";color:var(--accent2);margin-right:8px;transition:transform .15s;}
+.qz-details[open]>summary::before{transform:rotate(90deg);}
+.qz-details[open]>summary{margin-bottom:12px;}
