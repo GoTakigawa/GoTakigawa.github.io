@@ -598,3 +598,8 @@ body.blk-dragging,body.blk-dragging *{cursor:grabbing !important;user-select:non
 .fx-slots button.on{border-color:var(--accent1);color:var(--accent1);box-shadow:0 0 0 1px var(--accent1) inset;}
 #fx-slot-save{margin-left:4px;}
 .fx-ring.gr .lv{opacity:.55;}
+/* tuner / chord block: no extra reserved height above the played-note history */
+#tn-single,#tn-chord{min-height:0;}
+.tn-stage #tn-chord-res{height:150px;}
+.tn-stage #tn-chord-notes{min-height:28px;}
+.tn-stage #tn-chord-res{height:130px;}
