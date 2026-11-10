@@ -1,13 +1,13 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=59';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=59';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=59';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=59';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=59';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=59';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=59';
-import { PitchListener } from './pitch.js?v=59';
-import { initLayout } from './layout.js?v=59';
-import { initTheme, themeColors } from './theme.js?v=59';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=60';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=60';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=60';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=60';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=60';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=60';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=60';
+import { PitchListener } from './pitch.js?v=60';
+import { initLayout } from './layout.js?v=60';
+import { initTheme, themeColors } from './theme.js?v=60';
 const MAX_BARS = 120;
 // a preset is written per beat: f(beat index, position inside the beat 0..1) -> 0 off / 1 soft / 2 strong; it works at any resolution
 const PRESET_DEF = {
@@ -367,7 +367,7 @@ function renderFretboard() {
       const op = visible ? 1 : 0.16;
       const lbl = st.label === 'none' ? '' : shC && inShape.has(s + ':' + f) ? toneOf(shC, m) : st.label === 'interval' ? (set.intervalOf(p) || '') : st.label === 'degree' ? String(set.info(p) ? set.info(p).index + 1 : '') : set.name(p);
       const fs = lbl.length > 2 ? 8 : 10;
-      if (isRoot) dots += `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="10.5" fill="var(--accent3)"/><text x="${x}" y="${y + 3.6}" fill="#0a0a0a" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Barlow">${lbl}</text></g>`;
+      if (isRoot) dots += `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="10.5" fill="var(--accent3)"/><text x="${x}" y="${y + 3.6}" fill="var(--on-green)" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Barlow">${lbl}</text></g>`;
       else if (isEm) dots += `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="10.5" fill="var(--accent1)"/><text x="${x}" y="${y + 3.6}" fill="var(--on-accent)" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Barlow">${lbl}</text></g>`;
       else dots += `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="10" fill="var(--fb-bg)" stroke="var(--accent2)" stroke-width="1.6"/><text x="${x}" y="${y + 3.4}" fill="var(--accent2-text)" font-size="${lbl.length > 2 ? 7.5 : 9}" font-weight="600" text-anchor="middle" font-family="Barlow">${lbl}</text></g>`;
       const ord = order[s + ':' + f];
