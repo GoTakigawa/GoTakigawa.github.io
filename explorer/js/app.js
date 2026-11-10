@@ -426,8 +426,8 @@ function recordFrame(fr, now) {
 }
 function renderHist() {
   const set = currentSet(), shown = tnHist.slice(-64);
-  $('tn-hist-notes').innerHTML = shown.map(m => `<span class="pick-note">${set.name(m)}<small>${Math.floor(m / 12) - 1}</small></span>`).join('') || '<span class="hint">ギター入力をオンにして弾くと、音名が順に並びます。</span>';
-  const box = $('tn-hist-notes'); box.scrollTop = box.scrollHeight;
+  $('tn-hist-notes').textContent = shown.map(m => set.name(m)).join('  ') || '—';
+  const box = $('tn-hist-notes'); box.scrollLeft = box.scrollWidth;
   $('tn-hist-n').textContent = tnHist.length ? `${tnHist.length}音` : '';
   $('th-play').disabled = !tnHist.length; $('th-clear').disabled = !tnHist.length; $('th-est').disabled = tnHist.length < 3;
   if (histEst) renderEstimate();
