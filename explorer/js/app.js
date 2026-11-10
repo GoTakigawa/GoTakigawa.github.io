@@ -7,6 +7,7 @@ import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=51';
 import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=51';
 import { PitchListener } from './pitch.js?v=51';
 import { initLayout } from './layout.js?v=51';
+import { initTheme, themeColors } from './theme.js?v=51';
 
 const $ = id => document.getElementById(id);
 const STORE = 'gti-explorer:state';
@@ -316,56 +317,56 @@ function renderFretboard() {
   const cx = f => f === 0 && !K ? X(padL - 13) : X((raw(f) + raw(f - 1)) / 2);
   const midY = top + gap * (n - 1) / 2;
   let svg = `<svg viewBox="0 0 ${W} ${H + 18}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${titleFor(set)} の指板">`;
-  svg += `<rect width="${W}" height="${H + 18}" fill="#0a0a0a"/>`;
-  svg += `<rect x="${Math.min(X(padL), X(W - padR))}" y="${top - 10}" width="${W - padL - padR}" height="${gap * (n - 1) + 20}" fill="#121212"/>`;
+  svg += `<rect width="${W}" height="${H + 18}" fill="var(--fb-bg)"/>`;
+  svg += `<rect x="${Math.min(X(padL), X(W - padR))}" y="${top - 10}" width="${W - padL - padR}" height="${gap * (n - 1) + 20}" fill="var(--fb-area)"/>`;
   if (K) for (let i = 0; i < n; i++) {   // strings without that many minus frets start further right
     const x1 = raw(-(minusOf(n - 1 - i) + 1)); if (x1 - raw(-K) < 1) continue;
-    svg += `<rect x="${Math.min(X(raw(-K)), X(x1))}" y="${top + gap * i - gap / 2}" width="${x1 - raw(-K)}" height="${gap}" fill="#0a0a0a"/>`;
+    svg += `<rect x="${Math.min(X(raw(-K)), X(x1))}" y="${top + gap * i - gap / 2}" width="${x1 - raw(-K)}" height="${gap}" fill="var(--fb-bg)"/>`;
   }
   if (st.range === 'frets' && !sh) {
     const lo = Math.min(st.from, st.to), hi = Math.max(st.from, st.to);
     const x0 = lo === 0 ? raw(0) - 26 : raw(lo - 1), x1 = raw(hi);
-    svg += `<rect x="${Math.min(X(x0), X(x1))}" y="${top - 10}" width="${Math.abs(X(x1) - X(x0))}" height="${gap * (n - 1) + 20}" fill="rgba(140,77,255,.10)"/>`;
+    svg += `<rect x="${Math.min(X(x0), X(x1))}" y="${top - 10}" width="${Math.abs(X(x1) - X(x0))}" height="${gap * (n - 1) + 20}" fill="var(--accent1)" fill-opacity=".10"/>`;
   }
-  [3, 5, 7, 9, 15, 17, 19, 21, 27].filter(f => f <= F).forEach(f => svg += `<circle cx="${cx(f)}" cy="${midY}" r="4" fill="#262626"/>`);
-  [12, 24].filter(f => f <= F).forEach(f => svg += `<circle cx="${cx(f)}" cy="${midY - gap}" r="4" fill="#262626"/><circle cx="${cx(f)}" cy="${midY + gap}" r="4" fill="#262626"/>`);
-  for (let f = 0; f <= F; f++) svg += `<line x1="${fx(f)}" y1="${top - 10}" x2="${fx(f)}" y2="${top + gap * (n - 1) + 10}" stroke="${f === 0 ? '#9a9a9a' : '#2c2c2c'}" stroke-width="${f === 0 ? 4 : 1.2}"/>`;
-  for (let f = 1; f <= M; f++) svg += `<text x="${cx(-f)}" y="${H + 12}" fill="#5a5a8a" font-size="10" text-anchor="middle" font-family="Barlow">−${f}</text>`;
-  for (let f = 1; f <= F; f++) if ([1, 3, 5, 7, 9, 12, 15, 17, 19, 21, 24, 27].includes(f)) svg += `<text x="${cx(f)}" y="${H + 12}" fill="#666" font-size="10" text-anchor="middle" font-family="Barlow">${f}</text>`;
+  [3, 5, 7, 9, 15, 17, 19, 21, 27].filter(f => f <= F).forEach(f => svg += `<circle cx="${cx(f)}" cy="${midY}" r="4" fill="var(--fb-inlay)"/>`);
+  [12, 24].filter(f => f <= F).forEach(f => svg += `<circle cx="${cx(f)}" cy="${midY - gap}" r="4" fill="var(--fb-inlay)"/><circle cx="${cx(f)}" cy="${midY + gap}" r="4" fill="var(--fb-inlay)"/>`);
+  for (let f = 0; f <= F; f++) svg += `<line x1="${fx(f)}" y1="${top - 10}" x2="${fx(f)}" y2="${top + gap * (n - 1) + 10}" stroke="${f === 0 ? 'var(--fb-nut)' : 'var(--fb-fret)'}" stroke-width="${f === 0 ? 4 : 1.2}"/>`;
+  for (let f = 1; f <= M; f++) svg += `<text x="${cx(-f)}" y="${H + 12}" fill="var(--text3)" font-size="10" text-anchor="middle" font-family="Barlow">−${f}</text>`;
+  for (let f = 1; f <= F; f++) if ([1, 3, 5, 7, 9, 12, 15, 17, 19, 21, 24, 27].includes(f)) svg += `<text x="${cx(f)}" y="${H + 12}" fill="var(--text3)" font-size="10" text-anchor="middle" font-family="Barlow">${f}</text>`;
   let dots = '', hits = '', count = 0;
   const showHidden = fbAction === 'hide' || chipAction === 'hide';
   for (let i = 0; i < n; i++) {
     const s = n - 1 - i, y = top + gap * i, open = tun[s], on = st.strOn[s];
     // the 1st string (top) is the thinnest, the lowest string the thickest
     const mi = minusOf(s), xs = K ? fx(-(mi + 1)) : fx(0);
-    for (let f = 1; f <= mi + 1 && K; f++) svg += `<line x1="${fx(-f)}" y1="${y - gap / 2}" x2="${fx(-f)}" y2="${y + gap / 2}" stroke="#3a3a5a" stroke-width="1.2"/>`;
-    svg += `<line x1="${xs}" y1="${y}" x2="${X(W - padR)}" y2="${y}" stroke="${on ? '#5a5a5a' : '#262626'}" stroke-width="${(0.7 + i * 0.28).toFixed(2)}"/>`;
-    svg += `<text x="${X(padL - 30)}" y="${y + 3.5}" fill="${on ? '#9a9a9a' : '#3a3a3a'}" font-size="11" text-anchor="middle" font-family="Barlow" font-weight="600">${set.name(open)}</text>`;
+    for (let f = 1; f <= mi + 1 && K; f++) svg += `<line x1="${fx(-f)}" y1="${y - gap / 2}" x2="${fx(-f)}" y2="${y + gap / 2}" stroke="var(--fb-fret)" stroke-width="1.2"/>`;
+    svg += `<line x1="${xs}" y1="${y}" x2="${X(W - padR)}" y2="${y}" stroke="${on ? 'var(--fb-str)' : 'var(--fb-inlay)'}" stroke-width="${(0.7 + i * 0.28).toFixed(2)}"/>`;
+    svg += `<text x="${X(padL - 30)}" y="${y + 3.5}" fill="${on ? 'var(--fb-nut)' : 'var(--fb-fret)'}" font-size="11" text-anchor="middle" font-family="Barlow" font-weight="600">${set.name(open)}</text>`;
     for (let f = -mi; f <= F; f++) {
       const m = open + f, p = pc(m), x = cx(f);
       hits += `<rect class="fb-hit" data-m="${m}" data-c="${s}:${f}" x="${Math.min(f === 0 && !K ? X(padL - 26) : fx(f - 1), f === 0 && !K ? X(padL) : fx(f))}" y="${y - gap / 2}" width="${Math.abs(f === 0 && !K ? 26 : raw(f) - raw(f - 1))}" height="${gap}"><title>${set.note(m)}</title></rect>`;
       if (!set.has(p) && !(sh && inShape.has(s + ':' + f))) continue;
       const hidden = isHiddenCell(s, f) || isHiddenIv(set, p);
       const visible = vis(s, f) && !hidden;
-      if (hidden) { if (showHidden && vis(s, f)) dots += `<circle cx="${x}" cy="${y}" r="9.5" fill="none" stroke="#555" stroke-width="1.2" stroke-dasharray="2.5 2.5"/>`; continue; }
+      if (hidden) { if (showHidden && vis(s, f)) dots += `<circle cx="${x}" cy="${y}" r="9.5" fill="none" stroke="var(--text3)" stroke-width="1.2" stroke-dasharray="2.5 2.5"/>`; continue; }
       if (!visible && !(st.ghost && on)) continue;
       if (visible) count++;
       const isRoot = sh ? p === pc(shC.root) : st.mode !== 'notes' && p === pc(rootNow), isEm = emph.includes(p);
       const op = visible ? 1 : 0.16;
       const lbl = st.label === 'none' ? '' : shC && inShape.has(s + ':' + f) ? toneOf(shC, m) : st.label === 'interval' ? (set.intervalOf(p) || '') : st.label === 'degree' ? String(set.info(p) ? set.info(p).index + 1 : '') : set.name(p);
       const fs = lbl.length > 2 ? 8 : 10;
-      if (isRoot) dots += `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="10.5" fill="#86efac"/><text x="${x}" y="${y + 3.6}" fill="#0a0a0a" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Barlow">${lbl}</text></g>`;
-      else if (isEm) dots += `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="10.5" fill="#8c4dff"/><text x="${x}" y="${y + 3.6}" fill="#0a0a0a" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Barlow">${lbl}</text></g>`;
-      else dots += `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="10" fill="#000" stroke="#38bdf8" stroke-width="1.6"/><text x="${x}" y="${y + 3.4}" fill="#9fdcf9" font-size="${lbl.length > 2 ? 7.5 : 9}" font-weight="600" text-anchor="middle" font-family="Barlow">${lbl}</text></g>`;
+      if (isRoot) dots += `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="10.5" fill="var(--accent3)"/><text x="${x}" y="${y + 3.6}" fill="#0a0a0a" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Barlow">${lbl}</text></g>`;
+      else if (isEm) dots += `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="10.5" fill="var(--accent1)"/><text x="${x}" y="${y + 3.6}" fill="var(--on-accent)" font-size="${fs}" font-weight="700" text-anchor="middle" font-family="Barlow">${lbl}</text></g>`;
+      else dots += `<g opacity="${op}"><circle cx="${x}" cy="${y}" r="10" fill="var(--fb-bg)" stroke="var(--accent2)" stroke-width="1.6"/><text x="${x}" y="${y + 3.4}" fill="var(--accent2-text)" font-size="${lbl.length > 2 ? 7.5 : 9}" font-weight="600" text-anchor="middle" font-family="Barlow">${lbl}</text></g>`;
       const ord = order[s + ':' + f];
-      if (visible && ord) dots += `<circle cx="${x + 10}" cy="${y - 10}" r="6.5" fill="#e8e8e8"/><text x="${x + 10}" y="${y - 7.3}" fill="#0a0a0a" font-size="8" font-weight="700" text-anchor="middle" font-family="Barlow">${ord}</text>`;
+      if (visible && ord) dots += `<circle cx="${x + 10}" cy="${y - 10}" r="6.5" fill="var(--note-bg)"/><text x="${x + 10}" y="${y - 7.3}" fill="var(--note-fg)" font-size="8" font-weight="700" text-anchor="middle" font-family="Barlow">${ord}</text>`;
     }
   }
   // picked notes for the chord finder (any pitch, drawn on top)
   picks.forEach(k => {
     const [s, f] = k.split(':').map(Number); if (s >= n || f > F || f < -minusOf(s)) return;
     const x = cx(f), y = top + gap * (n - 1 - s);
-    dots += `<circle cx="${x}" cy="${y}" r="11.5" fill="#f5f5f5" stroke="#fff" stroke-width="1.5"/><text x="${x}" y="${y + 3.6}" fill="#0a0a0a" font-size="9" font-weight="700" text-anchor="middle" font-family="Barlow">${set.name(tun[s] + f)}</text>`;
+    dots += `<circle cx="${x}" cy="${y}" r="11.5" fill="var(--note-bg)" stroke="var(--note-bg)" stroke-width="1.5"/><text x="${x}" y="${y + 3.6}" fill="var(--note-fg)" font-size="9" font-weight="700" text-anchor="middle" font-family="Barlow">${set.name(tun[s] + f)}</text>`;
   });
   if (sh) sh.muted.forEach(s => { const y = top + gap * (n - 1 - s); dots += `<text x="${cx(0)}" y="${y + 4}" fill="#f87171" font-size="12" text-anchor="middle" font-family="Barlow" font-weight="700">×</text>`; });
   svg += dots + hits + '</svg>';
@@ -484,12 +485,12 @@ function drawStrobe(t, cents, active) {
   if (active) strobe.phase += cents * 0.06 * dt / 1000;      // periods per second = 0.06 per cent
   const ok = active && Math.abs(cents) <= 5, rows = [1, 2, 4], P = 36, rh = h / rows.length;
   rows.forEach((mul, i) => {
-    g.fillStyle = active ? (ok ? '#86efac' : '#38bdf8') : '#2a2a2a'; g.globalAlpha = active ? 0.9 - i * 0.12 : 1;
+    g.fillStyle = active ? cssVar(ok ? '--accent3' : '--accent2') : cssVar('--border2'); g.globalAlpha = active ? 0.9 - i * 0.12 : 1;
     const off = ((strobe.phase * mul) % 1 + 1) % 1 * P;
     for (let x = -P + off; x < w; x += P) g.fillRect(x, i * rh + 3, P / 2, rh - 6);
   });
   g.globalAlpha = 1;
-  g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(w / 2 - 0.5, 0, 1, h);
+  g.fillStyle = cssVar('--text'); g.globalAlpha = 0.4; g.fillRect(w / 2 - 0.5, 0, 1, h); g.globalAlpha = 1;
 }
 function tnView(v) {
   strobe.on = v === 'strobe';
@@ -521,11 +522,12 @@ function tunerReadout(active, m) {
   });
 }
 // Glow for a list of places { x, y, root }: green for the root, sky blue otherwise
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim() || '#888';
 function glowSvg(items, fade, t) {
   const breathe = 0.65 + 0.35 * Math.sin(t / 260);
   let g = `<defs><filter id="lv-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="4.5"/></filter><filter id="lv-glow2" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.6"/></filter></defs><g opacity="${fade.toFixed(2)}">`;
   items.forEach(c => {
-    const hi = c.root ? '#86efac' : '#38bdf8', core = c.root ? '#c9f9dc' : '#bfe9fb', x = c.x.toFixed(1);
+    const hi = c.root ? 'var(--accent3)' : 'var(--accent2)', core = c.root ? '#c9f9dc' : '#bfe9fb', x = c.x.toFixed(1);
     g += `<circle cx="${x}" cy="${c.y}" r="14" fill="none" stroke="${hi}" stroke-width="7" filter="url(#lv-glow)" opacity="${(0.55 + 0.4 * breathe).toFixed(2)}"/>`;
     g += `<circle cx="${x}" cy="${c.y}" r="14" fill="none" stroke="${hi}" stroke-width="3" filter="url(#lv-glow2)" opacity="${(0.5 + 0.4 * breathe).toFixed(2)}"/>`;
     g += `<circle cx="${x}" cy="${c.y}" r="14" fill="none" stroke="${core}" stroke-width="1.6"/>`;
@@ -704,17 +706,17 @@ function thumb(item, c) {
   const cols = hi - lo + 1, W = 18 + cols * 22 + 6, gap = 9, top = 8, H = top * 2 + gap * (n - 1) + 10;
   const x0 = 18, colX = f => x0 + (f - lo) * 22 + 11, Y = s => top + gap * (n - 1 - s);
   let g = `<svg class="thumb" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">`;
-  for (let k = 0; k <= cols; k++) g += `<line x1="${x0 + k * 22}" y1="${top - 3}" x2="${x0 + k * 22}" y2="${top + gap * (n - 1) + 3}" stroke="${k === 0 && lo === 1 ? '#bbb' : '#333'}" stroke-width="${k === 0 && lo === 1 ? 2.5 : 1}"/>`;
-  for (let s = 0; s < n; s++) g += `<line x1="${x0}" y1="${Y(s)}" x2="${x0 + cols * 22}" y2="${Y(s)}" stroke="#555" stroke-width="${(0.5 + (n - 1 - s) * 0.18).toFixed(2)}"/>`;
+  for (let k = 0; k <= cols; k++) g += `<line x1="${x0 + k * 22}" y1="${top - 3}" x2="${x0 + k * 22}" y2="${top + gap * (n - 1) + 3}" stroke="${k === 0 && lo === 1 ? 'var(--text2)' : 'var(--border2)'}" stroke-width="${k === 0 && lo === 1 ? 2.5 : 1}"/>`;
+  for (let s = 0; s < n; s++) g += `<line x1="${x0}" y1="${Y(s)}" x2="${x0 + cols * 22}" y2="${Y(s)}" stroke="var(--text3)" stroke-width="${(0.5 + (n - 1 - s) * 0.18).toFixed(2)}"/>`;
   item.muted.forEach(s => g += `<text x="9" y="${Y(s) + 3}" fill="#f87171" font-size="8" text-anchor="middle" font-family="Barlow" font-weight="700">×</text>`);
   item.cells.forEach(cell => {
     const m = tun[cell.s] + cell.f, isR = pc(m) === pc(c.root);
     const x = cell.f === 0 ? 9 : colX(cell.f), y = Y(cell.s);
-    if (cell.f === 0) g += `<circle cx="${x}" cy="${y}" r="3.6" fill="none" stroke="${isR ? '#86efac' : '#8c4dff'}" stroke-width="1.4"/>`;
-    else g += `<circle cx="${x}" cy="${y}" r="4.2" fill="${isR ? '#86efac' : '#8c4dff'}"/>`;
-    if (cell.order) g += `<text x="${x}" y="${y + 2.4}" fill="#0a0a0a" font-size="6" font-weight="700" text-anchor="middle" font-family="Barlow">${cell.order}</text>`;
+    if (cell.f === 0) g += `<circle cx="${x}" cy="${y}" r="3.6" fill="none" stroke="${isR ? 'var(--accent3)' : 'var(--accent1)'}" stroke-width="1.4"/>`;
+    else g += `<circle cx="${x}" cy="${y}" r="4.2" fill="${isR ? 'var(--accent3)' : 'var(--accent1)'}"/>`;
+    if (cell.order) g += `<text x="${x}" y="${y + 2.4}" fill="var(--on-accent)" font-size="6" font-weight="700" text-anchor="middle" font-family="Barlow">${cell.order}</text>`;
   });
-  g += `<text x="${x0 + 2}" y="${H - 1}" fill="#777" font-size="8" font-family="Barlow">${lo}f</text></svg>`;
+  g += `<text x="${x0 + 2}" y="${H - 1}" fill="var(--text3)" font-size="8" font-family="Barlow">${lo}f</text></svg>`;
   return g;
 }
 
@@ -1048,7 +1050,7 @@ function drawNext() {
   const lo = win ? win[0] : 0, hi = win ? win[1] : F; let h = '';
   tun.forEach((open, sIdx) => { if (!st.strOn[sIdx]) return; for (let f = lo; f <= hi; f++) { const p = pc(open + f); if (!set.has(p)) continue;
     const root = p === pc(ch.root);
-    const col = root ? '#86efac' : '#38bdf8', x = g.cx(f).toFixed(1), y = g.Y(sIdx);
+    const col = root ? 'var(--accent3)' : 'var(--accent2)', x = g.cx(f).toFixed(1), y = g.Y(sIdx);
     h += `<circle cx="${x}" cy="${y}" r="17" fill="${col}" opacity=".6" filter="url(#nx-glow)"/><circle cx="${x}" cy="${y}" r="12" fill="${col}" opacity=".16"/><circle cx="${x}" cy="${y}" r="13" fill="none" stroke="${col}" stroke-width="2.6" stroke-dasharray="5 3.5" opacity="1"/>`; } });
   L.innerHTML = '<defs><filter id="nx-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="5"/></filter></defs>' + h;
 }
@@ -1416,7 +1418,7 @@ async function boot() {
   try { const s = localStorage.getItem(STORE); st = sanitize(s ? JSON.parse(s) : null); } catch (e) { st = sanitize(null); }
   let shared = false;
   try { const m = /[#&]s=([A-Za-z0-9_-]+)/.exec(location.hash); if (m) { shared = applyShared(decodeShare(m[1])); history.replaceState(null, '', location.pathname + location.search); } } catch (e) {}
-  initLayout();
+  initLayout(); initTheme(() => { try { render(); } catch (e) {} });
   bind(); bindTuner(); bindVolume(); bindProg(); bindHist(); bindQuiz(); render();
   if (shared) { save(); notify('共有された進行と設定を読み込みました'); }
 }

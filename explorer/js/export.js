@@ -30,21 +30,23 @@ export function download(blob, filename) {
   setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
 }
 
-// Draw the fretboard SVG on a dark canvas with a title line; returns the canvas.
+// Draw the fretboard SVG on a canvas with a title line; returns the canvas.
 export async function fretboardCanvas(svgEl, title, sub) {
+  // the picture is drawn in the page's current theme: CSS variables are replaced by their values (a standalone SVG has no page CSS)
+  const cs = getComputedStyle(document.documentElement), v = n => cs.getPropertyValue(n).trim();
   const vb = svgEl.viewBox.baseVal, w = Math.round(vb.width), h = Math.round(vb.height), S = 2, padX = 36, head = 96, foot = 44;
   // the clickable hit areas are transparent only through the page's CSS, so they must not go into the picture
   const clone = svgEl.cloneNode(true); clone.querySelectorAll('.fb-hit').forEach(n => n.remove());
-  const xml = new XMLSerializer().serializeToString(clone);
+  const xml = new XMLSerializer().serializeToString(clone).replace(/color-mix\(in srgb, ?var\((--[\w-]+)\) (\d+)%, ?transparent\)/g, (m, n, p) => v(n)).replace(/var\((--[\w-]+)\)/g, (m, n) => v(n) || '#888');
   const img = new Image();
   await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml); });
   const c = document.createElement('canvas'); c.width = (w + padX * 2) * S; c.height = (h + head + foot) * S;
   const g = c.getContext('2d'); g.scale(S, S);
-  g.fillStyle = '#0a0a0a'; g.fillRect(0, 0, c.width, c.height);
-  g.fillStyle = '#e8e8e8'; g.font = '700 30px Barlow, sans-serif'; g.textBaseline = 'alphabetic'; g.fillText(title, padX, 50);
-  g.fillStyle = '#8a8a8a'; g.font = '500 16px Barlow, sans-serif'; g.fillText(sub, padX, 78);
+  g.fillStyle = v('--fb-bg') || '#0a0a0a'; g.fillRect(0, 0, c.width, c.height);
+  g.fillStyle = v('--text') || '#e8e8e8'; g.font = '700 30px Barlow, sans-serif'; g.textBaseline = 'alphabetic'; g.fillText(title, padX, 50);
+  g.fillStyle = v('--text3') || '#8a8a8a'; g.font = '500 16px Barlow, sans-serif'; g.fillText(sub, padX, 78);
   g.drawImage(img, padX, head, w, h);
-  g.fillStyle = '#5a5a5a'; g.font = '600 13px Barlow, sans-serif'; g.textAlign = 'right'; g.fillText('GTI  Fretboard Explorer', w + padX, h + head + 28);
+  g.fillStyle = v('--text3') || '#5a5a5a'; g.font = '600 13px Barlow, sans-serif'; g.textAlign = 'right'; g.fillText('GTI  Fretboard Explorer', w + padX, h + head + 28);
   return c;
 }
 export const canvasBlob = (c, type = 'image/png', q) => new Promise(r => c.toBlob(r, type, q));
