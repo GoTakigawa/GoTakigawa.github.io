@@ -1,14 +1,15 @@
-import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=113';
-import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=113';
-import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=113';
-import { PianoEngine, VOICE_NAMES } from './audio.js?v=113';
-import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=113';
-import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=113';
-import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=113';
-import { PitchListener } from './pitch.js?v=113';
-import { initLayout } from './layout.js?v=113';
-import { initTheme, themeColors } from './theme.js?v=113';
-import { initFx } from './fx.js?v=113';
+import { pc, SCALES, CHORDS, ROOT_LABELS, makeSet, parseInterval, diatonic, romanOf, chordSymbol, identifyChord, interpretDyad, identifyScales, diatonicRootName } from './theory.js?v=117';
+import { INSTRUMENTS, TUNINGS, MAX_MINUS, countsOf, tuningsFor, findTuning, midiLabel } from './tunings.js?v=117';
+import { npsPattern, findVoicings, chordForms, sweepShapes, FORMS, derivedForms, sweepScore, playScore } from './positions.js?v=117';
+import { PianoEngine, VOICE_NAMES } from './audio.js?v=117';
+import { parseChordText, parseScaleText, CHORD_PRESETS, SCALE_PRESETS, chordMidi, guideNote } from './progression.js?v=117';
+import { Player, drumBar, DRUM_INSTR, DRUM_VEL } from './player.js?v=117';
+import { buildMidi, download, fretboardCanvas, canvasBlob, pdfFromCanvas, encodeShare, decodeShare } from './export.js?v=117';
+import { PitchListener } from './pitch.js?v=117';
+import { initLayout } from './layout.js?v=117';
+import { initTheme, themeColors } from './theme.js?v=117';
+import { initFx } from './fx.js?v=117';
+import { initI18n, setLang, LANG, T } from './i18n.js?v=117';
 // the build number is the cache-busting ?v= of this file, shown next to BETA
 { const v = new URL(import.meta.url).searchParams.get('v'), el = document.getElementById('ver'); if (v && el) el.textContent = 'BETA ' + v; }
 // new-version check: index.html is re-read without cache and its app.js ?v= compared with the running one
@@ -380,7 +381,7 @@ function renderFretboard() {
     // the 1st string (top) is the thinnest, the lowest string the thickest
     const mi = minusOf(s), xs = K ? fx(-(mi + 1)) : fx(0);
     for (let f = 1; f <= mi + 1 && K; f++) svg += `<line x1="${fx(-f)}" y1="${y - gap / 2}" x2="${fx(-f)}" y2="${y + gap / 2}" stroke="var(--fb-fret)" stroke-width="1.2"/>`;
-    svg += `<line x1="${xs}" y1="${y}" x2="${X(W - padR)}" y2="${y}" stroke="${on ? 'var(--fb-str)' : 'var(--fb-inlay)'}" stroke-width="${(0.7 + i * 0.28).toFixed(2)}"/>`;
+    svg += `<line x1="${xs}" y1="${y}" x2="${X(W - padR)}" y2="${y}" stroke="${on ? 'var(--fb-str)' : 'var(--fb-inlay)'}" stroke-width="${(st.inst === 'bass' ? 1.4 + i * 0.85 : 0.7 + i * 0.28).toFixed(2)}"/>`;
     svg += `<text x="${X(padL - 30)}" y="${y + 3.5}" fill="${on ? 'var(--fb-nut)' : 'var(--fb-fret)'}" font-size="11" text-anchor="middle" font-family="Barlow" font-weight="600">${set.name(open)}</text>`;
     for (let f = -mi; f <= F; f++) {
       const m = open + f, p = pc(m), x = cx(f);
@@ -751,7 +752,7 @@ function thumb(item, c) {
   const x0 = 18, colX = f => x0 + (f - lo) * 22 + 11, Y = s => top + gap * (n - 1 - s);
   let g = `<svg class="thumb" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">`;
   for (let k = 0; k <= cols; k++) g += `<line x1="${x0 + k * 22}" y1="${top - 3}" x2="${x0 + k * 22}" y2="${top + gap * (n - 1) + 3}" stroke="${k === 0 && lo === 1 ? 'var(--text2)' : 'var(--border2)'}" stroke-width="${k === 0 && lo === 1 ? 2.5 : 1}"/>`;
-  for (let s = 0; s < n; s++) g += `<line x1="${x0}" y1="${Y(s)}" x2="${x0 + cols * 22}" y2="${Y(s)}" stroke="var(--text3)" stroke-width="${(0.5 + (n - 1 - s) * 0.18).toFixed(2)}"/>`;
+  for (let s = 0; s < n; s++) g += `<line x1="${x0}" y1="${Y(s)}" x2="${x0 + cols * 22}" y2="${Y(s)}" stroke="var(--text3)" stroke-width="${(st.inst === 'bass' ? 0.9 + (n - 1 - s) * 0.5 : 0.5 + (n - 1 - s) * 0.18).toFixed(2)}"/>`;
   item.muted.forEach(s => g += `<text x="9" y="${Y(s) + 3}" fill="#f87171" font-size="8" text-anchor="middle" font-family="Barlow" font-weight="700">×</text>`);
   item.cells.forEach(cell => {
     const m = tun[cell.s] + cell.f, isR = pc(m) === pc(c.root);
@@ -1240,7 +1241,7 @@ async function exportBoard(kind) {
   const set = currentSet(), tn = (st.tuning === 'custom' ? 'カスタム' : (findTuning(st.inst, st.strings, st.tuning) || {}).name) + ` ・ ${st.strings}弦`;
   const rng = $('m-range').textContent, title = $('fb-title').textContent || titleFor(set);
   try {
-    const c = await fretboardCanvas(svg, title, `${INSTRUMENTS[st.inst].name} ・ ${tn} ・ ${rng}`);
+    const c = await fretboardCanvas(svg, T(title), T(`${INSTRUMENTS[st.inst].name} ・ ${tn} ・ ${rng}`));
     const base = 'fretboard-' + title.replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 40);
     if (kind === 'png') download(await canvasBlob(c), base + '.png'); else download(await pdfFromCanvas(c), base + '.pdf');
     notify(kind === 'png' ? '指板図を PNG で保存しました' : '指板図を PDF で保存しました');
@@ -1478,6 +1479,8 @@ async function boot() {
   try { const s = localStorage.getItem(STORE); st = sanitize(s ? JSON.parse(s) : null); } catch (e) { st = sanitize(null); }
   let shared = false;
   try { const m = /[#&]s=([A-Za-z0-9_-]+)/.exec(location.hash); if (m) { shared = applyShared(decodeShare(m[1])); history.replaceState(null, '', location.pathname + location.search); } } catch (e) {}
+  initI18n();
+  { const sw = $('lang-sw'); if (sw) { sw.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b.dataset.l === LANG); b.addEventListener('click', () => { if (b.dataset.l !== LANG) setLang(b.dataset.l); }); }); } }
   initLayout(); initTheme(() => { try { render(); } catch (e) {} });
   bind(); bindTuner(); bindVolume(); bindProg(); bindHist(); bindQuiz(); render();
   if (shared) { save(); notify('共有された進行と設定を読み込みました'); }

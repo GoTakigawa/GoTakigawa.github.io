@@ -615,3 +615,9 @@ body.blk-dragging,body.blk-dragging *{cursor:grabbing !important;user-select:non
 a.tip-btn{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:var(--text2);border:1px solid var(--border2);border-radius:var(--r);padding:9px 10px;text-decoration:none;transition:color .15s,border-color .15s;}
 a.tip-btn:hover{color:#ffdd00;border-color:#ffdd00;}
 a.tip-btn.tip-stripe:hover{color:#a5a0ff;border-color:#a5a0ff;}
+
+.logo-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.logo-row .logo{margin-bottom:0;}
+.lang-sw{display:inline-flex;border:1px solid var(--border2);border-radius:8px;overflow:hidden;}
+.lang-sw button{font:inherit;font-size:11px;padding:3px 9px;border:0;background:none;color:var(--text3);cursor:pointer;}
+.lang-sw button.on{background:var(--accent1);color:#fff;}
