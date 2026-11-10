@@ -79,7 +79,7 @@ export class PitchListener {
     const Ctx = window.AudioContext || window.webkitAudioContext;
     this.ctx = new Ctx();
     if (this.ctx.state === 'suspended') await this.ctx.resume();
-    const src = this.ctx.createMediaStreamSource(this.stream);
+    const src = this.src = this.ctx.createMediaStreamSource(this.stream);
     this.an = this.ctx.createAnalyser(); this.an.fftSize = 4096; this.an.smoothingTimeConstant = 0;
     this.raw = this.ctx.createAnalyser(); this.raw.fftSize = 4096; this.raw.smoothingTimeConstant = 0; src.connect(this.raw);   // unfiltered, for the level
     // high-cut for the pitch search (two 2nd-order low-pass stages): follows the note, ~3.5x its pitch (700 Hz - 3 kHz), so the
@@ -158,7 +158,7 @@ export class PitchListener {
     clearInterval(this.timer); this.timer = 0;
     if (this.stream) this.stream.getTracks().forEach(t => t.stop());
     if (this.ctx) { try { await this.ctx.close(); } catch (e) {} }
-    this.stream = this.ctx = this.an = this.raw = this.lp = null;
+    this.stream = this.ctx = this.an = this.raw = this.lp = this.src = null;
   }
   get running() { return !!this.stream; }
 }
